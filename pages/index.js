@@ -249,6 +249,203 @@ const SPORTS = {
   },
 }
 
+
+// -- PLAY ANIMATOR --
+function PlayAnimator({ play, P, callAI, parseJSON }) {
+  const canvasRef = useRef(null)
+  const animRef = useRef(null)
+  const [parsed, setParsed] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [error, setError] = useState('')
+
+  async function generateAnim() {
+    setLoading(true); setError(''); setParsed(null); setPlaying(false)
+    const prompt = `You are a football play diagram expert. Generate an animated play diagram for the play "${play.name}" (type: ${play.type}).
+Play description: ${play.note}
+
+Return ONLY valid JSON describing player positions and paths on a field coordinate system where (0,0) is top-left and (100,56) is bottom-right. The line of scrimmage is at y=34.
+
+{"formation":"${play.name}","snapPoint":0.2,"duration":2800,"players":[
+{"id":"C","label":"C","role":"off","x":50,"y":34,"path":[[50,34],[50,28]]},
+{"id":"QB","label":"QB","role":"off","x":50,"y":37,"path":[[50,37],[50,41],[46,45]]},
+{"id":"RB","label":"RB","role":"off","x":50,"y":41,"path":[[50,41],[56,35],[63,28]]},
+{"id":"WR1","label":"WR","role":"off","x":22,"y":34,"path":[[22,34],[22,24],[32,16]]},
+{"id":"WR2","label":"WR","role":"off","x":78,"y":34,"path":[[78,34],[78,22],[68,14]]},
+{"id":"TE","label":"TE","role":"off","x":63,"y":34,"path":[[63,34],[63,27],[70,21]]},
+{"id":"LG","label":"G","role":"off","x":46,"y":34,"path":[[46,34],[43,29]]},
+{"id":"RG","label":"G","role":"off","x":54,"y":34,"path":[[54,34],[57,29]]},
+{"id":"LT","label":"T","role":"off","x":40,"y":34,"path":[[40,34],[37,28]]},
+{"id":"RT","label":"T","role":"off","x":60,"y":34,"path":[[60,34],[63,28]]},
+{"id":"D1","label":"D","role":"def","x":46,"y":31,"path":[[46,31],[46,35]]},
+{"id":"D2","label":"D","role":"def","x":54,"y":31,"path":[[54,31],[54,35]]},
+{"id":"D3","label":"D","role":"def","x":50,"y":29,"path":[[50,29],[50,33]]},
+{"id":"LB1","label":"LB","role":"def","x":40,"y":26,"path":[[40,26],[43,31]]},
+{"id":"LB2","label":"LB","role":"def","x":60,"y":26,"path":[[60,26],[57,31]]},
+{"id":"CB1","label":"CB","role":"def","x":22,"y":26,"path":[[22,26],[24,20]]},
+{"id":"CB2","label":"CB","role":"def","x":78,"y":26,"path":[[78,26],[76,20]]},
+{"id":"S1","label":"S","role":"def","x":38,"y":18,"path":[[38,18],[40,23]]},
+{"id":"S2","label":"S","role":"def","x":62,"y":18,"path":[[62,18],[60,23]]}
+]}
+
+Customize the paths to accurately represent "${play.name}". Make offensive routes realistic for the play type. Keep all coordinates within (5,5) to (95,52).`
+
+    try {
+      const raw = await callAI(prompt)
+      const data = parseJSON(raw)
+      if (!data.players) throw new Error('No players in response')
+      setParsed(data)
+    } catch(e) { setError(e.message) }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    if (!parsed || !canvasRef.current) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const W = canvas.width, H = canvas.height
+    const sx = x => (x / 100) * W
+    const sy = y => (y / 56) * H
+    const dur = parsed.duration || 2800
+    const snap = parsed.snapPoint || 0.2
+    let startTime = null
+
+    function lerp(a, b, t) { return a + (b - a) * t }
+
+    function getPos(player, t) {
+      const path = player.path
+      if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
+      if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
+      const pt = (t - snap) / (1 - snap)
+      const segs = path.length - 1
+      const seg = Math.min(Math.floor(pt * segs), segs - 1)
+      const st = (pt * segs) - seg
+      return {
+        x: sx(lerp(path[seg][0], path[seg+1][0], st)),
+        y: sy(lerp(path[seg][1], path[seg+1][1], st))
+      }
+    }
+
+    function draw(t) {
+      ctx.clearRect(0, 0, W, H)
+      // Field
+      ctx.fillStyle = '#1a4a1a'
+      ctx.fillRect(0, 0, W, H)
+      // Yard lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)'
+      ctx.lineWidth = 1
+      for (let y = 0; y <= 56; y += 8) {
+        ctx.beginPath(); ctx.moveTo(0, sy(y)); ctx.lineTo(W, sy(y)); ctx.stroke()
+      }
+      // Line of scrimmage
+      ctx.strokeStyle = 'rgba(255,255,100,0.7)'
+      ctx.lineWidth = 2
+      ctx.setLineDash([6, 4])
+      ctx.beginPath(); ctx.moveTo(0, sy(34)); ctx.lineTo(W, sy(34)); ctx.stroke()
+      ctx.setLineDash([])
+
+      // Routes
+      if (t >= snap) {
+        const pt = (t - snap) / (1 - snap)
+        parsed.players.forEach(player => {
+          const path = player.path
+          if (!path || path.length < 2) return
+          const segs = path.length - 1
+          const totalDraw = pt * segs
+          ctx.strokeStyle = player.role === 'off' ? (P + 'bb') : 'rgba(255,80,80,0.55)'
+          ctx.lineWidth = player.role === 'off' ? 2 : 1.5
+          ctx.setLineDash(player.role === 'def' ? [3, 3] : [])
+          ctx.beginPath()
+          ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+          for (let s = 0; s < Math.min(Math.floor(totalDraw), segs - 1); s++) {
+            ctx.lineTo(sx(path[s+1][0]), sy(path[s+1][1]))
+          }
+          if (totalDraw > 0 && Math.floor(totalDraw) < segs) {
+            const s = Math.floor(totalDraw)
+            const st = totalDraw - s
+            ctx.lineTo(sx(lerp(path[s][0], path[s+1][0], st)), sy(lerp(path[s][1], path[s+1][1], st)))
+          }
+          ctx.stroke()
+          ctx.setLineDash([])
+        })
+      }
+
+      // Players
+      parsed.players.forEach(player => {
+        const pos = getPos(player, t)
+        const r = Math.max(W, H) * 0.038
+        ctx.fillStyle = player.role === 'off' ? P : '#ff4444'
+        ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill()
+        ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5
+        ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.stroke()
+        ctx.fillStyle = 'white'
+        ctx.font = `bold ${Math.round(r * 0.85)}px sans-serif`
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+        ctx.fillText(player.label, pos.x, pos.y)
+      })
+
+      // Snap label
+      if (Math.abs(t - snap) < 0.04) {
+        ctx.fillStyle = 'rgba(255,255,255,0.9)'
+        ctx.font = `bold ${Math.round(H * 0.06)}px sans-serif`
+        ctx.textAlign = 'center'
+        ctx.fillText('SNAP!', W / 2, sy(34) - 14)
+      }
+    }
+
+    function frame(ts) {
+      if (!startTime) startTime = ts
+      const t = Math.min((ts - startTime) / dur, 1)
+      setProgress(t)
+      draw(t)
+      if (t < 1) {
+        animRef.current = requestAnimationFrame(frame)
+      } else {
+        setPlaying(false)
+      }
+    }
+
+    if (playing) {
+      startTime = null
+      if (animRef.current) cancelAnimationFrame(animRef.current)
+      animRef.current = requestAnimationFrame(frame)
+    } else {
+      draw(0)
+    }
+
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
+  }, [parsed, playing, P])
+
+  function replay() {
+    if (animRef.current) cancelAnimationFrame(animRef.current)
+    setProgress(0)
+    setPlaying(true)
+  }
+
+  return (
+    <div style={{ marginTop: 10, background: '#161922', borderRadius: 10, border: `1px solid rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.3)`, overflow: 'hidden' }}>
+      <div style={{ padding: '9px 13px', borderBottom: '1px solid #1e2330', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 14, letterSpacing: 1, color: P, flex: 1 }}>{play.name} — Animation</span>
+        {!parsed && !loading && (
+          <button onClick={generateAnim} style={{ padding: '4px 10px', background: `rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.15)`, border: `1px solid ${P}`, borderRadius: 6, color: P, fontSize: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: 1 }}>ANIMATE</button>
+        )}
+        {parsed && (
+          <button onClick={replay} disabled={playing} style={{ padding: '4px 10px', background: playing ? '#3d4559' : `rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.15)`, border: `1px solid ${P}`, borderRadius: 6, color: P, fontSize: 10, fontWeight: 700, cursor: playing ? 'not-allowed' : 'pointer', fontFamily: 'inherit', letterSpacing: 1 }}>{playing ? 'PLAYING...' : 'REPLAY'}</button>
+        )}
+      </div>
+      {loading && <div style={{ padding: 14, textAlign: 'center', color: '#6b7a96', fontSize: 12 }}>Generating play diagram...</div>}
+      {error && <div style={{ padding: 10, color: '#6b7a96', fontSize: 11 }}>Error: {error}</div>}
+      {parsed && (
+        <div style={{ position: 'relative' }}>
+          <canvas ref={canvasRef} width={400} height={224} style={{ width: '100%', display: 'block' }} />
+          <div style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 4, padding: '2px 6px', fontSize: 9, color: 'rgba(255,255,255,0.6)' }}>{Math.round(progress * 100)}%</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // -- HOME PAGE --
 function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callAI, parseJSON, onScheme }) {
   const cfg = SPORTS[sport] || SPORTS.Football
@@ -321,6 +518,11 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
                 </div>
               ))}
               {result.defenseTip && <div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defense Tip</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.defenseTip}</div></div>}
+              <div style={{ marginTop:12 }}>
+                <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Play Animations</div>
+                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:8, lineHeight:1.4 }}>Click ANIMATE on any play to generate and watch it unfold on the field.</div>
+                {(result.plays||[]).map(p => <PlayAnimator key={p.number} play={p} P={P} callAI={callAI} parseJSON={parseJSON} />)}
+              </div>
               {result.coachingCue && <div style={{ marginTop:8, padding:10, background:al(P,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Coaching Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic', fontWeight:500 }}>"{result.coachingCue}"</div></div>}
             </div>
           )}
