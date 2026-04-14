@@ -94,7 +94,7 @@ export default function CoachIQ() {
           {page === 'home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} schemes={schemes} iq={iq} gauntlets={gauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} playbook={playbook} setPlaybook={setPlaybook} schemeResult={schemeResult} setSchemeResult={setSchemeResult} schemeFields={schemeFields} setSchemeFields={setSchemeFields} schemeSport={schemeSport} setSchemeSport={setSchemeSport} />}
           {page === 'gauntlet' && <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />}
           {page === 'film' && <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
-          {page === 'more' && <MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} />}
+          {page === 'more' && <MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} />}
         </div>
 
         {/* BOTTOM NAV */}
@@ -269,6 +269,9 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
   const [variations, setVariations] = useState(null)
   const [variationsLoading, setVariationsLoading] = useState(false)
   const [showVariations, setShowVariations] = useState(false)
+  const [nflComp, setNflComp] = useState(null)
+  const [nflLoading, setNflLoading] = useState(false)
+  const [showNfl, setShowNfl] = useState(false)
 
   const pr = parseInt(P.slice(1,3),16)
   const pg = parseInt(P.slice(3,5),16)
@@ -315,6 +318,36 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
       setShowVariations(true)
     } catch(e) { setVariations([]) }
     setVariationsLoading(false)
+  }
+
+  async function loadNflComp() {
+    if (nflComp) { setShowNfl(true); return }
+    setNflLoading(true)
+    try {
+      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY'))
+      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
+      const league = isBB ? 'NBA' : isBSB ? 'MLB' : 'NFL'
+      const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
+      const raw = await callAI(
+        'You are an expert ' + sportName + ' analyst with deep knowledge of professional ' + league + ' playbooks. ' +
+        'A youth coach is running this play: "' + play.name + '" (' + play.type + '). ' + play.note +
+        ' Find the closest real ' + league + ' equivalent and explain the comparison. ' +
+        'Return ONLY valid JSON: {' +
+        '"proPlay":"exact name of the professional play or concept",' +
+        '"proTeam":"team most known for running this or a famous example",' +
+        '"famousExample":"a specific famous game moment or usage of this play in the pros, with year if known",' +
+        '"whatMatches":"what the youth version gets right that mirrors the pro version",' +
+        '"keyDifference":"main tactical difference between youth and pro execution",' +
+        '"proTip":"one thing the pro version does that youth coaches can teach toward as players develop",' +
+        '"watchFor":"what to search on YouTube to see this play executed at the pro level"' +
+        '}'
+      )
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      const data = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1))
+      setNflComp(data)
+      setShowNfl(true)
+    } catch(e) { setNflComp({ error: e.message }); setShowNfl(true) }
+    setNflLoading(false)
   }
 
   async function askQuestion() {
@@ -468,6 +501,67 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
             )}
           </div>
 
+          {/* NFL/NBA/MLB COMPARISON */}
+          <div style={{ marginBottom:12 }}>
+            <button
+              onClick={() => showNfl ? setShowNfl(false) : loadNflComp()}
+              disabled={nflLoading}
+              style={{ width:'100%', padding:'10px 14px', background:showNfl?'rgba(255,215,0,0.1)':'#161922', border:`1px solid ${showNfl?'rgba(255,215,0,0.5)':'#1e2330'}`, borderRadius:10, color:showNfl?'#f59e0b':'#6b7a96', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, cursor:nflLoading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'space-between' }}
+            >
+              <span style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <span style={{ fontSize:16 }}>{play.type&&(play.type.includes('COURT')||play.type.includes('INBOUND')||play.type.includes('SET PLAY'))?'🏀':play.type&&(play.type.includes('BATTING')||play.type.includes('BASERUN')||play.type.includes('PITCHING'))?'⚾':'🏈'}</span>
+                {nflLoading ? 'FINDING PRO EQUIVALENT...' : 'PRO COMPARISON'}
+              </span>
+              <span style={{ fontSize:11 }}>{showNfl ? '▲ HIDE' : '▼ SEE NFL/NBA/MLB VERSION'}</span>
+            </button>
+            {showNfl && nflComp && !nflComp.error && (
+              <div style={{ marginTop:8, background:'linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,165,0,0.04))', border:'1px solid rgba(255,215,0,0.25)', borderRadius:10, padding:14, animation:'fadeIn 0.2s ease' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:3 }}>Pro Equivalent</div>
+                    <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:20, letterSpacing:1, color:'#f2f4f8' }}>{nflComp.proPlay}</div>
+                    <div style={{ fontSize:12, color:'#f59e0b', marginTop:2 }}>{nflComp.proTeam}</div>
+                  </div>
+                  <div style={{ width:44, height:44, background:'rgba(255,215,0,0.15)', border:'1px solid rgba(255,215,0,0.3)', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>⭐</div>
+                </div>
+                {nflComp.famousExample && (
+                  <div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.3)', borderRadius:8, marginBottom:10, borderLeft:'3px solid #f59e0b' }}>
+                    <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:3 }}>Famous Example</div>
+                    <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.famousExample}</div>
+                  </div>
+                )}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                  <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.15)' }}>
+                    <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:4 }}>What Matches</div>
+                    <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.whatMatches}</div>
+                  </div>
+                  <div style={{ padding:'8px 10px', background:'rgba(208,2,27,0.06)', borderRadius:8, border:'1px solid rgba(208,2,27,0.15)' }}>
+                    <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#ff6b6b', fontWeight:700, marginBottom:4 }}>Key Difference</div>
+                    <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.keyDifference}</div>
+                  </div>
+                </div>
+                {nflComp.proTip && (
+                  <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)', marginBottom:8 }}>
+                    <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:4 }}>Pro Tip — Teach Toward This</div>
+                    <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.proTip}</div>
+                  </div>
+                )}
+                {nflComp.watchFor && (
+                  <div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.3)', borderRadius:8, display:'flex', alignItems:'center', gap:8 }}>
+                    <span style={{ fontSize:16 }}>▶</span>
+                    <div>
+                      <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:2 }}>Search on YouTube</div>
+                      <div style={{ fontSize:12, color:'#f59e0b', fontWeight:600 }}>{nflComp.watchFor}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {showNfl && nflComp && nflComp.error && (
+              <div style={{ marginTop:8, padding:10, background:'#161922', borderRadius:8, fontSize:11, color:'#6b7a96' }}>Could not load pro comparison. Try again.</div>
+            )}
+          </div>
+
           {/* Q&A section */}
           <div style={{ background:'#161922', borderRadius:10, padding:12 }}>
             <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Ask About This Play</div>
@@ -510,6 +604,10 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
   const [sportType, setSportType] = useState('football')
+  const cacheKey = 'anim_' + (play.name||'').replace(/[^a-z0-9]/gi,'_').toLowerCase().slice(0,40)
+  const cacheKey = 'anim_' + play.name.replace(/\s+/g,'_').toLowerCase()
+  // Cache key: once generated for a play, same result shows every time
+  const cacheKey = 'anim_' + play.name.replace(/\s+/g,'_').toLowerCase()
 
   const pr = parseInt(P.slice(1,3),16)
   const pg = parseInt(P.slice(3,5),16)
@@ -518,6 +616,16 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   useEffect(() => { if (autoLoad && !parsed) generateAnim() }, [autoLoad])
 
   async function generateAnim() {
+    // Check cache first - same play always shows same diagram
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) {
+        const data = JSON.parse(cached)
+        setParsed(data)
+        setSportType(data._sportType || 'football')
+        return
+      }
+    } catch(e) {}
     setLoading(true); setError(''); setParsed(null); setPlaying(false)
     const isBasketball = play.type && (
       play.type.includes('COURT') || play.type.includes('PRESS') ||
@@ -549,6 +657,12 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
       if (!data.players || data.players.length === 0) throw new Error('No players returned')
+      data._sportType = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
+      data._sport = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
+      data._sport = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
       setParsed(data)
     } catch(e) { setError(e.message) }
     setLoading(false)
@@ -1910,11 +2024,81 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
 }
 
 // -- MORE PAGE --
-function MorePage({ P, S, al, dk, cfg, setCfg }) {
+function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport }) {
+  const [moreTab, setMoreTab] = useState('playbook')
+  const [sortBy, setSortBy] = useState('recent')
+  const [filterType, setFilterType] = useState('All')
+
+  const allPlays = [...(playbook?.Football||[]), ...(playbook?.Basketball||[]), ...(playbook?.Baseball||[])]
+  const allPlayItems = allPlays.flatMap(scheme =>
+    (scheme.plays||[]).map(p => ({ ...p, packageName: scheme.packageName, sport: scheme._sport || 'Football' }))
+  )
+  const typeOptions = ['All', ...new Set(allPlayItems.map(p => p.type).filter(Boolean))]
+  const filteredPlays = allPlayItems
+    .filter(p => filterType === 'All' || p.type === filterType)
+    .sort((a,b) => sortBy === 'name' ? a.name.localeCompare(b.name) : sortBy === 'type' ? (a.type||'').localeCompare(b.type||'') : 0)
+
   return (
     <>
       <Hero greet="Pro Plan - All Features" left="Your" right="Playbook" P={P} S={S} dk={dk} />
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+
+      {/* Sub tabs */}
+      <div style={{ display:'flex', borderRadius:10, overflow:'hidden', border:'1px solid #1e2330' }}>
+        {[['playbook','Playbook'],['features','Features'],['settings','Settings']].map(([t,lbl]) => (
+          <button key={t} onClick={()=>setMoreTab(t)} style={{ flex:1, padding:'9px', background:moreTab===t?P:'#161922', color:moreTab===t?'white':'#6b7a96', border:'none', cursor:'pointer', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, transition:'all 0.15s' }}>{lbl}</button>
+        ))}
+      </div>
+
+      {/* PLAYBOOK TAB */}
+      {moreTab === 'playbook' && (
+        <div>
+          {allPlayItems.length === 0 ? (
+            <div style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:12, padding:'32px 20px', textAlign:'center' }}>
+              <div style={{ fontSize:32, marginBottom:12 }}>📖</div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, letterSpacing:1, marginBottom:8 }}>Your Playbook is Empty</div>
+              <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6 }}>Generate schemes on the Home tab and your plays will automatically be saved here, organized and sortable.</div>
+            </div>
+          ) : (
+            <>
+              {/* Sort and filter controls */}
+              <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap' }}>
+                <div style={{ flex:1, minWidth:120 }}>
+                  <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Sort By</label>
+                  <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+                    <option value="recent">Most Recent</option>
+                    <option value="name">Name A-Z</option>
+                    <option value="type">Play Type</option>
+                  </select>
+                </div>
+                <div style={{ flex:1, minWidth:120 }}>
+                  <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Filter Type</label>
+                  <select value={filterType} onChange={e=>setFilterType(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+                    {typeOptions.map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10 }}>{filteredPlays.length} play{filteredPlays.length!==1?'s':''} saved</div>
+              {filteredPlays.map((p,i) => (
+                <div key={i} style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:10, padding:'12px 14px', marginBottom:8, display:'flex', alignItems:'flex-start', gap:10 }}>
+                  <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${P}`, color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{p.number||i+1}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
+                      <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.15), color:P }}>{p.type}</span>
+                      <span style={{ fontSize:9, color:'#6b7a96' }}>{p.sport}</span>
+                    </div>
+                    <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4, marginBottom:3 }}>{p.note}</div>
+                    <div style={{ fontSize:10, color:'#3d4559' }}>From: {p.packageName}</div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* FEATURES TAB */}
+      {moreTab === 'features' && <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
         {[['📖','Playbook Builder','63 plays saved',false],['🏟','Game Day Mode','Sideline ready',false],['👥','Roster Manager','14 players',false],['📅','Season Planner','Week 6 of 10',false],['🎨','Play Designer','COMING SOON',true],['🏆','Certifications','COMING SOON',true]].map(([ico,ttl,sub,hi]) => (
           <div key={ttl} style={{ background:'#0f1117', border:`1px solid ${hi?al(P,0.25):'#1e2330'}`, borderRadius:12, padding:'15px 11px', textAlign:'center', cursor:'pointer' }}>
             <div style={{ fontSize:24, marginBottom:5 }}>{ico}</div>
@@ -1922,8 +2106,10 @@ function MorePage({ P, S, al, dk, cfg, setCfg }) {
             <div style={{ fontSize:10, color:hi?P:'#6b7a96', marginTop:2 }}>{sub}</div>
           </div>
         ))}
-      </div>
-      <Card>
+      </div>}
+
+      {/* SETTINGS TAB */}
+      {moreTab === 'settings' && <Card>
         <CardHead icon="🎨" title="Team Colors" tag="LIVE" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
           {[['Primary Color',cfg.primary,'primary'],['Secondary Color',cfg.secondary,'secondary']].map(([lbl,val,key]) => (
@@ -1942,7 +2128,7 @@ function MorePage({ P, S, al, dk, cfg, setCfg }) {
             <span style={{ fontSize:12, color:P, fontWeight:600, cursor:'pointer' }} onClick={()=>{const n=prompt('Team name:');if(n)setCfg(c=>({...c,team:n}))}}>Edit</span>
           </div>
         </div>
-      </Card>
+      </Card>}
     </>
   )
 }
