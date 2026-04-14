@@ -605,9 +605,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   const [error, setError] = useState('')
   const [sportType, setSportType] = useState('football')
   const cacheKey = 'anim_' + (play.name||'').replace(/[^a-z0-9]/gi,'_').toLowerCase().slice(0,40)
-  const cacheKey = 'anim_' + play.name.replace(/\s+/g,'_').toLowerCase()
   // Cache key: once generated for a play, same result shows every time
-  const cacheKey = 'anim_' + play.name.replace(/\s+/g,'_').toLowerCase()
 
   const pr = parseInt(P.slice(1,3),16)
   const pg = parseInt(P.slice(3,5),16)
