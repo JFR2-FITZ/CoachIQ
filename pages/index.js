@@ -1236,7 +1236,7 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
 
   return (
     <>
-      <Hero greet="Welcome back" left="Coach" right={lastName} P={P} S={S} dk={dk}>
+      <Hero greet={sport==='Baseball'?'Welcome back, Manager':'Welcome back'} left={sport==='Baseball'?'Manager':'Coach'} right={lastName} P={P} S={S} dk={dk}>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:7 }}>
           {[[schemes,P,'Schemes'],[iq,'white','IQ Score'],[gauntlets,'#6b9fff','Gauntlets']].map(([v,c,l]) => (
             <div key={l} style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:8, padding:'9px 7px', textAlign:'center' }}>
@@ -1250,14 +1250,14 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
 
       {/* SCHEME GENERATOR */}
       <Card>
-        <CardHead icon={activeCfg.emoji} title={`${sport} Scheme Generator`} tag="AI POWERED" tagColor={P} accent={P} />
+        <CardHead icon={activeCfg.emoji} title={`${sport==="Baseball"?"Baseball Game Plan Generator":sport+" Scheme Generator"}`} tag="AI POWERED" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
             {activeCfg.fields.map(f => (
               <Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />
             ))}
           </div>
-          <PBtn onClick={generate} disabled={loading} color={P}>{loading ? 'GENERATING...' : 'GENERATE SCHEME'}</PBtn>
+          <PBtn onClick={generate} disabled={loading} color={P}>{loading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
           {loading && <Shimmer />}
           {error && <ErrBox msg={error} />}
           {result && (
@@ -1577,25 +1577,25 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
 
   return (
     <>
-      <Hero greet="No camera needed" left="Film" right="Translator" P={P} S={S} dk={dk} />
+      <Hero greet={sport==='Baseball'?'Break down any situation':sport==='Basketball'?'No film needed':'No camera needed'} left="Film" right={sport==='Baseball'?'Analyzer':'Translator'} P={P} S={S} dk={dk} />
       <Card>
-        <CardHead icon="🎥" title="Film Translator" tag="AI DIAGNOSIS" tagColor={P} accent={P} />
+        <CardHead icon="🎥" title={sport==='Baseball'?'Situation Analyzer':sport==='Basketball'?'Film Translator':'Film Translator'} tag="AI DIAGNOSIS" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
           <div style={{ display:'flex', borderRadius:8, overflow:'hidden', border:'1px solid #1e2330', marginBottom:12 }}>
-            {[['describe','DESCRIBE'],['upload','UPLOAD CLIP']].map(([t,lbl]) => (
+            {[['describe', sport==='Baseball'?'SITUATION':'DESCRIBE'],['upload','UPLOAD CLIP']].map(([t,lbl]) => (
               <button key={t} onClick={()=>setTab(t)} style={{ flex:1, padding:9, background:tab===t?P:'#161922', color:tab===t?'white':'#6b7a96', border:'none', cursor:'pointer', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, transition:'all 0.15s' }}>{lbl}</button>
             ))}
           </div>
 
           {tab === 'describe' && (
             <>
-              <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Describe the problem</label>
-              <textarea value={problem} onChange={e=>setProblem(e.target.value)} placeholder="e.g. My QB keeps throwing into double coverage on 3rd down..." style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', resize:'vertical', minHeight:72, lineHeight:1.5, marginBottom:10 }} />
+              <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>{sport==='Baseball'?'Describe the situation or player issue':sport==='Basketball'?'Describe what you are seeing':'Describe the problem'}</label>
+              <textarea value={problem} onChange={e=>setProblem(e.target.value)} placeholder={sport==='Baseball'?'e.g. My pitcher keeps throwing balls when ahead in the count. His mechanics look off...':sport==='Basketball'?'e.g. My point guard keeps losing the ball on drives to the basket. Not sure if it is handles or decision making...':'e.g. My QB keeps throwing into double coverage on 3rd down...'} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', resize:'vertical', minHeight:72, lineHeight:1.5, marginBottom:10 }} />
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
                 <Sel label="Position" value={pos||cfg.positions[0]} onChange={setPos} options={cfg.positions} />
                 <Sel label="Age Group" value={age} onChange={setAge} options={['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']} />
               </div>
-              <PBtn onClick={diagnose} disabled={loading} color={P}>{loading?'DIAGNOSING...':'DIAGNOSE'}</PBtn>
+              <PBtn onClick={diagnose} disabled={loading} color={P}>{loading?(sport==='Baseball'?'ANALYZING...':'DIAGNOSING...'):(sport==='Baseball'?'ANALYZE SITUATION':'DIAGNOSE')}</PBtn>
               {loading && <Shimmer />}
               {error && <ErrBox msg={error} />}
               {result && (
