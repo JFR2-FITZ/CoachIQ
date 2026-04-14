@@ -1346,12 +1346,10 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
     setCoordQ(newQ)
     const history = newMsgs.map(m=>(m.role==='user'?'COACH: ':'OPPOSING COORDINATOR: ')+m.content).filter(Boolean).join('\n\n')
     const replyRole = sport==='Baseball' ? 'manager' : sport==='Basketball' ? 'head coach' : 'coordinator'
-    const prompt = `You are an elite opposing ${sport} ${replyRole}. Full conversation:
-
-${history}
-
-Continuing. Make a specific counter-adjustment using only ${sport} terminology. Under 150 words. End with a challenge.`
-      setCoordMsgs(prev => [...prev, { role:'ai', content:raw, lbl:`Q${newQ} - Opposing Coordinator` }])
+    const prompt = 'You are an elite opposing ' + sport + ' ' + replyRole + '. Conversation:\n\n' + history + '\n\nMake a counter-adjustment using only ' + sport + ' terminology. Under 150 words. End with a challenge.'
+    try {
+      const raw = await callAI(prompt)
+      setCoordMsgs(prev => [...prev, { role:'ai', content:raw, lbl:'Q'+newQ+' - Opposing '+replyRole }])
     } catch(e) { setCoordMsgs(prev => [...prev, { role:'error', content:'Error: '+e.message }]) }
     setCoordLoading(false)
   }
