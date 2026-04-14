@@ -65,6 +65,7 @@ export default function CoachIQ() {
           select option { background: #161922; }
           @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
           @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         `}</style>
 
         {/* TOPBAR */}
@@ -338,6 +339,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
           <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{play.name}</div>
           <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:1 }}>{play.type}</div>
           <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, lineHeight:1.4 }}>{play.note}</div>
+          <div style={{ fontSize:10, color:P, marginTop:4, letterSpacing:0.5 }}>{expanded ? '▲ Tap to collapse' : '▼ Tap to expand breakdown + diagram'}</div>
         </div>
         <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
           <button
@@ -362,10 +364,15 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
           )}
 
           {/* Step by step breakdown */}
-          {stepsLoading && <div style={{ fontSize:12, color:'#6b7a96', padding:'8px 0' }}>Loading play breakdown...</div>}
+          {stepsLoading && (
+            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}>
+              <div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+              <div style={{ fontSize:12, color:'#6b7a96' }}>Generating step-by-step breakdown...</div>
+            </div>
+          )}
           {steps && !steps.error && (
-            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12 }}>
-              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Play Breakdown</div>
+            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid ${al(P,0.2)}` }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:10 }}>Step-by-Step Breakdown</div>
 
               {/* Ball carrier */}
               <div style={{ display:'flex', gap:8, marginBottom:8, padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.1)`, borderRadius:8, border:`1px solid rgba(${pr},${pg},${pb},0.2)` }}>
@@ -501,7 +508,16 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 
     const footballPrompt = 'Generate football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL RULES: (1) QB: on RUN plays set routeName to "Handoff" and path is a 2-unit fake toward RB then stop. On PASS plays set routeName to "Dropback" and show 3-step drop (path moves upward/away from LOS). On KEEPER plays show QB running outside. (2) Ball carrier (RB/QB): path must show the FULL run lane all the way past the line of scrimmage, minimum 8-10 units past y=38. (3) Pulling guards: if this is a sweep/power play, guards should have paths around the edge (not just forward). (4) Receivers: each has a named route (Curl, Slant, Post, Out, Corner, Go, Cross, Flat) with routeYards. Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
 
-    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL RULES: (1) Exactly ONE player must have routeName starting with BALL: - this is who starts with the ball. (2) Exactly ONE player must have routeName starting with SHOOT: - this is the primary scoring target. (3) The BALL player path must show dribble movement toward the play action. (4) Pass recipients use PASS: prefix. (5) The BALL player should pass to the SHOOT player near the end of the play - their paths should end near each other. (6) Screeners use routeName SCREEN and their path stays short (1-2 units). Keep all coords in bounds. Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
+    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+    ' CRITICAL DIAGRAM RULES: ' +
+    '(1) ONE player gets routeName "BALL: [action]" - this player starts with the ball. Their path shows dribble movement. ' +
+    '(2) ONE player gets routeName "SHOOT: [action]" - this is where the ball ends up for a shot. ' +
+    '(3) The BALL player path must END near where the SHOOT player will be - showing the pass destination. ' +
+    '(4) Set the BALL player path to end close to the SHOOT player end position (within 10 units). ' +
+    '(5) Other movers use routeName "CUT: [direction]" or "MOVE: [action]". ' +
+    '(6) Screeners use routeName "SCREEN" with a path that barely moves (1 unit). ' +
+    '(7) snapPoint should be 0.12 so action starts quickly. ' +
+    'Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
 
     const baseballPrompt = 'Generate baseball defensive positioning and play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions on a baseball diamond. Show movement paths for relevant players. Return ONLY raw JSON using this template, customize paths to show this play: ' + bsbTemplate.replace('PLAYNAME', play.name)
 
@@ -872,16 +888,80 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
       if (t >= snap) {
         const pt = Math.min((t - snap) / (1 - snap), 1)
 
-        // Find ball handler for pass arc
-        const ballHolder = parsed.players.find(p => p.role==='off' && (getBBRole(p)==='ball' || p.id==='QB'))
+        // Ball handler and pass targets
+        const ballHolder = parsed.players.find(p => p.role==='off' && getBBRole(p)==='ball')
         const shooter = parsed.players.find(p => p.role==='off' && getBBRole(p)==='shooter')
+        const passTargets = parsed.players.filter(p => p.role==='off' && getBBRole(p)==='pass')
+        const qb = !isBBall && !isBSB ? parsed.players.find(p => p.id==='QB') : null
+        const rb = !isBBall && !isBSB ? parsed.players.find(p => p.id==='RB') : null
 
-        // Draw pass arc when play is 70% complete
-        if (isBBall && ballHolder && shooter && pt > 0.7) {
-          const ballPos = getPos(ballHolder, t)
-          const shootPos = getPos(shooter, t)
-          const arcAlpha = Math.min(1, (pt - 0.7) / 0.2)
-          drawPassArc(ballPos.x, ballPos.y, shootPos.x, shootPos.y, `rgba(255,220,50,${arcAlpha*0.9})`)
+        // PASS ARC: draw animated pass at 55% of play
+        const passTime = 0.55
+        if (isBBall && ballHolder && shooter && pt >= passTime) {
+          // Start pos of ball holder at pass time, end pos of shooter
+          const passProgress = Math.min(1, (pt - passTime) / 0.25)
+          const startPos = getPos(ballHolder, snap + (passTime) * (1-snap))
+          const endPos = getPos(shooter, t)
+          // Animate the arc drawing progressively
+          const mx = startPos.x + (endPos.x - startPos.x) * passProgress
+          const my = startPos.y + (endPos.y - startPos.y) * passProgress - 30 * passProgress * (1-passProgress) * 4
+          ctx.strokeStyle = `rgba(255,220,50,${0.9})`
+          ctx.lineWidth = 2
+          ctx.setLineDash([6, 3])
+          ctx.beginPath()
+          ctx.moveTo(startPos.x, startPos.y)
+          // Draw partial arc
+          const steps = 20
+          for (let i = 1; i <= Math.round(steps * passProgress); i++) {
+            const frac = i / steps
+            const bx = startPos.x + (endPos.x - startPos.x) * frac
+            const by = startPos.y + (endPos.y - startPos.y) * frac - 30 * frac * (1-frac) * 4
+            ctx.lineTo(bx, by)
+          }
+          ctx.stroke()
+          ctx.setLineDash([])
+          // Ball travels along the arc
+          if (passProgress < 1) {
+            const ballFrac = passProgress
+            const bx = startPos.x + (endPos.x - startPos.x) * ballFrac
+            const by = startPos.y + (endPos.y - startPos.y) * ballFrac - 30 * ballFrac * (1-ballFrac) * 4
+            ctx.fillStyle = '#f59e0b'
+            ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1
+            ctx.beginPath(); ctx.arc(bx, by, r*0.55, 0, Math.PI*2)
+            ctx.fill(); ctx.stroke()
+          }
+          // Arrowhead at destination when pass arrives
+          if (passProgress >= 0.9) {
+            const dx = endPos.x - startPos.x, dy = endPos.y - startPos.y
+            const dl = Math.sqrt(dx*dx+dy*dy)||1
+            ctx.fillStyle = 'rgba(255,220,50,0.9)'
+            arrow(endPos.x, endPos.y, dx/dl, dy/dl, r*1.5)
+          }
+        }
+
+        // Football handoff: show ball traveling from QB to RB
+        if (!isBBall && !isBSB && qb && rb) {
+          const qbRouteName = qb.routeName || ''
+          const isHandoff = qbRouteName.includes('Handoff') || qbRouteName.includes('handoff')
+          if (isHandoff && pt >= 0.1 && pt <= 0.4) {
+            const handoffProgress = Math.min(1, (pt - 0.1) / 0.2)
+            const qbPos = getPos(qb, t)
+            const rbPos = getPos(rb, t)
+            // Ball travels from QB to RB
+            const bx = qbPos.x + (rbPos.x - qbPos.x) * handoffProgress
+            const by = qbPos.y + (rbPos.y - qbPos.y) * handoffProgress
+            ctx.fillStyle = '#b45309'
+            ctx.strokeStyle = 'rgba(255,200,50,0.8)'; ctx.lineWidth = 1.5
+            ctx.beginPath(); ctx.arc(bx, by, r*0.6, 0, Math.PI*2)
+            ctx.fill(); ctx.stroke()
+            // Arrow showing handoff direction
+            if (handoffProgress < 0.8) {
+              const dx = rbPos.x - qbPos.x, dy = rbPos.y - qbPos.y
+              const dl = Math.sqrt(dx*dx+dy*dy)||1
+              ctx.fillStyle = 'rgba(255,200,50,0.7)'
+              arrow(bx + dx/dl*r, by + dy/dl*r, dx/dl, dy/dl, r*1.2)
+            }
+          }
         }
 
         parsed.players.forEach(player => {
@@ -982,16 +1062,24 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
             ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2)
             ctx.fill(); ctx.stroke()
 
-            // Ball indicator on ball holder
-            if (isBallHolder) {
+            // Ball indicator on ball holder - disappears after pass
+            const passTime2 = 0.55
+            const hasPassed = isBBall && shooter && pt >= passTime2 + 0.25
+            if (isBallHolder && !hasPassed) {
               ctx.fillStyle = '#f59e0b'
               ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 0.5
               ctx.beginPath(); ctx.arc(pos.x + r*0.95, pos.y - r*0.95, r*0.52, 0, Math.PI*2)
               ctx.fill(); ctx.stroke()
-              // Ball seam lines
               ctx.strokeStyle = 'rgba(139,69,19,0.8)'; ctx.lineWidth = 0.5
               ctx.beginPath(); ctx.arc(pos.x + r*0.95, pos.y - r*0.95, r*0.52, 0, Math.PI)
               ctx.stroke()
+            }
+            // Shooter gets ball after pass arrives
+            if (isShooter && isBBall && shooter && pt >= passTime2 + 0.25) {
+              ctx.fillStyle = '#f59e0b'
+              ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 0.5
+              ctx.beginPath(); ctx.arc(pos.x + r*0.95, pos.y - r*0.95, r*0.52, 0, Math.PI*2)
+              ctx.fill(); ctx.stroke()
             }
 
             // Star marker for shooter
