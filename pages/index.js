@@ -260,6 +260,9 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
   const [answer, setAnswer] = useState('')
   const [qaLoading, setQALoading] = useState(false)
   const [qaHistory, setQAHistory] = useState([])
+  const [variations, setVariations] = useState(null)
+  const [variationsLoading, setVariationsLoading] = useState(false)
+  const [showVariations, setShowVariations] = useState(false)
 
   const pr = parseInt(P.slice(1,3),16)
   const pg = parseInt(P.slice(3,5),16)
@@ -285,6 +288,30 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
     setStepsLoading(false)
   }
 
+  async function loadVariations() {
+    if (variations) { setShowVariations(true); return }
+    setVariationsLoading(true)
+    try {
+      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY'))
+      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
+      const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
+      const raw = await callAI(
+        'You are a ' + sportName + ' coordinator. The base play is: "' + play.name + '" (' + play.type + '). ' + play.note +
+        ' Generate exactly 3 play variations that use the same core concept but change one element each time (different motion, personnel, direction, or timing). ' +
+        'Return ONLY valid JSON: {"variations":[' +
+        '{"name":"variation name","type":"' + play.type + '","note":"what is different from the base play and when to use it","changeFrom":"what changed"},' +
+        '{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"},' +
+        '{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"}' +
+        ']}'
+      )
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      const data = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1))
+      setVariations(data.variations || [])
+      setShowVariations(true)
+    } catch(e) { setVariations([]) }
+    setVariationsLoading(false)
+  }
+
   async function askQuestion() {
     if (!question.trim()) return
     setQALoading(true)
@@ -305,7 +332,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
   return (
     <div style={{ borderBottom:'1px solid #1e2330' }}>
       {/* Play header row - always visible */}
-      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { setExpanded(e => !e); if (!expanded) loadSteps() }}>
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { const newExp = !expanded; setExpanded(newExp); if (newExp) { loadSteps(); } }}>
         <div style={{ width:22, height:22, minWidth:22, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{play.name}</div>
@@ -330,7 +357,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
           {/* Play animator inline */}
           {showAnim && (
             <div style={{ marginBottom:12 }}>
-              <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} />
+              <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={showAnim} key={showAnim?'shown':'hidden'} />
             </div>
           )}
 
@@ -371,6 +398,36 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
               )}
             </div>
           )}
+
+          {/* PLAY VARIATIONS */}
+          <div style={{ marginBottom:12 }}>
+            <button
+              onClick={() => { if(showVariations) { setShowVariations(false) } else { loadVariations() } }}
+              disabled={variationsLoading}
+              style={{ width:'100%', padding:'10px 14px', background:showVariations?al(P,0.15):'#161922', border:`1px solid ${showVariations?P:'#1e2330'}`, borderRadius:10, color:showVariations?P:'#6b7a96', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, cursor:variationsLoading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'space-between' }}
+            >
+              <span>{variationsLoading ? 'GENERATING VARIATIONS...' : 'PLAY VARIATIONS & ADJUSTMENTS'}</span>
+              <span style={{ fontSize:11 }}>{showVariations ? '▲ HIDE' : '▼ SHOW 3 VARIATIONS'}</span>
+            </button>
+            {showVariations && variations && (
+              <div style={{ marginTop:8, display:'flex', flexDirection:'column', gap:10, animation:'fadeIn 0.2s ease' }}>
+                <div style={{ fontSize:10, color:'#6b7a96', letterSpacing:1, padding:'4px 2px' }}>Same concept — different look. Each variation keeps the core idea but changes one key element.</div>
+                {variations.map((v, i) => (
+                  <div key={i} style={{ background:'#0f1117', border:`1px solid ${al(P,0.2)}`, borderRadius:10, overflow:'hidden' }}>
+                    <div style={{ padding:'10px 13px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'flex-start', gap:10 }}>
+                      <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${P}`, color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:1 }}>{i+1}</div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{v.name}</div>
+                        <div style={{ fontSize:10, color:P, fontFamily:"'DM Mono',monospace", marginBottom:3 }}>CHANGE: {v.changeFrom}</div>
+                        <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{v.note}</div>
+                      </div>
+                    </div>
+                    <PlayAnimator play={v} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={false} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Q&A section */}
           <div style={{ background:'#161922', borderRadius:10, padding:12 }}>
