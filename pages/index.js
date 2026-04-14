@@ -420,39 +420,31 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 
   async function generateAnim() {
     setLoading(true); setError(''); setParsed(null); setPlaying(false)
-    const sport = play.sport || 'Football'
-    const isBasketball = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('ZONE ATT') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
-    const isBaseball = play.type && (play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('INFIELD') || play.type.includes('BATTING'))
+    const isBasketball = play.type && (
+      play.type.includes('COURT') || play.type.includes('PRESS') ||
+      play.type.includes('BREAK') || play.type.includes('INBOUND') ||
+      play.type.includes('ZONE ATT') || play.type.includes('SET PLAY') ||
+      play.type.includes('FAST BREAK') || play.type.includes('HALF COURT')
+    )
+    const isBaseball = play.type && (
+      play.type.includes('BASERUN') || play.type.includes('PITCHING') ||
+      play.type.includes('INFIELD') || play.type.includes('BATTING') ||
+      play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN')
+    )
 
-    const footballPrompt = `Generate a football play diagram for: ${play.name} (${play.type}). ${play.note}
+    const fbTemplate = '{"formation":"PLAYNAME","snapPoint":0.18,"duration":3000,"players":[{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[35,34]],"routeName":"Block","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":42,"y":38,"path":[[42,38],[40,34]],"routeName":"Block","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,34]],"routeName":"Block","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":58,"y":38,"path":[[58,38],[60,34]],"routeName":"Block","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[65,34]],"routeName":"Block","routeYards":0},{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,44]],"routeName":"Handoff","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":50,"y":46,"path":[[50,46],[52,42],[58,36]],"routeName":"Run","routeYards":7},{"id":"X","label":"X","role":"off","routeType":"route","x":12,"y":38,"path":[[12,38],[12,30]],"routeName":"Go","routeYards":10},{"id":"Z","label":"Z","role":"off","routeType":"route","x":88,"y":38,"path":[[88,38],[88,30]],"routeName":"Go","routeYards":10},{"id":"TE","label":"Y","role":"off","routeType":"block","x":66,"y":38,"path":[[66,38],[66,34]],"routeName":"Block","routeYards":0},{"id":"D1","label":"D","role":"def","routeType":"block","x":42,"y":35,"path":[[42,35],[42,37]],"routeName":"","routeYards":0},{"id":"D2","label":"D","role":"def","routeType":"block","x":50,"y":35,"path":[[50,35],[50,37]],"routeName":"","routeYards":0},{"id":"D3","label":"D","role":"def","routeType":"block","x":58,"y":35,"path":[[58,35],[58,37]],"routeName":"","routeYards":0},{"id":"LB1","label":"LB","role":"def","routeType":"block","x":40,"y":30,"path":[[40,30],[40,32]],"routeName":"","routeYards":0},{"id":"LB2","label":"LB","role":"def","routeType":"block","x":60,"y":30,"path":[[60,30],[60,32]],"routeName":"","routeYards":0},{"id":"CB1","label":"CB","role":"def","routeType":"block","x":12,"y":30,"path":[[12,30],[12,32]],"routeName":"","routeYards":0},{"id":"CB2","label":"CB","role":"def","routeType":"block","x":88,"y":30,"path":[[88,30],[88,32]],"routeName":"","routeYards":0},{"id":"S1","label":"S","role":"def","routeType":"block","x":35,"y":22,"path":[[35,22],[35,24]],"routeName":"","routeYards":0},{"id":"S2","label":"S","role":"def","routeType":"block","x":65,"y":22,"path":[[65,22],[65,24]],"routeName":"","routeYards":0}]}'
 
-Field coords: x 0-100, y 0-60. LOS at y=38. Offense at y=38 or higher y. Defense at y=35 or lower y.
+    const bbTemplate = '{"formation":"PLAYNAME","snapPoint":0.15,"duration":3500,"players":[{"id":"PG","label":"1","role":"off","routeType":"route","x":50,"y":48,"path":[[50,48],[50,40]],"routeName":"Dribble","routeYards":0},{"id":"SG","label":"2","role":"off","routeType":"route","x":72,"y":44,"path":[[72,44],[78,32]],"routeName":"Cut","routeYards":0},{"id":"SF","label":"3","role":"off","routeType":"route","x":82,"y":38,"path":[[82,38],[85,26]],"routeName":"Wing","routeYards":0},{"id":"PF","label":"4","role":"off","routeType":"block","x":62,"y":22,"path":[[62,22],[62,22]],"routeName":"Screen","routeYards":0},{"id":"C5","label":"5","role":"off","routeType":"block","x":50,"y":17,"path":[[50,17],[50,17]],"routeName":"Post","routeYards":0},{"id":"d1","label":"D","role":"def","routeType":"block","x":50,"y":50,"path":[[50,50],[50,51]],"routeName":"","routeYards":0},{"id":"d2","label":"D","role":"def","routeType":"block","x":72,"y":46,"path":[[72,46],[72,47]],"routeName":"","routeYards":0},{"id":"d3","label":"D","role":"def","routeType":"block","x":82,"y":40,"path":[[82,40],[82,41]],"routeName":"","routeYards":0},{"id":"d4","label":"D","role":"def","routeType":"block","x":62,"y":24,"path":[[62,24],[62,25]],"routeName":"","routeYards":0},{"id":"d5","label":"D","role":"def","routeType":"block","x":50,"y":19,"path":[[50,19],[50,20]],"routeName":"","routeYards":0}]}'
 
-IMPORTANT QB RULES:
-- If this is a HANDOFF play: QB path must show a short fake/handoff motion (moves 1-2 units toward ball carrier then stops). Add a note "QB HANDS OFF" in the routeName.
-- If this is a KEEPER/BOOTLEG: QB path shows running to the edge.
-- If this is a PASS play: QB path shows a 3-5 step dropback (moves backward, higher y).
-- The RB path must clearly show the actual run lane, not just a short stub.
-- Pulling guards (G) should have longer paths around the edge showing their pull route.
+    const bsbTemplate = '{"formation":"PLAYNAME","snapPoint":0.2,"duration":3000,"players":[{"id":"P","label":"P","role":"off","routeType":"block","x":50,"y":30,"path":[[50,30],[50,30]],"routeName":"Pitch","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"Receive","routeYards":0},{"id":"1B","label":"1B","role":"off","routeType":"block","x":75,"y":42,"path":[[75,42],[75,42]],"routeName":"Hold","routeYards":0},{"id":"2B","label":"2B","role":"off","routeType":"block","x":65,"y":28,"path":[[65,28],[65,28]],"routeName":"Cover","routeYards":0},{"id":"SS","label":"SS","role":"off","routeType":"block","x":38,"y":30,"path":[[38,30],[38,30]],"routeName":"Cover","routeYards":0},{"id":"3B","label":"3B","role":"off","routeType":"block","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"Hold","routeYards":0},{"id":"LF","label":"LF","role":"off","routeType":"block","x":20,"y":12,"path":[[20,12],[20,12]],"routeName":"Pos","routeYards":0},{"id":"CF","label":"CF","role":"off","routeType":"block","x":50,"y":8,"path":[[50,8],[50,8]],"routeName":"Pos","routeYards":0},{"id":"RF","label":"RF","role":"off","routeType":"block","x":80,"y":12,"path":[[80,12],[80,12]],"routeName":"Pos","routeYards":0},{"id":"BAT","label":"B","role":"def","routeType":"route","x":50,"y":44,"path":[[50,44],[60,38]],"routeName":"Run","routeYards":0},{"id":"R1","label":"R","role":"def","routeType":"route","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"","routeYards":0}]}'
 
-Start with this exact JSON template and customize offensive paths for this specific play. Return ONLY raw JSON:
-{"formation":"${play.name}","snapPoint":0.18,"duration":3000,"players":[{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[35,34]],"routeName":"Block","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":42,"y":38,"path":[[42,38],[40,34]],"routeName":"Block","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,34]],"routeName":"Block","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":58,"y":38,"path":[[58,38],[60,34]],"routeName":"Block","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[65,34]],"routeName":"Block","routeYards":0},{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,44]],"routeName":"Handoff","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":50,"y":46,"path":[[50,46],[52,42],[58,36]],"routeName":"Run","routeYards":7},{"id":"X","label":"X","role":"off","routeType":"route","x":12,"y":38,"path":[[12,38],[12,30]],"routeName":"Go","routeYards":10},{"id":"Z","label":"Z","role":"off","routeType":"route","x":88,"y":38,"path":[[88,38],[88,30]],"routeName":"Go","routeYards":10},{"id":"TE","label":"Y","role":"off","routeType":"block","x":66,"y":38,"path":[[66,38],[66,34]],"routeName":"Block","routeYards":0},{"id":"D1","label":"D","role":"def","routeType":"block","x":42,"y":35,"path":[[42,35],[42,37]],"routeName":"","routeYards":0},{"id":"D2","label":"D","role":"def","routeType":"block","x":50,"y":35,"path":[[50,35],[50,37]],"routeName":"","routeYards":0},{"id":"D3","label":"D","role":"def","routeType":"block","x":58,"y":35,"path":[[58,35],[58,37]],"routeName":"","routeYards":0},{"id":"LB1","label":"LB","role":"def","routeType":"block","x":40,"y":30,"path":[[40,30],[40,32]],"routeName":"","routeYards":0},{"id":"LB2","label":"LB","role":"def","routeType":"block","x":60,"y":30,"path":[[60,30],[60,32]],"routeName":"","routeYards":0},{"id":"CB1","label":"CB","role":"def","routeType":"block","x":12,"y":30,"path":[[12,30],[12,32]],"routeName":"","routeYards":0},{"id":"CB2","label":"CB","role":"def","routeType":"block","x":88,"y":30,"path":[[88,30],[88,32]],"routeName":"","routeYards":0},{"id":"S1","label":"S","role":"def","routeType":"block","x":35,"y":22,"path":[[35,22],[35,24]],"routeName":"","routeYards":0},{"id":"S2","label":"S","role":"def","routeType":"block","x":65,"y":22,"path":[[65,22],[65,24]],"routeName":"","routeYards":0}]}`
+    const footballPrompt = 'Generate football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' RULES: QB on handoff plays makes short fake and stops (path 2 units). RB shows full run lane. Pulling guards show pull route around edge. Return ONLY raw JSON using this template, customize offensive paths only: ' + fbTemplate.replace('PLAYNAME', play.name)
 
-    const basketballPrompt = `Generate a basketball play diagram for: ${play.name} (${play.type}). ${play.note}
+    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Use 5 offensive players (1-5) and 5 defenders. Show cuts, screens, dribble paths. Return ONLY raw JSON using this template, customize all offensive paths for this play: ' + bbTemplate.replace('PLAYNAME', play.name)
 
-Use a BASKETBALL HALF COURT. Coords: x 0-100, y 0-60. Basket at x=50, y=8. Three point line arc from x=10,y=38 through x=50,y=5 to x=90,y=38. Paint: x=38-62, y=8-28. Free throw line at y=28.
+    const baseballPrompt = 'Generate baseball defensive positioning and play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions on a baseball diamond. Show movement paths for relevant players. Return ONLY raw JSON using this template, customize paths to show this play: ' + bsbTemplate.replace('PLAYNAME', play.name)
 
-5 offensive players: PG(1), SG(2), SF(3), PF(4), C(5). Use standard basketball positions.
-5 defensive players: d1-d5 (hollow circles, no routes).
-
-Routes: dribble paths are solid lines with arrow, cuts are dashed with arrow, screens shown as player stopping with perpendicular mark. routeType "route" for movers, "block" for screeners/stationary.
-
-Return ONLY raw JSON - same structure as football but with basketball positions:
-{"formation":"${play.name}","snapPoint":0.15,"duration":3500,"players":[{"id":"PG","label":"1","role":"off","routeType":"route","x":50,"y":48,"path":[[50,48],[50,38]],"routeName":"Dribble","routeYards":0},{"id":"SG","label":"2","role":"off","routeType":"route","x":70,"y":42,"path":[[70,42],[75,30]],"routeName":"Cut","routeYards":0},{"id":"SF","label":"3","role":"off","routeType":"route","x":80,"y":38,"path":[[80,38],[85,25]],"routeName":"Wing","routeYards":0},{"id":"PF","label":"4","role":"off","routeType":"block","x":62,"y":22,"path":[[62,22],[62,22]],"routeName":"Screen","routeYards":0},{"id":"C","label":"5","role":"off","routeType":"block","x":50,"y":18,"path":[[50,18],[50,18]],"routeName":"Post","routeYards":0},{"id":"d1","label":"D","role":"def","routeType":"block","x":50,"y":50,"path":[[50,50],[50,51]],"routeName":"","routeYards":0},{"id":"d2","label":"D","role":"def","routeType":"block","x":70,"y":44,"path":[[70,44],[70,45]],"routeName":"","routeYards":0},{"id":"d3","label":"D","role":"def","routeType":"block","x":80,"y":40,"path":[[80,40],[80,41]],"routeName":"","routeYards":0},{"id":"d4","label":"D","role":"def","routeType":"block","x":62,"y":24,"path":[[62,24],[62,25]],"routeName":"","routeYards":0},{"id":"d5","label":"D","role":"def","routeType":"block","x":50,"y":20,"path":[[50,20],[50,21]],"routeName":"","routeYards":0}]}
-
-Customize player paths to accurately represent ${play.name}. Return raw JSON only.`
-
-    const prompt = isBasketball ? basketballPrompt : footballPrompt
+    const prompt = isBasketball ? basketballPrompt : isBaseball ? baseballPrompt : footballPrompt
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
@@ -510,6 +502,7 @@ Customize player paths to accurately represent ${play.name}. Return raw JSON onl
     }
 
     const isBBall = isBasketball
+    const isBSB = isBaseball
 
     function drawBasketballCourt() {
       ctx.fillStyle = '#c8954a'
@@ -549,7 +542,66 @@ Customize player paths to accurately represent ${play.name}. Return raw JSON onl
       ctx.beginPath(); ctx.moveTo(sx(92), sy(38)); ctx.lineTo(sx(97), sy(38)); ctx.stroke()
     }
 
-    function drawFootballField() {
+    function drawBaseballField() {
+      // Grass green outfield
+      ctx.fillStyle = '#2d7a2d'
+      ctx.fillRect(0, 0, W, H)
+      // Infield dirt diamond
+      ctx.fillStyle = '#c4955a'
+      ctx.beginPath()
+      ctx.moveTo(sx(50), sy(42)) // home plate
+      ctx.lineTo(sx(75), sy(28)) // first base
+      ctx.lineTo(sx(50), sy(14)) // second base
+      ctx.lineTo(sx(25), sy(28)) // third base
+      ctx.closePath()
+      ctx.fill()
+      // Infield dirt circle
+      ctx.fillStyle = '#c4955a'
+      ctx.beginPath()
+      ctx.arc(sx(50), sy(28), sx(18), 0, Math.PI*2)
+      ctx.fill()
+      // Foul lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'
+      ctx.lineWidth = 1.5
+      ctx.beginPath(); ctx.moveTo(sx(50), sy(42)); ctx.lineTo(sx(5), sy(5)); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(50), sy(42)); ctx.lineTo(sx(95), sy(5)); ctx.stroke()
+      // Outfield arc
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(sx(50), sy(42), sy(40), Math.PI*1.2, Math.PI*1.8, false)
+      ctx.stroke()
+      // Bases
+      const bases = [[50,42,'HP'],[75,28,'1B'],[50,14,'2B'],[25,28,'3B']]
+      bases.forEach(([bx,by,lbl]) => {
+        ctx.fillStyle = lbl === 'HP' ? '#aaa' : 'white'
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)'
+        ctx.lineWidth = 1
+        const s = sx(2.5)
+        ctx.save()
+        ctx.translate(sx(bx), sy(by))
+        ctx.rotate(Math.PI/4)
+        ctx.fillRect(-s/2, -s/2, s, s)
+        ctx.strokeRect(-s/2, -s/2, s, s)
+        ctx.restore()
+        ctx.fillStyle = 'rgba(255,255,255,0.6)'
+        ctx.font = `bold ${Math.round(sx(2))}px sans-serif`
+        ctx.textAlign = 'center'
+        ctx.fillText(lbl, sx(bx), sy(by) - sx(3))
+      })
+      // Pitcher mound
+      ctx.fillStyle = '#b8885a'
+      ctx.beginPath()
+      ctx.arc(sx(50), sy(28), sx(3), 0, Math.PI*2)
+      ctx.fill()
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(sx(50), sy(28), sx(3), 0, Math.PI*2)
+      ctx.stroke()
+    }
+
+        function drawFootballField() {
       ctx.fillStyle = '#f8f8f4'
       ctx.fillRect(0, 0, W, H)
       ctx.strokeStyle = 'rgba(0,0,0,0.08)'
@@ -576,7 +628,7 @@ Customize player paths to accurately represent ${play.name}. Return raw JSON onl
 
     function draw(t) {
       ctx.clearRect(0, 0, W, H)
-      if (isBBall) { drawBasketballCourt() } else { drawFootballField() }
+      if (isBBall) { drawBasketballCourt() } else if (isBSB) { drawBaseballField() } else { drawFootballField() }
 
             // Player radius — very small, reference-image style
       const r = W * 0.016
@@ -738,10 +790,10 @@ Customize player paths to accurately represent ${play.name}. Return raw JSON onl
         ctx.fillStyle = 'rgba(0,0,0,0.75)'
         ctx.font = `bold ${Math.round(H*0.045)}px sans-serif`
         ctx.textAlign = 'center'
-        ctx.fillText(isBBall ? 'GO' : 'SNAP', W/2, isBBall ? sy(50) : sy(38)-10)
+        ctx.fillText(isBBall ? 'GO' : isBSB ? 'PITCH' : 'SNAP', W/2, isBBall ? sy(50) : isBSB ? sy(46) : sy(38)-10)
       }
       // QB action label (football only)
-      if (!isBBall && t >= snap && t < snap + 0.15) {
+      if (!isBBall && !isBSB && t >= snap && t < snap + 0.15) {
         const qb = parsed.players.find(p => p.id === 'QB')
         if (qb && qb.routeName && qb.routeName !== 'Dropback' && qb.routeName !== '') {
           const qbPos = getPos(qb, snap)
