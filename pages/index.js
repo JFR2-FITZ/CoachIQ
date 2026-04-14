@@ -260,41 +260,54 @@ function PlayAnimator({ play, P, callAI, parseJSON }) {
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
 
+  const pr = parseInt(P.slice(1,3),16)
+  const pg = parseInt(P.slice(3,5),16)
+  const pb = parseInt(P.slice(5,7),16)
+
   async function generateAnim() {
     setLoading(true); setError(''); setParsed(null); setPlaying(false)
-    const prompt = `You are a football play diagram expert. Generate an animated play diagram for the play "${play.name}" (type: ${play.type}).
-Play description: ${play.note}
+    const prompt = `You are a football play diagram expert. Generate a diagram for "${play.name}" (${play.type}). ${play.note}
 
-Return ONLY valid JSON describing player positions and paths on a field coordinate system where (0,0) is top-left and (100,56) is bottom-right. The line of scrimmage is at y=34.
+Use a coordinate system: (0,0) top-left, (100,60) bottom-right. Line of scrimmage at y=38. Offense lines up at y=38, defense at y=34 and above (lower y = further from LOS toward defense end zone).
 
-{"formation":"${play.name}","snapPoint":0.2,"duration":2800,"players":[
-{"id":"C","label":"C","role":"off","x":50,"y":34,"path":[[50,34],[50,28]]},
-{"id":"QB","label":"QB","role":"off","x":50,"y":37,"path":[[50,37],[50,41],[46,45]]},
-{"id":"RB","label":"RB","role":"off","x":50,"y":41,"path":[[50,41],[56,35],[63,28]]},
-{"id":"WR1","label":"WR","role":"off","x":22,"y":34,"path":[[22,34],[22,24],[32,16]]},
-{"id":"WR2","label":"WR","role":"off","x":78,"y":34,"path":[[78,34],[78,22],[68,14]]},
-{"id":"TE","label":"TE","role":"off","x":63,"y":34,"path":[[63,34],[63,27],[70,21]]},
-{"id":"LG","label":"G","role":"off","x":46,"y":34,"path":[[46,34],[43,29]]},
-{"id":"RG","label":"G","role":"off","x":54,"y":34,"path":[[54,34],[57,29]]},
-{"id":"LT","label":"T","role":"off","x":40,"y":34,"path":[[40,34],[37,28]]},
-{"id":"RT","label":"T","role":"off","x":60,"y":34,"path":[[60,34],[63,28]]},
-{"id":"D1","label":"D","role":"def","x":46,"y":31,"path":[[46,31],[46,35]]},
-{"id":"D2","label":"D","role":"def","x":54,"y":31,"path":[[54,31],[54,35]]},
-{"id":"D3","label":"D","role":"def","x":50,"y":29,"path":[[50,29],[50,33]]},
-{"id":"LB1","label":"LB","role":"def","x":40,"y":26,"path":[[40,26],[43,31]]},
-{"id":"LB2","label":"LB","role":"def","x":60,"y":26,"path":[[60,26],[57,31]]},
-{"id":"CB1","label":"CB","role":"def","x":22,"y":26,"path":[[22,26],[24,20]]},
-{"id":"CB2","label":"CB","role":"def","x":78,"y":26,"path":[[78,26],[76,20]]},
-{"id":"S1","label":"S","role":"def","x":38,"y":18,"path":[[38,18],[40,23]]},
-{"id":"S2","label":"S","role":"def","x":62,"y":18,"path":[[62,18],[60,23]]}
-]}
+Assign receiver labels: X (split end left), Y (tight end or slot), Z (split end right), H (halfback/slot), F (fullback/flex). Linemen use C, G, T.
 
-Customize the paths to accurately represent "${play.name}". Make offensive routes realistic for the play type. Keep all coordinates within (5,5) to (95,52).`
+Return ONLY valid JSON:
+{
+  "formation": "formation name",
+  "snapPoint": 0.18,
+  "duration": 3000,
+  "players": [
+    {
+      "id": "unique",
+      "label": "C",
+      "role": "off",
+      "routeType": "block",
+      "x": 50, "y": 38,
+      "path": [[50,38],[50,34]],
+      "routeName": "",
+      "routeYards": 0
+    }
+  ]
+}
+
+CRITICAL sizing rules:
+- Linemen (C, G, T) space 4 units apart on x-axis centered at 50: LT=38, LG=42, C=50, RG=58, RT=62
+- Wide receivers line up at x=12 (X) and x=88 (Z), y=38
+- Tight end at x=66, y=38
+- QB at x=50, y=42. RB at x=50, y=46
+- All paths must stay within x:5-95, y:5-56
+- Route paths: short routes 6-8 yards (1 yard = ~0.9 units), deep routes 12-15 yards
+- For PASS plays: receivers run real routes (curl, out, post, go, slant, cross, corner, flat, wheel)
+- For RUN plays: linemen have short block paths, skill players have run lane paths
+- routeName: the route name (Curl, Out, Post, Go, Slant, Cross, Corner, Flat, Block, Sweep, Counter, etc)
+- routeYards: how many yards the route goes (0 for blocks)
+- Defense: 3 DL at y=34-35, 2 LB at y=28-30, 2 CB at x=12,88 y=30, 2 S at y=20-22. Defense paths are very short (1-2 units) showing initial gap responsibility only.`
 
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
-      if (!data.players) throw new Error('No players in response')
+      if (!data.players || data.players.length === 0) throw new Error('No players returned')
       setParsed(data)
     } catch(e) { setError(e.message) }
     setLoading(false)
@@ -304,111 +317,257 @@ Customize the paths to accurately represent "${play.name}". Make offensive route
     if (!parsed || !canvasRef.current) return
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    const W = canvas.width, H = canvas.height
+    const W = canvas.width
+    const H = canvas.height
     const sx = x => (x / 100) * W
-    const sy = y => (y / 56) * H
-    const dur = parsed.duration || 2800
-    const snap = parsed.snapPoint || 0.2
+    const sy = y => (y / 60) * H
+    const dur = parsed.duration || 3000
+    const snap = parsed.snapPoint || 0.18
     let startTime = null
 
-    function lerp(a, b, t) { return a + (b - a) * t }
+    function lerp(a, b, t) { return a + (b-a)*t }
 
     function getPos(player, t) {
       const path = player.path
       if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
       if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
-      const pt = (t - snap) / (1 - snap)
+      const pt = Math.min((t - snap) / (1 - snap), 1)
       const segs = path.length - 1
       const seg = Math.min(Math.floor(pt * segs), segs - 1)
-      const st = (pt * segs) - seg
+      const st = pt * segs - seg
       return {
         x: sx(lerp(path[seg][0], path[seg+1][0], st)),
         y: sy(lerp(path[seg][1], path[seg+1][1], st))
       }
     }
 
+    function drawArrow(ctx, ex, ey, nx, ny, size) {
+      const angle = Math.atan2(ny, nx)
+      const a = 0.45
+      ctx.beginPath()
+      ctx.moveTo(ex, ey)
+      ctx.lineTo(ex - size*Math.cos(angle-a), ey - size*Math.sin(angle-a))
+      ctx.lineTo(ex - size*Math.cos(angle+a), ey - size*Math.sin(angle+a))
+      ctx.closePath()
+      ctx.fill()
+    }
+
+    function drawPerp(ctx, ex, ey, nx, ny, size) {
+      const px = -ny, py = nx
+      ctx.beginPath()
+      ctx.moveTo(ex - px*size, ey - py*size)
+      ctx.lineTo(ex + px*size, ey + py*size)
+      ctx.stroke()
+    }
+
     function draw(t) {
       ctx.clearRect(0, 0, W, H)
-      // Field
-      ctx.fillStyle = '#1a4a1a'
+
+      // White field background like the reference image
+      ctx.fillStyle = '#f8f8f4'
       ctx.fillRect(0, 0, W, H)
-      // Yard lines
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)'
+
+      // Yard lines - light gray horizontal
+      ctx.strokeStyle = 'rgba(0,0,0,0.08)'
       ctx.lineWidth = 1
-      for (let y = 0; y <= 56; y += 8) {
+      for (let y = 0; y <= 60; y += 6) {
         ctx.beginPath(); ctx.moveTo(0, sy(y)); ctx.lineTo(W, sy(y)); ctx.stroke()
       }
-      // Line of scrimmage
-      ctx.strokeStyle = 'rgba(255,255,100,0.7)'
+      // Hash marks
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)'
+      ctx.lineWidth = 0.5
+      for (let y = 0; y <= 60; y += 3) {
+        ctx.beginPath(); ctx.moveTo(sx(36), sy(y)); ctx.lineTo(sx(40), sy(y)); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(sx(60), sy(y)); ctx.lineTo(sx(64), sy(y)); ctx.stroke()
+      }
+      // Sidelines
+      ctx.strokeStyle = 'rgba(0,0,0,0.2)'
       ctx.lineWidth = 2
-      ctx.setLineDash([6, 4])
-      ctx.beginPath(); ctx.moveTo(0, sy(34)); ctx.lineTo(W, sy(34)); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(2), 0); ctx.lineTo(sx(2), H); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(98), 0); ctx.lineTo(sx(98), H); ctx.stroke()
+
+      // Line of scrimmage - bold black dashed
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)'
+      ctx.lineWidth = 1.5
+      ctx.setLineDash([8, 5])
+      ctx.beginPath(); ctx.moveTo(0, sy(38)); ctx.lineTo(W, sy(38)); ctx.stroke()
       ctx.setLineDash([])
 
-      // Routes
-      if (t >= snap) {
-        const pt = (t - snap) / (1 - snap)
+      // Player radius — very small, reference-image style
+      const r = W * 0.016
+
+      // PRE-SNAP: draw full route map as preview
+      if (t < snap) {
         parsed.players.forEach(player => {
+          if (player.role !== 'off') return
+          const path = player.path
+          if (!path || path.length < 2) return
+          const isLineman = ['C','G','T'].includes(player.label)
+          const isBlock = player.routeType === 'block' || isLineman
+
+          const routeColor = isLineman
+            ? 'rgba(80,80,80,0.5)'
+            : `rgba(${pr},${pg},${pb},0.7)`
+
+          ctx.strokeStyle = routeColor
+          ctx.lineWidth = isLineman ? 1 : 1.8
+          ctx.setLineDash(isLineman ? [3,3] : [])
+          ctx.beginPath()
+          ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+          for (let i = 1; i < path.length; i++) {
+            ctx.lineTo(sx(path[i][0]), sy(path[i][1]))
+          }
+          ctx.stroke()
+          ctx.setLineDash([])
+
+          // End marker
+          const ep = path[path.length-1]
+          const pp = path[path.length-2]
+          const dx = ep[0]-pp[0], dy = ep[1]-pp[1]
+          const dl = Math.sqrt(dx*dx+dy*dy)||1
+          const ex = sx(ep[0]), ey = sy(ep[1])
+
+          if (isBlock) {
+            ctx.strokeStyle = routeColor
+            ctx.lineWidth = 1.5
+            drawPerp(ctx, ex, ey, dx/dl, dy/dl, r*1.4)
+          } else {
+            ctx.fillStyle = `rgba(${pr},${pg},${pb},0.7)`
+            drawArrow(ctx, ex, ey, dx/dl, dy/dl, r*1.8)
+          }
+
+          // Route label: name + yards
+          if (!isBlock && player.routeName) {
+            const midIdx = Math.floor(path.length / 2)
+            const mx = sx(path[midIdx][0]) + 8
+            const my = sy(path[midIdx][1]) - 4
+            ctx.fillStyle = `rgba(${pr},${pg},${pb},0.85)`
+            ctx.font = `bold ${Math.round(r*2.2)}px sans-serif`
+            ctx.textAlign = 'left'
+            ctx.fillText(
+              player.routeYards > 0 ? `${player.routeYards} YDS` : player.routeName,
+              mx, my
+            )
+          }
+        })
+      }
+
+      // POST-SNAP: animate routes
+      if (t >= snap) {
+        const pt = Math.min((t - snap) / (1 - snap), 1)
+        parsed.players.forEach(player => {
+          if (player.role !== 'off') return
           const path = player.path
           if (!path || path.length < 2) return
           const segs = path.length - 1
           const totalDraw = pt * segs
-          ctx.strokeStyle = player.role === 'off' ? (P + 'bb') : 'rgba(255,80,80,0.55)'
-          ctx.lineWidth = player.role === 'off' ? 2 : 1.5
-          ctx.setLineDash(player.role === 'def' ? [3, 3] : [])
+          const isLineman = ['C','G','T'].includes(player.label)
+          const isBlock = player.routeType === 'block' || isLineman
+          const routeColor = isLineman ? 'rgba(80,80,80,0.8)' : `rgba(${pr},${pg},${pb},0.9)`
+
+          ctx.strokeStyle = routeColor
+          ctx.lineWidth = isLineman ? 1.2 : 2
+          ctx.setLineDash([])
           ctx.beginPath()
           ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
-          for (let s = 0; s < Math.min(Math.floor(totalDraw), segs - 1); s++) {
-            ctx.lineTo(sx(path[s+1][0]), sy(path[s+1][1]))
-          }
-          if (totalDraw > 0 && Math.floor(totalDraw) < segs) {
-            const s = Math.floor(totalDraw)
-            const st = totalDraw - s
-            ctx.lineTo(sx(lerp(path[s][0], path[s+1][0], st)), sy(lerp(path[s][1], path[s+1][1], st)))
+          for (let s = 0; s < segs; s++) {
+            const sp = Math.max(0, Math.min(1, totalDraw - s))
+            if (sp <= 0) break
+            ctx.lineTo(
+              sx(lerp(path[s][0], path[s+1][0], sp)),
+              sy(lerp(path[s][1], path[s+1][1], sp))
+            )
           }
           ctx.stroke()
-          ctx.setLineDash([])
+
+          // End marker when route complete
+          if (totalDraw >= segs * 0.92) {
+            const ep = path[path.length-1]
+            const pp = path[path.length-2]
+            const dx = ep[0]-pp[0], dy = ep[1]-pp[1]
+            const dl = Math.sqrt(dx*dx+dy*dy)||1
+            const ex = sx(ep[0]), ey = sy(ep[1])
+            if (isBlock) {
+              ctx.strokeStyle = routeColor
+              ctx.lineWidth = 1.8
+              drawPerp(ctx, ex, ey, dx/dl, dy/dl, r*1.4)
+            } else {
+              ctx.fillStyle = `rgba(${pr},${pg},${pb},0.95)`
+              drawArrow(ctx, ex, ey, dx/dl, dy/dl, r*1.8)
+            }
+            // Yardage label
+            if (!isBlock && player.routeYards > 0) {
+              ctx.fillStyle = `rgba(${pr},${pg},${pb},0.9)`
+              ctx.font = `bold ${Math.round(r*2.1)}px sans-serif`
+              ctx.textAlign = 'left'
+              ctx.fillText(`${player.routeYards} YDS`, ex+5, ey-4)
+            }
+          }
         })
       }
 
-      // Players
+      // PLAYERS
       parsed.players.forEach(player => {
         const pos = getPos(player, t)
-        const r = Math.max(W, H) * 0.038
-        ctx.fillStyle = player.role === 'off' ? P : '#ff4444'
-        ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill()
-        ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5
-        ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.stroke()
-        ctx.fillStyle = 'white'
-        ctx.font = `bold ${Math.round(r * 0.85)}px sans-serif`
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-        ctx.fillText(player.label, pos.x, pos.y)
+        const isOff = player.role === 'off'
+        const isLineman = ['C','G','T'].includes(player.label)
+
+        if (isOff) {
+          if (isLineman) {
+            // Linemen: small filled square, dark outline
+            const s = r * 0.95
+            ctx.fillStyle = P
+            ctx.strokeStyle = 'white'
+            ctx.lineWidth = 1.2
+            ctx.fillRect(pos.x-s, pos.y-s, s*2, s*2)
+            ctx.strokeRect(pos.x-s, pos.y-s, s*2, s*2)
+          } else {
+            // Skill: small filled circle
+            ctx.fillStyle = P
+            ctx.strokeStyle = 'white'
+            ctx.lineWidth = 1.2
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2)
+            ctx.fill(); ctx.stroke()
+          }
+          // Label inside
+          ctx.fillStyle = 'white'
+          ctx.font = `bold ${Math.round(r*1.1)}px sans-serif`
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+          ctx.fillText(player.label, pos.x, pos.y)
+        } else {
+          // Defense: hollow dark circle, small
+          ctx.strokeStyle = 'rgba(60,60,60,0.7)'
+          ctx.fillStyle = 'rgba(60,60,60,0.08)'
+          ctx.lineWidth = 1.2
+          ctx.beginPath(); ctx.arc(pos.x, pos.y, r*0.85, 0, Math.PI*2)
+          ctx.fill(); ctx.stroke()
+          ctx.fillStyle = 'rgba(60,60,60,0.7)'
+          ctx.font = `${Math.round(r*0.9)}px sans-serif`
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+          ctx.fillText(player.label, pos.x, pos.y)
+        }
       })
 
-      // Snap label
-      if (Math.abs(t - snap) < 0.04) {
-        ctx.fillStyle = 'rgba(255,255,255,0.9)'
-        ctx.font = `bold ${Math.round(H * 0.06)}px sans-serif`
+      // Snap flash
+      if (t >= snap && t < snap + 0.07) {
+        ctx.fillStyle = 'rgba(0,0,0,0.75)'
+        ctx.font = `bold ${Math.round(H*0.045)}px sans-serif`
         ctx.textAlign = 'center'
-        ctx.fillText('SNAP!', W / 2, sy(34) - 14)
-      }
-    }
-
-    function frame(ts) {
-      if (!startTime) startTime = ts
-      const t = Math.min((ts - startTime) / dur, 1)
-      setProgress(t)
-      draw(t)
-      if (t < 1) {
-        animRef.current = requestAnimationFrame(frame)
-      } else {
-        setPlaying(false)
+        ctx.fillText('SNAP', W/2, sy(38)-10)
       }
     }
 
     if (playing) {
       startTime = null
       if (animRef.current) cancelAnimationFrame(animRef.current)
+      function frame(ts) {
+        if (!startTime) startTime = ts
+        const t = Math.min((ts-startTime)/dur, 1)
+        setProgress(t)
+        draw(t)
+        if (t < 1) { animRef.current = requestAnimationFrame(frame) }
+        else { setPlaying(false) }
+      }
       animRef.current = requestAnimationFrame(frame)
     } else {
       draw(0)
@@ -419,27 +578,27 @@ Customize the paths to accurately represent "${play.name}". Make offensive route
 
   function replay() {
     if (animRef.current) cancelAnimationFrame(animRef.current)
-    setProgress(0)
-    setPlaying(true)
+    setProgress(0); setPlaying(true)
   }
 
   return (
-    <div style={{ marginTop: 10, background: '#161922', borderRadius: 10, border: `1px solid rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.3)`, overflow: 'hidden' }}>
-      <div style={{ padding: '9px 13px', borderBottom: '1px solid #1e2330', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 14, letterSpacing: 1, color: P, flex: 1 }}>{play.name} — Animation</span>
+    <div style={{ marginTop:10, background:'#f0f0ec', borderRadius:10, border:`1px solid rgba(${pr},${pg},${pb},0.3)`, overflow:'hidden' }}>
+      <div style={{ padding:'9px 13px', borderBottom:'1px solid rgba(0,0,0,0.1)', display:'flex', alignItems:'center', gap:8, background:'white' }}>
+        <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, color:'#222', flex:1 }}>{play.name}</span>
+        <span style={{ fontSize:10, color:'#888', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
         {!parsed && !loading && (
-          <button onClick={generateAnim} style={{ padding: '4px 10px', background: `rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.15)`, border: `1px solid ${P}`, borderRadius: 6, color: P, fontSize: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: 1 }}>ANIMATE</button>
+          <button onClick={generateAnim} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:1 }}>ANIMATE</button>
         )}
         {parsed && (
-          <button onClick={replay} disabled={playing} style={{ padding: '4px 10px', background: playing ? '#3d4559' : `rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.15)`, border: `1px solid ${P}`, borderRadius: 6, color: P, fontSize: 10, fontWeight: 700, cursor: playing ? 'not-allowed' : 'pointer', fontFamily: 'inherit', letterSpacing: 1 }}>{playing ? 'PLAYING...' : 'REPLAY'}</button>
+          <button onClick={replay} disabled={playing} style={{ padding:'4px 12px', background:playing?'#ccc':P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:playing?'not-allowed':'pointer', fontFamily:'inherit', letterSpacing:1 }}>{playing?'PLAYING':'REPLAY'}</button>
         )}
       </div>
-      {loading && <div style={{ padding: 14, textAlign: 'center', color: '#6b7a96', fontSize: 12 }}>Generating play diagram...</div>}
-      {error && <div style={{ padding: 10, color: '#6b7a96', fontSize: 11 }}>Error: {error}</div>}
+      {loading && <div style={{ padding:14, textAlign:'center', color:'#666', fontSize:12 }}>Generating play diagram...</div>}
+      {error && <div style={{ padding:10, color:'#c00', fontSize:11 }}>Error: {error}</div>}
       {parsed && (
-        <div style={{ position: 'relative' }}>
-          <canvas ref={canvasRef} width={400} height={224} style={{ width: '100%', display: 'block' }} />
-          <div style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 4, padding: '2px 6px', fontSize: 9, color: 'rgba(255,255,255,0.6)' }}>{Math.round(progress * 100)}%</div>
+        <div style={{ position:'relative' }}>
+          <canvas ref={canvasRef} width={500} height={300} style={{ width:'100%', display:'block' }} />
+          <div style={{ position:'absolute', bottom:6, right:8, background:'rgba(0,0,0,0.4)', borderRadius:4, padding:'1px 6px', fontSize:9, color:'white' }}>{Math.round(progress*100)}%</div>
         </div>
       )}
     </div>
