@@ -269,12 +269,17 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
     if (steps) return
     setStepsLoading(true)
     try {
-      const raw = await callAI(
-        `You are a youth football coach educator. Break down this play for coaches: "${play.name}" (${play.type}). ${play.note}
+      const isFBPlay = !play.type || (!play.type.includes('COURT') && !play.type.includes('PRESS') && !play.type.includes('BREAK') && !play.type.includes('INBOUND') && !play.type.includes('SET PLAY') && !play.type.includes('FAST BREAK') && !play.type.includes('BATTING') && !play.type.includes('BASERUN') && !play.type.includes('PITCHING') && !play.type.includes('INFIELD') && !play.type.includes('OFFENSE SITUATIONAL') && !play.type.includes('DEFENSE ALIGN'))
+      const isBBPlay = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
+      const isBSBPlay = !isFBPlay && !isBBPlay
 
-Provide a clear step-by-step breakdown. Return ONLY valid JSON:
-{"ballCarrier":"who carries the ball and how to identify it","blockingScheme":"zone or man blocking and why, explained simply","steps":["Step 1: what happens at snap","Step 2: key block assignments","Step 3: ball carrier reads and path","Step 4: what makes this play succeed","Step 5: common mistakes to avoid"],"keyCoachingPoints":["point 1","point 2","point 3"]}`
-      )
+      const breakdownPrompt = isBBPlay
+        ? 'You are a youth basketball coach. Break down this play: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who initiates the play and their role","blockingScheme":"screening concept or movement principle explained simply","steps":["Step 1: initial player movement","Step 2: screen or cut action","Step 3: ball handler reads","Step 4: what creates the open shot","Step 5: common mistakes"],"keyCoachingPoints":["point 1","point 2","point 3"]}'
+        : isBSBPlay
+        ? 'You are a youth baseball coach. Break down this strategy: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who the key player is in this situation","blockingScheme":"the core concept or philosophy behind this strategy","steps":["Step 1: read the situation","Step 2: key player actions","Step 3: execution details","Step 4: what makes this successful","Step 5: common mistakes to avoid"],"keyCoachingPoints":["point 1","point 2","point 3"]}'
+        : 'You are a youth football coach educator. Break down this play for coaches: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who carries the ball and how to identify it","blockingScheme":"zone or man blocking and why, explained simply","steps":["Step 1: what happens at snap","Step 2: key block assignments","Step 3: ball carrier reads and path","Step 4: what makes this play succeed","Step 5: common mistakes to avoid"],"keyCoachingPoints":["point 1","point 2","point 3"]}'
+
+      const raw = await callAI(breakdownPrompt)
       setSteps(parseJSON(raw))
     } catch(e) { setSteps({ error: e.message }) }
     setStepsLoading(false)
@@ -286,12 +291,9 @@ Provide a clear step-by-step breakdown. Return ONLY valid JSON:
     const q = question.trim()
     setQuestion('')
     try {
+      const sportCtx = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY')) ? 'basketball' : play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL')) ? 'baseball' : 'football'
       const raw = await callAI(
-        `You are a youth football coach educator. A coach is asking about this play: "${play.name}" (${play.type}). ${play.note}
-
-Coach question: "${q}"
-
-Answer clearly and practically in 2-4 sentences. Focus on youth coaching context. Be direct and helpful.`
+        'You are a youth ' + sportCtx + ' coach educator. A coach is asking about: "' + play.name + '" (' + play.type + '). ' + play.note + ' Coach question: "' + q + '" Answer clearly in 2-4 sentences using ' + sportCtx + ' terminology. Be direct and practical for a youth coach.'
       )
       setQAHistory(prev => [...prev, { q, a: raw.trim() }])
     } catch(e) {
@@ -340,13 +342,13 @@ Answer clearly and practically in 2-4 sentences. Focus on youth coaching context
 
               {/* Ball carrier */}
               <div style={{ display:'flex', gap:8, marginBottom:8, padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.1)`, borderRadius:8, border:`1px solid rgba(${pr},${pg},${pb},0.2)` }}>
-                <span style={{ fontSize:11, fontWeight:700, color:P, flexShrink:0 }}>Ball Carrier:</span>
+                <span style={{ fontSize:11, fontWeight:700, color:P, flexShrink:0 }}>Key Player:</span>
                 <span style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{steps.ballCarrier}</span>
               </div>
 
               {/* Blocking scheme */}
               <div style={{ display:'flex', gap:8, marginBottom:10, padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}>
-                <span style={{ fontSize:11, fontWeight:700, color:'#6b9fff', flexShrink:0 }}>Blocking:</span>
+                <span style={{ fontSize:11, fontWeight:700, color:'#6b9fff', flexShrink:0 }}>Core Concept:</span>
                 <span style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{steps.blockingScheme}</span>
               </div>
 
@@ -411,6 +413,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
+  const [sportType, setSportType] = useState('football')
 
   const pr = parseInt(P.slice(1,3),16)
   const pg = parseInt(P.slice(3,5),16)
@@ -431,6 +434,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
       play.type.includes('INFIELD') || play.type.includes('BATTING') ||
       play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN')
     )
+    setSportType(isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football')
 
     const fbTemplate = '{"formation":"PLAYNAME","snapPoint":0.18,"duration":3000,"players":[{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[35,34]],"routeName":"Block","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":42,"y":38,"path":[[42,38],[40,34]],"routeName":"Block","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,34]],"routeName":"Block","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":58,"y":38,"path":[[58,38],[60,34]],"routeName":"Block","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[65,34]],"routeName":"Block","routeYards":0},{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,44]],"routeName":"Handoff","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":50,"y":46,"path":[[50,46],[52,42],[58,36]],"routeName":"Run","routeYards":7},{"id":"X","label":"X","role":"off","routeType":"route","x":12,"y":38,"path":[[12,38],[12,30]],"routeName":"Go","routeYards":10},{"id":"Z","label":"Z","role":"off","routeType":"route","x":88,"y":38,"path":[[88,38],[88,30]],"routeName":"Go","routeYards":10},{"id":"TE","label":"Y","role":"off","routeType":"block","x":66,"y":38,"path":[[66,38],[66,34]],"routeName":"Block","routeYards":0},{"id":"D1","label":"D","role":"def","routeType":"block","x":42,"y":35,"path":[[42,35],[42,37]],"routeName":"","routeYards":0},{"id":"D2","label":"D","role":"def","routeType":"block","x":50,"y":35,"path":[[50,35],[50,37]],"routeName":"","routeYards":0},{"id":"D3","label":"D","role":"def","routeType":"block","x":58,"y":35,"path":[[58,35],[58,37]],"routeName":"","routeYards":0},{"id":"LB1","label":"LB","role":"def","routeType":"block","x":40,"y":30,"path":[[40,30],[40,32]],"routeName":"","routeYards":0},{"id":"LB2","label":"LB","role":"def","routeType":"block","x":60,"y":30,"path":[[60,30],[60,32]],"routeName":"","routeYards":0},{"id":"CB1","label":"CB","role":"def","routeType":"block","x":12,"y":30,"path":[[12,30],[12,32]],"routeName":"","routeYards":0},{"id":"CB2","label":"CB","role":"def","routeType":"block","x":88,"y":30,"path":[[88,30],[88,32]],"routeName":"","routeYards":0},{"id":"S1","label":"S","role":"def","routeType":"block","x":35,"y":22,"path":[[35,22],[35,24]],"routeName":"","routeYards":0},{"id":"S2","label":"S","role":"def","routeType":"block","x":65,"y":22,"path":[[65,22],[65,24]],"routeName":"","routeYards":0}]}'
 
@@ -501,8 +505,8 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
       ctx.stroke()
     }
 
-    const isBBall = isBasketball
-    const isBSB = isBaseball
+    const isBBall = sportType === 'basketball'
+    const isBSB = sportType === 'baseball'
 
     function drawBasketballCourt() {
       ctx.fillStyle = '#c8954a'
@@ -853,6 +857,232 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   )
 }
 
+// -- SITUATIONAL PANEL (sport-aware) --
+function SituationalPanel({ sport, P, S, al, callAI }) {
+  const isFB = sport === 'Football'
+  const isBB = sport === 'Basketball'
+  const isBSB = sport === 'Baseball'
+
+  // Football state
+  const [down, setDown] = useState('3rd')
+  const [distance, setDistance] = useState('5')
+  const [fieldPos, setFieldPos] = useState('OPP 28')
+  const [score, setScore] = useState('UP 3')
+  const [timeLeft, setTimeLeft] = useState('4:22')
+  const [fbRec, setFbRec] = useState([
+    {n:'1',top:true,name:'Slot Cross / Hi-Lo',why:'Attacks Cover 2 void in the middle',pct:'84%'},
+    {n:'2',top:false,name:'QB Draw',why:'Exploit aggressive pass rush',pct:'61%'},
+    {n:'3',top:false,name:'Four Verticals',why:'Force single coverage - big play potential',pct:'43%'},
+  ])
+  const [fbLoading, setFbLoading] = useState(false)
+
+  // Basketball state
+  const [quarter, setQuarter] = useState('3rd')
+  const [bbScore, setBbScore] = useState('UP 4')
+  const [possession, setPossession] = useState('Offense')
+  const [fouls, setFouls] = useState('2 team fouls')
+  const [timeouts, setTimeouts] = useState('2 remaining')
+  const [shotClock, setShotClock] = useState('14s')
+  const [bbRec, setBbRec] = useState(null)
+  const [bbLoading, setBbLoading] = useState(false)
+
+  // Baseball state
+  const [inning, setInning] = useState('5th')
+  const [halfInning, setHalfInning] = useState('Top')
+  const [outs, setOuts] = useState('1')
+  const [balls, setBalls] = useState('2')
+  const [strikes, setStrikes] = useState('1')
+  const [runners, setRunners] = useState('Runner on 1st')
+  const [bsbRec, setBsbRec] = useState(null)
+  const [bsbLoading, setBsbLoading] = useState(false)
+
+  async function getFbRec() {
+    setFbLoading(true)
+    try {
+      const raw = await callAI(
+        'You are a football offensive coordinator. Situation: ' + down + ' and ' + distance +
+        ', field position: ' + fieldPos + ', score: ' + score + ', time: ' + timeLeft +
+        '. Give top 3 play recommendations. Return ONLY valid JSON: ' +
+        '{"plays":[{"name":"play name","why":"one sentence reason","confidence":"pct like 87%"},' +
+        '{"name":"play name","why":"reason","confidence":"pct"},' +
+        '{"name":"play name","why":"reason","confidence":"pct"}]}'
+      )
+      const data = JSON.parse(raw.replace(/```[^`]*```/g,'').trim().slice(raw.indexOf('{'),raw.lastIndexOf('}')+1))
+      if (data.plays) setFbRec(data.plays.map((p,i) => ({n:String(i+1),top:i===0,name:p.name,why:p.why,pct:p.confidence})))
+    } catch(e) {}
+    setFbLoading(false)
+  }
+
+  async function getBbRec() {
+    setBbLoading(true)
+    try {
+      const raw = await callAI(
+        'You are a basketball coach. Situation: ' + quarter + ' quarter, score ' + bbScore +
+        ', ' + possession + ', shot clock ' + shotClock + ', ' + fouls + ', ' + timeouts +
+        '. Give 3 specific play call recommendations for this exact situation. Return ONLY valid JSON: ' +
+        '{"calls":[{"name":"play or action name","why":"specific tactical reason","urgency":"HIGH or MED or LOW"},' +
+        '{"name":"name","why":"reason","urgency":"level"},' +
+        '{"name":"name","why":"reason","urgency":"level"}]}'
+      )
+      const s = raw.replace(/```[^`]*```/g,'').trim()
+      const data = JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1))
+      setBbRec(data)
+    } catch(e) {}
+    setBbLoading(false)
+  }
+
+  async function getBsbRec() {
+    setBsbLoading(true)
+    try {
+      const raw = await callAI(
+        'You are a baseball manager. Situation: ' + halfInning + ' of ' + inning + ' inning, ' +
+        outs + ' out(s), count: ' + balls + '-' + strikes + ', ' + runners +
+        '. Give 3 specific strategic recommendations for this at-bat situation. Return ONLY valid JSON: ' +
+        '{"moves":[{"action":"specific action","reason":"why this makes sense now","type":"OFFENSE or DEFENSE or PITCHING"},' +
+        '{"action":"action","reason":"reason","type":"type"},' +
+        '{"action":"action","reason":"reason","type":"type"}]}'
+      )
+      const s = raw.replace(/```[^`]*```/g,'').trim()
+      const data = JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1))
+      setBsbRec(data)
+    } catch(e) {}
+    setBsbLoading(false)
+  }
+
+  const statBox = (label, value, onChange, opts) => (
+    <div key={label} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px' }}>
+      <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#3d4559', fontWeight:600, marginBottom:3 }}>{label}</div>
+      {opts ? (
+        <select value={value} onChange={e=>onChange(e.target.value)} style={{ background:'transparent', border:'none', color:'#f2f4f8', fontFamily:"'Bebas Neue',sans-serif", fontSize:18, outline:'none', width:'100%', cursor:'pointer' }}>
+          {opts.map(o => <option key={o} style={{background:'#161922'}}>{o}</option>)}
+        </select>
+      ) : (
+        <input value={value} onChange={e=>onChange(e.target.value)} style={{ background:'transparent', border:'none', color:'#f2f4f8', fontFamily:"'Bebas Neue',sans-serif", fontSize:18, outline:'none', width:'100%' }} />
+      )}
+    </div>
+  )
+
+  if (isFB) return (
+    <Card>
+      <CardHead icon="🎯" title="Situational Play Caller" tag="REAL-TIME" tagColor={S} accent={S} />
+      <div style={{ padding:14 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7, marginBottom:11 }}>
+          {statBox('Down', down, setDown, ['1st','2nd','3rd','4th'])}
+          {statBox('Distance', distance, setDistance, ['1','2','3','4','5','6','7','8','9','10','12','15','20+'])}
+          {statBox('Field Position', fieldPos, setFieldPos)}
+          {statBox('Score', score, setScore, ['UP 1','UP 3','UP 7','UP 10','TIED','DOWN 1','DOWN 3','DOWN 7','DOWN 10'])}
+          {statBox('Time Left', timeLeft, setTimeLeft)}
+          <div style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <button onClick={getFbRec} disabled={fbLoading} style={{ background:fbLoading?'#3d4559':P, border:'none', borderRadius:6, color:'white', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, padding:'6px 14px', cursor:fbLoading?'not-allowed':'pointer', width:'100%' }}>{fbLoading ? 'THINKING...' : 'GET RECS'}</button>
+          </div>
+        </div>
+        {fbRec.map(r => (
+          <div key={r.n} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}>
+            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:23, width:22, textAlign:'center', lineHeight:1, color:r.top?P:'#6b7a96' }}>{r.n}</div>
+            <div style={{ flex:1 }}><div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{r.name}</div><div style={{ fontSize:11, color:'#6b7a96', marginTop:2 }}>{r.why}</div></div>
+            <div style={{ fontFamily:"'DM Mono',monospace", fontSize:12, color:r.top?P:'#6b7a96' }}>{r.pct}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+
+  if (isBB) return (
+    <Card>
+      <CardHead icon="🏀" title="Live Game Adjustments" tag="IN-GAME" tagColor={S} accent={S} />
+      <div style={{ padding:14 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:7, marginBottom:11 }}>
+          {statBox('Quarter', quarter, setQuarter, ['1st','2nd','3rd','4th','OT'])}
+          {statBox('Score', bbScore, setBbScore, ['UP 1','UP 3','UP 5','UP 8','UP 10','TIED','DOWN 1','DOWN 3','DOWN 5','DOWN 8','DOWN 10'])}
+          {statBox('Possession', possession, setPossession, ['Offense','Defense','After Timeout','After Made Basket','Inbound'])}
+          {statBox('Shot Clock', shotClock, setShotClock, ['24s','20s','14s','10s','7s','Under 5s','Off'])}
+          {statBox('Team Fouls', fouls, setFouls, ['0 fouls','1 foul','2 fouls','3 fouls','4 fouls','Bonus','Double Bonus'])}
+          {statBox('Timeouts', timeouts, setTimeouts, ['3 remaining','2 remaining','1 remaining','None left'])}
+        </div>
+        <button onClick={getBbRec} disabled={bbLoading} style={{ width:'100%', background:bbLoading?'#3d4559':S, border:'none', borderRadius:8, color:'white', fontFamily:"'Bebas Neue',sans-serif", fontSize:15, letterSpacing:2, padding:'11px', cursor:bbLoading?'not-allowed':'pointer', marginBottom:11 }}>{bbLoading ? 'THINKING...' : '⚡ GET COACHING CALLS'}</button>
+        {bbRec && bbRec.calls && bbRec.calls.map((c,i) => (
+          <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:`1px solid ${c.urgency==='HIGH'?P:'#1e2330'}`, marginBottom:7 }}>
+            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:20, width:22, textAlign:'center', lineHeight:1, color:i===0?S:'#6b7a96', marginTop:2 }}>{i+1}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{c.name}</div>
+                <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:c.urgency==='HIGH'?al(P,0.2):al(S,0.15), color:c.urgency==='HIGH'?P:S }}>{c.urgency}</span>
+              </div>
+              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{c.why}</div>
+            </div>
+          </div>
+        ))}
+        {!bbRec && !bbLoading && <div style={{ fontSize:11, color:'#6b7a96', textAlign:'center', padding:'10px 0' }}>Set the game situation above and get AI coaching recommendations.</div>}
+      </div>
+    </Card>
+  )
+
+  if (isBSB) return (
+    <Card>
+      <CardHead icon="⚾" title="Count & Situation Manager" tag="AT-BAT" tagColor={S} accent={S} />
+      <div style={{ padding:14 }}>
+        {/* Count display */}
+        <div style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:10, padding:'12px 14px', marginBottom:11 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', marginBottom:4 }}>Balls</div>
+              <div style={{ display:'flex', gap:5 }}>
+                {[0,1,2,3].map(i => <div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(balls)?'#4ade80':'#1e2330', border:'1px solid #3d4559' }} />)}
+              </div>
+            </div>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', marginBottom:4 }}>Strikes</div>
+              <div style={{ display:'flex', gap:5 }}>
+                {[0,1,2].map(i => <div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(strikes)?P:'#1e2330', border:'1px solid #3d4559' }} />)}
+              </div>
+            </div>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', marginBottom:4 }}>Outs</div>
+              <div style={{ display:'flex', gap:5 }}>
+                {[0,1,2].map(i => <div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(outs)?'#f59e0b':'#1e2330', border:'1px solid #3d4559' }} />)}
+              </div>
+            </div>
+          </div>
+          {/* Baseball diamond runner indicator */}
+          <div style={{ display:'flex', justifyContent:'center', marginBottom:8 }}>
+            <div style={{ position:'relative', width:80, height:80 }}>
+              <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%) rotate(45deg)', width:50, height:50, border:'1px solid #3d4559' }} />
+              {[['2nd',{top:2,left:'50%',transform:'translateX(-50%)'}],['3rd',{top:'50%',left:2,transform:'translateY(-50%)'}],['1st',{top:'50%',right:2,transform:'translateY(-50%)'}],['HP',{bottom:2,left:'50%',transform:'translateX(-50%)'}]].map(([base,style]) => {
+                const active = runners.includes(base==='HP'?'Batter':base)
+                return <div key={base} style={{ position:'absolute', width:14, height:14, background:active?P:'#1e2330', border:`1px solid ${active?P:'#3d4559'}`, borderRadius:2, ...style }} />
+              })}
+            </div>
+          </div>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7, marginBottom:11 }}>
+          {statBox('Inning', inning, setInning, ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','Extra'])}
+          {statBox('Half', halfInning, setHalfInning, ['Top','Bottom'])}
+          {statBox('Balls', balls, setBalls, ['0','1','2','3'])}
+          {statBox('Strikes', strikes, setStrikes, ['0','1','2'])}
+          {statBox('Outs', outs, setOuts, ['0','1','2'])}
+          {statBox('Runners', runners, setRunners, ['Bases Empty','Runner on 1st','Runner on 2nd','Runner on 3rd','1st & 2nd','1st & 3rd','2nd & 3rd','Bases Loaded'])}
+        </div>
+        <button onClick={getBsbRec} disabled={bsbLoading} style={{ width:'100%', background:bsbLoading?'#3d4559':S, border:'none', borderRadius:8, color:'white', fontFamily:"'Bebas Neue',sans-serif", fontSize:15, letterSpacing:2, padding:'11px', cursor:bsbLoading?'not-allowed':'pointer', marginBottom:11 }}>{bsbLoading ? 'THINKING...' : '⚡ GET STRATEGIC MOVES'}</button>
+        {bsbRec && bsbRec.moves && bsbRec.moves.map((m,i) => (
+          <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:`1px solid ${i===0?P:'#1e2330'}`, marginBottom:7 }}>
+            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:20, width:22, textAlign:'center', lineHeight:1, color:i===0?P:'#6b7a96', marginTop:2 }}>{i+1}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{m.action}</div>
+                <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(S,0.2), color:S }}>{m.type}</span>
+              </div>
+              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{m.reason}</div>
+            </div>
+          </div>
+        ))}
+        {!bsbRec && !bsbLoading && <div style={{ fontSize:11, color:'#6b7a96', textAlign:'center', padding:'10px 0' }}>Set the count and situation above and get manager recommendations.</div>}
+      </div>
+    </Card>
+  )
+
+  return null
+}
+
 // -- HOME PAGE --
 function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callAI, parseJSON, onScheme }) {
   const cfg = SPORTS[sport] || SPORTS.Football
@@ -923,27 +1153,7 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
         </div>
       </Card>
 
-      {/* PLAY CALLER */}
-      <Card>
-        <CardHead icon="🎯" title="Situational Play Caller" tag="REAL-TIME" tagColor={S} accent={S} />
-        <div style={{ padding:14 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7, marginBottom:11 }}>
-            {[['Down & Distance','3RD & 5'],['Field Position','OPP 28'],['Score','UP 3'],['Time Left','4:22']].map(([l,v]) => (
-              <div key={l} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px' }}>
-                <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#3d4559', fontWeight:600 }}>{l}</div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:21, letterSpacing:1 }}>{v}</div>
-              </div>
-            ))}
-          </div>
-          {[['1',true,'Slot Cross / Hi-Lo','Attacks Cover 2 void in the middle','84%'],['2',false,'QB Draw','Exploit aggressive pass rush','61%'],['3',false,'Four Verticals','Force single coverage - big play potential','43%']].map(([n,top,name,why,pct]) => (
-            <div key={n} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:23, width:22, textAlign:'center', lineHeight:1, color:top?P:'#6b7a96' }}>{n}</div>
-              <div style={{ flex:1 }}><div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{name}</div><div style={{ fontSize:11, color:'#6b7a96', marginTop:2 }}>{why}</div></div>
-              <div style={{ fontFamily:"'DM Mono',monospace", fontSize:12, color:top?P:'#6b7a96' }}>{pct}</div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
     </>
   )
 }
