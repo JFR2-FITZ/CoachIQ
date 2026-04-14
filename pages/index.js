@@ -289,7 +289,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
       const isBSBPlay2 = !isBBPlay2 && play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN'))
       const jsonSchema = '{"ballCarrier":"key player role","blockingScheme":"core concept","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this works tactically","playerRoles":[{"position":"pos1","job":"their job","whyTheyDoIt":"explain to a 12yr old why"},{"position":"pos2","job":"their job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"their job","whyTheyDoIt":"explain why"}]}'
       const sportLabel = isBBPlay2 ? 'basketball' : isBSBPlay2 ? 'baseball' : 'football'
-      const breakdownPrompt = 'You are a youth ' + sportLabel + ' coach educator. Break down this play for coaches AND players: ' + play.name + ' (' + play.type + '). ' + play.note + ' Include: why it works tactically, AND what to tell each key player about their role in simple terms a 12-year-old can understand. Return ONLY valid JSON matching this structure: ' + jsonSchema
+      const breakdownPrompt = 'You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' Return ONLY valid JSON matching this structure: ' + jsonSchema + ' CRITICAL: For huddleCard, write one short action instruction per key position (use real position abbreviations like QB, RB, WR, OL, TE for football; PG/SG/SF/PF/C for basketball; P/C/1B/SS/OF/BAT for baseball). Each instruction must be one sentence max. For ANY jargon or technical term used (seal, kick out, drop step, curl, gap, zone, etc), add a brief plain-English clarification in termNote. This is what coaches read aloud in the huddle.'
       const raw = await callAI(breakdownPrompt)
       setSteps(parseJSON(raw))
     } catch(e) { setSteps({ error: e.message }) }
@@ -407,6 +407,26 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
             <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
               <div style={{ fontSize:12, color:'#6b7a96' }}>Generating step-by-step breakdown...</div>
+            </div>
+          )}
+
+          {/* HUDDLE CARD - always visible once steps load, written for athletes */}
+          {steps && steps.huddleCard && steps.huddleCard.length > 0 && (
+            <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:10, padding:12, marginBottom:12 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}>
+                <span style={{ fontSize:14 }}>📋</span>
+                <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card — Read This in the Huddle</div>
+              </div>
+              <div style={{ fontSize:10, color:'#6b7a96', marginBottom:8, lineHeight:1.4 }}>One job per player. Plain language. Any technical term is explained in <span style={{ fontStyle:'italic' }}>italics</span>.</div>
+              {steps.huddleCard.map((item, i) => (
+                <div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}>
+                  <div style={{ minWidth:32, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:5, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0, marginTop:1 }}>{item.player}</div>
+                  <div style={{ flex:1 }}>
+                    <span style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{item.instruction}</span>
+                    {item.termNote && <span style={{ fontSize:11, color:'#6b7a96', fontStyle:'italic' }}> ({item.termNote})</span>}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
           {steps && !steps.error && (
@@ -651,7 +671,8 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
     const baseballPrompt = 'Generate baseball defensive positioning and play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions on a baseball diamond. Show movement paths for relevant players. Return ONLY raw JSON using this template, customize paths to show this play: ' + bsbTemplate.replace('PLAYNAME', play.name)
 
     const isDefense = play._isDefense === true
-        const defensePrompt = 'Generate a DEFENSIVE football diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+    const isDisguise = play._isDisguise === true
+    const defensePrompt = 'Generate a DEFENSIVE football diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
     ' Show 11 defenders with assignments. Include 4-7 offensive linemen as STATIC reference only (no paths). ' +
     'DEFENDER routeNames must describe zone or assignment: use "Gap A", "Gap B", "Gap C" for DL, "Hook Zone", "Flat Zone", "Deep Half", "Deep Third", "Man Coverage", "Blitz" for others. ' +
     'DL players: label as DE or DT. LB players: label as WLB, MLB, SLB or LB. DBs: label as CB, SS, FS. ' +
@@ -675,7 +696,29 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
     '{"id":"OTb","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[62,38]],"routeName":"","routeYards":0}' +
     ']}'
 
-    const prompt = isDefense ? defensePrompt : isBasketball ? basketballPrompt : isBaseball ? baseballPrompt : footballPrompt
+    const disguisePrompt = 'Generate a DISGUISE defensive diagram for: ' + play.name + '. ' + play.note +
+    ' Show defenders in their PRE-SNAP fake look for the first 40% of the animation, then moving to their TRUE assignment. ' +
+    ' routeName format: use FAKE: for pre-snap deception (e.g. FAKE: Walk up LB), TRUE: for real assignment (e.g. TRUE: Deep Half). ' +
+    ' snapPoint should be 0.40 so fake is shown clearly before the snap. ' +
+    ' Customize all 11 defenders to show the specific disguise described. Return ONLY raw JSON using same template as defense: ' +
+    '{"formation":"' + play.name.replace(/"/g,"") + '","snapPoint":0.40,"duration":3500,"players":[' +
+    '{"id":"DEa","label":"DE","role":"def","routeType":"route","x":38,"y":35,"path":[[38,35],[42,32],[42,32],[38,38]],"routeName":"FAKE: Walk up","routeYards":0},' +
+    '{"id":"DTa","label":"DT","role":"def","routeType":"block","x":45,"y":35,"path":[[45,35],[45,38]],"routeName":"TRUE: Gap A","routeYards":0},' +
+    '{"id":"DTb","label":"DT","role":"def","routeType":"block","x":55,"y":35,"path":[[55,35],[55,38]],"routeName":"TRUE: Gap A","routeYards":0},' +
+    '{"id":"DEb","label":"DE","role":"def","routeType":"route","x":62,"y":35,"path":[[62,35],[58,32],[58,32],[62,38]],"routeName":"FAKE: Show Blitz","routeYards":0},' +
+    '{"id":"WLB","label":"WLB","role":"def","routeType":"route","x":34,"y":28,"path":[[34,28],[34,32],[34,32],[30,34]],"routeName":"FAKE: Press Man","routeYards":0},' +
+    '{"id":"MLB","label":"MLB","role":"def","routeType":"route","x":50,"y":27,"path":[[50,27],[50,27],[50,27],[50,33]],"routeName":"TRUE: Hook Zone","routeYards":0},' +
+    '{"id":"SLB","label":"SLB","role":"def","routeType":"route","x":66,"y":28,"path":[[66,28],[66,32],[66,32],[70,34]],"routeName":"FAKE: Show Blitz","routeYards":0},' +
+    '{"id":"CBa","label":"CB","role":"def","routeType":"route","x":12,"y":35,"path":[[12,35],[12,30],[12,30],[12,24]],"routeName":"FAKE: Press Zone","routeYards":0},' +
+    '{"id":"CBb","label":"CB","role":"def","routeType":"route","x":88,"y":35,"path":[[88,35],[88,30],[88,30],[88,24]],"routeName":"FAKE: Press Zone","routeYards":0},' +
+    '{"id":"SS","label":"SS","role":"def","routeType":"route","x":66,"y":20,"path":[[66,20],[58,24],[58,24],[58,26]],"routeName":"FAKE: Man then Half","routeYards":0},' +
+    '{"id":"FS","label":"FS","role":"def","routeType":"route","x":50,"y":14,"path":[[50,14],[50,14],[50,14],[50,20]],"routeName":"TRUE: Deep Middle","routeYards":0},' +
+    '{"id":"OC","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,38]],"routeName":"","routeYards":0},' +
+    '{"id":"OTa","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[38,38]],"routeName":"","routeYards":0},' +
+    '{"id":"OTb","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[62,38]],"routeName":"","routeYards":0}' +
+    ']}'
+
+    const prompt = isDefense ? (isDisguise ? disguisePrompt : defensePrompt) : isBasketball ? basketballPrompt : isBaseball ? baseballPrompt : footballPrompt
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
@@ -1460,7 +1503,7 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
       const sportLabel = sport || 'football'
       const raw = await callAI(
         'You are a youth ' + sportLabel + ' defensive coordinator educator. Break down this defensive formation for coaches AND players: "' + f.name + '" (' + f.type + '). Assignment: ' + f.assignment + '. When to use: ' + f.whenToUse +
-        ' Return ONLY valid JSON: {"keyAssignment":"the single most important assignment every player must understand","coverageType":"zone, man, or combination - explained simply","steps":["Step 1: pre-snap alignment","Step 2: at the snap","Step 3: key reads","Step 4: what makes it work","Step 5: common mistakes"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this defense is effective in the stated situation","playerRoles":[{"position":"DL","job":"their assignment","whyTheyDoIt":"explain to a 12yr old why their gap control matters"},{"position":"LB","job":"their assignment","whyTheyDoIt":"explain why"},{"position":"CB","job":"their assignment","whyTheyDoIt":"explain why"},{"position":"Safety","job":"their assignment","whyTheyDoIt":"explain why"}]}'
+        ' Return ONLY valid JSON: {"keyAssignment":"the single most important assignment every player must understand","coverageType":"zone, man, or combination - explained simply","steps":["Step 1: pre-snap alignment","Step 2: at the snap","Step 3: key reads","Step 4: what makes it work","Step 5: common mistakes"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this defense is effective in the stated situation","playerRoles":[{"position":"DL","job":"their assignment","whyTheyDoIt":"explain to a 12yr old why their gap control matters"},{"position":"LB","job":"their assignment","whyTheyDoIt":"explain why"},{"position":"CB","job":"their assignment","whyTheyDoIt":"explain why"},{"position":"Safety","job":"their assignment","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"DL","instruction":"one sentence defensive assignment","termNote":"explain any jargon or empty string"},{"player":"LB","instruction":"one sentence assignment","termNote":"explain any jargon"},{"player":"CB","instruction":"one sentence assignment","termNote":"explain any jargon"},{"player":"S","instruction":"one sentence assignment","termNote":"explain any jargon"}]}'
       )
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setSteps(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
@@ -1525,6 +1568,25 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
 
           {stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${S}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Generating breakdown...</div></div>}
 
+          {steps && steps.huddleCard && steps.huddleCard.length > 0 && (
+            <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:10, padding:12, marginBottom:12 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}>
+                <span style={{ fontSize:14 }}>📋</span>
+                <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card — Read This at the Line</div>
+              </div>
+              <div style={{ fontSize:10, color:'#6b7a96', marginBottom:8 }}>One job per player. Any technical term explained in <span style={{ fontStyle:'italic' }}>italics</span>.</div>
+              {steps.huddleCard.map((item, i) => (
+                <div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}>
+                  <div style={{ minWidth:32, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:5, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0, marginTop:1 }}>{item.player}</div>
+                  <div style={{ flex:1 }}>
+                    <span style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{item.instruction}</span>
+                    {item.termNote && <span style={{ fontSize:11, color:'#6b7a96', fontStyle:'italic' }}> ({item.termNote})</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {steps && !steps.error && (
             <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid rgba(${pr},${pg},${pb},0.2)` }}>
               <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:S, fontWeight:700, marginBottom:10 }}>Defensive Breakdown</div>
@@ -1569,6 +1631,24 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
                   <div style={{ padding:'8px 10px', background:'rgba(180,0,220,0.08)', borderRadius:8, marginBottom:8, borderLeft:'3px solid rgba(180,0,220,0.5)' }}>
                     <div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>What to Show Pre-Snap</div>
                     <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{disguise.presnap}</div>
+                  </div>
+
+                  {/* Disguise diagram - shows fake pre-snap then true assignment */}
+                  <div style={{ marginBottom:10 }}>
+                    <div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:6, textTransform:'uppercase' }}>Disguise Movement Diagram</div>
+                    <PlayAnimator
+                      play={{
+                        name: f.name + ' DISGUISE',
+                        type: 'DISGUISE',
+                        note: 'Pre-snap: ' + (disguise.fakeAlignment||'') + '. At snap: ' + (disguise.snapTrigger||'') + '. True assignment: ' + f.assignment,
+                        _isDefense: true,
+                        _isDisguise: true
+                      }}
+                      P="rgba(180,0,220,0.9)"
+                      callAI={callAI}
+                      parseJSON={parseJSON}
+                      autoLoad={true}
+                    />
                   </div>
 
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
