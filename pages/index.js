@@ -1325,6 +1325,142 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   )
 }
 
+// -- DEFENSIVE SCHEME GENERATOR --
+function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
+  const isFB = sport === 'Football'
+  const isBB = sport === 'Basketball'
+  const isBSB = sport === 'Baseball'
+
+  const fbFields = [
+    {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option']},
+    {id:'personnel',label:'Their Key Threat',opts:['Fast QB / Scrambler','Big Power RB','Slot Receiver Heavy','Multiple TE Sets','Balanced Attack','Pass Heavy']},
+    {id:'roster',label:'Your Roster Size',opts:['8-10 players','11-14 players','15-18 players','18+ players']},
+    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+    {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Athletic']},
+    {id:'style',label:'Defensive Preference',opts:['Gap Control / Physical','Speed and Pursuit','Bend Dont Break','Aggressive Blitz','Zone Coverage','Man Coverage']},
+  ]
+  const bbFields = [
+    {id:'offense',label:'Opponent Offense',opts:['Unknown / Scout First','Motion Heavy','Pick and Roll Heavy','Isolation / Star Player','Drive and Kick','Three Point Heavy','Post Dominant']},
+    {id:'personnel',label:'Their Key Threat',opts:['Elite Ball Handler','Dominant Big Man','Three Point Shooter','Athletic Wing','Balanced Team','Physical Post']},
+    {id:'roster',label:'Your Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
+    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+    {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Athletic']},
+    {id:'style',label:'Defensive Style',opts:['Man to Man Pressure','2-3 Zone','1-3-1 Zone','Full Court Press','Matchup Zone','Pack the Paint']},
+  ]
+  const bsbFields = [
+    {id:'batting',label:'Opponent Batting Style',opts:['Unknown / Scout First','Pull Hitters Heavy','Spray Hitters','Bunt Heavy / Small Ball','Power Hitters','Speed and Baserunning','Mixed Approach']},
+    {id:'personnel',label:'Their Key Threat',opts:['Elite Leadoff Hitter','Cleanup Power Hitter','Fast Baserunners','Contact Hitters','Patient / Walk Heavy','Switch Hitters']},
+    {id:'roster',label:'Your Roster Size',opts:['9-11 players','12-14 players','15+ players']},
+    {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+    {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Competitive']},
+    {id:'style',label:'Pitching Approach',opts:['Fastball First','Breaking Ball Setup','Change of Speed','Attack the Zone','Work the Corners','Keep Off Balance']},
+  ]
+
+  const cfg = isBB ? bbFields : isBSB ? bsbFields : fbFields
+  const initF = () => { const f={}; cfg.forEach(x=>{f[x.id]=x.opts[0]}); return f }
+  const [fields, setFields] = useState(initF)
+  const [prevSport, setPrevSport] = useState(sport)
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
+  const [expanded, setExpanded] = useState(false)
+
+  if (sport !== prevSport) {
+    setPrevSport(sport)
+    setFields(initF())
+    setResult(null)
+    setError('')
+  }
+
+  const activeCfg = isBB ? bbFields : isBSB ? bsbFields : fbFields
+
+  async function generate() {
+    setLoading(true); setResult(null); setError('')
+    const label = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
+    const inputSummary = Object.keys(fields).map(k => k + ': ' + fields[k]).join(', ')
+
+    const prompt = isFB
+      ? 'You are an elite youth football defensive coordinator. Build a defensive game plan. ' + inputSummary + '. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive formation name","type":"BASE or NICKEL or BLITZ or ZONE or MAN","assignment":"specific gap assignments and coverage responsibilities","whenToUse":"exact game situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"the single most important thing to stop their offense","adjustmentTip":"how to adjust at halftime if they are moving the ball","coachingCue":"memorable defensive phrase for players"}'
+      : isBB
+      ? 'You are an elite youth basketball defensive coach. Build a defensive game plan. ' + inputSummary + '. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive scheme name","type":"MAN or ZONE or PRESS or TRAP","assignment":"specific player assignments and rotations","whenToUse":"exact game situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"the most important thing to take away","adjustmentTip":"halftime adjustment if they are scoring easily","coachingCue":"defensive motto for players"}'
+      : 'You are an elite youth baseball manager. Build a defensive game plan for this opponent. ' + inputSummary + '. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive alignment name","type":"STANDARD or SHIFT or WHEEL or FIVE MAN INFIELD or OUTFIELD DEPTH","assignment":"specific positioning for all fielders and pitcher strategy","whenToUse":"exact count or game situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important out to get","adjustmentTip":"how to adjust if they are hitting well","coachingCue":"defensive focus phrase"}'
+
+    try {
+      const raw = await callAI(prompt)
+      const data = parseJSON(raw)
+      if (!data.formations) throw new Error('No formations in response')
+      setResult(data)
+    } catch(e) { setError(e.message) }
+    setLoading(false)
+  }
+
+  const icon = isBB ? '🛡' : isBSB ? '⚾' : '🛡'
+  const title = isBSB ? sport + ' Defensive Positioning' : sport + ' Defensive Scheme Generator'
+  const btnText = isBSB ? 'BUILD DEFENSIVE PLAN' : 'BUILD DEFENSIVE SCHEME'
+
+  return (
+    <Card>
+      <div style={{ padding:'12px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${S}`, cursor:'pointer' }} onClick={() => setExpanded(e=>!e)}>
+        <span style={{ fontSize:15 }}>🛡</span>
+        <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:15, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{title}</span>
+        <span style={{ fontSize:9, fontWeight:700, letterSpacing:1, padding:'2px 7px', borderRadius:10, background:al(S,0.15), color:S }}>DEFENSIVE</span>
+        <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded ? '▲' : '▼'}</span>
+      </div>
+      {expanded && (
+        <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+            {activeCfg.map(f => (
+              <Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />
+            ))}
+          </div>
+          <PBtn onClick={generate} disabled={loading} color={S}>{loading ? 'BUILDING...' : btnText}</PBtn>
+          {loading && <Shimmer />}
+          {error && <ErrBox msg={error} />}
+          {result && (
+            <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(S,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:1, color:S, marginBottom:8 }}>{result.packageName}</div>
+              <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
+
+              {/* Key stop */}
+              {result.keyStop && (
+                <div style={{ padding:'8px 12px', background:al(S,0.1), border:`1px solid ${al(S,0.25)}`, borderRadius:8, marginBottom:10 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Primary Assignment — Stop This</div>
+                  <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{result.keyStop}</div>
+                </div>
+              )}
+
+              {(result.formations||[]).map(f => (
+                <div key={f.number} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'8px 0', borderBottom:'1px solid #1e2330' }}>
+                  <div style={{ width:22, height:22, minWidth:22, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{f.number}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{f.name}</div>
+                    <div style={{ fontSize:10, color:S, fontFamily:"'DM Mono',monospace", marginTop:1 }}>{f.type}</div>
+                    <div style={{ fontSize:11, color:'#f2f4f8', marginTop:3, lineHeight:1.4 }}>{f.assignment}</div>
+                    <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
+                  </div>
+                </div>
+              ))}
+
+              {result.adjustmentTip && (
+                <div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div>
+                  <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div>
+                </div>
+              )}
+              {result.coachingCue && (
+                <div style={{ marginTop:8, padding:10, background:al(S,0.1), borderRadius:8 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defensive Cue</div>
+                  <div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic', fontWeight:500 }}>"{result.coachingCue}"</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+  )
+}
+
 // -- SITUATIONAL PANEL (sport-aware) --
 function SituationalPanel({ sport, P, S, al, callAI }) {
   const isFB = sport === 'Football'
@@ -1603,7 +1739,11 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
       const data = parseJSON(raw)
       if (!data.plays) throw new Error('No plays in response')
       setResult(data)
-      if (setSchemeResult) { setSchemeResult(data); setSchemeFields(fields); setSchemeSport(sport); if(setPlaybook) setPlaybook(pb => ({...pb, [sport]: [...(pb[sport]||[]), data]})) }
+      if (setSchemeResult) {
+        setSchemeResult(data); setSchemeFields(fields); setSchemeSport(sport)
+        const schemeWithMeta = { ...data, _sport: sport, _inputs: Object.entries(fields).map(([k,v])=>v).join(' · ') }
+        if(setPlaybook) setPlaybook(pb => ({...pb, [sport]: [...(pb[sport]||[]), schemeWithMeta]}))
+      }
       if (onScheme) onScheme()
     } catch(e) { setError(e.message) }
     setLoading(false)
@@ -1648,6 +1788,7 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
         </div>
       </Card>
 
+      <DefenseGen sport={sport} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />
       <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
     </>
   )
@@ -2027,14 +2168,26 @@ function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport }) {
   const [sortBy, setSortBy] = useState('recent')
   const [filterType, setFilterType] = useState('All')
 
-  const allPlays = [...(playbook?.Football||[]), ...(playbook?.Basketball||[]), ...(playbook?.Baseball||[])]
-  const allPlayItems = allPlays.flatMap(scheme =>
-    (scheme.plays||[]).map(p => ({ ...p, packageName: scheme.packageName, sport: scheme._sport || 'Football' }))
-  )
+  // Only show schemes for the currently selected sport
+  const sportSchemes = (playbook?.[sport] || [])
+  // Group by package for "by package" view
+  const byPackage = sportSchemes.map((scheme, idx) => ({
+    ...scheme,
+    packageIndex: idx + 1,
+    plays: (scheme.plays||[]).map(p => ({ ...p, packageName: scheme.packageName, packageIndex: idx+1, schemeInputs: scheme._inputs || '' }))
+  }))
+  const allPlayItems = byPackage.flatMap(s => s.plays)
   const typeOptions = ['All', ...new Set(allPlayItems.map(p => p.type).filter(Boolean))]
+  const filteredByPackage = byPackage.filter(scheme =>
+    filterType === 'All' || (scheme.plays||[]).some(p => p.type === filterType)
+  )
   const filteredPlays = allPlayItems
     .filter(p => filterType === 'All' || p.type === filterType)
-    .sort((a,b) => sortBy === 'name' ? a.name.localeCompare(b.name) : sortBy === 'type' ? (a.type||'').localeCompare(b.type||'') : 0)
+    .sort((a,b) =>
+      sortBy === 'name' ? a.name.localeCompare(b.name) :
+      sortBy === 'type' ? (a.type||'').localeCompare(b.type||'') :
+      sortBy === 'package' ? a.packageIndex - b.packageIndex : 0
+    )
 
   return (
     <>
@@ -2063,7 +2216,7 @@ function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport }) {
                 <div style={{ flex:1, minWidth:120 }}>
                   <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Sort By</label>
                   <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-                    <option value="recent">Most Recent</option>
+                    <option value="package">By Package</option>
                     <option value="name">Name A-Z</option>
                     <option value="type">Play Type</option>
                   </select>
@@ -2075,21 +2228,53 @@ function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport }) {
                   </select>
                 </div>
               </div>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10 }}>{filteredPlays.length} play{filteredPlays.length!==1?'s':''} saved</div>
-              {filteredPlays.map((p,i) => (
-                <div key={i} style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:10, padding:'12px 14px', marginBottom:8, display:'flex', alignItems:'flex-start', gap:10 }}>
-                  <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${P}`, color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{p.number||i+1}</div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}>
-                      <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
-                      <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.15), color:P }}>{p.type}</span>
-                      <span style={{ fontSize:9, color:'#6b7a96' }}>{p.sport}</span>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10 }}>
+                {sortBy === 'package' ? `${filteredByPackage.length} package${filteredByPackage.length!==1?'s':''} · ${allPlayItems.length} plays` : `${filteredPlays.length} play${filteredPlays.length!==1?'s':''}`} saved in {sport}
+              </div>
+
+              {sortBy === 'package' ? (
+                // Package view - grouped
+                filteredByPackage.map((scheme, si) => (
+                  <div key={si} style={{ marginBottom:14 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', background:`linear-gradient(135deg,${al(P,0.12)},${al(S,0.08)})`, border:`1px solid ${al(P,0.3)}`, borderRadius:'10px 10px 0 0' }}>
+                      <div style={{ width:26, height:26, minWidth:26, background:P, color:'white', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, fontWeight:800, flexShrink:0 }}>#{scheme.packageIndex}</div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:15, letterSpacing:1, color:'#f2f4f8' }}>{scheme.packageName}</div>
+                        {scheme.schemeInputs && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{scheme.schemeInputs}</div>}
+                      </div>
+                      <div style={{ fontSize:10, color:P, fontWeight:700 }}>{(scheme.plays||[]).length} PLAYS</div>
                     </div>
-                    <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4, marginBottom:3 }}>{p.note}</div>
-                    <div style={{ fontSize:10, color:'#3d4559' }}>From: {p.packageName}</div>
+                    {(scheme.plays||[]).filter(p => filterType==='All'||p.type===filterType).map((p,pi) => (
+                      <div key={pi} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 14px', background:'#0f1117', borderLeft:`3px solid ${al(P,0.3)}`, borderRight:'1px solid #1e2330', borderBottom:'1px solid #1e2330', ...(pi===(scheme.plays||[]).length-1?{borderRadius:'0 0 10px 10px'}:{}) }}>
+                        <div style={{ width:20, height:20, minWidth:20, background:al(P,0.15), color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, flexShrink:0, marginTop:2 }}>{p.number||pi+1}</div>
+                        <div style={{ flex:1 }}>
+                          <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:2, flexWrap:'wrap' }}>
+                            <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
+                            <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.12), color:P }}>{p.type}</span>
+                          </div>
+                          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{p.note}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                // Flat view - name or type sorted
+                filteredPlays.map((p,i) => (
+                  <div key={i} style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:10, padding:'12px 14px', marginBottom:8, display:'flex', alignItems:'flex-start', gap:10 }}>
+                    <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${P}`, color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{p.number||i+1}</div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}>
+                        <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
+                        <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.15), color:P }}>{p.type}</span>
+                        <span style={{ fontSize:9, color:'#3d4559' }}>Pkg #{p.packageIndex}</span>
+                      </div>
+                      <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4, marginBottom:3 }}>{p.note}</div>
+                      <div style={{ fontSize:10, color:'#3d4559' }}>{p.packageName}</div>
+                    </div>
+                  </div>
+                ))
+              )}
             </>
           )}
         </div>
