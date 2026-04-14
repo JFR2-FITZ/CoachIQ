@@ -508,16 +508,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 
     const footballPrompt = 'Generate football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL RULES: (1) QB: on RUN plays set routeName to "Handoff" and path is a 2-unit fake toward RB then stop. On PASS plays set routeName to "Dropback" and show 3-step drop (path moves upward/away from LOS). On KEEPER plays show QB running outside. (2) Ball carrier (RB/QB): path must show the FULL run lane all the way past the line of scrimmage, minimum 8-10 units past y=38. (3) Pulling guards: if this is a sweep/power play, guards should have paths around the edge (not just forward). (4) Receivers: each has a named route (Curl, Slant, Post, Out, Corner, Go, Cross, Flat) with routeYards. Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
 
-    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
-    ' CRITICAL DIAGRAM RULES: ' +
-    '(1) ONE player gets routeName "BALL: [action]" - this player starts with the ball. Their path shows dribble movement. ' +
-    '(2) ONE player gets routeName "SHOOT: [action]" - this is where the ball ends up for a shot. ' +
-    '(3) The BALL player path must END near where the SHOOT player will be - showing the pass destination. ' +
-    '(4) Set the BALL player path to end close to the SHOOT player end position (within 10 units). ' +
-    '(5) Other movers use routeName "CUT: [direction]" or "MOVE: [action]". ' +
-    '(6) Screeners use routeName "SCREEN" with a path that barely moves (1 unit). ' +
-    '(7) snapPoint should be 0.12 so action starts quickly. ' +
-    'Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
+    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL: (1) ONE player routeName starts with BALL: - they have the ball, path shows dribble. (2) ONE player routeName starts with SHOOT: - they receive the pass for the shot, path ends near where BALL player path ends. (3) BALL player path must end within 10 units of SHOOT player path end. (4) Others use CUT: or MOVE: or SCREEN. (5) snapPoint 0.12. Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
 
     const baseballPrompt = 'Generate baseball defensive positioning and play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions on a baseball diamond. Show movement paths for relevant players. Return ONLY raw JSON using this template, customize paths to show this play: ' + bsbTemplate.replace('PLAYNAME', play.name)
 
@@ -793,22 +784,6 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
         ctx.beginPath(); ctx.arc(x, y, r*1.4, 0, Math.PI*2); ctx.stroke()
         ctx.setLineDash([])
       }
-
-      // Get position at time t
-      function getPos(player, t) {
-        const path = player.path
-        if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
-        if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
-        const pt = Math.min((t - snap) / (1 - snap), 1)
-        const segs = path.length - 1
-        const seg = Math.min(Math.floor(pt * segs), segs - 1)
-        const st = pt * segs - seg
-        return {
-          x: sx(lerp(path[seg][0], path[seg+1][0], st)),
-          y: sy(lerp(path[seg][1], path[seg+1][1], st))
-        }
-      }
-
       // Basketball role detection
       function getBBRole(player) {
         const rn = player.routeName || ''
