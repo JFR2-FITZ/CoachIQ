@@ -216,7 +216,7 @@ const SPORTS = {
     fields:[
       {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing','Flexbone','Run and Shoot']},
       {id:'personnel',label:'Your Best Personnel',opts:['Athletic QB / Dual Threat','Big Physical RB','Fast Skill Players','Strong Offensive Line','Well-Balanced','Small But Fast Team','Big But Slower Team']},
-      {id:'age',label:'Age Group',opts:['6-8 yrs Flag','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
+      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
       {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
       {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
@@ -1443,8 +1443,14 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
   const [qaHistory, setQAHistory] = useState([])
   const [question, setQuestion] = useState('')
   const [qaLoading, setQALoading] = useState(false)
+  const [disguise, setDisguise] = useState(null)
+  const [disguiseLoading, setDisguiseLoading] = useState(false)
+  const [showDisguise, setShowDisguise] = useState(false)
 
   const defPlay = { name: f.name, type: f.type, note: f.assignment, _isDefense: true }
+  // Only show disguise for 11-12 and up
+  const ageGroup = f.ageGroup || ''
+  const showDisguiseFeature = !ageGroup || !ageGroup.includes('6-8') && !ageGroup.includes('9-10')
   const pr = parseInt(S.slice(1,3),16), pg = parseInt(S.slice(3,5),16), pb = parseInt(S.slice(5,7),16)
 
   async function loadSteps() {
@@ -1472,6 +1478,29 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
       setQAHistory(prev => [...prev, { q, a: raw.trim() }])
     } catch(e) { setQAHistory(prev => [...prev, { q, a: 'Error: '+e.message }]) }
     setQALoading(false)
+  }
+
+  async function loadDisguise() {
+    if (disguise) { setShowDisguise(s=>!s); return }
+    setDisguiseLoading(true)
+    try {
+      const raw = await callAI(
+        'You are a defensive coordinator teaching disguise techniques for this defense: "' + f.name + '" (' + f.type + '). ' + f.assignment +
+        ' Explain how to disguise this coverage pre-snap so the offense cannot identify it. Return ONLY valid JSON: {' +
+        '"presnap":"what defenders should show pre-snap (alignment, stance, eye direction) to fool the offense",' +
+        '"fakeAlignment":"the false look to present - what it should look like to the QB",' +
+        '"snapTrigger":"what happens at the snap that reveals the true assignment",' +
+        '"qbReads":"what this disguise forces the QB to think and why that helps the defense",' +
+        '"coachingCue":"exact words to use when teaching disguise to players",' +
+        '"techniques":[{"player":"position","action":"specific pre-snap movement or look","purpose":"why this fools the offense"},' +
+        '{"player":"position","action":"action","purpose":"purpose"},' +
+        '{"player":"position","action":"action","purpose":"purpose"}]}'
+      )
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      setDisguise(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
+      setShowDisguise(true)
+    } catch(e) { setDisguise({ error: e.message }); setShowDisguise(true) }
+    setDisguiseLoading(false)
   }
 
   return (
@@ -1508,7 +1537,7 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
             </div>
           )}
 
-          <div style={{ background:'#161922', borderRadius:10, padding:12 }}>
+          <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12 }}>
             <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Ask About This Formation</div>
             {qaHistory.map((item,i) => (<div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:11, fontWeight:600, color:S, marginBottom:3 }}>Q: {item.q}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.6, padding:'6px 10px', background:'rgba(255,255,255,0.04)', borderRadius:6 }}>{item.a}</div></div>))}
             {qaLoading && <div style={{ fontSize:11, color:'#6b7a96', marginBottom:8 }}>Getting answer...</div>}
@@ -1517,6 +1546,77 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
               <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':S, color:'white', border:'none', borderRadius:7, fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
             </div>
           </div>
+
+          {/* DISGUISE COVERAGE - 11-12 yrs and up only */}
+          {showDisguiseFeature && (
+            <div>
+              <button
+                onClick={loadDisguise}
+                disabled={disguiseLoading}
+                style={{ width:'100%', padding:'10px 14px', background:showDisguise?'rgba(180,0,220,0.12)':'#161922', border:`1px solid ${showDisguise?'rgba(180,0,220,0.4)':'#1e2330'}`, borderRadius:10, color:showDisguise?'#c084fc':'#6b7a96', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, cursor:disguiseLoading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'space-between' }}
+              >
+                <span style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <span style={{ fontSize:15 }}>🎭</span>
+                  {disguiseLoading ? 'GENERATING DISGUISE...' : 'DISGUISE THIS COVERAGE'}
+                </span>
+                <span style={{ fontSize:11 }}>{showDisguise ? '▲ HIDE' : '▼ HOW TO FOOL THE QB'}</span>
+              </button>
+
+              {showDisguise && disguise && !disguise.error && (
+                <div style={{ marginTop:8, background:'rgba(180,0,220,0.06)', border:'1px solid rgba(180,0,220,0.25)', borderRadius:10, padding:14, animation:'fadeIn 0.2s ease' }}>
+                  <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#c084fc', fontWeight:700, marginBottom:10 }}>Pre-Snap Disguise</div>
+
+                  <div style={{ padding:'8px 10px', background:'rgba(180,0,220,0.08)', borderRadius:8, marginBottom:8, borderLeft:'3px solid rgba(180,0,220,0.5)' }}>
+                    <div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>What to Show Pre-Snap</div>
+                    <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{disguise.presnap}</div>
+                  </div>
+
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                    <div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.25)', borderRadius:8 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Fake Look</div>
+                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{disguise.fakeAlignment}</div>
+                    </div>
+                    <div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.25)', borderRadius:8 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>At Snap</div>
+                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{disguise.snapTrigger}</div>
+                    </div>
+                  </div>
+
+                  {disguise.qbReads && (
+                    <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, marginBottom:10, border:'1px solid rgba(74,222,128,0.15)' }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#4ade80', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>What the QB Sees</div>
+                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{disguise.qbReads}</div>
+                    </div>
+                  )}
+
+                  {disguise.techniques && disguise.techniques.length > 0 && (
+                    <div style={{ marginBottom:10 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:6, textTransform:'uppercase' }}>Player-by-Player Disguise Moves</div>
+                      {disguise.techniques.map((t,i) => (
+                        <div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<disguise.techniques.length-1?'1px solid rgba(180,0,220,0.15)':'none' }}>
+                          <div style={{ width:26, height:26, minWidth:26, background:'rgba(180,0,220,0.15)', border:'1px solid rgba(180,0,220,0.3)', color:'#c084fc', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, flexShrink:0 }}>{t.player}</div>
+                          <div style={{ flex:1 }}>
+                            <div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600, marginBottom:2 }}>{t.action}</div>
+                            <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.4 }}>{t.purpose}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {disguise.coachingCue && (
+                    <div style={{ padding:'8px 10px', background:'rgba(180,0,220,0.08)', borderRadius:8, borderLeft:'3px solid rgba(180,0,220,0.5)' }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Coaching Cue</div>
+                      <div style={{ fontSize:12, color:'#f2f4f8', fontStyle:'italic' }}>"{disguise.coachingCue}"</div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {showDisguise && disguise && disguise.error && (
+                <div style={{ marginTop:8, padding:10, background:'#161922', borderRadius:8, fontSize:11, color:'#6b7a96' }}>Could not load disguise. Try again.</div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1560,7 +1660,7 @@ function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
   const fbFields = [
     {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option','Flexbone']},
     {id:'personnel',label:'Their Key Threat',opts:['Dual Threat QB / Scrambler','Big Physical RB','Speed Receivers','Multiple TE Sets','Strong OL Run Game','Pass Heavy No Run','Option/Triple Option']},
-    {id:'age',label:'Age Group',opts:['6-8 yrs Flag','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
+    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
     {id:'skill',label:'Your Defensive Skill',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
     {id:'dline',label:'Your D-Line Strength',opts:['Big and Physical','Quick and Agile','Average Size','Undersized but Fast','Overpowering']},
     {id:'style',label:'Defensive Identity',opts:['Gap Control / Physical','Speed and Pursuit','Bend Dont Break','Aggressive Blitz Heavy','Zone Heavy','Man Coverage Heavy','Multiple / Disguise']},
@@ -1983,7 +2083,7 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
 
       {/* SCHEME GENERATOR */}
       <Card>
-        <CardHead icon={activeCfg.emoji} title={`${sport==="Baseball"?"Baseball Game Plan Generator":sport+" Scheme Generator"}`} tag="AI POWERED" tagColor={P} accent={P} />
+        <CardHead icon={activeCfg.emoji} title={sport==="Baseball"?"Baseball Offensive Game Plan Generator":sport+" Offensive Scheme Generator"} tag="AI POWERED" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
             {activeCfg.fields.map(f => (
