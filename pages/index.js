@@ -9,6 +9,11 @@ export default function CoachIQ() {
   const [iq, setIQ] = useState(847)
   const [schemes, setSchemes] = useState(0)
   const [gauntlets, setGauntlets] = useState(0)
+  // Persistent playbook - survives tab switching
+  const [playbook, setPlaybook] = useState({ Football: [], Basketball: [], Baseball: [] })
+  const [schemeResult, setSchemeResult] = useState(null)
+  const [schemeFields, setSchemeFields] = useState(null)
+  const [schemeSport, setSchemeSport] = useState(null)
 
   const P = cfg.primary
   const S = cfg.secondary
@@ -86,7 +91,7 @@ export default function CoachIQ() {
 
         {/* CONTENT */}
         <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
-          {page === 'home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} schemes={schemes} iq={iq} gauntlets={gauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} />}
+          {page === 'home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} schemes={schemes} iq={iq} gauntlets={gauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} playbook={playbook} setPlaybook={setPlaybook} schemeResult={schemeResult} setSchemeResult={setSchemeResult} schemeFields={schemeFields} setSchemeFields={setSchemeFields} schemeSport={schemeSport} setSchemeSport={setSchemeSport} />}
           {page === 'gauntlet' && <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />}
           {page === 'film' && <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
           {page === 'more' && <MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} />}
@@ -278,11 +283,10 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
       const isBSBPlay = !isFBPlay && !isBBPlay
 
       const breakdownPrompt = isBBPlay
-        ? 'You are a youth basketball coach. Break down this play: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who initiates the play and their role","blockingScheme":"screening concept or movement principle explained simply","steps":["Step 1: initial player movement","Step 2: screen or cut action","Step 3: ball handler reads","Step 4: what creates the open shot","Step 5: common mistakes"],"keyCoachingPoints":["point 1","point 2","point 3"]}'
+        ? 'You are a youth basketball coach educator. Break down this play for coaches AND players: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who initiates and their role","blockingScheme":"screening concept explained simply","steps":["Step 1: describe","Step 2: describe","Step 3: describe","Step 4: describe","Step 5: describe"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"1-2 sentences explaining the basketball concept behind why this play creates an open shot","playerRoles":[{"position":"1","job":"what this player does","whyTheyDoIt":"explain to a 12-year-old why their movement matters"},{"position":"2","job":"what this player does","whyTheyDoIt":"explain why"},{"position":"3","job":"what this player does","whyTheyDoIt":"explain why"},{"position":"4","job":"what this player does","whyTheyDoIt":"explain why"},{"position":"5","job":"what this player does","whyTheyDoIt":"explain why"}]}'
         : isBSBPlay
-        ? 'You are a youth baseball coach. Break down this strategy: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who the key player is in this situation","blockingScheme":"the core concept or philosophy behind this strategy","steps":["Step 1: read the situation","Step 2: key player actions","Step 3: execution details","Step 4: what makes this successful","Step 5: common mistakes to avoid"],"keyCoachingPoints":["point 1","point 2","point 3"]}'
-        : 'You are a youth football coach educator. Break down this play for coaches: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who carries the ball and how to identify it","blockingScheme":"zone or man blocking and why, explained simply","steps":["Step 1: what happens at snap","Step 2: key block assignments","Step 3: ball carrier reads and path","Step 4: what makes this play succeed","Step 5: common mistakes to avoid"],"keyCoachingPoints":["point 1","point 2","point 3"]}'
-
+        ? 'You are a youth baseball coach educator. Break down this strategy: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"key player in this situation","blockingScheme":"core concept","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this strategy works in this situation","playerRoles":[{"position":"Pitcher","job":"their responsibility","whyTheyDoIt":"why explained simply"},{"position":"Batter","job":"their job","whyTheyDoIt":"why"},{"position":"Runner","job":"their job","whyTheyDoIt":"why"}]}'
+        : 'You are a youth football coach educator. Break down this play for coaches AND players: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who has the ball and how to identify it","blockingScheme":"zone or man blocking explained simply","steps":["Step 1: at the snap","Step 2: blocking assignments","Step 3: ball carrier reads","Step 4: what makes it succeed","Step 5: common mistakes"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"explain the football concept - why this scheme attacks this defense","playerRoles":[{"position":"QB","job":"their exact job on this play","whyTheyDoIt":"explain to a 12-year-old why they do this - how it helps a teammate"},{"position":"RB","job":"their exact job","whyTheyDoIt":"explain why their path matters"},{"position":"WR","job":"their exact job","whyTheyDoIt":"explain why"},{"position":"OL","job":"their blocking assignment","whyTheyDoIt":"explain why their block opens the play"},{"position":"TE","job":"their exact job","whyTheyDoIt":"explain why"}]}'
       const raw = await callAI(breakdownPrompt)
       setSteps(parseJSON(raw))
     } catch(e) { setSteps({ error: e.message }) }
@@ -320,8 +324,10 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
     setQuestion('')
     try {
       const sportCtx = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY')) ? 'basketball' : play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL')) ? 'baseball' : 'football'
+      const history = qaHistory.map(item => 'Q: ' + item.q + '\nA: ' + item.a).join('\n\n')
+      const context = history ? 'Previous questions about this play:\n' + history + '\n\n' : ''
       const raw = await callAI(
-        'You are a youth ' + sportCtx + ' coach educator. A coach is asking about: "' + play.name + '" (' + play.type + '). ' + play.note + ' Coach question: "' + q + '" Answer clearly in 2-4 sentences using ' + sportCtx + ' terminology. Be direct and practical for a youth coach.'
+        'You are a youth ' + sportCtx + ' coach educator having an ongoing conversation about the play "' + play.name + '" (' + play.type + '). ' + play.note + '\n\n' + context + 'New question: "' + q + '"\n\nAnswer clearly in 2-4 sentences. If this is a follow-up question, reference what was discussed before. Use ' + sportCtx + ' terminology. Be direct and practical.'
       )
       setQAHistory(prev => [...prev, { q, a: raw.trim() }])
     } catch(e) {
@@ -403,6 +409,32 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
                   ))}
                 </div>
               )}
+
+              {/* WHY IT WORKS - concept explanation */}
+              {steps.whyItWorks && (
+                <div style={{ marginTop:10, padding:'10px 12px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}>
+                  <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:5 }}>Why This Works</div>
+                  <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{steps.whyItWorks}</div>
+                </div>
+              )}
+
+              {/* PLAYER ROLES - explain to kids */}
+              {steps.playerRoles && steps.playerRoles.length > 0 && (
+                <div style={{ marginTop:10 }}>
+                  <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:8 }}>Player Roles — What to Tell Each Player</div>
+                  {steps.playerRoles.map((role, i) => (
+                    <div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+                        <div style={{ width:26, height:26, minWidth:26, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800 }}>{role.position}</div>
+                        <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{role.job}</div>
+                      </div>
+                      <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, paddingLeft:34, fontStyle:'italic' }}>
+                        "Tell your player: {role.whyTheyDoIt}"
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -455,7 +487,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && question.trim()) askQuestion() }}
-                placeholder="e.g. Who runs the ball? Is this zone or man blocking?"
+                placeholder={qaHistory.length > 0 ? "Ask a follow-up question..." : "e.g. Who runs the ball? Why does the receiver go that way?"}
                 style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:7, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }}
               />
               <button onClick={askQuestion} disabled={qaLoading || !question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':P, color:'white', border:'none', borderRadius:7, fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
@@ -1434,19 +1466,19 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
 }
 
 // -- HOME PAGE --
-function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callAI, parseJSON, onScheme }) {
+function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callAI, parseJSON, onScheme, playbook, setPlaybook, schemeResult, setSchemeResult, schemeFields, setSchemeFields, schemeSport, setSchemeSport }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
-  const [fields, setFields] = useState(initFields)
+  const [fields, setFields] = useState(() => savedFields || initFields())
   const [prevSport, setPrevSport] = useState(sport)
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState(savedResult || null)
   const [error, setError] = useState('')
 
   if (sport !== prevSport) {
     setPrevSport(sport)
-    setFields(initFields())
-    setResult(null)
+    setFields(savedFields || initFields())
+    setResult(savedResult || null)
     setError('')
   }
 
@@ -1459,7 +1491,8 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
       const data = parseJSON(raw)
       if (!data.plays) throw new Error('No plays in response')
       setResult(data)
-      onScheme()
+      if (onSave) onSave(data, fields)
+      else if (onScheme) onScheme()
     } catch(e) { setError(e.message) }
     setLoading(false)
   }
