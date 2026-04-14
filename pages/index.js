@@ -282,11 +282,11 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
       const isBBPlay = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
       const isBSBPlay = !isFBPlay && !isBBPlay
 
-      const breakdownPrompt = isBBPlay
-        ? 'You are a youth basketball coach educator. Break down this play for coaches AND players: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who initiates and their role","blockingScheme":"screening concept explained simply","steps":["Step 1: describe","Step 2: describe","Step 3: describe","Step 4: describe","Step 5: describe"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"1-2 sentences explaining the basketball concept behind why this play creates an open shot","playerRoles":[{"position":"1","job":"what this player does","whyTheyDoIt":"explain to a 12-year-old why their movement matters"},{"position":"2","job":"what this player does","whyTheyDoIt":"explain why"},{"position":"3","job":"what this player does","whyTheyDoIt":"explain why"},{"position":"4","job":"what this player does","whyTheyDoIt":"explain why"},{"position":"5","job":"what this player does","whyTheyDoIt":"explain why"}]}'
-        : isBSBPlay
-        ? 'You are a youth baseball coach educator. Break down this strategy: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"key player in this situation","blockingScheme":"core concept","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this strategy works in this situation","playerRoles":[{"position":"Pitcher","job":"their responsibility","whyTheyDoIt":"why explained simply"},{"position":"Batter","job":"their job","whyTheyDoIt":"why"},{"position":"Runner","job":"their job","whyTheyDoIt":"why"}]}'
-        : 'You are a youth football coach educator. Break down this play for coaches AND players: "' + play.name + '" (' + play.type + '). ' + play.note + ' Return ONLY valid JSON: {"ballCarrier":"who has the ball and how to identify it","blockingScheme":"zone or man blocking explained simply","steps":["Step 1: at the snap","Step 2: blocking assignments","Step 3: ball carrier reads","Step 4: what makes it succeed","Step 5: common mistakes"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"explain the football concept - why this scheme attacks this defense","playerRoles":[{"position":"QB","job":"their exact job on this play","whyTheyDoIt":"explain to a 12-year-old why they do this - how it helps a teammate"},{"position":"RB","job":"their exact job","whyTheyDoIt":"explain why their path matters"},{"position":"WR","job":"their exact job","whyTheyDoIt":"explain why"},{"position":"OL","job":"their blocking assignment","whyTheyDoIt":"explain why their block opens the play"},{"position":"TE","job":"their exact job","whyTheyDoIt":"explain why"}]}'
+      const isBBPlay2 = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
+      const isBSBPlay2 = !isBBPlay2 && play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN'))
+      const jsonSchema = '{"ballCarrier":"key player role","blockingScheme":"core concept","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this works tactically","playerRoles":[{"position":"pos1","job":"their job","whyTheyDoIt":"explain to a 12yr old why"},{"position":"pos2","job":"their job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"their job","whyTheyDoIt":"explain why"}]}'
+      const sportLabel = isBBPlay2 ? 'basketball' : isBSBPlay2 ? 'baseball' : 'football'
+      const breakdownPrompt = 'You are a youth ' + sportLabel + ' coach educator. Break down this play for coaches AND players: ' + play.name + ' (' + play.type + '). ' + play.note + ' Include: why it works tactically, AND what to tell each key player about their role in simple terms a 12-year-old can understand. Return ONLY valid JSON matching this structure: ' + jsonSchema
       const raw = await callAI(breakdownPrompt)
       setSteps(parseJSON(raw))
     } catch(e) { setSteps({ error: e.message }) }
@@ -1469,16 +1469,16 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
 function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callAI, parseJSON, onScheme, playbook, setPlaybook, schemeResult, setSchemeResult, schemeFields, setSchemeFields, schemeSport, setSchemeSport }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
-  const [fields, setFields] = useState(() => savedFields || initFields())
+  const [fields, setFields] = useState(() => (schemeSport===sport && schemeFields) ? schemeFields : initFields())
   const [prevSport, setPrevSport] = useState(sport)
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState(savedResult || null)
+  const [result, setResult] = useState((schemeSport===sport && schemeResult) ? schemeResult : null)
   const [error, setError] = useState('')
 
   if (sport !== prevSport) {
     setPrevSport(sport)
-    setFields(savedFields || initFields())
-    setResult(savedResult || null)
+    setFields((schemeSport===sport && schemeFields) ? schemeFields : initFields())
+    setResult((schemeSport===sport && schemeResult) ? schemeResult : null)
     setError('')
   }
 
@@ -1491,8 +1491,8 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
       const data = parseJSON(raw)
       if (!data.plays) throw new Error('No plays in response')
       setResult(data)
-      if (onSave) onSave(data, fields)
-      else if (onScheme) onScheme()
+      if (setSchemeResult) { setSchemeResult(data); setSchemeFields(fields); setSchemeSport(sport); if(setPlaybook) setPlaybook(pb => ({...pb, [sport]: [...(pb[sport]||[]), data]})) }
+      if (onScheme) onScheme()
     } catch(e) { setError(e.message) }
     setLoading(false)
   }
