@@ -93,7 +93,7 @@ export default function CoachIQ() {
 
         {/* BOTTOM NAV */}
         <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#0f1117', borderTop:`2px solid ${P}`, display:'flex', zIndex:50 }}>
-          {[['home','⚡','Home'],['gauntlet','⚔️','Gauntlet'],['film','🎥','Film'],['more','☰','More']].map(([p,ico,lbl]) => (
+          {[['home','H','Home'],['gauntlet','G','Gauntlet'],['film','F','Film'],['more','M','More']].map(([p,ico,lbl]) => (
             <button key={p} onClick={() => setPage(p)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'9px 4px 5px', cursor:'pointer', gap:3, background:'none', border:'none', position:'relative' }}>
               <span style={{ fontSize:17, color:page===p?P:'#3d4559' }}>{ico}</span>
               <span style={{ fontSize:9, color:page===p?P:'#3d4559', fontWeight:600, letterSpacing:0.5, textTransform:'uppercase', fontFamily:'inherit' }}>{lbl}</span>
@@ -106,7 +106,7 @@ export default function CoachIQ() {
   )
 }
 
-// ── ONBOARDING ──
+// -- ONBOARDING --
 function Onboarding({ onLaunch }) {
   const [coach, setCoach] = useState('Coach Regisford')
   const [team, setTeam] = useState('Tolland Youth Football')
@@ -153,7 +153,7 @@ function Onboarding({ onLaunch }) {
   )
 }
 
-// ── SHARED COMPONENTS ──
+// -- SHARED COMPONENTS --
 function Card({ children, style={} }) {
   return <div style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:12, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
 }
@@ -203,10 +203,10 @@ function Hero({ greet, left, right, P, S, dk, children }) {
   )
 }
 
-// ── SPORT CONFIG ──
+// -- SPORT CONFIG --
 const SPORTS = {
   Football: {
-    emoji:'🏈',
+    emoji:'FB',
     fields:[
       {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing']},
       {id:'roster',label:'Roster Size',opts:['8-10 players','11-14 players','15-18 players','18+ players']},
@@ -220,7 +220,7 @@ const SPORTS = {
     scenarioPrompt:(diff)=>`You are a coaching intelligence AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"game situation","phase":"OFFENSE","question":"2-3 sentence scenario asking what coach should do","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
   },
   Basketball: {
-    emoji:'🏀',
+    emoji:'BB',
     fields:[
       {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
       {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
@@ -234,7 +234,7 @@ const SPORTS = {
     scenarioPrompt:(diff)=>`You are a coaching intelligence AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"game situation","phase":"OFFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
   },
   Baseball: {
-    emoji:'⚾',
+    emoji:'BSB',
     fields:[
       {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
       {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
@@ -249,7 +249,7 @@ const SPORTS = {
   },
 }
 
-// ── HOME PAGE ──
+// -- HOME PAGE --
 function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callAI, parseJSON, onScheme }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
@@ -303,7 +303,7 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
               <Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />
             ))}
           </div>
-          <PBtn onClick={generate} disabled={loading} color={P}>{loading ? 'GENERATING...' : '⚡ GENERATE SCHEME'}</PBtn>
+          <PBtn onClick={generate} disabled={loading} color={P}>{loading ? 'GENERATING...' : 'GENERATE SCHEME'}</PBtn>
           {loading && <Shimmer />}
           {error && <ErrBox msg={error} />}
           {result && (
@@ -352,7 +352,7 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
   )
 }
 
-// ── GAUNTLET PAGE ──
+// -- GAUNTLET PAGE --
 function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON }) {
   const [diff, setDiff] = useState('varsity')
   const [loading, setLoading] = useState(false)
@@ -431,7 +431,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
 
       {/* SCENARIO */}
       <Card>
-        <CardHead icon="⚔️" title="AI Scenario Challenge" tag={`${cfg.emoji} ${sport.toUpperCase()}`} tagColor={P} accent={P} />
+        <CardHead icon="VS" title="AI Scenario Challenge" tag={`${cfg.emoji} ${sport.toUpperCase()}`} tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
           <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
             <span style={{ fontSize:10, color:'#3d4559', letterSpacing:1, textTransform:'uppercase' }}>Difficulty</span>
@@ -483,7 +483,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
 
       {/* COORDINATOR MATCHUP */}
       <Card>
-        <CardHead icon="⚔️" title="Coordinator Matchup" tag="LIVE BATTLE" tagColor={P} accent={P} />
+        <CardHead icon="VS" title="Coordinator Matchup" tag="LIVE BATTLE" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
           {!coordStarted ? (
             <>
@@ -561,7 +561,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
   )
 }
 
-// ── FILM PAGE ──
+// -- FILM PAGE --
 function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
   const [tab, setTab] = useState('describe')
   const [problem, setProblem] = useState('')
@@ -698,7 +698,7 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
   )
 }
 
-// ── MORE PAGE ──
+// -- MORE PAGE --
 function MorePage({ P, S, al, dk, cfg, setCfg }) {
   return (
     <>
