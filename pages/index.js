@@ -94,7 +94,7 @@ export default function CoachIQ() {
           {page === 'home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} schemes={schemes} iq={iq} gauntlets={gauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} playbook={playbook} setPlaybook={setPlaybook} schemeResult={schemeResult} setSchemeResult={setSchemeResult} schemeFields={schemeFields} setSchemeFields={setSchemeFields} schemeSport={schemeSport} setSchemeSport={setSchemeSport} />}
           {page === 'gauntlet' && <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />}
           {page === 'film' && <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
-          {page === 'more' && <MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} />}
+          {page === 'more' && <MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
         </div>
 
         {/* BOTTOM NAV */}
@@ -1325,6 +1325,71 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   )
 }
 
+// -- DEFENSIVE FORMATION CARD (collapsible with diagram) --
+function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) {
+  const [expanded, setExpanded] = useState(false)
+  const [showAnim, setShowAnim] = useState(false)
+
+  // Build a play-compatible object for the animator
+  const defPlay = {
+    name: f.name,
+    type: f.type,
+    note: f.assignment,
+    _isDefense: true
+  }
+
+  return (
+    <div style={{ borderBottom:'1px solid #1e2330' }}>
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => setExpanded(e=>!e)}>
+        <div style={{ width:22, height:22, minWidth:22, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{f.number}</div>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{f.name}</div>
+          <div style={{ fontSize:10, color:S, fontFamily:"'DM Mono',monospace", marginTop:1 }}>{f.type}</div>
+          <div style={{ fontSize:11, color:'#f2f4f8', marginTop:3, lineHeight:1.4 }}>{f.assignment}</div>
+          <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
+          <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Show diagram'}</div>
+        </div>
+        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true)}} style={{ padding:'4px 9px', background:showAnim?S:al(S,0.12), border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>
+          {showAnim ? 'HIDE' : 'DIAGRAM'}
+        </button>
+      </div>
+      {expanded && showAnim && (
+        <div style={{ marginBottom:10 }}>
+          <PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// -- PLAYBOOK PLAY CARD (in More tab, with diagram) --
+function PlaybookCard({ play, packageName, packageIndex, P, S, al, callAI, parseJSON }) {
+  const [showAnim, setShowAnim] = useState(false)
+
+  return (
+    <div style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:10, overflow:'hidden', marginBottom:8 }}>
+      <div style={{ padding:'12px 14px', display:'flex', alignItems:'flex-start', gap:10 }}>
+        <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${P}`, color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
+        <div style={{ flex:1 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}>
+            <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{play.name}</div>
+            <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.15), color:P }}>{play.type}</span>
+            <span style={{ fontSize:9, color:'#3d4559' }}>Pkg #{packageIndex}</span>
+          </div>
+          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4, marginBottom:3 }}>{play.note}</div>
+          <div style={{ fontSize:10, color:'#3d4559' }}>{packageName}</div>
+        </div>
+        <button onClick={()=>setShowAnim(a=>!a)} style={{ padding:'4px 9px', background:showAnim?P:al(P,0.12), border:`1px solid ${P}`, borderRadius:6, color:showAnim?'white':P, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>
+          {showAnim ? 'HIDE' : 'DIAGRAM'}
+        </button>
+      </div>
+      {showAnim && (
+        <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} />
+      )}
+    </div>
+  )
+}
+
 // -- DEFENSIVE SCHEME GENERATOR --
 function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
   const isFB = sport === 'Football'
@@ -1430,15 +1495,7 @@ function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
               )}
 
               {(result.formations||[]).map(f => (
-                <div key={f.number} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'8px 0', borderBottom:'1px solid #1e2330' }}>
-                  <div style={{ width:22, height:22, minWidth:22, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{f.number}</div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{f.name}</div>
-                    <div style={{ fontSize:10, color:S, fontFamily:"'DM Mono',monospace", marginTop:1 }}>{f.type}</div>
-                    <div style={{ fontSize:11, color:'#f2f4f8', marginTop:3, lineHeight:1.4 }}>{f.assignment}</div>
-                    <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
-                  </div>
-                </div>
+                <DefFormationCard key={f.number} formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} />
               ))}
 
               {result.adjustmentTip && (
@@ -2163,7 +2220,7 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
 }
 
 // -- MORE PAGE --
-function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport }) {
+function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport, callAI, parseJSON }) {
   const [moreTab, setMoreTab] = useState('playbook')
   const [sortBy, setSortBy] = useState('recent')
   const [filterType, setFilterType] = useState('All')
@@ -2245,34 +2302,14 @@ function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport }) {
                       <div style={{ fontSize:10, color:P, fontWeight:700 }}>{(scheme.plays||[]).length} PLAYS</div>
                     </div>
                     {(scheme.plays||[]).filter(p => filterType==='All'||p.type===filterType).map((p,pi) => (
-                      <div key={pi} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 14px', background:'#0f1117', borderLeft:`3px solid ${al(P,0.3)}`, borderRight:'1px solid #1e2330', borderBottom:'1px solid #1e2330', ...(pi===(scheme.plays||[]).length-1?{borderRadius:'0 0 10px 10px'}:{}) }}>
-                        <div style={{ width:20, height:20, minWidth:20, background:al(P,0.15), color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, flexShrink:0, marginTop:2 }}>{p.number||pi+1}</div>
-                        <div style={{ flex:1 }}>
-                          <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:2, flexWrap:'wrap' }}>
-                            <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
-                            <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.12), color:P }}>{p.type}</span>
-                          </div>
-                          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{p.note}</div>
-                        </div>
-                      </div>
+                      <PlaybookCard key={pi} play={{...p, number:p.number||pi+1}} packageName={scheme.packageName} packageIndex={scheme.packageIndex} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />
                     ))}
                   </div>
                 ))
               ) : (
                 // Flat view - name or type sorted
                 filteredPlays.map((p,i) => (
-                  <div key={i} style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:10, padding:'12px 14px', marginBottom:8, display:'flex', alignItems:'flex-start', gap:10 }}>
-                    <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${P}`, color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{p.number||i+1}</div>
-                    <div style={{ flex:1 }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}>
-                        <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
-                        <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.15), color:P }}>{p.type}</span>
-                        <span style={{ fontSize:9, color:'#3d4559' }}>Pkg #{p.packageIndex}</span>
-                      </div>
-                      <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4, marginBottom:3 }}>{p.note}</div>
-                      <div style={{ fontSize:10, color:'#3d4559' }}>{p.packageName}</div>
-                    </div>
-                  </div>
+                  <PlaybookCard key={i} play={{...p, number:p.number||i+1}} packageName={p.packageName} packageIndex={p.packageIndex} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />
                 ))
               )}
             </>
