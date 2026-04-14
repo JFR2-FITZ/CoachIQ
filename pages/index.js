@@ -250,8 +250,160 @@ const SPORTS = {
 }
 
 
+// -- PLAY CARD (collapsible, with animator + Q&A + step-by-step) --
+function PlayCard({ play, P, S, al, callAI, parseJSON }) {
+  const [expanded, setExpanded] = useState(false)
+  const [showAnim, setShowAnim] = useState(false)
+  const [steps, setSteps] = useState(null)
+  const [stepsLoading, setStepsLoading] = useState(false)
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState('')
+  const [qaLoading, setQALoading] = useState(false)
+  const [qaHistory, setQAHistory] = useState([])
+
+  const pr = parseInt(P.slice(1,3),16)
+  const pg = parseInt(P.slice(3,5),16)
+  const pb = parseInt(P.slice(5,7),16)
+
+  async function loadSteps() {
+    if (steps) return
+    setStepsLoading(true)
+    try {
+      const raw = await callAI(
+        `You are a youth football coach educator. Break down this play for coaches: "${play.name}" (${play.type}). ${play.note}
+
+Provide a clear step-by-step breakdown. Return ONLY valid JSON:
+{"ballCarrier":"who carries the ball and how to identify it","blockingScheme":"zone or man blocking and why, explained simply","steps":["Step 1: what happens at snap","Step 2: key block assignments","Step 3: ball carrier reads and path","Step 4: what makes this play succeed","Step 5: common mistakes to avoid"],"keyCoachingPoints":["point 1","point 2","point 3"]}`
+      )
+      setSteps(parseJSON(raw))
+    } catch(e) { setSteps({ error: e.message }) }
+    setStepsLoading(false)
+  }
+
+  async function askQuestion() {
+    if (!question.trim()) return
+    setQALoading(true)
+    const q = question.trim()
+    setQuestion('')
+    try {
+      const raw = await callAI(
+        `You are a youth football coach educator. A coach is asking about this play: "${play.name}" (${play.type}). ${play.note}
+
+Coach question: "${q}"
+
+Answer clearly and practically in 2-4 sentences. Focus on youth coaching context. Be direct and helpful.`
+      )
+      setQAHistory(prev => [...prev, { q, a: raw.trim() }])
+    } catch(e) {
+      setQAHistory(prev => [...prev, { q, a: 'Error: ' + e.message }])
+    }
+    setQALoading(false)
+  }
+
+  return (
+    <div style={{ borderBottom:'1px solid #1e2330' }}>
+      {/* Play header row - always visible */}
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { setExpanded(e => !e); if (!expanded) loadSteps() }}>
+        <div style={{ width:22, height:22, minWidth:22, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{play.name}</div>
+          <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:1 }}>{play.type}</div>
+          <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, lineHeight:1.4 }}>{play.note}</div>
+        </div>
+        <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
+          <button
+            onClick={e => { e.stopPropagation(); setShowAnim(a => !a); if (!expanded) setExpanded(true) }}
+            style={{ padding:'4px 9px', background:showAnim ? P : `rgba(${pr},${pg},${pb},0.12)`, border:`1px solid ${P}`, borderRadius:6, color:showAnim?'white':P, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap' }}
+          >
+            {showAnim ? 'HIDE PLAY' : 'SHOW PLAY'}
+          </button>
+          <span style={{ fontSize:14, color:'#6b7a96', userSelect:'none' }}>{expanded ? '▲' : '▼'}</span>
+        </div>
+      </div>
+
+      {/* Expanded content */}
+      {expanded && (
+        <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
+
+          {/* Play animator inline */}
+          {showAnim && (
+            <div style={{ marginBottom:12 }}>
+              <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} />
+            </div>
+          )}
+
+          {/* Step by step breakdown */}
+          {stepsLoading && <div style={{ fontSize:12, color:'#6b7a96', padding:'8px 0' }}>Loading play breakdown...</div>}
+          {steps && !steps.error && (
+            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12 }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Play Breakdown</div>
+
+              {/* Ball carrier */}
+              <div style={{ display:'flex', gap:8, marginBottom:8, padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.1)`, borderRadius:8, border:`1px solid rgba(${pr},${pg},${pb},0.2)` }}>
+                <span style={{ fontSize:11, fontWeight:700, color:P, flexShrink:0 }}>Ball Carrier:</span>
+                <span style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{steps.ballCarrier}</span>
+              </div>
+
+              {/* Blocking scheme */}
+              <div style={{ display:'flex', gap:8, marginBottom:10, padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}>
+                <span style={{ fontSize:11, fontWeight:700, color:'#6b9fff', flexShrink:0 }}>Blocking:</span>
+                <span style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{steps.blockingScheme}</span>
+              </div>
+
+              {/* Steps */}
+              {(steps.steps||[]).map((step, i) => (
+                <div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i < steps.steps.length-1 ? '1px solid #1e2330' : 'none' }}>
+                  <div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${P}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:P, flexShrink:0, marginTop:1 }}>{i+1}</div>
+                  <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div>
+                </div>
+              ))}
+
+              {/* Key coaching points */}
+              {steps.keyCoachingPoints && steps.keyCoachingPoints.length > 0 && (
+                <div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.2)' }}>
+                  <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:6 }}>Key Coaching Points</div>
+                  {steps.keyCoachingPoints.map((pt,i) => (
+                    <div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Q&A section */}
+          <div style={{ background:'#161922', borderRadius:10, padding:12 }}>
+            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Ask About This Play</div>
+
+            {/* Previous Q&A */}
+            {qaHistory.map((item, i) => (
+              <div key={i} style={{ marginBottom:10 }}>
+                <div style={{ fontSize:11, fontWeight:600, color:P, marginBottom:3 }}>Q: {item.q}</div>
+                <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.6, padding:'6px 10px', background:'rgba(255,255,255,0.04)', borderRadius:6 }}>{item.a}</div>
+              </div>
+            ))}
+
+            {qaLoading && <div style={{ fontSize:11, color:'#6b7a96', marginBottom:8 }}>Getting answer...</div>}
+
+            <div style={{ display:'flex', gap:7 }}>
+              <input
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && question.trim()) askQuestion() }}
+                placeholder="e.g. Who runs the ball? Is this zone or man blocking?"
+                style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:7, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }}
+              />
+              <button onClick={askQuestion} disabled={qaLoading || !question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':P, color:'white', border:'none', borderRadius:7, fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
+            </div>
+            <div style={{ fontSize:10, color:'#6b7a96', marginTop:5 }}>Press Enter to ask. Examples: "Who carries the ball?" "Is this zone or man blocking?"</div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // -- PLAY ANIMATOR --
-function PlayAnimator({ play, P, callAI, parseJSON }) {
+function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   const canvasRef = useRef(null)
   const animRef = useRef(null)
   const [parsed, setParsed] = useState(null)
@@ -263,6 +415,8 @@ function PlayAnimator({ play, P, callAI, parseJSON }) {
   const pr = parseInt(P.slice(1,3),16)
   const pg = parseInt(P.slice(3,5),16)
   const pb = parseInt(P.slice(5,7),16)
+
+  useEffect(() => { if (autoLoad && !parsed) generateAnim() }, [autoLoad])
 
   async function generateAnim() {
     setLoading(true); setError(''); setParsed(null); setPlaying(false)
@@ -555,7 +709,7 @@ Start with this exact JSON template and customize ONLY the offensive paths and r
       <div style={{ padding:'9px 13px', borderBottom:'1px solid rgba(0,0,0,0.1)', display:'flex', alignItems:'center', gap:8, background:'white' }}>
         <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, color:'#222', flex:1 }}>{play.name}</span>
         <span style={{ fontSize:10, color:'#888', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
-        {!parsed && !loading && (
+        {!parsed && !loading && !autoLoad && (
           <button onClick={generateAnim} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:1 }}>ANIMATE</button>
         )}
         {parsed && (
@@ -635,22 +789,9 @@ function HomePage({ P, S, al, dk, lastName, sport, schemes, iq, gauntlets, callA
             <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
               <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:1, color:P, marginBottom:8 }}>{result.packageName}</div>
               <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
-              {(result.plays||[]).map(p => (
-                <div key={p.number} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'8px 0', borderBottom:'1px solid #1e2330' }}>
-                  <div style={{ width:22, height:22, minWidth:22, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{p.number}</div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
-                    <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:1 }}>{p.type}</div>
-                    <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, lineHeight:1.4 }}>{p.note}</div>
-                  </div>
-                </div>
-              ))}
+              {(result.plays||[]).map(p => <PlayCard key={p.number} play={p} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />)}
               {result.defenseTip && <div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defense Tip</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.defenseTip}</div></div>}
-              <div style={{ marginTop:12 }}>
-                <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Play Animations</div>
-                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:8, lineHeight:1.4 }}>Click ANIMATE on any play to generate and watch it unfold on the field.</div>
-                {(result.plays||[]).map(p => <PlayAnimator key={p.number} play={p} P={P} callAI={callAI} parseJSON={parseJSON} />)}
-              </div>
+
               {result.coachingCue && <div style={{ marginTop:8, padding:10, background:al(P,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Coaching Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic', fontWeight:500 }}>"{result.coachingCue}"</div></div>}
             </div>
           )}
