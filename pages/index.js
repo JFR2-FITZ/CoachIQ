@@ -499,9 +499,9 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 
     const bsbTemplate = '{"formation":"PLAYNAME","snapPoint":0.2,"duration":3000,"players":[{"id":"P","label":"P","role":"off","routeType":"block","x":50,"y":30,"path":[[50,30],[50,30]],"routeName":"Pitch","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"Receive","routeYards":0},{"id":"1B","label":"1B","role":"off","routeType":"block","x":75,"y":42,"path":[[75,42],[75,42]],"routeName":"Hold","routeYards":0},{"id":"2B","label":"2B","role":"off","routeType":"block","x":65,"y":28,"path":[[65,28],[65,28]],"routeName":"Cover","routeYards":0},{"id":"SS","label":"SS","role":"off","routeType":"block","x":38,"y":30,"path":[[38,30],[38,30]],"routeName":"Cover","routeYards":0},{"id":"3B","label":"3B","role":"off","routeType":"block","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"Hold","routeYards":0},{"id":"LF","label":"LF","role":"off","routeType":"block","x":20,"y":12,"path":[[20,12],[20,12]],"routeName":"Pos","routeYards":0},{"id":"CF","label":"CF","role":"off","routeType":"block","x":50,"y":8,"path":[[50,8],[50,8]],"routeName":"Pos","routeYards":0},{"id":"RF","label":"RF","role":"off","routeType":"block","x":80,"y":12,"path":[[80,12],[80,12]],"routeName":"Pos","routeYards":0},{"id":"BAT","label":"B","role":"def","routeType":"route","x":50,"y":44,"path":[[50,44],[60,38]],"routeName":"Run","routeYards":0},{"id":"R1","label":"R","role":"def","routeType":"route","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"","routeYards":0}]}'
 
-    const footballPrompt = 'Generate football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' RULES: QB on handoff plays makes short fake and stops (path 2 units). RB shows full run lane. Pulling guards show pull route around edge. Return ONLY raw JSON using this template, customize offensive paths only: ' + fbTemplate.replace('PLAYNAME', play.name)
+    const footballPrompt = 'Generate football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL RULES: (1) QB: on RUN plays set routeName to "Handoff" and path is a 2-unit fake toward RB then stop. On PASS plays set routeName to "Dropback" and show 3-step drop (path moves upward/away from LOS). On KEEPER plays show QB running outside. (2) Ball carrier (RB/QB): path must show the FULL run lane all the way past the line of scrimmage, minimum 8-10 units past y=38. (3) Pulling guards: if this is a sweep/power play, guards should have paths around the edge (not just forward). (4) Receivers: each has a named route (Curl, Slant, Post, Out, Corner, Go, Cross, Flat) with routeYards. Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
 
-    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' IMPORTANT: Mark the ball handler with routeName starting with BALL: (e.g. routeName: "BALL: Dribble right"). Mark the primary scorer/shooter with routeName starting with SHOOT: (e.g. routeName: "SHOOT: Curl to wing"). Mark pass recipients with routeName starting with PASS: (e.g. routeName: "PASS: Spot up corner"). Mark screeners with routeName: "SCREEN". Mark cutters with routeName starting with CUT:. This labeling is critical so coaches know exactly who has the ball, who is the target, and what each player does. Use 5 offensive players (1-5) and 5 defenders. Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
+    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL RULES: (1) Exactly ONE player must have routeName starting with BALL: - this is who starts with the ball. (2) Exactly ONE player must have routeName starting with SHOOT: - this is the primary scoring target. (3) The BALL player path must show dribble movement toward the play action. (4) Pass recipients use PASS: prefix. (5) The BALL player should pass to the SHOOT player near the end of the play - their paths should end near each other. (6) Screeners use routeName SCREEN and their path stays short (1-2 units). Keep all coords in bounds. Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
 
     const baseballPrompt = 'Generate baseball defensive positioning and play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions on a baseball diamond. Show movement paths for relevant players. Return ONLY raw JSON using this template, customize paths to show this play: ' + bsbTemplate.replace('PLAYNAME', play.name)
 
@@ -721,10 +721,79 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
       ctx.clearRect(0, 0, W, H)
       if (isBBall) { drawBasketballCourt() } else if (isBSB) { drawBaseballField() } else { drawFootballField() }
 
-            // Player radius — very small, reference-image style
-      const r = W * 0.016
+      const r = W * 0.016  // player radius
 
-      // Basketball special rendering helpers
+      const pr = parseInt(P.slice(1,3),16)
+      const pg = parseInt(P.slice(3,5),16)
+      const pb = parseInt(P.slice(5,7),16)
+
+      // Helper: draw arrowhead
+      function arrow(ex, ey, nx, ny, size) {
+        const angle = Math.atan2(ny, nx)
+        const a = 0.45
+        ctx.beginPath()
+        ctx.moveTo(ex, ey)
+        ctx.lineTo(ex - size*Math.cos(angle-a), ey - size*Math.sin(angle-a))
+        ctx.lineTo(ex - size*Math.cos(angle+a), ey - size*Math.sin(angle+a))
+        ctx.closePath(); ctx.fill()
+      }
+
+      // Helper: draw perpendicular (block) marker
+      function perp(ex, ey, nx, ny, size) {
+        const px = -ny, py = nx
+        ctx.beginPath()
+        ctx.moveTo(ex - px*size, ey - py*size)
+        ctx.lineTo(ex + px*size, ey + py*size)
+        ctx.stroke()
+      }
+
+      // Helper: draw pass arc between two points
+      function drawPassArc(x1, y1, x2, y2, color) {
+        const mx = (x1+x2)/2, my = (y1+y2)/2 - Math.abs(x2-x1)*0.3
+        ctx.strokeStyle = color
+        ctx.lineWidth = 1.5
+        ctx.setLineDash([5, 3])
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.quadraticCurveTo(mx, my, x2, y2)
+        ctx.stroke()
+        ctx.setLineDash([])
+        // Arrow at end
+        const dx = x2 - mx, dy = y2 - my
+        const dl = Math.sqrt(dx*dx+dy*dy)||1
+        ctx.fillStyle = color
+        arrow(x2, y2, dx/dl, dy/dl, r*1.2)
+      }
+
+      // Helper: draw start position dot
+      function startDot(x, y, color) {
+        ctx.fillStyle = color
+        ctx.globalAlpha = 0.3
+        ctx.beginPath(); ctx.arc(x, y, r*1.4, 0, Math.PI*2); ctx.fill()
+        ctx.globalAlpha = 1
+        ctx.strokeStyle = color
+        ctx.lineWidth = 1
+        ctx.setLineDash([2,2])
+        ctx.beginPath(); ctx.arc(x, y, r*1.4, 0, Math.PI*2); ctx.stroke()
+        ctx.setLineDash([])
+      }
+
+      // Get position at time t
+      function getPos(player, t) {
+        const path = player.path
+        if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
+        if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
+        const pt = Math.min((t - snap) / (1 - snap), 1)
+        const segs = path.length - 1
+        const seg = Math.min(Math.floor(pt * segs), segs - 1)
+        const st = pt * segs - seg
+        return {
+          x: sx(lerp(path[seg][0], path[seg+1][0], st)),
+          y: sy(lerp(path[seg][1], path[seg+1][1], st))
+        }
+      }
+
+      // Basketball role detection
       function getBBRole(player) {
         const rn = player.routeName || ''
         if (rn.startsWith('BALL:')) return 'ball'
@@ -735,7 +804,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
         return 'move'
       }
 
-      // PRE-SNAP: draw full route map as preview
+      // ── PRE-SNAP: show ghost start positions + full route preview ──
       if (t < snap) {
         parsed.players.forEach(player => {
           if (player.role !== 'off') return
@@ -743,13 +812,18 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
           if (!path || path.length < 2) return
           const isLineman = ['C','G','T'].includes(player.label)
           const isBlock = player.routeType === 'block' || isLineman
+          const bbRole = isBBall ? getBBRole(player) : null
 
+          // Route color
           const routeColor = isLineman
-            ? 'rgba(80,80,80,0.5)'
-            : `rgba(${pr},${pg},${pb},0.7)`
+            ? 'rgba(100,100,100,0.5)'
+            : isBBall
+              ? (bbRole==='ball'?'rgba(245,158,11,0.8)':bbRole==='shooter'?'rgba(74,222,128,0.8)':`rgba(${pr},${pg},${pb},0.7)`)
+              : `rgba(${pr},${pg},${pb},0.75)`
 
+          // Draw full route
           ctx.strokeStyle = routeColor
-          ctx.lineWidth = isLineman ? 1 : 1.8
+          ctx.lineWidth = isLineman ? 1 : 2
           ctx.setLineDash(isLineman ? [3,3] : [])
           ctx.beginPath()
           ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
@@ -767,33 +841,49 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
           const ex = sx(ep[0]), ey = sy(ep[1])
 
           if (isBlock) {
-            ctx.strokeStyle = routeColor
-            ctx.lineWidth = 1.5
-            drawPerp(ctx, ex, ey, dx/dl, dy/dl, r*1.4)
+            ctx.strokeStyle = routeColor; ctx.lineWidth = 1.8
+            perp(ex, ey, dx/dl, dy/dl, r*1.4)
           } else {
-            ctx.fillStyle = `rgba(${pr},${pg},${pb},0.7)`
-            drawArrow(ctx, ex, ey, dx/dl, dy/dl, r*1.8)
+            ctx.fillStyle = routeColor
+            arrow(ex, ey, dx/dl, dy/dl, r*1.8)
           }
 
-          // Route label: name + yards
-          if (!isBlock && player.routeName) {
-            const midIdx = Math.floor(path.length / 2)
-            const mx = sx(path[midIdx][0]) + 8
-            const my = sy(path[midIdx][1]) - 4
-            ctx.fillStyle = `rgba(${pr},${pg},${pb},0.85)`
-            ctx.font = `bold ${Math.round(r*2.2)}px sans-serif`
-            ctx.textAlign = 'left'
-            ctx.fillText(
-              player.routeYards > 0 ? `${player.routeYards} YDS` : player.routeName,
-              mx, my
-            )
+          // Route name + yardage label
+          if (!isBlock && (player.routeName || player.routeYards > 0)) {
+            const midIdx = Math.max(0, Math.floor(path.length/2) - 1)
+            const lx = sx(path[midIdx][0])
+            const ly = sy(path[midIdx][1]) - r*2
+            ctx.fillStyle = isBBall ? 'rgba(200,200,200,0.9)' : `rgba(${pr},${pg},${pb},0.9)`
+            ctx.font = `bold ${Math.round(r*1.8)}px sans-serif`
+            ctx.textAlign = 'center'
+            // Show clean route name
+            const displayName = player.routeName
+              ? player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:)/,'').trim()
+              : ''
+            const displayText = player.routeYards > 0
+              ? (displayName ? displayName + ' ' + player.routeYards+'yd' : player.routeYards+'yd')
+              : displayName
+            if (displayText) ctx.fillText(displayText, lx, ly)
           }
         })
       }
 
-      // POST-SNAP: animate routes
+      // ── POST-SNAP: animate routes ──
       if (t >= snap) {
         const pt = Math.min((t - snap) / (1 - snap), 1)
+
+        // Find ball handler for pass arc
+        const ballHolder = parsed.players.find(p => p.role==='off' && (getBBRole(p)==='ball' || p.id==='QB'))
+        const shooter = parsed.players.find(p => p.role==='off' && getBBRole(p)==='shooter')
+
+        // Draw pass arc when play is 70% complete
+        if (isBBall && ballHolder && shooter && pt > 0.7) {
+          const ballPos = getPos(ballHolder, t)
+          const shootPos = getPos(shooter, t)
+          const arcAlpha = Math.min(1, (pt - 0.7) / 0.2)
+          drawPassArc(ballPos.x, ballPos.y, shootPos.x, shootPos.y, `rgba(255,220,50,${arcAlpha*0.9})`)
+        }
+
         parsed.players.forEach(player => {
           if (player.role !== 'off') return
           const path = player.path
@@ -802,7 +892,13 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
           const totalDraw = pt * segs
           const isLineman = ['C','G','T'].includes(player.label)
           const isBlock = player.routeType === 'block' || isLineman
-          const routeColor = isLineman ? 'rgba(80,80,80,0.8)' : `rgba(${pr},${pg},${pb},0.9)`
+          const bbRole = isBBall ? getBBRole(player) : null
+
+          const routeColor = isLineman
+            ? 'rgba(100,100,100,0.8)'
+            : isBBall
+              ? (bbRole==='ball'?`rgba(245,158,11,0.95)`:bbRole==='shooter'?`rgba(74,222,128,0.95)`:`rgba(${pr},${pg},${pb},0.9)`)
+              : `rgba(${pr},${pg},${pb},0.95)`
 
           ctx.strokeStyle = routeColor
           ctx.lineWidth = isLineman ? 1.2 : 2
@@ -812,151 +908,165 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
           for (let s = 0; s < segs; s++) {
             const sp = Math.max(0, Math.min(1, totalDraw - s))
             if (sp <= 0) break
-            ctx.lineTo(
-              sx(lerp(path[s][0], path[s+1][0], sp)),
-              sy(lerp(path[s][1], path[s+1][1], sp))
-            )
+            ctx.lineTo(sx(lerp(path[s][0],path[s+1][0],sp)), sy(lerp(path[s][1],path[s+1][1],sp)))
           }
           ctx.stroke()
 
-          // End marker when route complete
-          if (totalDraw >= segs * 0.92) {
+          // End marker when route mostly done
+          if (totalDraw >= segs * 0.88) {
             const ep = path[path.length-1]
-            const pp = path[path.length-2]
-            const dx = ep[0]-pp[0], dy = ep[1]-pp[1]
+            const pp2 = path[path.length-2]
+            const dx = ep[0]-pp2[0], dy = ep[1]-pp2[1]
             const dl = Math.sqrt(dx*dx+dy*dy)||1
             const ex = sx(ep[0]), ey = sy(ep[1])
             if (isBlock) {
-              ctx.strokeStyle = routeColor
-              ctx.lineWidth = 1.8
-              drawPerp(ctx, ex, ey, dx/dl, dy/dl, r*1.4)
+              ctx.strokeStyle = routeColor; ctx.lineWidth = 2
+              perp(ex, ey, dx/dl, dy/dl, r*1.4)
             } else {
-              ctx.fillStyle = `rgba(${pr},${pg},${pb},0.95)`
-              drawArrow(ctx, ex, ey, dx/dl, dy/dl, r*1.8)
+              ctx.fillStyle = routeColor
+              arrow(ex, ey, dx/dl, dy/dl, r*1.8)
             }
-            // Yardage label
+            // Yardage at end of route
             if (!isBlock && player.routeYards > 0) {
-              ctx.fillStyle = `rgba(${pr},${pg},${pb},0.9)`
-              ctx.font = `bold ${Math.round(r*2.1)}px sans-serif`
+              ctx.fillStyle = routeColor
+              ctx.font = `bold ${Math.round(r*1.7)}px sans-serif`
               ctx.textAlign = 'left'
-              ctx.fillText(`${player.routeYards} YDS`, ex+5, ey-4)
+              ctx.fillText(player.routeYards+'yd', ex+r*1.2, ey)
             }
           }
         })
       }
 
-      // PLAYERS
+      // ── DRAW ALL PLAYERS ──
       parsed.players.forEach(player => {
         const pos = getPos(player, t)
         const isOff = player.role === 'off'
         const isLineman = ['C','G','T'].includes(player.label)
         const bbRole = isBBall ? getBBRole(player) : null
 
+        // Show ghost start position if player has moved significantly
+        if (isOff && t >= snap) {
+          const startX = sx(player.path[0][0])
+          const startY = sy(player.path[0][1])
+          const dist = Math.sqrt(Math.pow(pos.x-startX,2)+Math.pow(pos.y-startY,2))
+          if (dist > r * 2) {
+            ctx.globalAlpha = 0.2
+            ctx.fillStyle = isLineman ? '#888' : P
+            if (isLineman) {
+              const s = r * 0.85
+              ctx.fillRect(startX-s, startY-s, s*2, s*2)
+            } else {
+              ctx.beginPath(); ctx.arc(startX, startY, r*0.9, 0, Math.PI*2); ctx.fill()
+            }
+            ctx.globalAlpha = 1
+          }
+        }
+
         if (isOff) {
           if (isBBall) {
-            // Basketball player rendering with role indicators
             const isBallHolder = bbRole === 'ball'
             const isShooter = bbRole === 'shooter'
             const isPassTarget = bbRole === 'pass'
-            const isScreen = bbRole === 'screen'
+            const isScreener = bbRole === 'screen'
 
-            // Outer glow for key players
-            if (isBallHolder) {
-              ctx.fillStyle = 'rgba(255,200,0,0.25)'
-              ctx.beginPath(); ctx.arc(pos.x, pos.y, r*2.2, 0, Math.PI*2); ctx.fill()
-            } else if (isShooter) {
-              ctx.fillStyle = 'rgba(74,222,128,0.2)'
-              ctx.beginPath(); ctx.arc(pos.x, pos.y, r*2.2, 0, Math.PI*2); ctx.fill()
+            // Glow ring for key players
+            if (isBallHolder || isShooter) {
+              const glowColor = isBallHolder ? 'rgba(245,158,11,0.25)' : 'rgba(74,222,128,0.2)'
+              ctx.fillStyle = glowColor
+              ctx.beginPath(); ctx.arc(pos.x, pos.y, r*2.4, 0, Math.PI*2); ctx.fill()
             }
 
-            ctx.fillStyle = isBallHolder ? '#f59e0b' : isShooter ? '#4ade80' : isScreen ? '#888' : P
-            ctx.strokeStyle = 'white'
-            ctx.lineWidth = 1.5
+            // Player circle
+            ctx.fillStyle = isBallHolder ? '#f59e0b' : isShooter ? '#4ade80' : isScreener ? '#888' : P
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5
             ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2)
             ctx.fill(); ctx.stroke()
 
-            // Ball indicator
+            // Ball indicator on ball holder
             if (isBallHolder) {
               ctx.fillStyle = '#f59e0b'
-              ctx.strokeStyle = '#000'
-              ctx.lineWidth = 0.5
-              ctx.beginPath(); ctx.arc(pos.x + r*0.9, pos.y - r*0.9, r*0.55, 0, Math.PI*2)
+              ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 0.5
+              ctx.beginPath(); ctx.arc(pos.x + r*0.95, pos.y - r*0.95, r*0.52, 0, Math.PI*2)
               ctx.fill(); ctx.stroke()
-            }
-            // Star for shooter
-            if (isShooter) {
-              ctx.fillStyle = '#4ade80'
-              ctx.font = `bold ${Math.round(r*1.2)}px sans-serif`
-              ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-              ctx.fillText('*', pos.x + r*0.9, pos.y - r*0.9)
+              // Ball seam lines
+              ctx.strokeStyle = 'rgba(139,69,19,0.8)'; ctx.lineWidth = 0.5
+              ctx.beginPath(); ctx.arc(pos.x + r*0.95, pos.y - r*0.95, r*0.52, 0, Math.PI)
+              ctx.stroke()
             }
 
-            ctx.fillStyle = 'white'
+            // Star marker for shooter
+            if (isShooter) {
+              ctx.fillStyle = '#4ade80'
+              ctx.font = `bold ${Math.round(r*1.4)}px sans-serif`
+              ctx.textAlign = 'center'
+              ctx.fillText('*', pos.x + r*1.0, pos.y - r*1.1)
+            }
+
+            // Player number
+            ctx.fillStyle = isBallHolder || isShooter ? '#000' : 'white'
             ctx.font = `bold ${Math.round(r*1.05)}px sans-serif`
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
             ctx.fillText(player.label, pos.x, pos.y)
 
-            // Role label below player
-            const shortRole = isBallHolder ? 'BALL' : isShooter ? 'SHOOT' : isPassTarget ? 'PASS' : isScreen ? 'SCREEN' : ''
-            if (shortRole) {
-              ctx.fillStyle = isBallHolder ? '#f59e0b' : isShooter ? '#4ade80' : '#6b9fff'
-              ctx.font = `bold ${Math.round(r*0.85)}px sans-serif`
+            // Role tag below player
+            const tag = isBallHolder ? 'BALL' : isShooter ? 'SHOOT' : isPassTarget ? 'PASS' : isScreener ? 'SCREEN' : ''
+            if (tag) {
+              const tagColor = isBallHolder ? '#f59e0b' : isShooter ? '#4ade80' : '#6b9fff'
+              ctx.fillStyle = tagColor
+              ctx.font = `bold ${Math.round(r*0.9)}px sans-serif`
               ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-              ctx.fillText(shortRole, pos.x, pos.y + r*1.2)
+              ctx.fillText(tag, pos.x, pos.y + r*1.2)
             }
+
           } else if (isLineman) {
-            const s = r * 0.95
-            ctx.fillStyle = P
-            ctx.strokeStyle = 'white'
-            ctx.lineWidth = 1.2
+            // Square for linemen
+            ctx.fillStyle = P; ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.2
+            const s = r * 0.92
             ctx.fillRect(pos.x-s, pos.y-s, s*2, s*2)
             ctx.strokeRect(pos.x-s, pos.y-s, s*2, s*2)
             ctx.fillStyle = 'white'
-            ctx.font = `bold ${Math.round(r*1.1)}px sans-serif`
+            ctx.font = `bold ${Math.round(r)}px sans-serif`
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
             ctx.fillText(player.label, pos.x, pos.y)
           } else {
-            ctx.fillStyle = P
-            ctx.strokeStyle = 'white'
-            ctx.lineWidth = 1.2
+            // Circle for skill players
+            ctx.fillStyle = P; ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.2
             ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2)
             ctx.fill(); ctx.stroke()
+
+            // QB handoff indicator
+            if (!isBBall && !isBSB && player.id === 'QB' && player.routeName && player.routeName.includes('Handoff') && t >= snap && t < snap + 0.25) {
+              ctx.fillStyle = 'rgba(255,200,50,0.9)'
+              ctx.font = `bold ${Math.round(r*1.5)}px sans-serif`
+              ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'
+              ctx.fillText('HAND OFF', pos.x, pos.y - r*1.5)
+            }
+
             ctx.fillStyle = 'white'
-            ctx.font = `bold ${Math.round(r*1.1)}px sans-serif`
+            ctx.font = `bold ${Math.round(r*1.0)}px sans-serif`
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
             ctx.fillText(player.label, pos.x, pos.y)
           }
         } else {
-          // Defense: hollow dark circle
-          ctx.strokeStyle = isBBall ? 'rgba(100,100,100,0.6)' : 'rgba(60,60,60,0.7)'
-          ctx.fillStyle = isBBall ? 'rgba(100,100,100,0.08)' : 'rgba(60,60,60,0.08)'
+          // Defense: hollow circle
+          const defColor = isBBall ? 'rgba(120,120,120,0.7)' : 'rgba(60,60,60,0.75)'
+          ctx.strokeStyle = defColor; ctx.fillStyle = isBBall ? 'rgba(120,120,120,0.08)' : 'rgba(60,60,60,0.08)'
           ctx.lineWidth = 1.2
-          ctx.beginPath(); ctx.arc(pos.x, pos.y, r*0.85, 0, Math.PI*2)
+          ctx.beginPath(); ctx.arc(pos.x, pos.y, r*0.82, 0, Math.PI*2)
           ctx.fill(); ctx.stroke()
-          ctx.fillStyle = isBBall ? 'rgba(100,100,100,0.7)' : 'rgba(60,60,60,0.7)'
-          ctx.font = `${Math.round(r*0.9)}px sans-serif`
+          ctx.fillStyle = defColor
+          ctx.font = `${Math.round(r*0.85)}px sans-serif`
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
           ctx.fillText(player.label, pos.x, pos.y)
         }
       })
 
       // Snap flash
-      if (t >= snap && t < snap + 0.07) {
-        ctx.fillStyle = 'rgba(0,0,0,0.75)'
+      if (!isBBall && !isBSB && t >= snap && t < snap + 0.07) {
+        ctx.fillStyle = 'rgba(0,0,0,0.8)'
         ctx.font = `bold ${Math.round(H*0.045)}px sans-serif`
         ctx.textAlign = 'center'
-        ctx.fillText(isBBall ? 'GO' : isBSB ? 'PITCH' : 'SNAP', W/2, isBBall ? sy(50) : isBSB ? sy(46) : sy(38)-10)
-      }
-      // QB action label (football only)
-      if (!isBBall && !isBSB && t >= snap && t < snap + 0.15) {
-        const qb = parsed.players.find(p => p.id === 'QB')
-        if (qb && qb.routeName && qb.routeName !== 'Dropback' && qb.routeName !== '') {
-          const qbPos = getPos(qb, snap)
-          ctx.fillStyle = `rgba(${pr},${pg},${pb},0.85)`
-          ctx.font = `bold ${Math.round(r*1.8)}px sans-serif`
-          ctx.textAlign = 'center'
-          ctx.fillText(qb.routeName.toUpperCase(), qbPos.x, qbPos.y - r*2.5)
-        }
+        ctx.fillText('SNAP', W/2, isBSB ? sy(46) : sy(38)-10)
       }
     }
 
@@ -1352,13 +1462,14 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
   const [reply, setReply] = useState('')
   const chatRef = useRef(null)
 
-  useEffect(() => { loadScenario() }, [])
+  useEffect(() => { loadScenario() }, [sport])
   useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight }, [coordMsgs])
 
   const cfg = SPORTS[sport] || SPORTS.Football
 
   async function loadScenario() {
     setLoading(true); setScenario(null); setError(''); setPicked(null)
+    const cfg = SPORTS[sport] || SPORTS.Football
     try {
       const raw = await callAI(cfg.scenarioPrompt(diff))
       const data = parseJSON(raw)
