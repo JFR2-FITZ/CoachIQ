@@ -217,7 +217,7 @@ const SPORTS = {
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
     buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme for this teams personnel.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types like: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a coaching intelligence AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"game situation","phase":"OFFENSE","question":"2-3 sentence scenario asking what coach should do","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
+    scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
   },
   Basketball: {
     emoji:'BB',
@@ -231,7 +231,7 @@ const SPORTS = {
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays or sets. Use types like: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a coaching intelligence AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"game situation","phase":"OFFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
+    scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario using basketball terminology only. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 BALL ON OWN 30 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using basketball terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
   },
   Baseball: {
     emoji:'BSB',
@@ -245,7 +245,7 @@ const SPORTS = {
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types like: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a coaching intelligence AI. Create a baseball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"game situation","phase":"OFFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
+    scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario using baseball manager terminology only. No football references. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario for a manager","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using baseball manager terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
   },
 }
 
@@ -444,7 +444,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 
     const footballPrompt = 'Generate football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' RULES: QB on handoff plays makes short fake and stops (path 2 units). RB shows full run lane. Pulling guards show pull route around edge. Return ONLY raw JSON using this template, customize offensive paths only: ' + fbTemplate.replace('PLAYNAME', play.name)
 
-    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Use 5 offensive players (1-5) and 5 defenders. Show cuts, screens, dribble paths. Return ONLY raw JSON using this template, customize all offensive paths for this play: ' + bbTemplate.replace('PLAYNAME', play.name)
+    const basketballPrompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' IMPORTANT: Mark the ball handler with routeName starting with BALL: (e.g. routeName: "BALL: Dribble right"). Mark the primary scorer/shooter with routeName starting with SHOOT: (e.g. routeName: "SHOOT: Curl to wing"). Mark pass recipients with routeName starting with PASS: (e.g. routeName: "PASS: Spot up corner"). Mark screeners with routeName: "SCREEN". Mark cutters with routeName starting with CUT:. This labeling is critical so coaches know exactly who has the ball, who is the target, and what each player does. Use 5 offensive players (1-5) and 5 defenders. Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
 
     const baseballPrompt = 'Generate baseball defensive positioning and play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions on a baseball diamond. Show movement paths for relevant players. Return ONLY raw JSON using this template, customize paths to show this play: ' + bsbTemplate.replace('PLAYNAME', play.name)
 
@@ -509,41 +509,71 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
     const isBSB = sportType === 'baseball'
 
     function drawBasketballCourt() {
-      ctx.fillStyle = '#c8954a'
+      // Wood floor
+      ctx.fillStyle = '#c4893e'
       ctx.fillRect(0, 0, W, H)
-      ctx.strokeStyle = 'rgba(0,0,0,0.06)'
-      ctx.lineWidth = 1
-      for (let row = 0; row < 12; row++) {
-        ctx.beginPath(); ctx.moveTo(0, H*row/12); ctx.lineTo(W, H*row/12); ctx.stroke()
+      // Floor grain
+      ctx.strokeStyle = 'rgba(0,0,0,0.05)'
+      ctx.lineWidth = 0.5
+      for (let i = 0; i < 14; i++) {
+        ctx.beginPath(); ctx.moveTo(0, H*i/14); ctx.lineTo(W, H*i/14); ctx.stroke()
       }
-      ctx.strokeStyle = 'rgba(255,255,255,0.85)'
+      // Court boundary
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)'
       ctx.lineWidth = 2
-      ctx.strokeRect(sx(3), sy(2), sx(94), sy(95))
-      ctx.fillStyle = 'rgba(180,60,60,0.22)'
-      ctx.fillRect(sx(38), sy(8), sx(24), sy(20))
-      ctx.strokeStyle = 'rgba(255,255,255,0.75)'
+      ctx.strokeRect(sx(4), sy(3), sx(92), sy(94))
+
+      // Key/paint - proportional rectangle
+      // Key is 16ft wide, free throw line is 15ft from basket
+      // Basket at y=6, key goes from y=6 to y=30 (free throw line)
+      ctx.fillStyle = 'rgba(160,50,50,0.2)'
+      ctx.fillRect(sx(37), sy(6), sx(26), sy(24))
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'
       ctx.lineWidth = 1.5
-      ctx.strokeRect(sx(38), sy(8), sx(24), sy(20))
+      ctx.strokeRect(sx(37), sy(6), sx(26), sy(24))
+
+      // Free throw line at y=30
+      ctx.beginPath(); ctx.moveTo(sx(37), sy(30)); ctx.lineTo(sx(63), sy(30)); ctx.stroke()
+
+      // Free throw circle - centered on free throw line
       ctx.beginPath()
-      ctx.arc(sx(50), sy(28), sx(11), 0, Math.PI*2)
+      ctx.arc(sx(50), sy(30), sx(12), 0, Math.PI*2)
       ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(sx(38), sy(28)); ctx.lineTo(sx(62), sy(28)); ctx.stroke()
-      ctx.fillStyle = 'rgba(255,100,50,0.9)'
-      ctx.beginPath(); ctx.arc(sx(50), sy(8), sx(2.5), 0, Math.PI*2); ctx.fill()
+
+      // Restricted arc near basket
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(sx(50), sy(6), sx(5), 0, Math.PI)
+      ctx.stroke()
+
+      // Basket at top center
+      ctx.fillStyle = '#e05020'
+      ctx.beginPath(); ctx.arc(sx(50), sy(6), sx(2.5), 0, Math.PI*2); ctx.fill()
       ctx.strokeStyle = 'rgba(255,255,255,0.9)'
-      ctx.lineWidth = 1.5
-      ctx.beginPath(); ctx.arc(sx(50), sy(8), sx(2.5), 0, Math.PI*2); ctx.stroke()
+      ctx.lineWidth = 2
+      ctx.beginPath(); ctx.arc(sx(50), sy(6), sx(2.5), 0, Math.PI*2); ctx.stroke()
+
+      // Backboard
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)'
       ctx.lineWidth = 2.5
-      ctx.beginPath(); ctx.moveTo(sx(40), sy(4.5)); ctx.lineTo(sx(60), sy(4.5)); ctx.stroke()
-      ctx.strokeStyle = 'rgba(255,255,255,0.6)'
+      ctx.beginPath(); ctx.moveTo(sx(41), sy(3.5)); ctx.lineTo(sx(59), sy(3.5)); ctx.stroke()
+
+      // Three point line - arc centered on basket (y=6), radius ~23.75ft
+      // In our coords: basket at x=50,y=6. Three point radius = ~31 units
+      ctx.strokeStyle = 'rgba(255,255,255,0.65)'
       ctx.lineWidth = 1.5
+      // Corner three straight portions
+      ctx.beginPath(); ctx.moveTo(sx(7), sy(3)); ctx.lineTo(sx(7), sy(34)); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(93), sy(3)); ctx.lineTo(sx(93), sy(34)); ctx.stroke()
+      // Arc connecting corners - must pass through y=34 at x=7 and x=93
+      // Center at basket x=50,y=6. Radius to hit x=7,y=34: sqrt(43^2+28^2) = 51 units
       ctx.beginPath()
-      ctx.arc(sx(50), sy(8), sy(30), Math.PI*0.54, Math.PI*0.46, false)
+      const r3 = Math.sqrt(Math.pow(sx(50)-sx(7),2) + Math.pow(sy(6)-sy(34),2))
+      const startAngle = Math.atan2(sy(34)-sy(6), sx(7)-sx(50))
+      const endAngle = Math.atan2(sy(34)-sy(6), sx(93)-sx(50))
+      ctx.arc(sx(50), sy(6), r3, startAngle, endAngle, false)
       ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(sx(8), sy(38)); ctx.lineTo(sx(8), sy(2)); ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(sx(92), sy(38)); ctx.lineTo(sx(92), sy(2)); ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(sx(8), sy(38)); ctx.lineTo(sx(3), sy(38)); ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(sx(92), sy(38)); ctx.lineTo(sx(97), sy(38)); ctx.stroke()
     }
 
     function drawBaseballField() {
@@ -636,6 +666,17 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 
             // Player radius — very small, reference-image style
       const r = W * 0.016
+
+      // Basketball special rendering helpers
+      function getBBRole(player) {
+        const rn = player.routeName || ''
+        if (rn.startsWith('BALL:')) return 'ball'
+        if (rn.startsWith('SHOOT:')) return 'shooter'
+        if (rn.startsWith('PASS:')) return 'pass'
+        if (rn === 'SCREEN') return 'screen'
+        if (rn.startsWith('CUT:')) return 'cut'
+        return 'move'
+      }
 
       // PRE-SNAP: draw full route map as preview
       if (t < snap) {
@@ -752,37 +793,90 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
         const pos = getPos(player, t)
         const isOff = player.role === 'off'
         const isLineman = ['C','G','T'].includes(player.label)
+        const bbRole = isBBall ? getBBRole(player) : null
 
         if (isOff) {
-          if (isLineman) {
-            // Linemen: small filled square, dark outline
+          if (isBBall) {
+            // Basketball player rendering with role indicators
+            const isBallHolder = bbRole === 'ball'
+            const isShooter = bbRole === 'shooter'
+            const isPassTarget = bbRole === 'pass'
+            const isScreen = bbRole === 'screen'
+
+            // Outer glow for key players
+            if (isBallHolder) {
+              ctx.fillStyle = 'rgba(255,200,0,0.25)'
+              ctx.beginPath(); ctx.arc(pos.x, pos.y, r*2.2, 0, Math.PI*2); ctx.fill()
+            } else if (isShooter) {
+              ctx.fillStyle = 'rgba(74,222,128,0.2)'
+              ctx.beginPath(); ctx.arc(pos.x, pos.y, r*2.2, 0, Math.PI*2); ctx.fill()
+            }
+
+            ctx.fillStyle = isBallHolder ? '#f59e0b' : isShooter ? '#4ade80' : isScreen ? '#888' : P
+            ctx.strokeStyle = 'white'
+            ctx.lineWidth = 1.5
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2)
+            ctx.fill(); ctx.stroke()
+
+            // Ball indicator
+            if (isBallHolder) {
+              ctx.fillStyle = '#f59e0b'
+              ctx.strokeStyle = '#000'
+              ctx.lineWidth = 0.5
+              ctx.beginPath(); ctx.arc(pos.x + r*0.9, pos.y - r*0.9, r*0.55, 0, Math.PI*2)
+              ctx.fill(); ctx.stroke()
+            }
+            // Star for shooter
+            if (isShooter) {
+              ctx.fillStyle = '#4ade80'
+              ctx.font = `bold ${Math.round(r*1.2)}px sans-serif`
+              ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+              ctx.fillText('*', pos.x + r*0.9, pos.y - r*0.9)
+            }
+
+            ctx.fillStyle = 'white'
+            ctx.font = `bold ${Math.round(r*1.05)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
+
+            // Role label below player
+            const shortRole = isBallHolder ? 'BALL' : isShooter ? 'SHOOT' : isPassTarget ? 'PASS' : isScreen ? 'SCREEN' : ''
+            if (shortRole) {
+              ctx.fillStyle = isBallHolder ? '#f59e0b' : isShooter ? '#4ade80' : '#6b9fff'
+              ctx.font = `bold ${Math.round(r*0.85)}px sans-serif`
+              ctx.textAlign = 'center'; ctx.textBaseline = 'top'
+              ctx.fillText(shortRole, pos.x, pos.y + r*1.2)
+            }
+          } else if (isLineman) {
             const s = r * 0.95
             ctx.fillStyle = P
             ctx.strokeStyle = 'white'
             ctx.lineWidth = 1.2
             ctx.fillRect(pos.x-s, pos.y-s, s*2, s*2)
             ctx.strokeRect(pos.x-s, pos.y-s, s*2, s*2)
+            ctx.fillStyle = 'white'
+            ctx.font = `bold ${Math.round(r*1.1)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
           } else {
-            // Skill: small filled circle
             ctx.fillStyle = P
             ctx.strokeStyle = 'white'
             ctx.lineWidth = 1.2
             ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2)
             ctx.fill(); ctx.stroke()
+            ctx.fillStyle = 'white'
+            ctx.font = `bold ${Math.round(r*1.1)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
           }
-          // Label inside
-          ctx.fillStyle = 'white'
-          ctx.font = `bold ${Math.round(r*1.1)}px sans-serif`
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-          ctx.fillText(player.label, pos.x, pos.y)
         } else {
-          // Defense: hollow dark circle, small
-          ctx.strokeStyle = 'rgba(60,60,60,0.7)'
-          ctx.fillStyle = 'rgba(60,60,60,0.08)'
+          // Defense: hollow dark circle
+          ctx.strokeStyle = isBBall ? 'rgba(100,100,100,0.6)' : 'rgba(60,60,60,0.7)'
+          ctx.fillStyle = isBBall ? 'rgba(100,100,100,0.08)' : 'rgba(60,60,60,0.08)'
           ctx.lineWidth = 1.2
           ctx.beginPath(); ctx.arc(pos.x, pos.y, r*0.85, 0, Math.PI*2)
           ctx.fill(); ctx.stroke()
-          ctx.fillStyle = 'rgba(60,60,60,0.7)'
+          ctx.fillStyle = isBBall ? 'rgba(100,100,100,0.7)' : 'rgba(60,60,60,0.7)'
           ctx.font = `${Math.round(r*0.9)}px sans-serif`
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
           ctx.fillText(player.label, pos.x, pos.y)
@@ -1000,18 +1094,31 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
           {statBox('Timeouts', timeouts, setTimeouts, ['3 remaining','2 remaining','1 remaining','None left'])}
         </div>
         <button onClick={getBbRec} disabled={bbLoading} style={{ width:'100%', background:bbLoading?'#3d4559':S, border:'none', borderRadius:8, color:'white', fontFamily:"'Bebas Neue',sans-serif", fontSize:15, letterSpacing:2, padding:'11px', cursor:bbLoading?'not-allowed':'pointer', marginBottom:11 }}>{bbLoading ? 'THINKING...' : '⚡ GET COACHING CALLS'}</button>
-        {bbRec && bbRec.calls && bbRec.calls.map((c,i) => (
-          <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:`1px solid ${c.urgency==='HIGH'?P:'#1e2330'}`, marginBottom:7 }}>
-            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:20, width:22, textAlign:'center', lineHeight:1, color:i===0?S:'#6b7a96', marginTop:2 }}>{i+1}</div>
-            <div style={{ flex:1 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}>
-                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{c.name}</div>
-                <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:c.urgency==='HIGH'?al(P,0.2):al(S,0.15), color:c.urgency==='HIGH'?P:S }}>{c.urgency}</span>
+        {bbRec && bbRec.calls && (
+          <>
+            <div style={{ background:al(S,0.1), border:`2px solid ${S}`, borderRadius:10, padding:'12px 14px', marginBottom:10 }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:S, fontWeight:700, marginBottom:6 }}>Primary Call — Best Option Now</div>
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+                <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{bbRec.calls[0].name}</div>
+                <span style={{ fontSize:9, fontWeight:700, padding:'2px 8px', borderRadius:4, background:bbRec.calls[0].urgency==='HIGH'?al(P,0.25):al(S,0.2), color:bbRec.calls[0].urgency==='HIGH'?P:S }}>{bbRec.calls[0].urgency}</span>
               </div>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{c.why}</div>
+              <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{bbRec.calls[0].why}</div>
             </div>
-          </div>
-        ))}
+            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Also Consider</div>
+            {bbRec.calls.slice(1).map((c,i) => (
+              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}>
+                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, width:20, textAlign:'center', lineHeight:1, color:'#6b7a96', marginTop:2, flexShrink:0 }}>{i+2}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{c.name}</div>
+                    <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:c.urgency==='HIGH'?al(P,0.2):al(S,0.15), color:c.urgency==='HIGH'?P:S }}>{c.urgency}</span>
+                  </div>
+                  <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{c.why}</div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
         {!bbRec && !bbLoading && <div style={{ fontSize:11, color:'#6b7a96', textAlign:'center', padding:'10px 0' }}>Set the game situation above and get AI coaching recommendations.</div>}
       </div>
     </Card>
@@ -1063,18 +1170,31 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
           {statBox('Runners', runners, setRunners, ['Bases Empty','Runner on 1st','Runner on 2nd','Runner on 3rd','1st & 2nd','1st & 3rd','2nd & 3rd','Bases Loaded'])}
         </div>
         <button onClick={getBsbRec} disabled={bsbLoading} style={{ width:'100%', background:bsbLoading?'#3d4559':S, border:'none', borderRadius:8, color:'white', fontFamily:"'Bebas Neue',sans-serif", fontSize:15, letterSpacing:2, padding:'11px', cursor:bsbLoading?'not-allowed':'pointer', marginBottom:11 }}>{bsbLoading ? 'THINKING...' : '⚡ GET STRATEGIC MOVES'}</button>
-        {bsbRec && bsbRec.moves && bsbRec.moves.map((m,i) => (
-          <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:`1px solid ${i===0?P:'#1e2330'}`, marginBottom:7 }}>
-            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:20, width:22, textAlign:'center', lineHeight:1, color:i===0?P:'#6b7a96', marginTop:2 }}>{i+1}</div>
-            <div style={{ flex:1 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}>
-                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{m.action}</div>
-                <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(S,0.2), color:S }}>{m.type}</span>
-              </div>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{m.reason}</div>
+        {bsbRec && bsbRec.moves && (
+          <>
+            {/* Primary recommendation - highlighted */}
+            <div style={{ background:al(P,0.08), border:`2px solid ${P}`, borderRadius:10, padding:'12px 14px', marginBottom:10 }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:6 }}>Primary Move — Best Option Here</div>
+              <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', marginBottom:4 }}>{bsbRec.moves[0].action}</div>
+              <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5, marginBottom:6 }}>{bsbRec.moves[0].reason}</div>
+              <span style={{ fontSize:9, fontWeight:700, padding:'2px 8px', borderRadius:4, background:al(S,0.25), color:S }}>{bsbRec.moves[0].type}</span>
             </div>
-          </div>
-        ))}
+            {/* Secondary options */}
+            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Also Consider</div>
+            {bsbRec.moves.slice(1).map((m,i) => (
+              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}>
+                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, width:20, textAlign:'center', lineHeight:1, color:'#6b7a96', marginTop:2, flexShrink:0 }}>{i+2}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{m.action}</div>
+                    <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:'rgba(107,154,255,0.15)', color:'#6b9fff' }}>{m.type}</span>
+                  </div>
+                  <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{m.reason}</div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
         {!bsbRec && !bsbLoading && <div style={{ fontSize:11, color:'#6b7a96', textAlign:'center', padding:'10px 0' }}>Set the count and situation above and get manager recommendations.</div>}
       </div>
     </Card>
@@ -1206,7 +1326,9 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
     const msgs = [{ role:'user', content:coordPlan, lbl:'Your Game Plan' }]
     setCoordMsgs(msgs)
     setCoordStarted(true)
-    const prompt = `You are an elite opposing ${sport} coordinator. The coach shared their ${coordSide} game plan: "${coordPlan}". You play ${coordSide==='offense'?'DEFENSE':'OFFENSE'} against them. This is Q1. Tell them specifically how you will attack or stop their scheme. Under 150 words. End with a challenge that forces them to adapt.`
+    const matchupRole = sport==='Baseball' ? 'manager' : sport==='Basketball' ? 'head coach' : 'coordinator'
+    const oppSide = coordSide==='offense' ? (sport==='Baseball'?'pitching/defense':sport==='Basketball'?'defense':'DEFENSE') : (sport==='Baseball'?'batting/offense':sport==='Basketball'?'offense':'OFFENSE')
+    const prompt = `You are an elite opposing ${sport} ${matchupRole}. The coach described their ${coordSide} game plan: "${coordPlan}". You handle the ${oppSide} side. Use ${sport}-specific terminology only - no football terms if this is basketball or baseball. Tell them specifically how you will stop or exploit their approach. Under 150 words. End with a specific challenge.`
     try {
       const raw = await callAI(prompt)
       setCoordMsgs([...msgs, { role:'ai', content:raw, lbl:'Q1 - Opposing Coordinator' }])
@@ -1223,9 +1345,12 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
     const newQ = newMsgs.filter(m=>m.role==='ai').length % 2 === 0 && coordQ < 4 ? coordQ+1 : coordQ
     setCoordQ(newQ)
     const history = newMsgs.map(m=>(m.role==='user'?'COACH: ':'OPPOSING COORDINATOR: ')+m.content).filter(Boolean).join('\n\n')
-    const prompt = `You are an elite opposing ${sport} coordinator. Conversation:\n\n${history}\n\nNow Q${newQ}. Make a counter-adjustment. Tactical, specific. Under 150 words. End with a challenge.`
-    try {
-      const raw = await callAI(prompt)
+    const replyRole = sport==='Baseball' ? 'manager' : sport==='Basketball' ? 'head coach' : 'coordinator'
+    const prompt = `You are an elite opposing ${sport} ${replyRole}. Full conversation:
+
+${history}
+
+Continuing. Make a specific counter-adjustment using only ${sport} terminology. Under 150 words. End with a challenge.`
       setCoordMsgs(prev => [...prev, { role:'ai', content:raw, lbl:`Q${newQ} - Opposing Coordinator` }])
     } catch(e) { setCoordMsgs(prev => [...prev, { role:'error', content:'Error: '+e.message }]) }
     setCoordLoading(false)
@@ -1233,7 +1358,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
 
   return (
     <>
-      <Hero greet="Test Your Coaching IQ" left="Gauntlet" right="Mode" P={P} S={S} dk={c=>c} />
+      <Hero greet={sport==='Baseball'?'Test Your Manager IQ':sport==='Basketball'?'Test Your Coaching IQ':'Test Your Coaching IQ'} left="Gauntlet" right="Mode" P={P} S={S} dk={c=>c} />
 
       {/* SCENARIO */}
       <Card>
@@ -1295,17 +1420,25 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
             <>
               <div style={{ background:al(P,0.08), border:`1px solid ${al(P,0.2)}`, borderRadius:10, padding:12, marginBottom:12 }}>
                 <div style={{ fontSize:11, color:P, fontWeight:700, letterSpacing:1, marginBottom:6, textTransform:'uppercase' }}>How It Works</div>
-                <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6 }}>Describe your game plan. An AI opposing coordinator tells you exactly how they will stop you. You adapt. The battle continues as long as you want.</div>
+                <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6 }}>{sport==='Football' && 'Describe your scheme. An AI opposing coordinator attacks it. You adapt. Keep going as long as you want.'}{sport==='Basketball' && 'Describe your offensive set or defensive scheme. An AI opposing coach counters it. You make adjustments.'}{sport==='Baseball' && 'Describe your pitching approach or offensive game plan. An AI opposing manager counters it. You adapt.'}</div>
               </div>
               <div style={{ display:'flex', gap:6, marginBottom:12 }}>
                 {['offense','defense'].map(s => (
                   <button key={s} onClick={() => setCoordSide(s)} style={{ flex:1, padding:9, borderRadius:8, border:`1px solid ${coordSide===s?P:'#1e2330'}`, background:coordSide===s?al(P,0.15):'transparent', color:coordSide===s?P:'#6b7a96', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, cursor:'pointer' }}>
-                    {s==='offense'?'ON OFFENSE':'ON DEFENSE'}
+                    {s==='offense'
+                      ? (sport==='Baseball'?'BATTING/OFFENSE':sport==='Basketball'?'ON OFFENSE':'ON OFFENSE')
+                      : (sport==='Baseball'?'PITCHING/DEFENSE':sport==='Basketball'?'ON DEFENSE':'ON DEFENSE')}
                   </button>
                 ))}
               </div>
               <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Describe your {coordSide} game plan</label>
-              <textarea value={coordPlan} onChange={e=>setCoordPlan(e.target.value)} placeholder={coordSide==='offense'?'e.g. We run a Wing-T with 13-year-olds. Our strength is the buck sweep...':'e.g. We run a 4-3 defense. We plan to stop the run first...'} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', resize:'vertical', minHeight:90, lineHeight:1.5, marginBottom:10 }} />
+              <textarea value={coordPlan} onChange={e=>setCoordPlan(e.target.value)} placeholder={
+                      sport==='Basketball'
+                        ? (coordSide==='offense'?'e.g. We run motion offense with 13-year-olds. Our strength is ball movement and the pick and roll...':'e.g. We play man-to-man defense. We want to deny the ball to their best scorer...')
+                        : sport==='Baseball'
+                        ? (coordSide==='offense'?'e.g. We are a small ball team. We like to move runners with contact hitting and smart baserunning...':'e.g. Our pitcher throws 70% fastballs. We struggle with left-handed hitters...')
+                        : (coordSide==='offense'?'e.g. We run a Wing-T with 13-year-olds. Our strength is the buck sweep...':'e.g. We run a 4-3 defense. We plan to stop the run first...')
+                    } style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', resize:'vertical', minHeight:90, lineHeight:1.5, marginBottom:10 }} />
               <PBtn onClick={startMatchup} disabled={coordLoading||!coordPlan.trim()} color={P}>{coordLoading?'OPPONENT THINKING...':'START MATCHUP'}</PBtn>
               {coordLoading && <Shimmer />}
             </>
@@ -1345,16 +1478,26 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
 
       {/* IQ SCORE */}
       <Card>
-        <CardHead icon="🧠" title="Your Coach IQ" tag="TOP 12%" tagColor={S} accent={S} />
+        <CardHead icon="🧠" title={sport==='Baseball'?'Your Manager IQ':sport==='Basketball'?'Your Coach IQ':'Your Coach IQ'} tag="TOP 12%" tagColor={S} accent={S} />
         <div style={{ padding:14 }}>
           <div style={{ background:`linear-gradient(135deg,${al(S,0.12)},${al(P,0.1)})`, borderRadius:10, padding:15, display:'flex', alignItems:'center', gap:13, marginBottom:13 }}>
             <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:68, color:P, letterSpacing:2, lineHeight:1 }}>{iq}</div>
             <div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:1 }}>Advanced Coordinator</div>
-              <div style={{ fontSize:11, color:'#6b7a96', marginTop:4, lineHeight:1.5 }}>Strongest: Situational IQ<br />Improve: Halftime Adjustments</div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:1 }}>
+                {sport==='Basketball'?'Advanced Coach':sport==='Baseball'?'Advanced Manager':'Advanced Coordinator'}
+              </div>
+              <div style={{ fontSize:11, color:'#6b7a96', marginTop:4, lineHeight:1.5 }}>
+                Strongest: Situational IQ<br />
+                Improve: {sport==='Basketball'?'Timeout Management':sport==='Baseball'?'Bullpen Strategy':'Halftime Adjustments'}
+              </div>
             </div>
           </div>
-          {[['Play Calling',88,P],['Situational IQ',92,P],['Scheme Knowledge',85,S],['Halftime Adjustments',71,'#6b7a96'],['Opponent Reading',79,S]].map(([l,v,c]) => (
+          {(sport==='Basketball'
+            ? [['Play Calling',88,P],['Situational IQ',92,P],['Scheme Knowledge',85,S],['Timeout Management',71,'#6b7a96'],['Opponent Reading',79,S]]
+            : sport==='Baseball'
+            ? [['Pitch Sequencing',88,P],['Situational IQ',92,P],['Lineup Management',85,S],['Bullpen Strategy',71,'#6b7a96'],['Opponent Reading',79,S]]
+            : [['Play Calling',88,P],['Situational IQ',92,P],['Scheme Knowledge',85,S],['Halftime Adjustments',71,'#6b7a96'],['Opponent Reading',79,S]]
+          ).map(([l,v,c]) => (
             <div key={l} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
               <div style={{ fontSize:11, color:'#6b7a96', width:140, flexShrink:0 }}>{l}</div>
               <div style={{ flex:1, height:5, background:'#161922', borderRadius:3, overflow:'hidden' }}><div style={{ height:'100%', borderRadius:3, background:c, width:`${v}%` }} /></div>
