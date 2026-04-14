@@ -420,13 +420,39 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 
   async function generateAnim() {
     setLoading(true); setError(''); setParsed(null); setPlaying(false)
-    const prompt = `Generate a football play diagram for: ${play.name} (${play.type}). ${play.note}
+    const sport = play.sport || 'Football'
+    const isBasketball = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('ZONE ATT') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
+    const isBaseball = play.type && (play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('INFIELD') || play.type.includes('BATTING'))
 
-Field coords: x 0-100, y 0-60. LOS at y=38. Offense lines up at y=38 or higher y (below LOS). Defense lines up at y=35 or lower y (above LOS).
+    const footballPrompt = `Generate a football play diagram for: ${play.name} (${play.type}). ${play.note}
 
-Start with this exact JSON template and customize ONLY the offensive paths and routeNames for this specific play. Return ONLY raw JSON with no extra text or markdown:
+Field coords: x 0-100, y 0-60. LOS at y=38. Offense at y=38 or higher y. Defense at y=35 or lower y.
 
-{"formation":"${play.name}","snapPoint":0.18,"duration":3000,"players":[{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[35,34]],"routeName":"Block","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":42,"y":38,"path":[[42,38],[40,34]],"routeName":"Block","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,34]],"routeName":"Block","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":58,"y":38,"path":[[58,38],[60,34]],"routeName":"Block","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[65,34]],"routeName":"Block","routeYards":0},{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[48,45]],"routeName":"Dropback","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":50,"y":46,"path":[[50,46],[52,42],[56,38]],"routeName":"Run","routeYards":6},{"id":"X","label":"X","role":"off","routeType":"route","x":12,"y":38,"path":[[12,38],[12,30]],"routeName":"Go","routeYards":10},{"id":"Z","label":"Z","role":"off","routeType":"route","x":88,"y":38,"path":[[88,38],[88,30]],"routeName":"Go","routeYards":10},{"id":"TE","label":"Y","role":"off","routeType":"block","x":66,"y":38,"path":[[66,38],[66,34]],"routeName":"Block","routeYards":0},{"id":"D1","label":"D","role":"def","routeType":"block","x":42,"y":35,"path":[[42,35],[42,37]],"routeName":"","routeYards":0},{"id":"D2","label":"D","role":"def","routeType":"block","x":50,"y":35,"path":[[50,35],[50,37]],"routeName":"","routeYards":0},{"id":"D3","label":"D","role":"def","routeType":"block","x":58,"y":35,"path":[[58,35],[58,37]],"routeName":"","routeYards":0},{"id":"LB1","label":"LB","role":"def","routeType":"block","x":40,"y":30,"path":[[40,30],[40,32]],"routeName":"","routeYards":0},{"id":"LB2","label":"LB","role":"def","routeType":"block","x":60,"y":30,"path":[[60,30],[60,32]],"routeName":"","routeYards":0},{"id":"CB1","label":"CB","role":"def","routeType":"block","x":12,"y":30,"path":[[12,30],[12,32]],"routeName":"","routeYards":0},{"id":"CB2","label":"CB","role":"def","routeType":"block","x":88,"y":30,"path":[[88,30],[88,32]],"routeName":"","routeYards":0},{"id":"S1","label":"S","role":"def","routeType":"block","x":35,"y":22,"path":[[35,22],[35,24]],"routeName":"","routeYards":0},{"id":"S2","label":"S","role":"def","routeType":"block","x":65,"y":22,"path":[[65,22],[65,24]],"routeName":"","routeYards":0}]}`
+IMPORTANT QB RULES:
+- If this is a HANDOFF play: QB path must show a short fake/handoff motion (moves 1-2 units toward ball carrier then stops). Add a note "QB HANDS OFF" in the routeName.
+- If this is a KEEPER/BOOTLEG: QB path shows running to the edge.
+- If this is a PASS play: QB path shows a 3-5 step dropback (moves backward, higher y).
+- The RB path must clearly show the actual run lane, not just a short stub.
+- Pulling guards (G) should have longer paths around the edge showing their pull route.
+
+Start with this exact JSON template and customize offensive paths for this specific play. Return ONLY raw JSON:
+{"formation":"${play.name}","snapPoint":0.18,"duration":3000,"players":[{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[35,34]],"routeName":"Block","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":42,"y":38,"path":[[42,38],[40,34]],"routeName":"Block","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,34]],"routeName":"Block","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":58,"y":38,"path":[[58,38],[60,34]],"routeName":"Block","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[65,34]],"routeName":"Block","routeYards":0},{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,44]],"routeName":"Handoff","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":50,"y":46,"path":[[50,46],[52,42],[58,36]],"routeName":"Run","routeYards":7},{"id":"X","label":"X","role":"off","routeType":"route","x":12,"y":38,"path":[[12,38],[12,30]],"routeName":"Go","routeYards":10},{"id":"Z","label":"Z","role":"off","routeType":"route","x":88,"y":38,"path":[[88,38],[88,30]],"routeName":"Go","routeYards":10},{"id":"TE","label":"Y","role":"off","routeType":"block","x":66,"y":38,"path":[[66,38],[66,34]],"routeName":"Block","routeYards":0},{"id":"D1","label":"D","role":"def","routeType":"block","x":42,"y":35,"path":[[42,35],[42,37]],"routeName":"","routeYards":0},{"id":"D2","label":"D","role":"def","routeType":"block","x":50,"y":35,"path":[[50,35],[50,37]],"routeName":"","routeYards":0},{"id":"D3","label":"D","role":"def","routeType":"block","x":58,"y":35,"path":[[58,35],[58,37]],"routeName":"","routeYards":0},{"id":"LB1","label":"LB","role":"def","routeType":"block","x":40,"y":30,"path":[[40,30],[40,32]],"routeName":"","routeYards":0},{"id":"LB2","label":"LB","role":"def","routeType":"block","x":60,"y":30,"path":[[60,30],[60,32]],"routeName":"","routeYards":0},{"id":"CB1","label":"CB","role":"def","routeType":"block","x":12,"y":30,"path":[[12,30],[12,32]],"routeName":"","routeYards":0},{"id":"CB2","label":"CB","role":"def","routeType":"block","x":88,"y":30,"path":[[88,30],[88,32]],"routeName":"","routeYards":0},{"id":"S1","label":"S","role":"def","routeType":"block","x":35,"y":22,"path":[[35,22],[35,24]],"routeName":"","routeYards":0},{"id":"S2","label":"S","role":"def","routeType":"block","x":65,"y":22,"path":[[65,22],[65,24]],"routeName":"","routeYards":0}]}`
+
+    const basketballPrompt = `Generate a basketball play diagram for: ${play.name} (${play.type}). ${play.note}
+
+Use a BASKETBALL HALF COURT. Coords: x 0-100, y 0-60. Basket at x=50, y=8. Three point line arc from x=10,y=38 through x=50,y=5 to x=90,y=38. Paint: x=38-62, y=8-28. Free throw line at y=28.
+
+5 offensive players: PG(1), SG(2), SF(3), PF(4), C(5). Use standard basketball positions.
+5 defensive players: d1-d5 (hollow circles, no routes).
+
+Routes: dribble paths are solid lines with arrow, cuts are dashed with arrow, screens shown as player stopping with perpendicular mark. routeType "route" for movers, "block" for screeners/stationary.
+
+Return ONLY raw JSON - same structure as football but with basketball positions:
+{"formation":"${play.name}","snapPoint":0.15,"duration":3500,"players":[{"id":"PG","label":"1","role":"off","routeType":"route","x":50,"y":48,"path":[[50,48],[50,38]],"routeName":"Dribble","routeYards":0},{"id":"SG","label":"2","role":"off","routeType":"route","x":70,"y":42,"path":[[70,42],[75,30]],"routeName":"Cut","routeYards":0},{"id":"SF","label":"3","role":"off","routeType":"route","x":80,"y":38,"path":[[80,38],[85,25]],"routeName":"Wing","routeYards":0},{"id":"PF","label":"4","role":"off","routeType":"block","x":62,"y":22,"path":[[62,22],[62,22]],"routeName":"Screen","routeYards":0},{"id":"C","label":"5","role":"off","routeType":"block","x":50,"y":18,"path":[[50,18],[50,18]],"routeName":"Post","routeYards":0},{"id":"d1","label":"D","role":"def","routeType":"block","x":50,"y":50,"path":[[50,50],[50,51]],"routeName":"","routeYards":0},{"id":"d2","label":"D","role":"def","routeType":"block","x":70,"y":44,"path":[[70,44],[70,45]],"routeName":"","routeYards":0},{"id":"d3","label":"D","role":"def","routeType":"block","x":80,"y":40,"path":[[80,40],[80,41]],"routeName":"","routeYards":0},{"id":"d4","label":"D","role":"def","routeType":"block","x":62,"y":24,"path":[[62,24],[62,25]],"routeName":"","routeYards":0},{"id":"d5","label":"D","role":"def","routeType":"block","x":50,"y":20,"path":[[50,20],[50,21]],"routeName":"","routeYards":0}]}
+
+Customize player paths to accurately represent ${play.name}. Return raw JSON only.`
+
+    const prompt = isBasketball ? basketballPrompt : footballPrompt
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
@@ -483,40 +509,76 @@ Start with this exact JSON template and customize ONLY the offensive paths and r
       ctx.stroke()
     }
 
-    function draw(t) {
-      ctx.clearRect(0, 0, W, H)
+    const isBBall = isBasketball
 
-      // White field background like the reference image
+    function drawBasketballCourt() {
+      ctx.fillStyle = '#c8954a'
+      ctx.fillRect(0, 0, W, H)
+      ctx.strokeStyle = 'rgba(0,0,0,0.06)'
+      ctx.lineWidth = 1
+      for (let row = 0; row < 12; row++) {
+        ctx.beginPath(); ctx.moveTo(0, H*row/12); ctx.lineTo(W, H*row/12); ctx.stroke()
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)'
+      ctx.lineWidth = 2
+      ctx.strokeRect(sx(3), sy(2), sx(94), sy(95))
+      ctx.fillStyle = 'rgba(180,60,60,0.22)'
+      ctx.fillRect(sx(38), sy(8), sx(24), sy(20))
+      ctx.strokeStyle = 'rgba(255,255,255,0.75)'
+      ctx.lineWidth = 1.5
+      ctx.strokeRect(sx(38), sy(8), sx(24), sy(20))
+      ctx.beginPath()
+      ctx.arc(sx(50), sy(28), sx(11), 0, Math.PI*2)
+      ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(38), sy(28)); ctx.lineTo(sx(62), sy(28)); ctx.stroke()
+      ctx.fillStyle = 'rgba(255,100,50,0.9)'
+      ctx.beginPath(); ctx.arc(sx(50), sy(8), sx(2.5), 0, Math.PI*2); ctx.fill()
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)'
+      ctx.lineWidth = 1.5
+      ctx.beginPath(); ctx.arc(sx(50), sy(8), sx(2.5), 0, Math.PI*2); ctx.stroke()
+      ctx.lineWidth = 2.5
+      ctx.beginPath(); ctx.moveTo(sx(40), sy(4.5)); ctx.lineTo(sx(60), sy(4.5)); ctx.stroke()
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(sx(50), sy(8), sy(30), Math.PI*0.54, Math.PI*0.46, false)
+      ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(8), sy(38)); ctx.lineTo(sx(8), sy(2)); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(92), sy(38)); ctx.lineTo(sx(92), sy(2)); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(8), sy(38)); ctx.lineTo(sx(3), sy(38)); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(sx(92), sy(38)); ctx.lineTo(sx(97), sy(38)); ctx.stroke()
+    }
+
+    function drawFootballField() {
       ctx.fillStyle = '#f8f8f4'
       ctx.fillRect(0, 0, W, H)
-
-      // Yard lines - light gray horizontal
       ctx.strokeStyle = 'rgba(0,0,0,0.08)'
       ctx.lineWidth = 1
       for (let y = 0; y <= 60; y += 6) {
         ctx.beginPath(); ctx.moveTo(0, sy(y)); ctx.lineTo(W, sy(y)); ctx.stroke()
       }
-      // Hash marks
       ctx.strokeStyle = 'rgba(0,0,0,0.12)'
       ctx.lineWidth = 0.5
       for (let y = 0; y <= 60; y += 3) {
         ctx.beginPath(); ctx.moveTo(sx(36), sy(y)); ctx.lineTo(sx(40), sy(y)); ctx.stroke()
         ctx.beginPath(); ctx.moveTo(sx(60), sy(y)); ctx.lineTo(sx(64), sy(y)); ctx.stroke()
       }
-      // Sidelines
       ctx.strokeStyle = 'rgba(0,0,0,0.2)'
       ctx.lineWidth = 2
       ctx.beginPath(); ctx.moveTo(sx(2), 0); ctx.lineTo(sx(2), H); ctx.stroke()
       ctx.beginPath(); ctx.moveTo(sx(98), 0); ctx.lineTo(sx(98), H); ctx.stroke()
-
-      // Line of scrimmage - bold black dashed
       ctx.strokeStyle = 'rgba(0,0,0,0.5)'
       ctx.lineWidth = 1.5
       ctx.setLineDash([8, 5])
       ctx.beginPath(); ctx.moveTo(0, sy(38)); ctx.lineTo(W, sy(38)); ctx.stroke()
       ctx.setLineDash([])
+    }
 
-      // Player radius — very small, reference-image style
+    function draw(t) {
+      ctx.clearRect(0, 0, W, H)
+      if (isBBall) { drawBasketballCourt() } else { drawFootballField() }
+
+            // Player radius — very small, reference-image style
       const r = W * 0.016
 
       // PRE-SNAP: draw full route map as preview
@@ -676,7 +738,18 @@ Start with this exact JSON template and customize ONLY the offensive paths and r
         ctx.fillStyle = 'rgba(0,0,0,0.75)'
         ctx.font = `bold ${Math.round(H*0.045)}px sans-serif`
         ctx.textAlign = 'center'
-        ctx.fillText('SNAP', W/2, sy(38)-10)
+        ctx.fillText(isBBall ? 'GO' : 'SNAP', W/2, isBBall ? sy(50) : sy(38)-10)
+      }
+      // QB action label (football only)
+      if (!isBBall && t >= snap && t < snap + 0.15) {
+        const qb = parsed.players.find(p => p.id === 'QB')
+        if (qb && qb.routeName && qb.routeName !== 'Dropback' && qb.routeName !== '') {
+          const qbPos = getPos(qb, snap)
+          ctx.fillStyle = `rgba(${pr},${pg},${pb},0.85)`
+          ctx.font = `bold ${Math.round(r*1.8)}px sans-serif`
+          ctx.textAlign = 'center'
+          ctx.fillText(qb.routeName.toUpperCase(), qbPos.x, qbPos.y - r*2.5)
+        }
       }
     }
 
