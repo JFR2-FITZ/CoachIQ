@@ -214,12 +214,12 @@ const SPORTS = {
   Football: {
     emoji:'FB',
     fields:[
-      {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing']},
-      {id:'roster',label:'Roster Size',opts:['8-10 players','11-14 players','15-18 players','18+ players']},
-      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
-      {id:'focus',label:'Offensive Focus',opts:['Balanced','Run Heavy','Pass Heavy','Option/Read']},
-      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','Multiple / Varies']},
+      {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing','Flexbone','Run and Shoot']},
+      {id:'personnel',label:'Your Best Personnel',opts:['Athletic QB / Dual Threat','Big Physical RB','Fast Skill Players','Strong Offensive Line','Well-Balanced','Small But Fast Team','Big But Slower Team']},
+      {id:'age',label:'Age Group',opts:['6-8 yrs Flag','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
+      {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+      {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
+      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
     buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme for this teams personnel.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types like: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -651,28 +651,30 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
     const baseballPrompt = 'Generate baseball defensive positioning and play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions on a baseball diamond. Show movement paths for relevant players. Return ONLY raw JSON using this template, customize paths to show this play: ' + bsbTemplate.replace('PLAYNAME', play.name)
 
     const isDefense = play._isDefense === true
-    const defensePrompt = 'Generate a defensive football diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
-    ' This is a DEFENSIVE scheme. Show ONLY defensive players and their assignments. NO offensive players except a generic offense at the line of scrimmage for reference. ' +
-    'Defensive template - customize ALL defensive paths and positions to accurately show this specific defense: ' +
-    '{"formation":"' + play.name + '","snapPoint":0.15,"duration":3000,"players":[' +
-    '{"id":"DLa","label":"DE","role":"def","routeType":"block","x":38,"y":35,"path":[[38,35],[35,38]],"routeName":"Gap B","routeYards":0},' +
-    '{"id":"DLb","label":"DT","role":"def","routeType":"block","x":44,"y":35,"path":[[44,35],[44,38]],"routeName":"Gap A","routeYards":0},' +
-    '{"id":"DLc","label":"DT","role":"def","routeType":"block","x":56,"y":35,"path":[[56,35],[56,38]],"routeName":"Gap A","routeYards":0},' +
-    '{"id":"DLd","label":"DE","role":"def","routeType":"block","x":62,"y":35,"path":[[62,35],[65,38]],"routeName":"Gap B","routeYards":0},' +
-    '{"id":"LBa","label":"WLB","role":"def","routeType":"route","x":35,"y":29,"path":[[35,29],[30,34]],"routeName":"Flat Zone","routeYards":0},' +
-    '{"id":"LBb","label":"MLB","role":"def","routeType":"route","x":50,"y":27,"path":[[50,27],[50,33]],"routeName":"Hook Zone","routeYards":0},' +
-    '{"id":"LBc","label":"SLB","role":"def","routeType":"route","x":65,"y":29,"path":[[65,29],[70,34]],"routeName":"Flat Zone","routeYards":0},' +
-    '{"id":"CBa","label":"CB","role":"def","routeType":"route","x":12,"y":35,"path":[[12,35],[12,25]],"routeName":"Man Coverage","routeYards":0},' +
-    '{"id":"CBb","label":"CB","role":"def","routeType":"route","x":88,"y":35,"path":[[88,35],[88,25]],"routeName":"Man Coverage","routeYards":0},' +
-    '{"id":"SS","label":"SS","role":"def","routeType":"route","x":65,"y":22,"path":[[65,22],[55,27]],"routeName":"Cover 2 Half","routeYards":0},' +
-    '{"id":"FS","label":"FS","role":"def","routeType":"route","x":50,"y":16,"path":[[50,16],[50,22]],"routeName":"Deep Middle","routeYards":0},' +
-    '{"id":"Oa","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[38,38]],"routeName":"","routeYards":0},' +
-    '{"id":"Ob","label":"G","role":"off","routeType":"block","x":44,"y":38,"path":[[44,38],[44,38]],"routeName":"","routeYards":0},' +
-    '{"id":"Oc","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,38]],"routeName":"","routeYards":0},' +
-    '{"id":"Od","label":"G","role":"off","routeType":"block","x":56,"y":38,"path":[[56,38],[56,38]],"routeName":"","routeYards":0},' +
-    '{"id":"Oe","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[62,38]],"routeName":"","routeYards":0},' +
-    '{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"","routeYards":0}' +
+        const defensePrompt = 'Generate a DEFENSIVE football diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+    ' Show 11 defenders with assignments. Include 4-7 offensive linemen as STATIC reference only (no paths). ' +
+    'DEFENDER routeNames must describe zone or assignment: use "Gap A", "Gap B", "Gap C" for DL, "Hook Zone", "Flat Zone", "Deep Half", "Deep Third", "Man Coverage", "Blitz" for others. ' +
+    'DL players: label as DE or DT. LB players: label as WLB, MLB, SLB or LB. DBs: label as CB, SS, FS. ' +
+    'Return ONLY raw JSON using this template and customize ALL defender positions and paths for this specific defense: ' +
+    '{"formation":"' + play.name.replace(/"/g,"") + '","snapPoint":0.15,"duration":3000,"players":[' +
+    '{"id":"DEa","label":"DE","role":"def","routeType":"block","x":38,"y":35,"path":[[38,35],[35,38]],"routeName":"Gap B","routeYards":0},' +
+    '{"id":"DTa","label":"DT","role":"def","routeType":"block","x":45,"y":35,"path":[[45,35],[45,38]],"routeName":"Gap A","routeYards":0},' +
+    '{"id":"DTb","label":"DT","role":"def","routeType":"block","x":55,"y":35,"path":[[55,35],[55,38]],"routeName":"Gap A","routeYards":0},' +
+    '{"id":"DEb","label":"DE","role":"def","routeType":"block","x":62,"y":35,"path":[[62,35],[65,38]],"routeName":"Gap B","routeYards":0},' +
+    '{"id":"WLB","label":"WLB","role":"def","routeType":"route","x":34,"y":28,"path":[[34,28],[30,34]],"routeName":"Flat Zone","routeYards":0},' +
+    '{"id":"MLB","label":"MLB","role":"def","routeType":"route","x":50,"y":27,"path":[[50,27],[50,33]],"routeName":"Hook Zone","routeYards":0},' +
+    '{"id":"SLB","label":"SLB","role":"def","routeType":"route","x":66,"y":28,"path":[[66,28],[70,34]],"routeName":"Flat Zone","routeYards":0},' +
+    '{"id":"CBa","label":"CB","role":"def","routeType":"route","x":12,"y":35,"path":[[12,35],[12,24]],"routeName":"Man Coverage","routeYards":0},' +
+    '{"id":"CBb","label":"CB","role":"def","routeType":"route","x":88,"y":35,"path":[[88,35],[88,24]],"routeName":"Man Coverage","routeYards":0},' +
+    '{"id":"SS","label":"SS","role":"def","routeType":"route","x":66,"y":20,"path":[[66,20],[58,26]],"routeName":"Deep Half","routeYards":0},' +
+    '{"id":"FS","label":"FS","role":"def","routeType":"route","x":50,"y":14,"path":[[50,14],[50,20]],"routeName":"Deep Middle","routeYards":0},' +
+    '{"id":"OTa","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[38,38]],"routeName":"","routeYards":0},' +
+    '{"id":"OGa","label":"G","role":"off","routeType":"block","x":44,"y":38,"path":[[44,38],[44,38]],"routeName":"","routeYards":0},' +
+    '{"id":"OC","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,38]],"routeName":"","routeYards":0},' +
+    '{"id":"OGb","label":"G","role":"off","routeType":"block","x":56,"y":38,"path":[[56,38],[56,38]],"routeName":"","routeYards":0},' +
+    '{"id":"OTb","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[62,38]],"routeName":"","routeYards":0}' +
     ']}'
+
     const prompt = isDefense ? defensePrompt : isBasketball ? basketballPrompt : isBaseball ? baseballPrompt : footballPrompt
     try {
       const raw = await callAI(prompt)
@@ -1432,37 +1434,89 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   )
 }
 
-// -- DEFENSIVE FORMATION CARD (collapsible with diagram) --
+// -- DEFENSIVE FORMATION CARD --
 function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) {
   const [expanded, setExpanded] = useState(false)
   const [showAnim, setShowAnim] = useState(false)
+  const [steps, setSteps] = useState(null)
+  const [stepsLoading, setStepsLoading] = useState(false)
+  const [qaHistory, setQAHistory] = useState([])
+  const [question, setQuestion] = useState('')
+  const [qaLoading, setQALoading] = useState(false)
 
-  // Build a play-compatible object for the animator
-  const defPlay = {
-    name: f.name,
-    type: f.type,
-    note: f.assignment,
-    _isDefense: true
+  const defPlay = { name: f.name, type: f.type, note: f.assignment, _isDefense: true }
+  const pr = parseInt(S.slice(1,3),16), pg = parseInt(S.slice(3,5),16), pb = parseInt(S.slice(5,7),16)
+
+  async function loadSteps() {
+    if (steps) return
+    setStepsLoading(true)
+    try {
+      const sportLabel = sport || 'football'
+      const raw = await callAI(
+        'You are a youth ' + sportLabel + ' defensive coordinator educator. Break down this defensive formation for coaches AND players: "' + f.name + '" (' + f.type + '). Assignment: ' + f.assignment + '. When to use: ' + f.whenToUse +
+        ' Return ONLY valid JSON: {"keyAssignment":"the single most important assignment every player must understand","coverageType":"zone, man, or combination - explained simply","steps":["Step 1: pre-snap alignment","Step 2: at the snap","Step 3: key reads","Step 4: what makes it work","Step 5: common mistakes"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this defense is effective in the stated situation","playerRoles":[{"position":"DL","job":"their assignment","whyTheyDoIt":"explain to a 12yr old why their gap control matters"},{"position":"LB","job":"their assignment","whyTheyDoIt":"explain why"},{"position":"CB","job":"their assignment","whyTheyDoIt":"explain why"},{"position":"Safety","job":"their assignment","whyTheyDoIt":"explain why"}]}'
+      )
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      setSteps(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
+    } catch(e) { setSteps({ error: e.message }) }
+    setStepsLoading(false)
+  }
+
+  async function askQuestion() {
+    if (!question.trim()) return
+    const q = question.trim(); setQuestion(''); setQALoading(true)
+    const history = qaHistory.map(i => 'Q: '+i.q+'\nA: '+i.a).join('\n\n')
+    const ctx = history ? 'Previous questions:\n'+history+'\n\n' : ''
+    try {
+      const raw = await callAI('You are a youth ' + (sport||'football') + ' defensive coordinator educator. Formation: "' + f.name + '" - ' + f.assignment + '\n\n' + ctx + 'Coach question: "' + q + '" Answer in 2-4 sentences using defensive terminology. Be practical.')
+      setQAHistory(prev => [...prev, { q, a: raw.trim() }])
+    } catch(e) { setQAHistory(prev => [...prev, { q, a: 'Error: '+e.message }]) }
+    setQALoading(false)
   }
 
   return (
     <div style={{ borderBottom:'1px solid #1e2330' }}>
-      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => setExpanded(e=>!e)}>
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { const n=!expanded; setExpanded(n); if(n) loadSteps() }}>
         <div style={{ width:22, height:22, minWidth:22, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{f.number}</div>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{f.name}</div>
           <div style={{ fontSize:10, color:S, fontFamily:"'DM Mono',monospace", marginTop:1 }}>{f.type}</div>
           <div style={{ fontSize:11, color:'#f2f4f8', marginTop:3, lineHeight:1.4 }}>{f.assignment}</div>
           <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
-          <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Show diagram'}</div>
+          <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Expand breakdown + diagram'}</div>
         </div>
-        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true)}} style={{ padding:'4px 9px', background:showAnim?S:al(S,0.12), border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>
+        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true);loadSteps()}} style={{ padding:'4px 9px', background:showAnim?S:`rgba(${pr},${pg},${pb},0.12)`, border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>
           {showAnim ? 'HIDE' : 'DIAGRAM'}
         </button>
       </div>
-      {expanded && showAnim && (
-        <div style={{ marginBottom:10 }}>
-          <PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} />
+
+      {expanded && (
+        <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
+          {showAnim && <div style={{ marginBottom:12 }}><PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} /></div>}
+
+          {stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${S}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Generating breakdown...</div></div>}
+
+          {steps && !steps.error && (
+            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid rgba(${pr},${pg},${pb},0.2)` }}>
+              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:S, fontWeight:700, marginBottom:10 }}>Defensive Breakdown</div>
+              {steps.keyAssignment && <div style={{ padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.1)`, border:`1px solid rgba(${pr},${pg},${pb},0.25)`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:S, fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Key Assignment</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{steps.keyAssignment}</div></div>}
+              {steps.coverageType && <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, marginBottom:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#6b9fff', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Coverage Type</div><div style={{ fontSize:12, color:'#f2f4f8' }}>{steps.coverageType}</div></div>}
+              {(steps.steps||[]).map((step, i) => (<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}><div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${S}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:S, flexShrink:0, marginTop:1 }}>{i+1}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div></div>))}
+              {steps.keyCoachingPoints && steps.keyCoachingPoints.length > 0 && (<div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:6 }}>Key Coaching Points</div>{steps.keyCoachingPoints.map((pt,i) => <div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>)}</div>)}
+              {steps.whyItWorks && (<div style={{ marginTop:10, padding:'10px 12px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:5 }}>Why This Works</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{steps.whyItWorks}</div></div>)}
+              {steps.playerRoles && steps.playerRoles.length > 0 && (<div style={{ marginTop:10 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:8 }}>What to Tell Each Player</div>{steps.playerRoles.map((role,i) => (<div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800 }}>{role.position}</div><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{role.job}</div></div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, paddingLeft:34, fontStyle:'italic' }}>"Tell your player: {role.whyTheyDoIt}"</div></div>))}</div>)}
+            </div>
+          )}
+
+          <div style={{ background:'#161922', borderRadius:10, padding:12 }}>
+            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Ask About This Formation</div>
+            {qaHistory.map((item,i) => (<div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:11, fontWeight:600, color:S, marginBottom:3 }}>Q: {item.q}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.6, padding:'6px 10px', background:'rgba(255,255,255,0.04)', borderRadius:6 }}>{item.a}</div></div>))}
+            {qaLoading && <div style={{ fontSize:11, color:'#6b7a96', marginBottom:8 }}>Getting answer...</div>}
+            <div style={{ display:'flex', gap:7 }}>
+              <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder={qaHistory.length>0?"Ask a follow-up...":"e.g. What is the CB responsible for? How do we handle a TE?"} style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:7, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+              <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':S, color:'white', border:'none', borderRadius:7, fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -1504,12 +1558,12 @@ function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
   const isBSB = sport === 'Baseball'
 
   const fbFields = [
-    {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option']},
-    {id:'personnel',label:'Their Key Threat',opts:['Fast QB / Scrambler','Big Power RB','Slot Receiver Heavy','Multiple TE Sets','Balanced Attack','Pass Heavy']},
-    {id:'roster',label:'Your Roster Size',opts:['8-10 players','11-14 players','15-18 players','18+ players']},
-    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-    {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Athletic']},
-    {id:'style',label:'Defensive Preference',opts:['Gap Control / Physical','Speed and Pursuit','Bend Dont Break','Aggressive Blitz','Zone Coverage','Man Coverage']},
+    {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option','Flexbone']},
+    {id:'personnel',label:'Their Key Threat',opts:['Dual Threat QB / Scrambler','Big Physical RB','Speed Receivers','Multiple TE Sets','Strong OL Run Game','Pass Heavy No Run','Option/Triple Option']},
+    {id:'age',label:'Age Group',opts:['6-8 yrs Flag','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
+    {id:'skill',label:'Your Defensive Skill',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+    {id:'dline',label:'Your D-Line Strength',opts:['Big and Physical','Quick and Agile','Average Size','Undersized but Fast','Overpowering']},
+    {id:'style',label:'Defensive Identity',opts:['Gap Control / Physical','Speed and Pursuit','Bend Dont Break','Aggressive Blitz Heavy','Zone Heavy','Man Coverage Heavy','Multiple / Disguise']},
   ]
   const bbFields = [
     {id:'offense',label:'Opponent Offense',opts:['Unknown / Scout First','Motion Heavy','Pick and Roll Heavy','Isolation / Star Player','Drive and Kick','Three Point Heavy','Post Dominant']},
