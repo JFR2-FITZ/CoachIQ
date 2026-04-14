@@ -266,44 +266,13 @@ function PlayAnimator({ play, P, callAI, parseJSON }) {
 
   async function generateAnim() {
     setLoading(true); setError(''); setParsed(null); setPlaying(false)
-    const prompt = `You are a football play diagram expert. Generate a diagram for "${play.name}" (${play.type}). ${play.note}
+    const prompt = `Generate a football play diagram for: ${play.name} (${play.type}). ${play.note}
 
-Use a coordinate system: (0,0) top-left, (100,60) bottom-right. Line of scrimmage at y=38. Offense lines up at y=38, defense at y=34 and above (lower y = further from LOS toward defense end zone).
+Field coords: x 0-100, y 0-60. LOS at y=38. Offense lines up at y=38 or higher y (below LOS). Defense lines up at y=35 or lower y (above LOS).
 
-Assign receiver labels: X (split end left), Y (tight end or slot), Z (split end right), H (halfback/slot), F (fullback/flex). Linemen use C, G, T.
+Start with this exact JSON template and customize ONLY the offensive paths and routeNames for this specific play. Return ONLY raw JSON with no extra text or markdown:
 
-Return ONLY valid JSON:
-{
-  "formation": "formation name",
-  "snapPoint": 0.18,
-  "duration": 3000,
-  "players": [
-    {
-      "id": "unique",
-      "label": "C",
-      "role": "off",
-      "routeType": "block",
-      "x": 50, "y": 38,
-      "path": [[50,38],[50,34]],
-      "routeName": "",
-      "routeYards": 0
-    }
-  ]
-}
-
-CRITICAL sizing rules:
-- Linemen (C, G, T) space 4 units apart on x-axis centered at 50: LT=38, LG=42, C=50, RG=58, RT=62
-- Wide receivers line up at x=12 (X) and x=88 (Z), y=38
-- Tight end at x=66, y=38
-- QB at x=50, y=42. RB at x=50, y=46
-- All paths must stay within x:5-95, y:5-56
-- Route paths: short routes 6-8 yards (1 yard = ~0.9 units), deep routes 12-15 yards
-- For PASS plays: receivers run real routes (curl, out, post, go, slant, cross, corner, flat, wheel)
-- For RUN plays: linemen have short block paths, skill players have run lane paths
-- routeName: the route name (Curl, Out, Post, Go, Slant, Cross, Corner, Flat, Block, Sweep, Counter, etc)
-- routeYards: how many yards the route goes (0 for blocks)
-- Defense: 3 DL at y=34-35, 2 LB at y=28-30, 2 CB at x=12,88 y=30, 2 S at y=20-22. Defense paths are very short (1-2 units) showing initial gap responsibility only.`
-
+{"formation":"${play.name}","snapPoint":0.18,"duration":3000,"players":[{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[35,34]],"routeName":"Block","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":42,"y":38,"path":[[42,38],[40,34]],"routeName":"Block","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,34]],"routeName":"Block","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":58,"y":38,"path":[[58,38],[60,34]],"routeName":"Block","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[65,34]],"routeName":"Block","routeYards":0},{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[48,45]],"routeName":"Dropback","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":50,"y":46,"path":[[50,46],[52,42],[56,38]],"routeName":"Run","routeYards":6},{"id":"X","label":"X","role":"off","routeType":"route","x":12,"y":38,"path":[[12,38],[12,30]],"routeName":"Go","routeYards":10},{"id":"Z","label":"Z","role":"off","routeType":"route","x":88,"y":38,"path":[[88,38],[88,30]],"routeName":"Go","routeYards":10},{"id":"TE","label":"Y","role":"off","routeType":"block","x":66,"y":38,"path":[[66,38],[66,34]],"routeName":"Block","routeYards":0},{"id":"D1","label":"D","role":"def","routeType":"block","x":42,"y":35,"path":[[42,35],[42,37]],"routeName":"","routeYards":0},{"id":"D2","label":"D","role":"def","routeType":"block","x":50,"y":35,"path":[[50,35],[50,37]],"routeName":"","routeYards":0},{"id":"D3","label":"D","role":"def","routeType":"block","x":58,"y":35,"path":[[58,35],[58,37]],"routeName":"","routeYards":0},{"id":"LB1","label":"LB","role":"def","routeType":"block","x":40,"y":30,"path":[[40,30],[40,32]],"routeName":"","routeYards":0},{"id":"LB2","label":"LB","role":"def","routeType":"block","x":60,"y":30,"path":[[60,30],[60,32]],"routeName":"","routeYards":0},{"id":"CB1","label":"CB","role":"def","routeType":"block","x":12,"y":30,"path":[[12,30],[12,32]],"routeName":"","routeYards":0},{"id":"CB2","label":"CB","role":"def","routeType":"block","x":88,"y":30,"path":[[88,30],[88,32]],"routeName":"","routeYards":0},{"id":"S1","label":"S","role":"def","routeType":"block","x":35,"y":22,"path":[[35,22],[35,24]],"routeName":"","routeYards":0},{"id":"S2","label":"S","role":"def","routeType":"block","x":65,"y":22,"path":[[65,22],[65,24]],"routeName":"","routeYards":0}]}`
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
