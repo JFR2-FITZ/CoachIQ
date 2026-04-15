@@ -92,10 +92,12 @@ export default function CoachIQ() {
         {/* TOPBAR */}
         <div style={{ background:'#07090d', borderBottom:`1px solid #0e1220`, padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
           <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%, ${cfg.secondary || '#002868'} 55%)` }} />
-          {/* Sacramento logo - tight letter-spacing */}
-          <div style={{ fontFamily:"'Sacramento',cursive", fontSize:22, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
-            <span style={{ color:P }}>C</span><span style={{ color:'#dde1f0' }}>oach</span><span style={{ color:P }}>IQ</span>
-          </div>
+          {/* Sacramento logo — SVG tspan for reliable rendering */}
+          <svg viewBox="0 0 88 28" style={{ width:88, height:28, overflow:'visible', flexShrink:0 }}>
+            <text y="22" fontFamily="Sacramento, cursive" fontSize="24" letterSpacing="-0.5">
+              <tspan fill={P}>C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill={P}>IQ</tspan>
+            </text>
+          </svg>
           <div style={{ display:'flex', gap:3, marginLeft:2 }}>
             {[['FB','Football','🏈'],['BB','Basketball','🏀'],['BSB','Baseball','⚾']].map(([lbl,s,ico]) => (
               <button key={lbl} onClick={() => setSport(s)} style={{ padding:'3px 8px', borderRadius:2, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
@@ -188,12 +190,18 @@ function Onboarding({ onLaunch }) {
     red: '#C0392B',
   }
 
-  // Shared Sacramento logo component
-  const Logo = ({ size=42 }) => (
-    <div style={{ fontFamily:"'Sacramento',cursive", fontSize:size, letterSpacing:'-1px', lineHeight:1, whiteSpace:'nowrap' }}>
-      <span style={{ color:S.red }}>C</span><span style={{ color:'#dde1f0' }}>oach</span><span style={{ color:S.red }}>IQ</span>
-    </div>
-  )
+  // Shared Sacramento logo — SVG tspan keeps it one continuous string with precise color
+  const Logo = ({ size=42 }) => {
+    const w = size * 3.2
+    const h = size * 1.25
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`} style={{ width:w, height:h, overflow:'visible', flexShrink:0 }}>
+        <text y={size * 0.92} fontFamily="Sacramento, cursive" fontSize={size} letterSpacing="-1">
+          <tspan fill="#C0392B">C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill="#C0392B">IQ</tspan>
+        </text>
+      </svg>
+    )
+  }
 
   // Shared angular button style
   const BtnRed = { width:'100%', background:S.red, border:'none', borderRadius:4, padding:'13px', fontSize:13, fontWeight:700, color:'white', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'2px', textTransform:'uppercase', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }
@@ -330,9 +338,11 @@ function Onboarding({ onLaunch }) {
         <div style={{ marginBottom:20, borderRadius:4, overflow:'hidden' }}>
           <div style={{ height:6, background:`linear-gradient(90deg,${teamPrimary} 55%,${teamSecondary} 55%)` }} />
           <div style={{ background:`linear-gradient(135deg,${teamPrimary}33,#07090d)`, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
-            <div style={{ fontFamily:"'Sacramento',cursive", fontSize:18, letterSpacing:'-0.5px', color:'white' }}>
-              <span style={{ color:teamPrimary }}>C</span><span>oach</span><span style={{ color:teamPrimary }}>IQ</span>
-            </div>
+            <svg viewBox="0 0 88 24" style={{ width:88, height:24, overflow:'visible' }}>
+              <text y="19" fontFamily="Sacramento, cursive" fontSize="20" letterSpacing="-0.5">
+                <tspan fill={teamPrimary}>C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill={teamPrimary}>IQ</tspan>
+              </text>
+            </svg>
             <div style={{ marginLeft:'auto', display:'flex', gap:6 }}>
               {[['3','PKG'],['0','IQ']].map(([v,l]) => (
                 <div key={l} style={{ background:'rgba(0,0,0,0.3)', padding:'4px 8px', clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
@@ -356,7 +366,11 @@ function Onboarding({ onLaunch }) {
     <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'0 0 40px' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
       <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${S.border}`, display:'flex', alignItems:'center', gap:10 }}>
-        <Logo size={28} />
+        <svg viewBox="0 0 88 28" style={{ width:88, height:28, overflow:'visible' }}>
+          <text y="22" fontFamily="Sacramento, cursive" fontSize="24" letterSpacing="-0.5">
+            <tspan fill={S.red}>C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill={S.red}>IQ</tspan>
+          </text>
+        </svg>
         <div style={{ fontSize:12, color:S.muted, marginLeft:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>Your locker room</div>
       </div>
 
