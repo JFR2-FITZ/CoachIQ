@@ -3,7 +3,8 @@ import Head from 'next/head'
 
 export default function CoachIQ() {
   const [launched, setLaunched] = useState(false)
-  const [cfg, setCfg] = useState({ coach: 'Coach Regisford', team: 'Tolland Youth Football', primary: '#D0021B', secondary: '#002868' })
+  const [showSplash, setShowSplash] = useState(true)
+  const [cfg, setCfg] = useState({ coach: '', team: '', primary: '#C0392B', secondary: '#002868' })
   const [page, setPage] = useState('home')
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(847)
@@ -62,6 +63,17 @@ export default function CoachIQ() {
 
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
+  // Always show splash first — auto-skip to app if already authed
+  if (showSplash) return (
+    <SplashScreen
+      onDone={(skipToApp) => {
+        setShowSplash(false)
+        if (skipToApp) setLaunched(true)
+      }}
+      alreadyAuthed={launched}
+    />
+  )
+
   if (!launched) return (
     <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} />
   )
@@ -71,7 +83,7 @@ export default function CoachIQ() {
       <Head><title>CoachIQ</title></Head>
       <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@400;600;700&family=Big+Shoulders+Display:wght@500;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@400;600;700&family=Big+Shoulders+Display:wght@500;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
           * { box-sizing: border-box; margin: 0; padding: 0; }
           ::-webkit-scrollbar { width: 4px; }
           ::-webkit-scrollbar-thumb { background: #1e2330; border-radius: 0; }
@@ -87,17 +99,18 @@ export default function CoachIQ() {
           @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
           @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
           @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
+          @keyframes splashFade { 0%{opacity:1} 75%{opacity:1} 100%{opacity:0} }
+          @keyframes logoReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+          @keyframes ballDrift { 0%{opacity:0} 20%{opacity:0.11} 80%{opacity:0.11} 100%{opacity:0} }
         `}</style>
 
         {/* TOPBAR */}
         <div style={{ background:'#07090d', borderBottom:`1px solid #0e1220`, padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
           <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%, ${cfg.secondary || '#002868'} 55%)` }} />
-          {/* Sacramento logo — SVG tspan for reliable rendering */}
-          <svg viewBox="0 0 88 28" style={{ width:88, height:28, overflow:'visible', flexShrink:0 }}>
-            <text y="22" fontFamily="Sacramento, cursive" fontSize="24" letterSpacing="-0.5">
-              <tspan fill={P}>C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill={P}>IQ</tspan>
-            </text>
-          </svg>
+          {/* Kalam logo */}
+          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:22, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
+            <span style={{ color:P }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
+          </div>
           <div style={{ display:'flex', gap:3, marginLeft:2 }}>
             {[['FB','Football','🏈'],['BB','Basketball','🏀'],['BSB','Baseball','⚾']].map(([lbl,s,ico]) => (
               <button key={lbl} onClick={() => setSport(s)} style={{ padding:'3px 8px', borderRadius:2, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
@@ -130,6 +143,136 @@ export default function CoachIQ() {
         </div>
       </div>
     </>
+  )
+}
+
+// -- SPLASH SCREEN --
+// Always shown on open. If alreadyAuthed, auto-advances after logo reveal.
+// If new user, shows CTA buttons after logo animates in.
+function SplashScreen({ onDone, alreadyAuthed }) {
+  const [phase, setPhase] = useState('logo') // 'logo' | 'cta'
+
+  useEffect(() => {
+    // Logo reveals for ~1.8s, then either auto-advance or show CTAs
+    const t = setTimeout(() => {
+      if (alreadyAuthed) {
+        onDone(true) // skip straight to app
+      } else {
+        setPhase('cta')
+      }
+    }, 1800)
+    return () => clearTimeout(t)
+  }, [])
+
+  const ballStyle = (anim, left, top, right, bottom) => ({
+    position:'absolute',
+    ...(left!==undefined?{left}:{}),
+    ...(top!==undefined?{top}:{}),
+    ...(right!==undefined?{right}:{}),
+    ...(bottom!==undefined?{bottom}:{}),
+    animation:`${anim} ease-in-out infinite`,
+    opacity:0.11,
+    zIndex:0,
+    pointerEvents:'none',
+  })
+
+  return (
+    <div style={{ minHeight:'100vh', maxWidth:480, margin:'0 auto', background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 28px', position:'relative', overflow:'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&display=swap');
+        * { box-sizing:border-box; margin:0; padding:0; }
+        @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
+        @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
+        @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
+        @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
+        @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
+        @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
+        @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
+        @keyframes logoReveal { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+      `}</style>
+
+      {/* Floating sport balls */}
+      <div style={ballStyle('float1 7s',-16,undefined,undefined,'42%')}>
+        <svg width="78" height="50" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg>
+      </div>
+      <div style={ballStyle('float2 9s',undefined,undefined,8,'38%')}>
+        <svg width="64" height="64" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg>
+      </div>
+      <div style={ballStyle('float3 8s',14,undefined,undefined,'25%')}>
+        <svg width="52" height="52" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="20" x2="19" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="27" x2="16" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="20" x2="37" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="27" x2="40" y2="29" stroke="#C0392B" strokeWidth="1.2"/></svg>
+      </div>
+      <div style={ballStyle('float4 11s',undefined,8,undefined,undefined)}>
+        <svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg>
+      </div>
+      <div style={ballStyle('float5 6.5s',undefined,undefined,20,'18%')}>
+        <svg width="38" height="38" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg>
+      </div>
+      <div style={ballStyle('float6 10s',undefined,undefined,10,'58%')}>
+        <svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg>
+      </div>
+      <div style={ballStyle('float7 12s',20,undefined,undefined,'68%')}>
+        <svg width="50" height="50" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/></svg>
+      </div>
+
+      {/* Gradient fades */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:'35%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'35%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+
+      {/* Centered clipboard watermark */}
+      <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-58%) rotate(-8deg)', zIndex:1, opacity:0.06, pointerEvents:'none' }}>
+        <svg width="160" height="200" viewBox="0 0 220 280" fill="none">
+          <rect x="10" y="24" width="200" height="240" rx="6" fill="#c8b89a"/>
+          <rect x="80" y="10" width="60" height="30" rx="7" fill="#888880"/>
+          <rect x="90" y="4" width="40" height="18" rx="9" fill="#777770"/>
+          <line x1="30" y1="70" x2="190" y2="70" stroke="#5a4a3a" strokeWidth="2"/>
+          <line x1="30" y1="90" x2="190" y2="90" stroke="#5a4a3a" strokeWidth="2"/>
+          <line x1="30" y1="110" x2="160" y2="110" stroke="#5a4a3a" strokeWidth="2"/>
+          <rect x="30" y="130" width="160" height="110" rx="4" fill="none" stroke="#5a4a3a" strokeWidth="2"/>
+          <line x1="110" y1="130" x2="110" y2="240" stroke="#5a4a3a" strokeWidth="1.5"/>
+          <circle cx="65" cy="158" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
+          <circle cx="90" cy="172" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
+          <circle cx="148" cy="158" r="9" fill="#5a4a3a"/>
+          <circle cx="162" cy="175" r="9" fill="#5a4a3a"/>
+          <path d="M74 149 L88 140" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
+          <path d="M99 163 L115 158" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
+        </svg>
+      </div>
+
+      {/* Logo — always visible, animates in */}
+      <div style={{ position:'relative', zIndex:2, textAlign:'center', animation:'logoReveal 0.7s ease forwards' }}>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:58, lineHeight:1, letterSpacing:'-0.5px', marginBottom:10 }}>
+          <span style={{ color:'#C0392B' }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
+        </div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>AI Coaching Intelligence</div>
+      </div>
+
+      {/* CTAs — only shown for new users after logo reveal */}
+      {phase === 'cta' && (
+        <div style={{ position:'relative', zIndex:2, width:'100%', display:'flex', flexDirection:'column', gap:10, marginTop:48, animation:'ctaReveal 0.4s ease forwards' }}>
+          <button
+            onClick={() => onDone(false)}
+            style={{ width:'100%', background:'#C0392B', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}
+          >
+            Get Started — Free
+          </button>
+          <button
+            onClick={() => onDone(false)}
+            style={{ width:'100%', background:'transparent', border:'1px solid #1c2235', borderRadius:4, padding:'13px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}
+          >
+            Sign In
+          </button>
+          <div style={{ textAlign:'center', paddingTop:4 }}>
+            <span
+              onClick={() => onDone(true)}
+              style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:'#C0392B', fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}
+            >
+              Preview first →
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -190,18 +333,12 @@ function Onboarding({ onLaunch }) {
     red: '#C0392B',
   }
 
-  // Shared Sacramento logo — SVG tspan keeps it one continuous string with precise color
-  const Logo = ({ size=42 }) => {
-    const w = size * 3.2
-    const h = size * 1.25
-    return (
-      <svg viewBox={`0 0 ${w} ${h}`} style={{ width:w, height:h, overflow:'visible', flexShrink:0 }}>
-        <text y={size * 0.92} fontFamily="Sacramento, cursive" fontSize={size} letterSpacing="-1">
-          <tspan fill="#C0392B">C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill="#C0392B">IQ</tspan>
-        </text>
-      </svg>
-    )
-  }
+  // Kalam logo — renders cleanly as HTML (not a connected script font, no SVG needed)
+  const Logo = ({ size=42, primary='#C0392B' }) => (
+    <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:size, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
+      <span style={{ color:primary }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
+    </div>
+  )
 
   // Shared angular button style
   const BtnRed = { width:'100%', background:S.red, border:'none', borderRadius:4, padding:'13px', fontSize:13, fontWeight:700, color:'white', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'2px', textTransform:'uppercase', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }
@@ -211,7 +348,7 @@ function Onboarding({ onLaunch }) {
   if (screen === 'signin') return (
     <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif", position:'relative', overflow:'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
         * { box-sizing:border-box; margin:0; padding:0; }
         @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
         @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
@@ -269,7 +406,7 @@ function Onboarding({ onLaunch }) {
   // ── SIGN UP ──────────────────────────────────────────────
   if (screen === 'signup') return (
     <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
       <div style={{ textAlign:'center', marginBottom:28 }}>
         <Logo size={42} />
       </div>
@@ -298,7 +435,7 @@ function Onboarding({ onLaunch }) {
   // ── CREATE TEAM ──────────────────────────────────────────
   if (screen === 'createTeam') return (
     <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'24px 20px 40px' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=Big+Shoulders+Display:wght@900&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=Big+Shoulders+Display:wght@900&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
       <div style={{ maxWidth:440, margin:'0 auto' }}>
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28, paddingTop:16 }}>
           <button onClick={() => setScreen('teams')} style={{ background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'5px 12px', color:S.muted, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
@@ -339,8 +476,8 @@ function Onboarding({ onLaunch }) {
           <div style={{ height:6, background:`linear-gradient(90deg,${teamPrimary} 55%,${teamSecondary} 55%)` }} />
           <div style={{ background:`linear-gradient(135deg,${teamPrimary}33,#07090d)`, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
             <svg viewBox="0 0 88 24" style={{ width:88, height:24, overflow:'visible' }}>
-              <text y="19" fontFamily="Sacramento, cursive" fontSize="20" letterSpacing="-0.5">
-                <tspan fill={teamPrimary}>C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill={teamPrimary}>IQ</tspan>
+              <text y="19" fontFamily="Kalam, cursive" fontSize="20" letterSpacing="-0.5">
+                <tspan fill={teamPrimary}>Coach</tspan><tspan fill="#dde1f0">IQ</tspan>
               </text>
             </svg>
             <div style={{ marginLeft:'auto', display:'flex', gap:6 }}>
@@ -364,13 +501,11 @@ function Onboarding({ onLaunch }) {
   // ── LOCKER ROOM ───────────────────────────────────────────
   return (
     <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'0 0 40px' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
       <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${S.border}`, display:'flex', alignItems:'center', gap:10 }}>
-        <svg viewBox="0 0 88 28" style={{ width:88, height:28, overflow:'visible' }}>
-          <text y="22" fontFamily="Sacramento, cursive" fontSize="24" letterSpacing="-0.5">
-            <tspan fill={S.red}>C</tspan><tspan fill="#dde1f0">oach</tspan><tspan fill={S.red}>IQ</tspan>
-          </text>
-        </svg>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap' }}>
+          <span style={{ color:S.red }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
+        </div>
         <div style={{ fontSize:12, color:S.muted, marginLeft:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>Your locker room</div>
       </div>
 
@@ -385,7 +520,7 @@ function Onboarding({ onLaunch }) {
                 <div style={{ position:'absolute', bottom:-4, right:-4, height:6, background:`linear-gradient(90deg,${team.primary} 55%,${team.secondary||'#002868'} 55%)`, left:0 }} />
                 <div style={{ fontSize:32, lineHeight:1, flexShrink:0 }}>{m.emoji}</div>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontFamily:"'Sacramento',cursive", fontSize:18, color:'white', letterSpacing:'-0.5px' }}>{team.name}</div>
+                  <div style={{ fontFamily:"'Kalam',cursive", fontSize:18, color:'white', letterSpacing:'-0.5px' }}>{team.name}</div>
                   <div style={{ fontSize:11, color:'rgba(255,255,255,0.6)', marginTop:2 }}>IQ {team.iq} · {team.packages} package{team.packages!==1?'s':''} · {team.coach}</div>
                 </div>
                 <div style={{ fontSize:20, color:'rgba(255,255,255,0.5)' }}>›</div>
@@ -2450,32 +2585,33 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
   // DASHBOARD VIEW
   if (activeMode === 'dashboard') return (
     <>
-      {/* Team hero band — diagonal cut bottom edge */}
-      <div style={{ position:'relative', overflow:'hidden', marginBottom:0, borderRadius:4 }}>
-        <div style={{ background:`linear-gradient(135deg,${dk(P,50)} 0%,${P} 100%)`, padding:'14px 16px 26px', position:'relative', overflow:'hidden' }}>
-          <div style={{ position:'absolute', right:-10, bottom:-15, fontSize:90, opacity:0.08, lineHeight:1, userSelect:'none', pointerEvents:'none' }}>{sportEmoji}</div>
-          <div style={{ position:'absolute', bottom:-1, left:0, right:0, height:18, background:'#07090d', clipPath:'polygon(0 100%,100% 0,100% 100%)' }} />
-          <div style={{ position:'relative', zIndex:1 }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'rgba(255,255,255,0.5)', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{cfg.team}</div>
-            <div style={{ fontFamily:"'Sacramento',cursive", fontSize:22, color:'white', letterSpacing:'-0.5px', lineHeight:1.1, marginBottom:10 }}>Coach {lastName}</div>
-            <div style={{ display:'flex', gap:7 }}>
-              {[[schemes,'Schemes'],[iq,'IQ'],[(playbook[sport]||[]).length,'Saved']].map(([v,l]) => (
-                <div key={l} style={{ background:'rgba(0,0,0,0.3)', padding:'6px 10px', flex:1, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
-                  <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:'white', lineHeight:1 }}>{v}</div>
-                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'rgba(255,255,255,0.45)', textTransform:'uppercase', letterSpacing:'1px', marginTop:1 }}>{l}</div>
-                </div>
-              ))}
-            </div>
+      {/* Coach personal header — no team required */}
+      <div style={{ padding:'16px 0 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
+          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>
+            {cfg.coach ? `Coach ${lastName}` : 'CoachIQ'}
+          </div>
+        </div>
+        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Coach IQ</div>
+          </div>
+          <div style={{ width:1, height:28, background:'#1c2235' }} />
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div>
           </div>
         </div>
       </div>
 
       {/* Live ticker */}
-      <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26 }}>
-        <div style={{ background:P, padding:'0 8px 0 10px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)', paddingRight:14 }}>
+      <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
+        <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span>
         </div>
-        <div style={{ overflow:'hidden', flex:1 }}>
+        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}>
           <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>
             {feed && feed.items && feed.items.length > 0
               ? feed.items.map(i=>`${i.title}: ${i.body}`).join(' · ')
@@ -2484,105 +2620,117 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
         </div>
       </div>
 
-      {/* Tools section */}
-      <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:4 }}>
-          <div style={{ width:3, height:12, background:P, transform:'skewX(-15deg)', flexShrink:0 }} />
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#3a4260' }}>TOOLS</span>
-        </div>
-
-        {/* SCHEMES — hero card, gradient fill, most visual weight */}
+      {/* SCHEMES — hero feature with teaching mission front and center */}
+      <div style={{ marginTop:14 }}>
         <div
           onClick={() => setActiveMode('schemes')}
-          style={{ background:'linear-gradient(135deg,#1a0404,#1e0808)', border:'1px solid rgba(192,57,43,0.25)', borderRadius:4, padding:'13px 14px', cursor:'pointer', position:'relative', overflow:'hidden' }}
+          style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', cursor:'pointer', position:'relative', overflow:'hidden' }}
         >
-          <div style={{ position:'absolute', bottom:-10, right:-10, fontSize:60, opacity:0.06, lineHeight:1, pointerEvents:'none' }}>📋</div>
-          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-            <div style={{ width:32, height:32, background:'rgba(192,57,43,0.15)', borderRadius:4, display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }}>📋</div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#dde1f0', letterSpacing:'0.5px' }}>Schemes</div>
-              <div style={{ fontSize:9, color:'rgba(192,57,43,0.65)', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>Offense + Defense</div>
+          <div style={{ position:'absolute', right:-12, bottom:-12, opacity:0.05, pointerEvents:'none' }}>
+            <svg width="110" height="130" viewBox="0 0 220 280" fill="none">
+              <rect x="10" y="24" width="200" height="240" rx="6" fill="#c8b89a"/>
+              <rect x="80" y="10" width="60" height="30" rx="7" fill="#888"/>
+              <line x1="30" y1="70" x2="190" y2="70" stroke="white" strokeWidth="3"/>
+              <line x1="30" y1="90" x2="190" y2="90" stroke="white" strokeWidth="3"/>
+              <line x1="30" y1="110" x2="160" y2="110" stroke="white" strokeWidth="3"/>
+              <rect x="30" y="130" width="160" height="110" rx="4" fill="none" stroke="white" strokeWidth="3"/>
+            </svg>
+          </div>
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:10 }}>
+            <div>
+              <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:22, color:'#dde1f0', lineHeight:1, marginBottom:4 }}>
+                Scheme Generator
+              </div>
+              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:220 }}>
+                Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — with animated diagrams and coaching cues built in.
+              </div>
             </div>
-            <div style={{ background:'rgba(192,57,43,0.9)', padding:'3px 10px', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:9, color:'white', letterSpacing:'1px' }}>OPEN</span>
+            <div style={{ background:'#C0392B', padding:'5px 12px', borderRadius:2, clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)', flexShrink:0, marginLeft:10, marginTop:2 }}>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN</span>
             </div>
           </div>
-          {/* Play chips */}
-          <div style={{ display:'flex', gap:5, flexWrap:'wrap', marginBottom:10 }}>
-            {(result?.plays?.slice(0,2) || []).map((p,i) => (
-              <span key={i} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'rgba(192,57,43,0.12)', borderLeft:'2px solid #C0392B', color:'#C0392B', letterSpacing:'0.5px' }}>{p.name}</span>
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap', marginBottom:12 }}>
+            {['Offense','Defense','AI Diagrams','Educator Mode','Pro Comparison'].map(tag => (
+              <span key={tag} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 8px', background:'rgba(192,57,43,0.12)', borderLeft:'2px solid rgba(192,57,43,0.4)', color:'rgba(192,57,43,0.8)', letterSpacing:'0.5px' }}>{tag}</span>
             ))}
-            {(!result || !result.plays) && (
-              <>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'rgba(192,57,43,0.12)', borderLeft:'2px solid #C0392B', color:'#C0392B' }}>Belly Handoff</span>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'#0a0c14', borderLeft:'2px solid #1c2235', color:'#6b7896' }}>Sweep Right</span>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'#0a0c14', borderLeft:'2px solid #1c2235', color:'#3a4260' }}>+tap to generate</span>
-              </>
-            )}
           </div>
-          {/* Mini diagram preview */}
-          <div style={{ background:'rgba(0,0,0,0.35)', borderRadius:3, padding:'7px 10px', display:'flex', alignItems:'center', gap:9 }}>
-            <svg width="42" height="26" viewBox="0 0 42 26">
-              <line x1="0" y1="13" x2="42" y2="13" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
-              <circle cx="21" cy="16" r="3" fill={P}/>
-              <circle cx="11" cy="16" r="2" fill={P} opacity="0.5"/>
-              <circle cx="31" cy="16" r="2" fill={P} opacity="0.5"/>
-              <path d="M21 16 L21 6" stroke={P} strokeWidth="1.5" opacity="0.7"/>
-              <path d="M11 16 L7 8" stroke={P} strokeWidth="1" opacity="0.4"/>
-              <path d="M31 16 L35 8" stroke={P} strokeWidth="1" opacity="0.4"/>
+          <div style={{ background:'rgba(0,0,0,0.4)', borderRadius:3, padding:'8px 12px', display:'flex', alignItems:'center', gap:12 }}>
+            <svg width="52" height="32" viewBox="0 0 52 32">
+              <line x1="0" y1="16" x2="52" y2="16" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+              <rect x="20" y="17" width="5" height="5" fill={P} opacity="0.9"/>
+              <rect x="10" y="17" width="4" height="4" fill={P} opacity="0.5"/>
+              <rect x="31" y="17" width="4" height="4" fill={P} opacity="0.5"/>
+              <rect x="2" y="17" width="4" height="4" fill={P} opacity="0.3"/>
+              <rect x="40" y="17" width="4" height="4" fill={P} opacity="0.3"/>
+              <path d="M22 17 L22 6" stroke={P} strokeWidth="1.8" opacity="0.8"/>
+              <path d="M12 17 L8 7" stroke={P} strokeWidth="1.2" opacity="0.5"/>
+              <path d="M33 17 L40 8" stroke={P} strokeWidth="1.2" opacity="0.5"/>
+              <circle cx="22" cy="5" r="2" fill={P} opacity="0.6"/>
             </svg>
             <div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:P, fontWeight:700, letterSpacing:'0.5px' }}>AI Diagrams included</div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', letterSpacing:'0.3px' }}>Animated plays + educator mode</div>
-            </div>
-          </div>
-        </div>
-
-        {/* GAUNTLET + SITUATIONAL — compact 2-col row */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-          <div onClick={() => setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 12px', cursor:'pointer' }}>
-            <div style={{ fontSize:15, marginBottom:6 }}>⚡</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0', marginBottom:6, letterSpacing:'0.5px' }}>Gauntlet</div>
-            <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:3 }}>
-              <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>IQ</span>
-            </div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', letterSpacing:'0.5px' }}>🔥 {gauntlets} streak</div>
-          </div>
-          <div onClick={() => setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 12px', cursor:'pointer' }}>
-            <div style={{ fontSize:15, marginBottom:6 }}>🎯</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0', marginBottom:6, letterSpacing:'0.5px' }}>Situational</div>
-            <div style={{ background:'#0a0c14', borderRadius:3, padding:'5px 7px' }}>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700, letterSpacing:'0.5px' }}>
-                {sport==='Basketball' ? 'Q3 · UP 4' : sport==='Baseball' ? '5th · 1 out' : '3rd & 5'}
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:P, letterSpacing:'0.5px' }}>
+                {result ? `Last: ${result.packageName}` : 'Tap to generate your first package'}
               </div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#6b7896', marginTop:1 }}>
-                {sport==='Basketball' ? 'Half Court Set' : sport==='Baseball' ? 'Runner on 1st' : 'Slot Cross · 84%'}
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', marginTop:1 }}>
+                {result ? `${result.plays?.length || 0} plays · animated diagrams ready` : 'Football · Basketball · Baseball'}
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* FILM ROOM — slim single row */}
+      {/* Secondary tools */}
+      <div style={{ marginTop:8 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+          <div style={{ width:3, height:10, background:'#3a4260', transform:'skewX(-15deg)', flexShrink:0 }} />
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#3a4260' }}>More Tools</span>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7, marginBottom:7 }}>
+          <div onClick={() => setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
+              <span style={{ fontSize:16 }}>⚡</span>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Gauntlet</div>
+            </div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Test your coaching IQ with live AI scenarios</div>
+            <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
+              <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>your IQ</span>
+            </div>
+          </div>
+          <div onClick={() => setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
+              <span style={{ fontSize:16 }}>🎯</span>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Situational</div>
+            </div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Real-time play calls by down, distance &amp; score</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700 }}>
+              {sport==='Basketball' ? 'Q3 · Live adjustments' : sport==='Baseball' ? '5th · Count manager' : '3rd & 5 · Live caller'}
+            </div>
+          </div>
+        </div>
         <div onClick={() => setActiveMode('film')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 14px', display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
-          <div style={{ fontSize:15 }}>🎥</div>
+          <span style={{ fontSize:16 }}>🎥</span>
           <div style={{ flex:1 }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0', letterSpacing:'0.5px' }}>Film Room</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', letterSpacing:'0.3px' }}>Describe · Upload · AI Diagnose</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Film Room</div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470' }}>Describe a problem or upload a clip — AI diagnoses it</div>
           </div>
-          <div style={{ fontSize:11, color:'#3a4260' }}>›</div>
+          <div style={{ fontSize:12, color:'#3a4260' }}>›</div>
         </div>
-
       </div>
 
       {/* Coaching Feed */}
-      <div style={{ marginTop:6 }}>
+      <div style={{ marginTop:14 }}>
         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-          <div style={{ width:3, height:12, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
+          <div style={{ width:3, height:10, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
-          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer', letterSpacing:'0.5px' }}>Refresh</button>
+          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
         </div>
-        {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontSize:11, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Loading {sport} coaching content...</div></div>}
+        {feedLoading && (
+          <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}>
+            <div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} />
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching content...</div>
+          </div>
+        )}
         {feed && (feed.items||[]).map((item,i) => (
           <div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
@@ -2594,12 +2742,11 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
         ))}
       </div>
 
-      {/* Generation History */}
       {sportHistory.length > 0 && (
-        <div style={{ marginTop:6 }}>
+        <div style={{ marginTop:6, marginBottom:14 }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8, cursor:'pointer' }} onClick={() => setShowHistory(h=>!h)}>
-            <div style={{ width:3, height:12, background:'#3a4260', transform:'skewX(-15deg)', flexShrink:0 }} />
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', flex:1 }}>Generation History ({sportHistory.length})</span>
+            <div style={{ width:3, height:10, background:'#3a4260', transform:'skewX(-15deg)', flexShrink:0 }} />
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', flex:1 }}>Recent Generations ({sportHistory.length})</span>
             <span style={{ fontSize:11, color:'#6b7a96' }}>{showHistory ? '▲' : '▼'}</span>
           </div>
           {showHistory && sportHistory.map((h,i) => (
@@ -2615,45 +2762,6 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
       )}
     </>
   )
-
-  // SCHEMES MODE
-  if (activeMode === 'schemes') return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Scheme Generator</span>
-      </div>
-      <Card>
-        <div style={{ padding:14 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-            {(SPORTS[sport]||SPORTS.Football).fields.map(f => (
-              <Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />
-            ))}
-          </div>
-          <PBtn onClick={generate} disabled={loading} color={P}>{loading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
-          {loading && <Shimmer />}
-          {error && <ErrBox msg={error} />}
-          {result && (
-            <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:1, color:P, marginBottom:4 }}>{result.packageName}</div>
-              <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
-              {(result.plays||[]).map(p => <PlayCard key={p.number} play={p} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />)}
-              {result.defenseTip && <div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defense Tip</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.defenseTip}</div></div>}
-              {result.coachingCue && <div style={{ marginTop:8, padding:10, background:al(P,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Coaching Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic', fontWeight:500 }}>"{result.coachingCue}"</div></div>}
-              {/* SAVE BUTTON */}
-              <div style={{ marginTop:12, display:'flex', gap:8 }}>
-                <button onClick={() => { setResult(null); setError('') }} style={{ flex:1, padding:'10px', background:'transparent', border:'0.5px solid #1e2330', borderRadius:8, color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:"'Bebas Neue',sans-serif", letterSpacing:1 }}>REGENERATE</button>
-                <button onClick={saveToPlaybook} disabled={isAlreadySaved} style={{ flex:2, padding:'10px', background:isAlreadySaved?'#1a2a1a':P, border:'none', borderRadius:8, color:isAlreadySaved?'#4ade80':'white', fontSize:12, fontWeight:600, cursor:isAlreadySaved?'default':'pointer', fontFamily:"'Bebas Neue',sans-serif", letterSpacing:1 }}>
-                  {isAlreadySaved ? '✓ SAVED TO PLAYBOOK' : 'SAVE TO PLAYBOOK +'}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
-    </>
-  )
-
   // GAUNTLET MODE (inline from home)
   if (activeMode === 'gauntlet') return (
     <>
