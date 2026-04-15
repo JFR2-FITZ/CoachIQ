@@ -2393,6 +2393,7 @@ export default function CoachIQ() {
   const NAV_ITEMS = [
     { id:'home',   icon:'🏠', label:'HOME' },
     { id:'schemes',icon:'📋', label:'SCHEMES' },
+    { id:'team',   icon:'🏆', label:'TEAM'    },
     { id:'scout',  icon:'🔍', label:'SCOUT' },
     { id:'playbook',icon:'📖',label:'PLAYBOOK' },
     { id:'more',   icon:'⋯',  label:'MORE' },
@@ -2455,6 +2456,7 @@ export default function CoachIQ() {
           {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} />}
           {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
+          {page==='team'     && <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} />}
           {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
           {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} />}
         </div>
@@ -2475,6 +2477,313 @@ export default function CoachIQ() {
 }
 
 // ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
+function RosterSection({ team, P, al, teams, setTeams, sport }) {
+  const [players, setPlayers] = useState(team.players || [])
+  const [newName, setNewName] = useState('')
+  const [newPos, setNewPos] = useState('')
+  const [newNum, setNewNum] = useState('')
+
+  const positions = {
+    Football: ['QB','RB','WR','TE','OL','DL','LB','CB','S','K','P'],
+    Basketball: ['PG','SG','SF','PF','C'],
+    Baseball: ['P','C','1B','2B','3B','SS','LF','CF','RF','DH'],
+  }
+
+  function addPlayer() {
+    if (!newName.trim()) return
+    const p = { id: Date.now(), name: newName.trim(), position: newPos, number: newNum }
+    const updated = [...players, p]
+    setPlayers(updated)
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, players:updated} : t) }))
+    setNewName(''); setNewPos(''); setNewNum('')
+  }
+
+  function removePlayer(id) {
+    const updated = players.filter(p=>p.id!==id)
+    setPlayers(updated)
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, players:updated} : t) }))
+  }
+
+  return (
+    <Card>
+      <CardHead icon="👥" title="Roster" tag={`${players.length} players`} tagColor={P} accent={P} />
+      <div style={{ padding:14 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr auto', gap:7, marginBottom:12, alignItems:'end' }}>
+          <div>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Name</label>
+            <input value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addPlayer()} placeholder="Player name" style={{ width:'100%', background:'#161922', border:`1px solid ${newName?P:'#1e2330'}`, borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+          </div>
+          <div>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Pos</label>
+            <select value={newPos} onChange={e=>setNewPos(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 6px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', appearance:'none' }}>
+              <option value="">—</option>
+              {(positions[sport]||[]).map(p=><option key={p}>{p}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>#</label>
+            <input value={newNum} onChange={e=>setNewNum(e.target.value)} placeholder="00" maxLength={2} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', textAlign:'center' }} />
+          </div>
+          <button onClick={addPlayer} style={{ padding:'8px 12px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', marginTop:18 }}>+</button>
+        </div>
+        {players.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'20px 0', color:'#3d4559', fontSize:12 }}>No players added yet</div>
+        ) : (
+          <div>
+            {players.map(p => (
+              <div key={p.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:6 }}>
+                {p.number && <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, flexShrink:0 }}>{p.number}</div>}
+                <div style={{ flex:1 }}><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:500 }}>{p.name}</div>{p.position&&<div style={{ fontSize:10, color:'#6b7a96' }}>{p.position}</div>}</div>
+                <button onClick={()=>removePlayer(p.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>×</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+}
+
+function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
+  const [plans, setPlans] = useState([])
+  const [generating, setGenerating] = useState(false)
+  const [planForm, setPlanForm] = useState({ focus:'', duration:'90 minutes', intensity:'Medium', opponent:'', date:'' })
+  const [showForm, setShowForm] = useState(false)
+
+  const focusOpts = {
+    Football: ['Balanced / Full Team','Offense Only','Defense Only','Special Teams','Red Zone','Two-Minute Drill','Goal Line','Opening Drive','Game Preparation'],
+    Basketball: ['Balanced / Full Team','Offense Only','Defense Only','Press Break','Transition','End of Game Situations','Free Throws','Post Play','Perimeter'],
+    Baseball: ['Balanced / Full Team','Hitting Only','Pitching / Bullpen','Fielding / Defense','Baserunning','Situations','Batting Practice','Infield / Outfield'],
+  }
+
+  async function generatePlan() {
+    setGenerating(true)
+    const ctx = `Team: ${team.name}, Sport: ${sport}, Season: ${team.season}, Players: ${(team.players||[]).length} on roster.`
+    const inputs = `Focus: ${planForm.focus||'Balanced'}, Duration: ${planForm.duration}, Intensity: ${planForm.intensity}${planForm.opponent?', Upcoming opponent: '+planForm.opponent:''}.`
+    try {
+      const raw = await callAI(`You are an elite youth ${sport.toLowerCase()} coach. Generate a detailed practice plan. ${ctx} ${inputs} Return ONLY valid JSON: {"title":"practice plan name","date":"${planForm.date||'Next Practice'}","duration":"${planForm.duration}","warmup":{"time":"X min","activities":["activity 1","activity 2"]},"segments":[{"name":"segment name","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"how many reps or time"},{"name":"segment 2","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"},{"name":"segment 3","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"},{"name":"segment 4","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"}],"teamPeriod":{"time":"X min","activity":"full team activity","notes":"coaching emphasis"},"cooldown":{"time":"X min","activity":"cooldown activity"},"coachNote":"motivational note for the team"}`)
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      const plan = { ...JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1)), id: Date.now(), _form: planForm }
+      setPlans(prev => [plan, ...prev])
+      setShowForm(false)
+    } catch(e) { console.error(e) }
+    setGenerating(false)
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      <Card>
+        <CardHead icon="📆" title="Practice Planner" accent={P} />
+        <div style={{ padding:14 }}>
+          {!showForm ? (
+            <button onClick={()=>setShowForm(true)} style={{ width:'100%', padding:'11px', background:al(P,0.12), border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>+ GENERATE PRACTICE PLAN</button>
+          ) : (
+            <div style={{ animation:'fadeIn 0.2s ease' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                <Sel label="Focus Area" value={planForm.focus||focusOpts[sport][0]} onChange={v=>setPlanForm(f=>({...f,focus:v}))} options={focusOpts[sport]||focusOpts.Football} />
+                <Sel label="Duration" value={planForm.duration} onChange={v=>setPlanForm(f=>({...f,duration:v}))} options={['45 minutes','60 minutes','75 minutes','90 minutes','2 hours','2.5 hours']} />
+                <Sel label="Intensity" value={planForm.intensity} onChange={v=>setPlanForm(f=>({...f,intensity:v}))} options={['Light / Recovery','Medium','High / Game Prep','Game Week Intensity']} />
+                <div>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Practice Date</label>
+                  <input value={planForm.date} onChange={e=>setPlanForm(f=>({...f,date:e.target.value}))} placeholder="e.g. Monday 4/21" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div style={{ gridColumn:'1/-1' }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Upcoming Opponent <span style={{ color:'#3d4559' }}>(optional)</span></label>
+                  <input value={planForm.opponent} onChange={e=>setPlanForm(f=>({...f,opponent:e.target.value}))} placeholder="e.g. Coventry Eagles" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={()=>setShowForm(false)} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                <button onClick={generatePlan} disabled={generating} style={{ flex:2, padding:'10px', background:generating?'#3d4559':P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:generating?'not-allowed':'pointer', letterSpacing:'1px' }}>{generating?'GENERATING...':'GENERATE PLAN'}</button>
+              </div>
+              {generating && <Shimmer />}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {plans.map(plan => (
+        <Card key={plan.id}>
+          <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${P}` }}>
+            <span style={{ fontSize:15 }}>📋</span>
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase' }}>{plan.title}</div>
+              <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{plan.date} · {plan.duration}</div>
+            </div>
+          </div>
+          <div style={{ padding:14 }}>
+            {plan.warmup && <div style={{ padding:'8px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Warmup — {plan.warmup.time}</div>{(plan.warmup.activities||[]).map((a,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:2 }}>• {a}</div>)}</div>}
+            {(plan.segments||[]).map((seg,i) => (
+              <div key={i} style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:8 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+                  <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:P }}>{i+1}</div>
+                  <div><div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{seg.name}</div><div style={{ fontSize:10, color:'#6b7a96' }}>{seg.time} · {seg.reps}</div></div>
+                </div>
+                <div style={{ fontSize:11, color:'#dde1f0', marginBottom:4, fontWeight:600 }}>📍 {seg.drill}</div>
+                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:4 }}>Purpose: {seg.purpose}</div>
+                <div style={{ fontSize:11, color:P, fontStyle:'italic' }}>Coach: "{seg.coaching}"</div>
+              </div>
+            ))}
+            {plan.teamPeriod && <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Team Period — {plan.teamPeriod.time}</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600, marginBottom:3 }}>{plan.teamPeriod.activity}</div><div style={{ fontSize:11, color:'#6b7a96' }}>{plan.teamPeriod.notes}</div></div>}
+            {plan.coachNote && <div style={{ padding:'8px 12px', background:'rgba(0,0,0,0.3)', borderRadius:8, borderLeft:`3px solid ${P}` }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Coach's Note</div><div style={{ fontSize:12, color:'#f2f4f8', fontStyle:'italic' }}>"{plan.coachNote}"</div></div>}
+          </div>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function AnalyticsSection({ team, P, al }) {
+  const metrics = [
+    { label:'Schemes Generated', val: 0, color: P, icon:'📋' },
+    { label:'Plays in Playbook', val: 0, color:'#4ade80', icon:'📖' },
+    { label:'Gauntlet Score', val: 847, color:'#f59e0b', icon:'⚡' },
+    { label:'Scout Reports', val: 0, color:'#6b9fff', icon:'🔍' },
+    { label:'Practice Plans', val: 0, color:'#c084fc', icon:'📆' },
+  ]
+  return (
+    <Card>
+      <CardHead icon="📊" title="Analytics" tag="COMING SOON" tagColor="#f59e0b" accent={P} />
+      <div style={{ padding:14 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
+          {metrics.map((m,i) => (
+            <div key={i} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'12px' }}>
+              <div style={{ fontSize:20, marginBottom:4 }}>{m.icon}</div>
+              <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:24, color:m.color, lineHeight:1, marginBottom:3 }}>{m.val}</div>
+              <div style={{ fontSize:10, color:'#6b7a96' }}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding:'12px', background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8, textAlign:'center' }}>
+          <div style={{ fontSize:12, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, marginBottom:4 }}>FULL ANALYTICS COMING SOON</div>
+          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>Win probability models, tendency heat maps, opponent pattern recognition, and season-wide performance tracking.</div>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+function PrintSection({ team, P, S, al, callAI, sport }) {
+  const [printType, setPrintType] = useState('wristband')
+  const [generating, setGenerating] = useState(false)
+  const [generated, setGenerated] = useState(null)
+
+  const printTypes = [
+    { id:'wristband', label:'📿 Wristband', desc:'QR/play call strips for game day' },
+    { id:'playbook', label:'📋 Playbook Sheet', desc:'Full play diagrams for your playbook' },
+    { id:'coach', label:'🗂 Coach Sheet', desc:'Sideline reference sheet' },
+    { id:'practice', label:'📆 Practice Plan', desc:'Print-ready practice schedule' },
+  ]
+
+  async function generatePDF() {
+    setGenerating(true)
+    try {
+      const content = await callAI(`You are a ${sport} coordinator. Generate content for a ${printType} sheet for team: ${team.name}, ${team.season}. Return a plain text formatted document suitable for printing. Include team name, sport, season, and relevant ${printType} content with clear sections and formatting. Keep it concise and professional.`)
+      setGenerated({ type: printType, team: team.name, content, generatedAt: new Date().toLocaleString() })
+    } catch(e) { console.error(e) }
+    setGenerating(false)
+  }
+
+  function downloadAsPDF() {
+    if (!generated) return
+    const printWindow = window.open('', '_blank')
+    const scriptTag = '<scr' + 'ipt>window.onload=()=>{window.print()}</scr' + 'ipt>'
+    const html = [
+      '<html><head><title>' + team.name + ' - ' + generated.type + '</title>',
+      '<style>body{font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto}pre{white-space:pre-wrap;font-size:13px;line-height:1.6}.header{border-bottom:3px solid ' + P + ';padding-bottom:12px;margin-bottom:16px}@media print{body{padding:12px}}</style></head><body>',
+      '<div class="header"><h1>' + team.name + '</h1><h2>' + sport + ' - ' + (team.season||'') + ' - ' + (generated.type||'').toUpperCase() + '</h2></div>',
+      '<pre>' + (generated.content||'') + '</pre>',
+      '<div style="margin-top:20px;font-size:11px;color:#888">Generated by CoachIQ</div>',
+      scriptTag,'</body></html>'
+    ].join('')
+    printWindow.document.write(html)
+    printWindow.document.close()
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      <Card>
+        <CardHead icon="🖨" title="Printable Sheets" accent={P} />
+        <div style={{ padding:14 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+            {printTypes.map(pt => (
+              <div key={pt.id} onClick={()=>setPrintType(pt.id)} style={{ padding:'10px 12px', background:printType===pt.id?al(P,0.12):'#161922', border:`1px solid ${printType===pt.id?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
+                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:3 }}>{pt.label}</div>
+                <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.4 }}>{pt.desc}</div>
+              </div>
+            ))}
+          </div>
+          <PBtn onClick={generatePDF} disabled={generating} color={P}>{generating?'GENERATING...':'GENERATE '+printType.toUpperCase()}</PBtn>
+          {generating && <Shimmer />}
+          {generated && (
+            <div style={{ marginTop:12, animation:'fadeIn 0.2s ease' }}>
+              <div style={{ padding:'10px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}>
+                <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Ready to Print</div>
+                <div style={{ fontSize:12, color:'#f2f4f8' }}>{team.name} — {generated.type} sheet generated</div>
+              </div>
+              <button onClick={downloadAsPDF} style={{ width:'100%', padding:'11px', background:'linear-gradient(135deg,#1B5E20,#2e7d32)', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+                <span>🖨</span> OPEN PRINT DIALOG (PDF)
+              </button>
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+
+// ─── TEAM PAGE ─────────────────────────────────────────────────────────────────
+function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg }) {
+  const [section, setSection] = useState('roster')
+  const currentTeam = activeTeam[sport]
+  const mascotObj = currentTeam ? (MASCOTS||[]).find(m=>m.id===currentTeam.mascot) : null
+
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Team management</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
+      </div>
+
+      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setPage('team')} />
+
+      {!currentTeam ? (
+        <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
+          <div style={{ fontSize:36, marginBottom:10 }}>🏆</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Team Selected</div>
+          <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Create or select a team above to access roster, schedule, practice plans, and more.</div>
+        </div>
+      ) : (
+        <>
+          {/* Team header */}
+          <div style={{ marginTop:12, padding:'10px 14px', background:`linear-gradient(135deg,${currentTeam.primary}22,#07090d)`, border:`1px solid ${al(P,0.2)}`, borderRadius:4, display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ fontSize:28 }}>{mascotObj?.emoji||'🏆'}</span>
+            <div>
+              <div style={{ fontFamily:(TEAM_FONTS||[]).find(f=>f.id===currentTeam.teamFont)?.style||"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8' }}>{currentTeam.name}</div>
+              <div style={{ fontSize:10, color:'#6b7a96' }}>{currentTeam.season}{currentTeam.hometown?' · '+currentTeam.hometown:''}</div>
+            </div>
+          </div>
+
+          {/* Section tabs */}
+          <div style={{ display:'flex', gap:6, marginTop:12, marginBottom:12, overflowX:'auto', paddingBottom:2 }}>
+            {[['roster','👥 Roster'],['schedule','📅 Schedule'],['practice','📆 Practice'],['analytics','📊 Analytics'],['print','🖨 Print']].map(([s,lbl])=>(
+              <button key={s} onClick={()=>setSection(s)} style={{ flexShrink:0, padding:'8px 12px', borderRadius:4, fontSize:11, border:`1px solid ${section===s?P:'#1e2330'}`, background:section===s?al(P,0.15):'transparent', color:section===s?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
+            ))}
+          </div>
+
+          {section==='roster'   && <RosterSection   team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
+          {section==='schedule' && <ScheduleSection  team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
+          {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} />}
+          {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} />}
+          {section==='print'    && <PrintSection     team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} />}
+        </>
+      )}
+    </>
+  )
+}
+
+
 function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
   const [mode, setMode] = useState('view')
   const [expanded, setExpanded] = useState(false)
@@ -2648,5 +2957,135 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
         )}
       </div>
     </>
+  )
+}
+
+
+// ─── SCHEDULE SECTION ─────────────────────────────────────────────────────────
+function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
+  const [showAdd, setShowAdd] = useState(false)
+  const [savedOpponents, setSavedOpponents] = useState([])
+  const [form, setForm] = useState({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
+
+  const schedule = team.schedule || []
+
+  function updateTeam(updates) {
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t,...updates} : t) }))
+  }
+
+  function saveEvent() {
+    if (!form.date) return
+    const event = { id:Date.now(), ...form }
+    const updated = [...schedule, event].sort((a,b) => new Date(a.date) - new Date(b.date))
+    updateTeam({ schedule: updated })
+    if (form.opponent && !savedOpponents.includes(form.opponent)) {
+      setSavedOpponents(prev => [...prev, form.opponent])
+    }
+    setForm({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
+    setShowAdd(false)
+  }
+
+  function removeEvent(id) {
+    updateTeam({ schedule: schedule.filter(e => e.id !== id) })
+  }
+
+  const typeColors = { Game:P, Practice:'#4ade80', Scrimmage:'#f59e0b', Tournament:'#c084fc' }
+  const typeIcons  = { Game:'🏆', Practice:'📋', Scrimmage:'⚡', Tournament:'🥇' }
+  const now = new Date()
+  const upcoming = schedule.filter(e => new Date(e.date+'T23:59:59') >= now)
+  const past     = schedule.filter(e => new Date(e.date+'T23:59:59') < now)
+
+  return (
+    <Card>
+      <CardHead icon="📅" title="Schedule" tag={upcoming.length + ' upcoming'} tagColor={P} accent={P} />
+      <div style={{ padding:14 }}>
+        {!showAdd ? (
+          <button onClick={()=>setShowAdd(true)} style={{ width:'100%', padding:'10px', background:al(P,0.08), border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', marginBottom: upcoming.length ? 12 : 0 }}>+ ADD EVENT</button>
+        ) : (
+          <div style={{ animation:'fadeIn 0.2s ease', marginBottom:12 }}>
+            <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:10 }}>Add Event</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
+              <Sel label="Type" value={form.type} onChange={v=>setForm(f=>({...f,type:v}))} options={['Game','Practice','Scrimmage','Tournament']} />
+              <Sel label="Home / Away" value={form.homeAway} onChange={v=>setForm(f=>({...f,homeAway:v}))} options={['Home','Away','Neutral']} />
+              <div style={{ gridColumn:'1/-1' }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Opponent / Event Name</label>
+                <input value={form.opponent} onChange={e=>setForm(f=>({...f,opponent:e.target.value}))} placeholder={form.type==='Practice' ? 'Practice session' : 'e.g. Westport Eagles'} list="saved-opps-list" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <datalist id="saved-opps-list">{savedOpponents.map(o=><option key={o} value={o}/>)}</datalist>
+              </div>
+              <div>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Date *</label>
+                <input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:`1px solid ${form.date?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+              </div>
+              <div>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Start Time</label>
+                <input type="time" value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+              </div>
+              <div>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Arrive By</label>
+                <input type="time" value={form.arrivalTime} onChange={e=>setForm(f=>({...f,arrivalTime:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+              </div>
+              <div>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / City</label>
+                <input value={form.location} onChange={e=>setForm(f=>({...f,location:e.target.value}))} placeholder={form.homeAway==='Home' ? (team.hometown||'Home field') : 'e.g. Westport, CT'} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+              </div>
+              <div style={{ gridColumn:'1/-1' }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
+                <input value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="e.g. Wear red jerseys, bring extra water" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={()=>setShowAdd(false)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+              <button onClick={saveEvent} disabled={!form.date} style={{ flex:2, padding:'9px', background:form.date?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:form.date?'pointer':'not-allowed', letterSpacing:'1px' }}>SAVE EVENT</button>
+            </div>
+          </div>
+        )}
+
+        {upcoming.length === 0 && !showAdd && (
+          <div style={{ textAlign:'center', padding:'18px 0', color:'#3d4559', fontSize:12 }}>No upcoming events — tap above to add your schedule</div>
+        )}
+
+        {upcoming.map(event => {
+          const tc = typeColors[event.type] || P
+          const d = new Date(event.date + 'T12:00:00')
+          return (
+            <div key={event.id} style={{ padding:'10px 12px', background:'#161922', border:`1px solid ${al(tc,0.25)}`, borderRadius:6, marginBottom:8, borderLeft:`3px solid ${tc}` }}>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
+                <span style={{ fontSize:16, flexShrink:0 }}>{typeIcons[event.type]||'📅'}</span>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:2 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{event.opponent || event.type}</div>
+                    <span style={{ fontSize:8, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} · {event.homeAway}</span>
+                  </div>
+                  <div style={{ fontSize:11, color:'#6b7a96' }}>
+                    {d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
+                    {event.time && ' · ' + event.time}
+                    {event.arrivalTime && ' · Arrive ' + event.arrivalTime}
+                  </div>
+                  {event.location && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>📍 {event.location}</div>}
+                  {event.notes && <div style={{ fontSize:10, color:'#3d4559', marginTop:1, fontStyle:'italic' }}>{event.notes}</div>}
+                </div>
+                <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, flexShrink:0, padding:0 }}>×</button>
+              </div>
+            </div>
+          )
+        })}
+
+        {past.length > 0 && (
+          <details style={{ marginTop:8 }}>
+            <summary style={{ fontSize:10, color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>PAST EVENTS ({past.length})</summary>
+            <div style={{ marginTop:6, opacity:0.5 }}>
+              {past.map(event => (
+                <div key={event.id} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5, fontSize:11, color:'#6b7a96', display:'flex', alignItems:'center', gap:8 }}>
+                  <span>{typeIcons[event.type]||'📅'}</span>
+                  <span>{event.opponent || event.type}</span>
+                  <span style={{ marginLeft:'auto' }}>{new Date(event.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'})}</span>
+                  <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+      </div>
+    </Card>
   )
 }
