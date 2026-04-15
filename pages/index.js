@@ -10,6 +10,69 @@ const BRAND_PALETTES = {
   'Gold — C+IQ colored':  { accent: '#f59e0b', accentOn: 'CIQ', name: 'Gold — C+IQ colored' },
 }
 
+
+// ─── MASCOTS ──────────────────────────────────────────────────────────────────
+const MASCOTS = [
+  { id:'eagles',    name:'Eagles',     emoji:'🦅' },
+  { id:'hawks',     name:'Hawks',      emoji:'🦆' },
+  { id:'falcons',   name:'Falcons',    emoji:'🦅' },
+  { id:'ravens',    name:'Ravens',     emoji:'🐦' },
+  { id:'cardinals', name:'Cardinals',  emoji:'🐦' },
+  { id:'owls',      name:'Owls',       emoji:'🦉' },
+  { id:'tigers',    name:'Tigers',     emoji:'🐯' },
+  { id:'lions',     name:'Lions',      emoji:'🦁' },
+  { id:'bears',     name:'Bears',      emoji:'🐻' },
+  { id:'panthers',  name:'Panthers',   emoji:'🐆' },
+  { id:'cougars',   name:'Cougars',    emoji:'🐈' },
+  { id:'jaguars',   name:'Jaguars',    emoji:'🐆' },
+  { id:'wolves',    name:'Wolves',     emoji:'🐺' },
+  { id:'huskies',   name:'Huskies',    emoji:'🐕' },
+  { id:'bulldogs',  name:'Bulldogs',   emoji:'🐶' },
+  { id:'vipers',    name:'Vipers',     emoji:'🐍' },
+  { id:'cobras',    name:'Cobras',     emoji:'🐍' },
+  { id:'gators',    name:'Gators',     emoji:'🐊' },
+  { id:'dragons',   name:'Dragons',    emoji:'🐉' },
+  { id:'mustangs',  name:'Mustangs',   emoji:'🐎' },
+  { id:'stallions', name:'Stallions',  emoji:'🐎' },
+  { id:'broncos',   name:'Broncos',    emoji:'🐴' },
+  { id:'rams',      name:'Rams',       emoji:'🐏' },
+  { id:'bulls',     name:'Bulls',      emoji:'🐂' },
+  { id:'bison',     name:'Bison',      emoji:'🦬' },
+  { id:'sharks',    name:'Sharks',     emoji:'🦈' },
+  { id:'warriors',  name:'Warriors',   emoji:'⚔️' },
+  { id:'knights',   name:'Knights',    emoji:'🛡️' },
+  { id:'spartans',  name:'Spartans',   emoji:'🗡️' },
+  { id:'titans',    name:'Titans',     emoji:'💪' },
+  { id:'giants',    name:'Giants',     emoji:'🏔️' },
+  { id:'rockets',   name:'Rockets',    emoji:'🚀' },
+  { id:'blazers',   name:'Blazers',    emoji:'🔥' },
+  { id:'thunder',   name:'Thunder',    emoji:'⚡' },
+  { id:'storm',     name:'Storm',      emoji:'🌩️' },
+  { id:'lightning', name:'Lightning',  emoji:'⚡' },
+  { id:'cyclones',  name:'Cyclones',   emoji:'🌀' },
+  { id:'tornados',  name:'Tornados',   emoji:'🌪️' },
+  { id:'comets',    name:'Comets',     emoji:'☄️' },
+  { id:'jets',      name:'Jets',       emoji:'✈️' },
+  { id:'phantoms',  name:'Phantoms',   emoji:'👻' },
+  { id:'chargers',  name:'Chargers',   emoji:'⚡' },
+  { id:'patriots',  name:'Patriots',   emoji:'🦅' },
+  { id:'rebels',    name:'Rebels',     emoji:'🔱' },
+  { id:'trojans',   name:'Trojans',    emoji:'🏛️' },
+  { id:'vikings',   name:'Vikings',    emoji:'🪓' },
+  { id:'pirates',   name:'Pirates',    emoji:'☠️' },
+  { id:'raiders',   name:'Raiders',    emoji:'💀' },
+  { id:'colts',     name:'Colts',      emoji:'🐴' },
+]
+
+// ─── TEAM NAME FONTS ──────────────────────────────────────────────────────────
+const TEAM_FONTS = [
+  { id:'kalam',    name:'Kalam',           style:"'Kalam', cursive",                    preview:'Handwritten' },
+  { id:'barlow',   name:'Barlow Condensed',style:"'Barlow Condensed', sans-serif",       preview:'Bold Athletic' },
+  { id:'bigshoul', name:'Big Shoulders',   style:"'Big Shoulders Display', sans-serif",  preview:'BLOCK CAPS' },
+  { id:'dmsans',   name:'DM Sans',         style:"'DM Sans', sans-serif",                preview:'Clean Modern' },
+  { id:'mono',     name:'DM Mono',         style:"'DM Mono', monospace",                 preview:'Monospace' },
+]
+
 // ─── SPORT COLORS ────────────────────────────────────────────────────────────
 const SPORT_COLORS = {
   Football:   { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', label: 'Football' },
@@ -35,11 +98,11 @@ const SPORTS = {
       {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
       {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Dual-Threat QB','Speed / Fast Athletes','Big Physical Players','Pass Heavy / Spread','Run Heavy / Power','Option / Misdirection Heavy','Blitzes Every Down','Zone Coverage Heavy','Man Press Every Play']},
+      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
-    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
   },
   Basketball: {
@@ -51,11 +114,11 @@ const SPORTS = {
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
       {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','One Star Player ISO Heavy','Strong Inside Post','Three Point Shooting Team','Fast Break Heavy','Ball Control Slow Pace','Full Court Press Every Possession','Zone Defense Only','Aggressive Man Pressure','Weak Ball Handlers']},
+      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -67,7 +130,7 @@ const SPORTS = {
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
       {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
       {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Pull Hitters Heavy','Spray / Opposite Field Hitters','Speed Team — Steals Often','Power Hitting Lineup','Bunt Heavy Small Ball','Strong Pitching','Aggressive Base Running','Struggles with Off-Speed','Rarely Strike Out']},
+      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
@@ -233,6 +296,12 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
           <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{play.name}</div>
           <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:1 }}>{play.type}</div>
           <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, lineHeight:1.4 }}>{play.note}</div>
+          {play.nameExplanation && (
+            <div style={{ marginTop:5, padding:'5px 8px', background:`rgba(${parseInt(P.slice(1,3),16)||192},${parseInt(P.slice(3,5),16)||57},${parseInt(P.slice(5,7),16)||43},0.08)`, borderRadius:4, borderLeft:`2px solid ${P}` }}>
+              <div style={{ fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:2 }}>Why this name?</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.nameExplanation}</div>
+            </div>
+          )}
           <div style={{ fontSize:10, color:P, marginTop:4 }}>{expanded ? '▲ Tap to collapse' : '▼ Tap to expand breakdown + diagram'}</div>
         </div>
         <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
@@ -2037,17 +2106,31 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   // DASHBOARD
   return (
     <>
-      <div style={{ padding:'16px 0 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
-          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>{lastName ? `Coach ${lastName}` : 'CoachIQ'}</div>
-        </div>
-        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Coach IQ</div></div>
-          <div style={{ width:1, height:28, background:'#1c2235' }} />
-          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div></div>
-        </div>
-      </div>
+      {/* Team hero card */}
+      {(() => {
+        const ct = activeTeam[sport]
+        const mascotObj = ct ? (MASCOTS||[]).find(m=>m.id===ct.mascot) : null
+        const teamFont = ct ? ((TEAM_FONTS||[]).find(f=>f.id===ct.teamFont)?.style||"'Barlow Condensed',sans-serif") : null
+        return (
+          <div style={{ marginTop:14, borderRadius:4, overflow:'hidden', border:`1px solid ${al(P,0.25)}`, position:'relative', minHeight:86, background:ct?`linear-gradient(135deg,${ct.primary}22,${ct.secondary||'#07090d'}33,#07090d)`:'linear-gradient(135deg,#0f1219,#07090d)' }}>
+            {mascotObj && <div style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', fontSize:60, opacity:0.12, pointerEvents:'none', userSelect:'none', lineHeight:1 }}>{mascotObj.emoji}</div>}
+            <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:ct?`linear-gradient(90deg,${ct.primary},${ct.secondary||P},${ct.accent1||P},${ct.accent2||P})`:`linear-gradient(90deg,${P},${S})` }} />
+            <div style={{ padding:'14px 16px', display:'flex', alignItems:'center', gap:12, position:'relative', zIndex:1 }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
+                <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#f2f4f8', lineHeight:1, marginBottom:ct?4:0 }}>Coach {lastName||'—'}</div>
+                {ct && <div style={{ fontFamily:teamFont, fontStyle:'italic', fontSize:14, color:ct.primary, letterSpacing:'0.5px' }}>{mascotObj?.emoji} {ct.name}</div>}
+                {ct?.season && <div style={{ fontSize:10, color:'#3d4559', marginTop:2, fontFamily:"'Barlow Condensed',sans-serif" }}>{ct.season}{ct.hometown?' · '+ct.hometown:''}</div>}
+              </div>
+              <div style={{ display:'flex', gap:10, alignItems:'center', flexShrink:0 }}>
+                <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>IQ</div></div>
+                <div style={{ width:1, height:24, background:'#1c2235' }} />
+                <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div></div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Ticker */}
       <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
@@ -2344,16 +2427,26 @@ export default function CoachIQ() {
         <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
           <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
           <CoachIQLogo size={22} brand={brand} />
-          <div style={{ display:'flex', gap:3, marginLeft:2 }}>
-            {[['FB','Football','🏈'],['BB','Basketball','🏀'],['BSB','Baseball','⚾']].map(([lbl,s,ico]) => (
-              <button key={lbl} onClick={()=>setSport(s)} style={{ padding:'3px 8px', borderRadius:2, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
-                <span style={{ fontSize:10 }}>{ico}</span><span>{lbl}</span>
-              </button>
-            ))}
+          <div style={{ position:'relative', marginLeft:4 }}>
+            <select value={sport} onChange={e=>setSport(e.target.value)} style={{ background:'#161922', border:`1px solid ${al(P,0.35)}`, borderRadius:3, padding:'4px 26px 4px 8px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, letterSpacing:'0.5px', outline:'none', appearance:'none', cursor:'pointer' }}>
+              {['Football','Basketball','Baseball'].map(s=>(
+                <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾' }[s]} {s}</option>
+              ))}
+            </select>
+            <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:4, background:`rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:2, padding:'3px 8px', marginLeft:'auto' }}>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
-            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
+          <div style={{ marginLeft:'auto', display:'flex', alignItems:'center' }}>
+            {currentTeam ? (
+              <div style={{ display:'flex', alignItems:'center', gap:5, background:al(P,0.1), border:`1px solid ${al(P,0.25)}`, borderRadius:3, padding:'3px 8px' }}>
+                <span style={{ fontSize:13 }}>{(MASCOTS||[]).find(m=>m.id===currentTeam.mascot)?.emoji||'🏆'}</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{currentTeam.name}</span>
+              </div>
+            ) : (
+              <div style={{ display:'flex', alignItems:'center', gap:4, background:`rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:2, padding:'3px 8px' }}>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
+                <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -2382,153 +2475,178 @@ export default function CoachIQ() {
 }
 
 // ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
-function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg }) {
-  const [mode, setMode] = useState('view') // view | create
+function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
+  const [mode, setMode] = useState('view')
   const [expanded, setExpanded] = useState(false)
-  const [form, setForm] = useState({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
   const [error, setError] = useState('')
 
   const sportTeams = teams[sport] || []
   const current = activeTeam[sport]
   const MAX_TEAMS = 5
-
-  const colorOptions = {
-    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#E91E63','#FF6F00'],
-    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010','#0d2137','#3e0a1e','#1a1200'],
-  }
-
   const seasons = ['Fall 2025','Winter 2025','Spring 2026','Summer 2026','Fall 2026','Winter 2026','Spring 2027','Summer 2027','Year Round']
   const sportEmoji = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
 
   function createTeam() {
     if (!form.name.trim()) { setError('Team name is required'); return }
-    if (sportTeams.length >= MAX_TEAMS) { setError(`Max ${MAX_TEAMS} teams per sport`); return }
-    const newTeam = { id: Date.now(), name: form.name.trim(), season: form.season || 'Season N/A', primary: form.primary, secondary: form.secondary, sport, createdAt: Date.now() }
-    const updated = { ...teams, [sport]: [...sportTeams, newTeam] }
-    setTeams(updated)
-    setActiveTeam(prev => ({ ...prev, [sport]: newTeam }))
-    setCfg(prev => ({ ...prev, primary: newTeam.primary, secondary: newTeam.secondary }))
-    setForm({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
-    setMode('view')
-    setError('')
+    if (sportTeams.length >= MAX_TEAMS) { setError('Max '+MAX_TEAMS+' teams per sport'); return }
+    const newTeam = { id:Date.now(), name:form.name.trim(), season:form.season||'Season N/A', mascot:form.mascot, teamFont:form.teamFont, hometown:form.hometown.trim(), primary:form.primary, secondary:form.secondary, accent1:form.accent1, accent2:form.accent2, sport, players:[], schedule:[] }
+    setTeams(prev => ({ ...prev, [sport]:[...(prev[sport]||[]), newTeam] }))
+    setActiveTeam(prev => ({ ...prev, [sport]:newTeam }))
+    setCfg(prev => ({ ...prev, primary:newTeam.primary, secondary:newTeam.secondary }))
+    setForm({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
+    setMode('view'); setError('')
   }
 
   function selectTeam(team) {
-    setActiveTeam(prev => ({ ...prev, [sport]: team }))
-    setCfg(prev => ({ ...prev, primary: team.primary, secondary: team.secondary }))
+    setActiveTeam(prev => ({ ...prev, [sport]:team }))
+    setCfg(prev => ({ ...prev, primary:team.primary, secondary:team.secondary }))
     setExpanded(false)
   }
 
-  function deleteTeam(id) {
-    const updated = sportTeams.filter(t => t.id !== id)
-    setTeams(prev => ({ ...prev, [sport]: updated }))
-    if (current?.id === id) {
-      const next = updated[0] || null
-      setActiveTeam(prev => ({ ...prev, [sport]: next }))
-      if (next) setCfg(prev => ({ ...prev, primary: next.primary, secondary: next.secondary }))
-    }
+  function deselectTeam() {
+    setActiveTeam(prev => ({ ...prev, [sport]:null }))
+    setExpanded(false)
   }
 
-  const hasTeams = sportTeams.length > 0
+  function doDelete() {
+    if (!deleteConfirm) return
+    const updated = sportTeams.filter(t => t.id !== deleteConfirm.id)
+    setTeams(prev => ({ ...prev, [sport]:updated }))
+    if (current?.id === deleteConfirm.id) {
+      const next = updated[0] || null
+      setActiveTeam(prev => ({ ...prev, [sport]:next }))
+      if (next) setCfg(prev => ({ ...prev, primary:next.primary, secondary:next.secondary }))
+    }
+    setDeleteConfirm(null)
+  }
+
+  const mascotObj = current ? (MASCOTS || []).find(m => m.id === current.mascot) : null
+  const fontStyle = current ? ((TEAM_FONTS || []).find(f => f.id === current.teamFont)?.style || "'Barlow Condensed',sans-serif") : "'Barlow Condensed',sans-serif"
 
   return (
-    <div style={{ marginTop:14 }}>
-      {/* Header bar */}
-      <div
-        onClick={() => setExpanded(e => !e)}
-        style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${hasTeams ? al(P,0.3) : '#1e2330'}`, borderRadius: expanded ? '4px 4px 0 0' : 4, cursor:'pointer', borderLeft:`3px solid ${P}` }}
-      >
-        <span style={{ fontSize:16 }}>{sportEmoji[sport] || '🏆'}</span>
-        <div style={{ flex:1 }}>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'0.5px', color:'#f2f4f8', textTransform:'uppercase' }}>
-            {current ? current.name : `No ${sport} Team Selected`}
-          </div>
-          {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
-          {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
-        </div>
-        {current && (
-          <div style={{ display:'flex', gap:4 }}>
-            <div style={{ width:12, height:12, borderRadius:2, background:current.primary }} />
-            <div style={{ width:12, height:12, borderRadius:2, background:current.secondary }} />
-          </div>
-        )}
-        <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded ? '▲' : '▼'}</span>
-      </div>
-
-      {expanded && (
-        <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
-
-          {/* Existing teams list */}
-          {hasTeams && mode === 'view' && (
-            <div style={{ marginBottom:12 }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
-              {sportTeams.map(team => (
-                <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background: current?.id===team.id ? al(P,0.1) : '#161922', border:`1px solid ${current?.id===team.id ? al(P,0.4) : '#1e2330'}`, borderRadius:6, marginBottom:6 }}>
-                  <div style={{ display:'flex', gap:3, flexShrink:0 }}>
-                    <div style={{ width:14, height:14, borderRadius:2, background:team.primary }} />
-                    <div style={{ width:14, height:14, borderRadius:2, background:team.secondary }} />
-                  </div>
-                  <div style={{ flex:1, cursor:'pointer' }} onClick={() => selectTeam(team)}>
-                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{team.name}</div>
-                    <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}</div>
-                  </div>
-                  {current?.id === team.id && <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>ACTIVE</span>}
-                  <button onClick={() => deleteTeam(team.id)} style={{ background:'transparent', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.6)', fontSize:10, padding:'3px 7px', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
-                </div>
-              ))}
+    <>
+      {deleteConfirm && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+          <div style={{ background:'#0f1219', border:'1px solid rgba(239,68,68,0.4)', borderRadius:8, padding:24, width:'100%', maxWidth:340 }}>
+            <div style={{ fontSize:24, textAlign:'center', marginBottom:10 }}>⚠️</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:18, color:'#f2f4f8', textAlign:'center', marginBottom:6 }}>Delete Team?</div>
+            <div style={{ fontSize:13, color:'#6b7a96', textAlign:'center', lineHeight:1.6, marginBottom:20 }}>This will permanently delete <span style={{ color:'#f2f4f8', fontWeight:600 }}>{deleteConfirm.name}</span>. This cannot be undone.</div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={()=>setDeleteConfirm(null)} style={{ flex:1, padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>CANCEL</button>
+              <button onClick={doDelete} style={{ flex:1, padding:'11px', background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.5)', borderRadius:4, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>DELETE</button>
             </div>
-          )}
-
-          {/* Create team form */}
-          {mode === 'create' && (
-            <div style={{ animation:'fadeIn 0.2s ease' }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:10 }}>Create New Team</div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-                <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
-                  <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={`e.g. Tolland Youth ${sport}`} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-                <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Season</label>
-                  <select value={form.season} onChange={e=>setForm(f=>({...f,season:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:form.season?'#f2f4f8':'#6b7a96', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-                    <option value="">Select season...</option>
-                    {seasons.map(s => <option key={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div style={{ marginBottom:10 }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Primary Color</label>
-                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                  {colorOptions.primary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,primary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.primary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-                </div>
-              </div>
-              <div style={{ marginBottom:12 }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Secondary Color</label>
-                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                  {colorOptions.secondary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,secondary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.secondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-                </div>
-              </div>
-              {/* Color preview strip */}
-              <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 55%,${form.secondary} 55%)`, marginBottom:12 }} />
-              {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
-              <div style={{ display:'flex', gap:8 }}>
-                <button onClick={() => { setMode('view'); setError('') }} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CANCEL</button>
-                <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
-              </div>
-            </div>
-          )}
-
-          {/* Add team button */}
-          {mode === 'view' && sportTeams.length < MAX_TEAMS && (
-            <button onClick={() => setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-              <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
-            </button>
-          )}
-          {mode === 'view' && sportTeams.length >= MAX_TEAMS && (
-            <div style={{ fontSize:11, color:'#3d4559', textAlign:'center', padding:'8px 0' }}>Max {MAX_TEAMS} teams reached for {sport}</div>
-          )}
+          </div>
         </div>
       )}
-    </div>
+
+      <div style={{ marginTop:14 }}>
+        <div onClick={()=>setExpanded(e=>!e)} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
+          <span style={{ fontSize:18 }}>{mascotObj?.emoji || sportEmoji[sport] || '🏆'}</span>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:current?15:13, color:'#f2f4f8', textTransform:'uppercase' }}>
+              {current ? current.name : 'No '+sport+' Team Selected'}
+            </div>
+            {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season}{current.hometown?' · '+current.hometown:''} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
+            {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
+          </div>
+          {current && <div style={{ display:'flex', gap:3 }}>{[current.primary,current.secondary,current.accent1,current.accent2].filter(Boolean).map((c,i)=><div key={i} style={{ width:10,height:10,borderRadius:2,background:c }} />)}</div>}
+          <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded?'▲':'▼'}</span>
+        </div>
+
+        {expanded && (
+          <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
+            {sportTeams.length > 0 && mode === 'view' && (
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
+                {sportTeams.map(team => {
+                  const m = (MASCOTS||[]).find(x=>x.id===team.mascot)
+                  const fs = (TEAM_FONTS||[]).find(f=>f.id===team.teamFont)?.style||"'Barlow Condensed',sans-serif"
+                  return (
+                    <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:current?.id===team.id?al(P,0.1):'#161922', border:`1px solid ${current?.id===team.id?al(P,0.4):'#1e2330'}`, borderRadius:6, marginBottom:6 }}>
+                      <span style={{ fontSize:18, flexShrink:0 }}>{m?.emoji||'🏆'}</span>
+                      <div style={{ flex:1, cursor:'pointer' }} onClick={()=>selectTeam(team)}>
+                        <div style={{ fontFamily:fs, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
+                        <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
+                      </div>
+                      {current?.id===team.id && <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>DESELECT</button>}
+                      {current?.id===team.id && onOpenTeamTab && <button onClick={onOpenTeamTab} style={{ padding:'3px 7px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>OPEN →</button>}
+                      <button onClick={()=>setDeleteConfirm(team)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.7)', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {mode === 'create' && (
+              <div style={{ animation:'fadeIn 0.2s ease' }}>
+                <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:12 }}>Create New Team</div>
+                <div style={{ marginBottom:10 }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
+                  <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={'e.g. Tolland Youth '+sport} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                  <Sel label="Season" value={form.season||seasons[0]} onChange={v=>setForm(f=>({...f,season:v}))} options={seasons} />
+                  <div>
+                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Hometown</label>
+                    <input value={form.hometown} onChange={e=>setForm(f=>({...f,hometown:e.target.value}))} placeholder="e.g. Tolland, CT" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom:12 }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Mascot</label>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:3, maxHeight:110, overflowY:'auto', padding:4, background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
+                    {(MASCOTS||[]).map(m=>(
+                      <div key={m.id} onClick={()=>setForm(f=>({...f,mascot:m.id}))} title={m.name} style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'5px 2px', borderRadius:4, background:form.mascot===m.id?al(P,0.2):'transparent', border:`1px solid ${form.mascot===m.id?P:'transparent'}`, cursor:'pointer' }}>
+                        <span style={{ fontSize:16 }}>{m.emoji}</span>
+                        <span style={{ fontSize:6, color:'#6b7a96', textAlign:'center', lineHeight:1.1 }}>{m.name.slice(0,5)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {form.mascot && <div style={{ fontSize:10, color:P, marginTop:3 }}>Selected: {(MASCOTS||[]).find(m=>m.id===form.mascot)?.emoji} {(MASCOTS||[]).find(m=>m.id===form.mascot)?.name}</div>}
+                </div>
+                <div style={{ marginBottom:12 }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Name Font</label>
+                  <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                    {(TEAM_FONTS||[]).map(tf=>(
+                      <div key={tf.id} onClick={()=>setForm(f=>({...f,teamFont:tf.id}))} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 12px', background:form.teamFont===tf.id?al(P,0.1):'#161922', border:`1px solid ${form.teamFont===tf.id?P:'#1e2330'}`, borderRadius:5, cursor:'pointer' }}>
+                        <span style={{ fontFamily:tf.style, fontSize:15, color:'#f2f4f8', flex:1 }}>{form.name||'Team Name'}</span>
+                        <span style={{ fontSize:9, color:'#6b7a96' }}>{tf.preview}</span>
+                        {form.teamFont===tf.id && <span style={{ fontSize:11, color:'#4ade80' }}>✓</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {[['primary','Primary'],['secondary','Secondary'],['accent1','Accent 1'],['accent2','Accent 2']].map(([key,label])=>(
+                  <div key={key} style={{ marginBottom:10 }}>
+                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:5, display:'block' }}>{label} Color</label>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <input type="color" value={form[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))} style={{ width:34, height:34, border:'none', borderRadius:4, cursor:'pointer', padding:0 }} />
+                      <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
+                        {['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#f59e0b','#374151'].map(c=>(
+                          <div key={c} onClick={()=>setForm(f=>({...f,[key]:c}))} style={{ width:22,height:22,borderRadius:3,background:c,border:`2px solid ${form[key]===c?'white':'transparent'}`,cursor:'pointer' }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 25%,${form.secondary} 25%,${form.secondary} 50%,${form.accent1} 50%,${form.accent1} 75%,${form.accent2} 75%)`, marginBottom:12 }} />
+                {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
+                <div style={{ display:'flex', gap:8 }}>
+                  <button onClick={()=>{setMode('view');setError('')}} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                  <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
+                </div>
+              </div>
+            )}
+
+            {mode === 'view' && sportTeams.length < MAX_TEAMS && (
+              <button onClick={()=>setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   )
 }
