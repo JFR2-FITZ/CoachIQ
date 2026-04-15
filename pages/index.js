@@ -330,13 +330,13 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, a
     </div>,
   ].filter(Boolean)
 
-  const activeSlot = slots[slot % slots.length]
+  const activeSlot = slots.length > 0 ? slots[slot % slots.length] : null
 
   return (
     <div style={{ display:'flex', alignItems:'center', gap:6 }}>
       <div style={{ fontSize:22, lineHeight:1, opacity:0.7 }}>{SPORT_BALL[sport]||'🏈'}</div>
       <div style={{ minWidth:68, display:'flex', alignItems:'center', justifyContent:'center', animation:'fadeIn 0.4s ease' }} key={slot}>
-        {activeSlot}
+        {activeSlot || <div style={{ fontSize:18 }}>📅</div>}
       </div>
       <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
         {slots.map((_,i) => <div key={i} style={{ width:3, height:3, borderRadius:'50%', background: i===slot%slots.length ? P : '#3d4559' }} />)}
@@ -3299,9 +3299,6 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function CoachIQ() {
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
-  if (!mounted) return null
-
   const [launched, setLaunched] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
   const [cfg, setCfg] = useState({ coach:'', primary:'#C0392B', secondary:'#002868' })
@@ -3314,6 +3311,8 @@ export default function CoachIQ() {
   const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[] })
   const [teams, setTeams] = useState({ Football:[], Basketball:[], Baseball:[] })
   const [activeTeam, setActiveTeam] = useState({ Football:null, Basketball:null, Baseball:null })
+  useEffect(() => { setMounted(true) }, [])
+  if (!mounted) return null
 
   const ALL_SPORTS = ['Football','Basketball','Baseball']
   const SPORT_ICONS = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
