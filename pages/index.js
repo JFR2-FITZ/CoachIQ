@@ -1,416 +1,108 @@
 import { useState, useEffect, useRef } from 'react'
 import Head from 'next/head'
 
-export default function CoachIQ() {
-  const [launched, setLaunched] = useState(false)
-  const [showSplash, setShowSplash] = useState(true)
-  const [cfg, setCfg] = useState({ coach: '', team: '', primary: '#C0392B', secondary: '#002868' })
-  const [page, setPage] = useState('home')
-  const [sport, setSport] = useState('Football')
-  const [iq, setIQ] = useState(847)
-  const [schemes, setSchemes] = useState(0)
-  const [gauntlets, setGauntlets] = useState(0)
-  const [playbook, setPlaybook] = useState({ Football: [], Basketball: [], Baseball: [] })
-  const [schemeResult, setSchemeResult] = useState(null)
-  const [schemeFields, setSchemeFields] = useState(null)
-  const [schemeSport, setSchemeSport] = useState(null)
-  const [genHistory, setGenHistory] = useState({ Football: [], Basketball: [], Baseball: [] })
-
-  const SPORT_COLORS = {
-    Football: { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', field: '#2d5a27', label: 'Football' },
-    Basketball: { primary: '#D4600A', secondary: '#1a1208', accent: '#fff3e0', field: '#c8843c', label: 'Basketball' },
-    Baseball: { primary: '#1B5E20', secondary: '#1a1208', accent: '#f1f8e9', field: '#8B6914', label: 'Baseball' },
-  }
-  const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
-  const P = sportColors.primary
-  const S = sportColors.secondary
-
-  function al(hex, a) {
-    const r = parseInt(hex.slice(1,3),16)
-    const g = parseInt(hex.slice(3,5),16)
-    const b = parseInt(hex.slice(5,7),16)
-    return `rgba(${r},${g},${b},${a})`
-  }
-  function dk(hex, amt) {
-    const r = parseInt(hex.slice(1,3),16)
-    const g = parseInt(hex.slice(3,5),16)
-    const b = parseInt(hex.slice(5,7),16)
-    return '#' + [r,g,b].map(x => Math.max(0,x-amt).toString(16).padStart(2,'0')).join('')
-  }
-
-  async function callAI(prompt, imageData) {
-    const messages = imageData
-      ? [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: imageData.mime, data: imageData.b64 } }, { type: 'text', text: prompt }] }]
-      : [{ role: 'user', content: prompt }]
-    const res = await fetch('/api/ai', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ messages })
-    })
-    const d = await res.json()
-    if (!res.ok) throw new Error(d.error || 'API error')
-    return d.text
-  }
-
-  function parseJSON(raw) {
-    const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-    const a = s.indexOf('{'), b = s.lastIndexOf('}')
-    if (a < 0 || b <= a) throw new Error('No JSON in response')
-    return JSON.parse(s.slice(a, b+1))
-  }
-
-  const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
-
-  if (showSplash) return (
-    <SplashScreen
-      onDone={(skipToApp) => {
-        setShowSplash(false)
-        if (skipToApp) setLaunched(true)
-      }}
-      alreadyAuthed={launched}
-    />
-  )
-
-  if (!launched) return (
-    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} />
-  )
-
-  return (
-    <>
-      <Head><title>CoachIQ</title></Head>
-      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@400;600;700&family=Big+Shoulders+Display:wght@500;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          ::-webkit-scrollbar { width: 4px; }
-          ::-webkit-scrollbar-thumb { background: #1e2330; border-radius: 0; }
-          select option { background: #161922; }
-          @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-          @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-          @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-          @keyframes ticker { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
-          @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
-          @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
-          @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
-          @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
-          @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
-          @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
-          @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
-          @keyframes splashFade { 0%{opacity:1} 75%{opacity:1} 100%{opacity:0} }
-          @keyframes logoReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
-          @keyframes ballDrift { 0%{opacity:0} 20%{opacity:0.11} 80%{opacity:0.11} 100%{opacity:0} }
-        `}</style>
-
-        <div style={{ background:'#07090d', borderBottom:`1px solid #0e1220`, padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%, ${cfg.secondary || '#002868'} 55%)` }} />
-          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:22, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
-            <span style={{ color:P }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
-          </div>
-          <div style={{ display:'flex', gap:3, marginLeft:2 }}>
-            {[['FB','Football','🏈'],['BB','Basketball','🏀'],['BSB','Baseball','⚾']].map(([lbl,s,ico]) => (
-              <button key={lbl} onClick={() => setSport(s)} style={{ padding:'3px 8px', borderRadius:2, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
-                <span style={{ fontSize:10 }}>{ico}</span><span>{lbl}</span>
-              </button>
-            ))}
-          </div>
-          <div style={{ display:'flex', alignItems:'center', gap:4, background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:2, padding:'3px 8px', marginLeft:'auto' }}>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
-            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
-          </div>
-        </div>
-
-        <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
-          <div style={{ display: page==='home' ? 'contents' : 'none' }}><HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} sportColors={SPORT_COLORS} schemes={schemes} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} playbook={playbook} setPlaybook={setPlaybook} schemeResult={schemeResult} setSchemeResult={setSchemeResult} schemeFields={schemeFields} setSchemeFields={setSchemeFields} schemeSport={schemeSport} setSchemeSport={setSchemeSport} genHistory={genHistory} setGenHistory={setGenHistory} /></div>
-          <div style={{ display: page==='playbook' ? 'contents' : 'none' }}><PlaybookPage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
-          <div style={{ display: page==='more' ? 'contents' : 'none' }}><MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
-        </div>
-
-        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
-          {[['home','🏠','HOME'],['playbook','📖','PLAYBOOK'],['more','⋯','MORE']].map(([p,ico,lbl]) => (
-            <button key={p} onClick={() => setPage(p)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
-              {page===p && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:32, height:2, background:P }} />}
-              <span style={{ fontSize:16, color:page===p?P:'#3d4559' }}>{ico}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:page===p?P:'#3d4559', fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>{lbl}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </>
-  )
+// ─── BRAND CONFIG ────────────────────────────────────────────────────────────
+const BRAND_PALETTES = {
+  'Red & White': { logo1: '#C0392B', logo2: '#f2f4f8', name: 'Red & White' },
+  'Blue & White': { logo1: '#1565C0', logo2: '#f2f4f8', name: 'Blue & White' },
+  'Black & Gold': { logo1: '#f59e0b', logo2: '#f2f4f8', name: 'Black & Gold' },
 }
 
-function SplashScreen({ onDone, alreadyAuthed }) {
-  const [phase, setPhase] = useState('logo')
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (alreadyAuthed) { onDone(true) } else { setPhase('cta') }
-    }, 1800)
-    return () => clearTimeout(t)
-  }, [])
-
-  const ballStyle = (anim, left, top, right, bottom) => ({
-    position:'absolute',
-    ...(left!==undefined?{left}:{}),
-    ...(top!==undefined?{top}:{}),
-    ...(right!==undefined?{right}:{}),
-    ...(bottom!==undefined?{bottom}:{}),
-    animation:`${anim} ease-in-out infinite`,
-    opacity:0.11,
-    zIndex:0,
-    pointerEvents:'none',
-  })
-
-  return (
-    <div style={{ minHeight:'100vh', maxWidth:480, margin:'0 auto', background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 28px', position:'relative', overflow:'hidden' }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&display=swap');
-        * { box-sizing:border-box; margin:0; padding:0; }
-        @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
-        @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
-        @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
-        @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
-        @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
-        @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
-        @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
-        @keyframes logoReveal { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
-        @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
-      `}</style>
-
-      <div style={ballStyle('float1 7s',-16,undefined,undefined,'42%')}><svg width="78" height="50" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
-      <div style={ballStyle('float2 9s',undefined,undefined,8,'38%')}><svg width="64" height="64" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg></div>
-      <div style={ballStyle('float3 8s',14,undefined,undefined,'25%')}><svg width="52" height="52" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="20" x2="19" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="27" x2="16" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="20" x2="37" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="27" x2="40" y2="29" stroke="#C0392B" strokeWidth="1.2"/></svg></div>
-      <div style={ballStyle('float4 11s',undefined,8,undefined,undefined)}><svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg></div>
-      <div style={ballStyle('float5 6.5s',undefined,undefined,20,'18%')}><svg width="38" height="38" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg></div>
-      <div style={ballStyle('float6 10s',undefined,undefined,10,'58%')}><svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg></div>
-      <div style={ballStyle('float7 12s',20,undefined,undefined,'68%')}><svg width="50" height="50" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/></svg></div>
-
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:'35%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'35%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
-
-      <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-58%) rotate(-8deg)', zIndex:1, opacity:0.06, pointerEvents:'none' }}>
-        <svg width="160" height="200" viewBox="0 0 220 280" fill="none">
-          <rect x="10" y="24" width="200" height="240" rx="6" fill="#c8b89a"/>
-          <rect x="80" y="10" width="60" height="30" rx="7" fill="#888880"/>
-          <rect x="90" y="4" width="40" height="18" rx="9" fill="#777770"/>
-          <line x1="30" y1="70" x2="190" y2="70" stroke="#5a4a3a" strokeWidth="2"/>
-          <line x1="30" y1="90" x2="190" y2="90" stroke="#5a4a3a" strokeWidth="2"/>
-          <line x1="30" y1="110" x2="160" y2="110" stroke="#5a4a3a" strokeWidth="2"/>
-          <rect x="30" y="130" width="160" height="110" rx="4" fill="none" stroke="#5a4a3a" strokeWidth="2"/>
-          <line x1="110" y1="130" x2="110" y2="240" stroke="#5a4a3a" strokeWidth="1.5"/>
-          <circle cx="65" cy="158" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
-          <circle cx="90" cy="172" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
-          <circle cx="148" cy="158" r="9" fill="#5a4a3a"/>
-          <circle cx="162" cy="175" r="9" fill="#5a4a3a"/>
-          <path d="M74 149 L88 140" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
-          <path d="M99 163 L115 158" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
-        </svg>
-      </div>
-
-      <div style={{ position:'relative', zIndex:2, textAlign:'center', animation:'logoReveal 0.7s ease forwards' }}>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:58, lineHeight:1, letterSpacing:'-0.5px', marginBottom:10 }}>
-          <span style={{ color:'#C0392B' }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
-        </div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>AI Coaching Intelligence</div>
-      </div>
-
-      {phase === 'cta' && (
-        <div style={{ position:'relative', zIndex:2, width:'100%', display:'flex', flexDirection:'column', gap:10, marginTop:48, animation:'ctaReveal 0.4s ease forwards' }}>
-          <button onClick={() => onDone(false)} style={{ width:'100%', background:'#C0392B', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Get Started — Free</button>
-          <button onClick={() => onDone(false)} style={{ width:'100%', background:'transparent', border:'1px solid #1c2235', borderRadius:4, padding:'13px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}>Sign In</button>
-          <div style={{ textAlign:'center', paddingTop:4 }}>
-            <span onClick={() => onDone(true)} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:'#C0392B', fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+// ─── SPORT COLORS ────────────────────────────────────────────────────────────
+const SPORT_COLORS = {
+  Football:   { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', label: 'Football' },
+  Basketball: { primary: '#D4600A', secondary: '#1a1208', accent: '#fff3e0', label: 'Basketball' },
+  Baseball:   { primary: '#1B5E20', secondary: '#1a1208', accent: '#f1f8e9', label: 'Baseball' },
 }
 
-function Onboarding({ onLaunch }) {
-  const [screen, setScreen] = useState('signin')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [coachName, setCoachName] = useState('')
-  const [teamSport, setTeamSport] = useState('Football')
-  const [teamName, setTeamName] = useState('')
-  const [teamPrimary, setTeamPrimary] = useState('#C0392B')
-  const [teamSecondary, setTeamSecondary] = useState('#002868')
-  const [teams, setTeams] = useState([
-    { sport: 'Football', name: 'Tolland Youth Football', primary: '#C0392B', secondary: '#002868', coach: 'Coach Regisford', iq: 847, packages: 3 }
-  ])
+// ─── DEFAULT PLAYBOOK FOLDERS ────────────────────────────────────────────────
+const DEFAULT_FOLDERS = {
+  Football:   ['Base Offense','Red Zone','2-Minute Drill','Base Defense','Special Teams','My Favorites'],
+  Basketball: ['Base Offense','End of Game','Press Break','Zone Attack','Inbounds','My Favorites'],
+  Baseball:   ['Base Offense','Late Innings','Small Ball','Pitching Strategy','Defensive Sets','My Favorites'],
+}
 
-  const sportMeta = {
-    Football: { emoji: '🏈', grad: ['#6b0000','#C0392B'], label: 'Football' },
-    Basketball: { emoji: '🏀', grad: ['#7a3000','#D4600A'], label: 'Basketball' },
-    Baseball: { emoji: '⚾', grad: ['#0a2a0a','#1B5E20'], label: 'Baseball' },
-  }
+// ─── SPORTS CONFIG ───────────────────────────────────────────────────────────
+const SPORTS = {
+  Football: {
+    emoji:'FB',
+    fields:[
+      {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing','Flexbone','Run and Shoot']},
+      {id:'personnel',label:'Your Best Personnel',opts:['Athletic QB / Dual Threat','Big Physical RB','Fast Skill Players','Strong Offensive Line','Well-Balanced','Small But Fast Team','Big But Slower Team']},
+      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
+      {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+      {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
+      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Dual-Threat QB','Speed / Fast Athletes','Big Physical Players','Pass Heavy / Spread','Run Heavy / Power','Option / Misdirection Heavy','Blitzes Every Down','Zone Coverage Heavy','Man Press Every Play']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
+    ],
+    positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
+    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
+  },
+  Basketball: {
+    emoji:'BB',
+    fields:[
+      {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
+      {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
+      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
+      {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
+      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','One Star Player ISO Heavy','Strong Inside Post','Three Point Shooting Team','Fast Break Heavy','Ball Control Slow Pace','Full Court Press Every Possession','Zone Defense Only','Aggressive Man Pressure','Weak Ball Handlers']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
+    ],
+    positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
+    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
+  },
+  Baseball: {
+    emoji:'BSB',
+    fields:[
+      {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
+      {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
+      {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
+      {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
+      {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Pull Hitters Heavy','Spray / Opposite Field Hitters','Speed Team — Steals Often','Power Hitting Lineup','Bunt Heavy Small Ball','Strong Pitching','Aggressive Base Running','Struggles with Off-Speed','Rarely Strike Out']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
+    ],
+    positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
+    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
+  },
+}
 
-  const colorOptions = {
-    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
-    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010'],
-  }
 
-  function handleSignIn() { setScreen('teams') }
-
-  function handleCreateTeam() {
-    if (!teamName.trim()) return
-    const newTeam = { sport: teamSport, name: teamName, primary: teamPrimary, secondary: teamSecondary, coach: coachName || 'Coach', iq: 500, packages: 0 }
-    setTeams(prev => [...prev, newTeam])
-    setScreen('teams')
-    setTeamName('')
-  }
-
-  function enterTeam(team) {
-    onLaunch({ coach: team.coach || 'Coach Regisford', team: team.name, primary: team.primary, secondary: team.secondary, sport: team.sport })
-  }
-
-  const S = { bg:'#07090d', surface:'#0d1117', card:'#0f1219', border:'#1e2330', text:'#f2f4f8', muted:'#6b7a96', dim:'#3d4559', red:'#C0392B' }
-  const Logo = ({ size=42, primary='#C0392B' }) => (
+// ─── LOGO COMPONENT ──────────────────────────────────────────────────────────
+function CoachIQLogo({ size=22, brand='Red & White' }) {
+  const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red & White']
+  return (
     <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:size, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
-      <span style={{ color:primary }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
-    </div>
-  )
-  const BtnRed = { width:'100%', background:S.red, border:'none', borderRadius:4, padding:'13px', fontSize:13, fontWeight:700, color:'white', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'2px', textTransform:'uppercase', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }
-  const BtnGhost = { width:'100%', background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'12px', fontSize:12, color:S.text, cursor:'pointer', fontFamily:"'DM Sans',sans-serif" }
-
-  if (screen === 'signin') return (
-    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif", position:'relative', overflow:'hidden' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; } @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} } @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} } @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} } @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} } @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} } @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} } @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }`}</style>
-      <div style={{ position:'absolute', left:'-5%', top:'8%', animation:'float1 7s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="88" height="56" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
-      <div style={{ position:'absolute', right:'5%', top:'18%', animation:'float2 9s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg></div>
-      <div style={{ position:'absolute', left:'12%', bottom:'22%', animation:'float3 8s ease-in-out infinite', opacity:0.11, zIndex:0 }}><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="13" x2="19" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="20" x2="16" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="8" y1="27" x2="14" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="34" x2="16" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="13" y1="41" x2="19" y2="43" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="13" x2="37" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="20" x2="40" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="48" y1="27" x2="42" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="34" x2="40" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="41" x2="37" y2="43" stroke="#C0392B" strokeWidth="1.2"/></svg></div>
-      <div style={{ position:'absolute', right:'15%', top:'5%', animation:'float4 11s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg></div>
-      <div style={{ position:'absolute', left:'50%', top:'12%', animation:'float5 6.5s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg></div>
-      <div style={{ position:'absolute', right:'8%', bottom:'28%', animation:'float6 10s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><path d="M10 5 Q26 14 42 5" stroke="#2a8a2a" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg></div>
-      <div style={{ position:'absolute', left:'8%', top:'52%', animation:'float7 12s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="20" r="4" fill="rgba(255,255,255,0.25)"/></svg></div>
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:'30%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'30%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
-      <div style={{ textAlign:'center', marginBottom:40, position:'relative', zIndex:2 }}><Logo size={66} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', marginTop:6, textTransform:'uppercase' }}>AI Coaching Intelligence</div></div>
-      <div style={{ width:'100%', maxWidth:360, display:'flex', flexDirection:'column', gap:10, position:'relative', zIndex:2 }}>
-        <button onClick={handleSignIn} style={BtnRed}>Get Started — Free</button>
-        <button onClick={handleSignIn} style={BtnGhost}>Sign In</button>
-        <div style={{ textAlign:'center', paddingTop:4 }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:S.red, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span></div>
-      </div>
-    </div>
-  )
-
-  if (screen === 'signup') return (
-    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
-      <div style={{ textAlign:'center', marginBottom:28 }}><Logo size={42} /></div>
-      <div style={{ width:'100%', maxWidth:380, background:S.surface, border:`1px solid ${S.border}`, borderRadius:4, overflow:'hidden' }}>
-        <div style={{ height:3, background:`linear-gradient(90deg,${S.red},transparent)` }} />
-        <div style={{ padding:'28px 28px 24px' }}>
-          <div style={{ fontSize:20, fontWeight:600, color:S.text, marginBottom:6 }}>Create your account</div>
-          <div style={{ fontSize:13, color:S.muted, marginBottom:24 }}>Free to start. No credit card required.</div>
-          {[['Your name','text',coachName,setCoachName,'Coach Regisford'],['Email','email',email,setEmail,'coach@yourteam.com'],['Password','password',password,setPassword,'Min 8 characters']].map(([lbl,type,val,set,ph]) => (
-            <div key={lbl} style={{ marginBottom:14 }}>
-              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:S.muted, marginBottom:6 }}>{lbl}</div>
-              <input type={type} value={val} onChange={e=>set(e.target.value)} placeholder={ph} style={{ width:'100%', background:S.card, border:`1px solid ${S.border}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit' }} />
-            </div>
-          ))}
-          <div style={{ marginBottom:22 }} />
-          <button onClick={() => { setScreen('createTeam') }} style={{ ...BtnRed, borderRadius:4 }}>Create Account</button>
-        </div>
-        <div style={{ borderTop:`1px solid ${S.border}`, padding:'14px 28px', textAlign:'center', fontSize:12, color:S.muted }}>Already have an account? <span onClick={() => setScreen('signin')} style={{ color:S.red, cursor:'pointer', fontWeight:500 }}>Sign in</span></div>
-      </div>
-    </div>
-  )
-
-  if (screen === 'createTeam') return (
-    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'24px 20px 40px' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=Big+Shoulders+Display:wght@900&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
-      <div style={{ maxWidth:440, margin:'0 auto' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28, paddingTop:16 }}>
-          <button onClick={() => setScreen('teams')} style={{ background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'5px 12px', color:S.muted, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-          <Logo size={22} />
-        </div>
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Sport</div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:22 }}>
-          {Object.entries(sportMeta).map(([s,m]) => (
-            <div key={s} onClick={() => setTeamSport(s)} style={{ borderRadius:4, overflow:'hidden', cursor:'pointer', border:`2px solid ${teamSport===s?m.grad[1]:'transparent'}` }}>
-              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 8px', textAlign:'center' }}>
-                <div style={{ fontSize:28, lineHeight:1.2 }}>{m.emoji}</div>
-                <div style={{ fontSize:10, fontWeight:700, color:'white', marginTop:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>{m.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Team name</div>
-        <input value={teamName} onChange={e=>setTeamName(e.target.value)} placeholder={`e.g. Tolland Youth ${teamSport}`} style={{ width:'100%', background:S.card, border:`1px solid ${teamPrimary}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit', marginBottom:22 }} />
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Primary color <span style={{ color:S.red }}>*</span></div>
-        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:20 }}>
-          {colorOptions.primary.map(c => (<div key={c} onClick={() => setTeamPrimary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamPrimary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-        </div>
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Secondary color <span style={{ color:S.dim }}>optional</span></div>
-        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:28 }}>
-          {colorOptions.secondary.map(c => (<div key={c} onClick={() => setTeamSecondary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamSecondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-        </div>
-        <div style={{ marginBottom:20, borderRadius:4, overflow:'hidden' }}>
-          <div style={{ height:6, background:`linear-gradient(90deg,${teamPrimary} 55%,${teamSecondary} 55%)` }} />
-          <div style={{ background:`linear-gradient(135deg,${teamPrimary}33,#07090d)`, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
-            <svg viewBox="0 0 88 24" style={{ width:88, height:24, overflow:'visible' }}><text y="19" fontFamily="Kalam, cursive" fontSize="20" letterSpacing="-0.5"><tspan fill={teamPrimary}>Coach</tspan><tspan fill="#dde1f0">IQ</tspan></text></svg>
-            <div style={{ marginLeft:'auto', display:'flex', gap:6 }}>
-              {[['3','PKG'],['0','IQ']].map(([v,l]) => (<div key={l} style={{ background:'rgba(0,0,0,0.3)', padding:'4px 8px', clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:'white', lineHeight:1 }}>{v}</div><div style={{ fontSize:7, color:'rgba(255,255,255,0.4)', textTransform:'uppercase' }}>{l}</div></div>))}
-            </div>
-          </div>
-        </div>
-        <button onClick={handleCreateTeam} disabled={!teamName.trim()} style={{ width:'100%', background:teamName.trim()?teamPrimary:'#1e2330', border:'none', borderRadius:4, padding:'14px', fontSize:14, color:'white', cursor:teamName.trim()?'pointer':'not-allowed', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'2px', clipPath:'polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)' }}>Create Team</button>
-      </div>
-    </div>
-  )
-
-  return (
-    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'0 0 40px' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
-      <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${S.border}`, display:'flex', alignItems:'center', gap:10 }}>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap' }}><span style={{ color:S.red }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span></div>
-        <div style={{ fontSize:12, color:S.muted, marginLeft:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>Your locker room</div>
-      </div>
-      <div style={{ padding:'20px 20px 0', maxWidth:440, margin:'0 auto' }}>
-        <div style={{ fontSize:9, color:S.dim, letterSpacing:'2px', textTransform:'uppercase', marginBottom:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Your teams</div>
-        {teams.map((team, i) => {
-          const m = sportMeta[team.sport] || sportMeta.Football
-          return (
-            <div key={i} onClick={() => enterTeam(team)} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', border:`1px solid rgba(255,255,255,0.07)` }}>
-              <div style={{ background:`linear-gradient(135deg,${m.grad[0]} 0%,${team.primary} 100%)`, padding:'16px 18px', display:'flex', alignItems:'center', gap:14, position:'relative', overflow:'hidden' }}>
-                <div style={{ position:'absolute', bottom:-4, right:-4, height:6, background:`linear-gradient(90deg,${team.primary} 55%,${team.secondary||'#002868'} 55%)`, left:0 }} />
-                <div style={{ fontSize:32, lineHeight:1, flexShrink:0 }}>{m.emoji}</div>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontFamily:"'Kalam',cursive", fontSize:18, color:'white', letterSpacing:'-0.5px' }}>{team.name}</div>
-                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.6)', marginTop:2 }}>IQ {team.iq} · {team.packages} package{team.packages!==1?'s':''} · {team.coach}</div>
-                </div>
-                <div style={{ fontSize:20, color:'rgba(255,255,255,0.5)' }}>›</div>
-              </div>
-            </div>
-          )
-        })}
-        {['Football','Basketball','Baseball'].filter(s => !teams.find(t=>t.sport===s)).map(s => {
-          const m = sportMeta[s]
-          return (
-            <div key={s} onClick={() => { setTeamSport(s); setScreen('createTeam') }} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', opacity:0.5 }}>
-              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 18px', display:'flex', alignItems:'center', gap:14 }}>
-                <div style={{ fontSize:26, lineHeight:1, flexShrink:0, opacity:0.6 }}>{m.emoji}</div>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.7)', fontFamily:"'Barlow Condensed',sans-serif" }}>Add {m.label} team</div>
-                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)' }}>Tap to set up</div>
-                </div>
-                <div style={{ fontSize:20, color:'rgba(255,255,255,0.3)' }}>+</div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      <span style={{ color:p.logo1 }}>C</span>
+      <span style={{ color:p.logo2 }}>oach</span>
+      <span style={{ color:p.logo1 }}>IQ</span>
     </div>
   )
 }
 
+// ─── SHARED UI ───────────────────────────────────────────────────────────────
+function al(hex, a) {
+  if (!hex || hex.length < 7) return `rgba(0,0,0,${a})`
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
+  return `rgba(${r},${g},${b},${a})`
+}
+function dk(hex, amt) {
+  if (!hex || hex.length < 7) return hex
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
+  return '#'+[r,g,b].map(x=>Math.max(0,x-amt).toString(16).padStart(2,'0')).join('')
+}
 function Card({ children, style={} }) {
   return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
 }
 function CardHead({ icon, title, tag, tagColor, accent }) {
-  const tc = tagColor || '#C0392B'
+  const tc = tagColor||'#C0392B'
   return (
     <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#C0392B'}` }}>
       <span style={{ fontSize:15 }}>{icon}</span>
@@ -440,70 +132,6 @@ function Shimmer() {
 function ErrBox({ msg }) {
   return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
 }
-function Hero({ greet, left, right, P, S, dk, children }) {
-  return (
-    <div style={{ borderRadius:4, padding:'16px 15px', position:'relative', overflow:'hidden', border:'1px solid #1e2330', background:`linear-gradient(135deg,${dk(S,40)} 0%,#07090d 65%)` }}>
-      <div style={{ position:'absolute', top:0, right:0, width:4, height:'100%', background:P }} />
-      <div style={{ position:'relative', zIndex:1 }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{greet}</div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:26, letterSpacing:'1px', lineHeight:1, marginBottom:children?11:0, textTransform:'uppercase' }}>{left} <span style={{ color:P }}>{right}</span></div>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-const SPORTS = {
-  Football: {
-    emoji:'FB',
-    fields:[
-      {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing','Flexbone','Run and Shoot']},
-      {id:'personnel',label:'Your Best Personnel',opts:['Athletic QB / Dual Threat','Big Physical RB','Fast Skill Players','Strong Offensive Line','Well-Balanced','Small But Fast Team','Big But Slower Team']},
-      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
-      {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
-      {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
-      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Dual-Threat QB','Speed / Fast Athletes','Big Physical Players','Pass Heavy / Spread','Run Heavy / Power','Option / Misdirection Heavy','Blitzes Every Down','Zone Coverage Heavy','Man Press Every Play']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
-    ],
-    positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
-    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme for this teams personnel.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types like: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
-  },
-  Basketball: {
-    emoji:'BB',
-    fields:[
-      {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
-      {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
-      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
-      {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
-      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','One Star Player ISO Heavy','Strong Inside Post','Three Point Shooting Team','Fast Break Heavy','Ball Control Slow Pace','Full Court Press Every Possession','Zone Defense Only','Aggressive Man Pressure','Weak Ball Handlers']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
-    ],
-    positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays or sets. Use types like: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario using basketball terminology only. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 BALL ON OWN 30 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using basketball terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
-  },
-  Baseball: {
-    emoji:'BSB',
-    fields:[
-      {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
-      {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
-      {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
-      {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
-      {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Pull Hitters Heavy','Spray / Opposite Field Hitters','Speed Team — Steals Often','Power Hitting Lineup','Bunt Heavy Small Ball','Strong Pitching','Aggressive Base Running','Struggles with Off-Speed','Rarely Strike Out']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
-    ],
-    positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types like: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario using baseball manager terminology only. No football references. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario for a manager","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using baseball manager terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
-  },
-}
-
 
 function PlayCard({ play, P, S, al, callAI, parseJSON }) {
   const [expanded, setExpanded] = useState(false)
@@ -1877,123 +1505,1308 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
   )
 }
 
-function SchemeFolder({ pkg, pkgIndex, sport, P, S, al, callAI, parseJSON }) {
-  const [open, setOpen] = useState(false)
-  const typeColors = { 'RUN BASE': '#4ade80', 'RUN PERIMETER': '#4ade80', 'RUN MISDIRECTION': '#4ade80', 'RUN SHORT YARDAGE': '#4ade80', 'PASS PLAY ACTION': '#6b9fff', 'PASS QUICK GAME': '#6b9fff', 'SET PLAY HALF COURT': '#f59e0b', 'INBOUND BASELINE': '#f59e0b', 'PRESS BREAK': '#f59e0b', 'FAST BREAK': '#f59e0b', 'ZONE ATTACK': '#c084fc', 'END OF GAME': '#ef4444', 'OFFENSE SITUATIONAL': '#4ade80', 'DEFENSE ALIGNMENT': '#6b9fff', 'BASERUNNING RULE': '#f59e0b', 'PITCHING STRATEGY': '#c084fc', 'BATTING APPROACH': '#f87171' }
+
+// ─── SCHEME PREVIEW (mini interactive diagrams for home card) ─────────────────
+function SchemePreviewMini({ type='offense', P }) {
+  const isOff = type === 'offense'
+  const color = isOff ? P : '#6b9fff'
   return (
-    <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:10, overflow:'hidden', marginBottom:10 }}>
-      <div onClick={() => setOpen(o=>!o)} style={{ padding:'13px 15px', display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
-        <div style={{ width:8, height:8, borderRadius:2, background:P, flexShrink:0, transform:'rotate(45deg)' }} />
-        <div style={{ flex:1 }}>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'0.5px', color:'#f2f4f8' }}>{pkg.packageName}</div>
-          <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{pkg._inputs} · {pkg._sport}</div>
+    <svg viewBox="0 0 100 60" style={{ width:'100%', height:'100%' }}>
+      {/* field lines */}
+      <rect width="100" height="60" fill={isOff ? '#1a2a1a' : '#0d1520'} rx="3"/>
+      <line x1="0" y1="38" x2="100" y2="38" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" strokeDasharray="4,3"/>
+      {isOff ? (
+        <>
+          {/* OL */}
+          {[38,43,50,57,62].map(x => <rect key={x} x={x-3} y={35} width="6" height="6" fill={color} opacity="0.9" rx="1"/>)}
+          {/* QB */}
+          <circle cx="50" cy="44" r="3.5" fill={color} opacity="0.9"/>
+          {/* RB */}
+          <circle cx="50" cy="52" r="3" fill={color} opacity="0.7"/>
+          {/* WR */}
+          <circle cx="12" cy="36" r="3" fill={color} opacity="0.7"/>
+          <circle cx="88" cy="36" r="3" fill={color} opacity="0.7"/>
+          {/* routes */}
+          <path d="M12 36 L12 24" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
+          <path d="M88 36 L88 24" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
+          <path d="M50 52 L56 40" stroke={color} strokeWidth="1.5" fill="none" opacity="0.5" strokeDasharray="2,1"/>
+          {/* arrows */}
+          <polygon points="12,23 10,27 14,27" fill={color} opacity="0.6"/>
+          <polygon points="88,23 86,27 90,27" fill={color} opacity="0.6"/>
+          {/* defenders */}
+          {[40,50,60].map(x => <circle key={x} cx={x} cy={31} r="2.5" fill="none" stroke="rgba(200,200,200,0.4)" strokeWidth="1"/>)}
+          {[35,50,65].map(x => <circle key={x+'lb'} cx={x} cy={24} r="2.5" fill="none" stroke="rgba(200,200,200,0.3)" strokeWidth="1"/>)}
+        </>
+      ) : (
+        <>
+          {/* defense diagram */}
+          {/* DL */}
+          {[38,44,56,62].map(x => <rect key={x} x={x-3} y={33} width="6" height="6" fill={color} opacity="0.9" rx="1"/>)}
+          {/* LBs */}
+          {[34,50,66].map(x => <circle key={x} cx={x} cy={25} r="3.5" fill={color} opacity="0.85"/>)}
+          {/* DBs */}
+          {[12,30,70,88].map(x => <circle key={x} cx={x} cy={16} r="3" fill={color} opacity="0.6"/>)}
+          {/* coverage zones */}
+          <ellipse cx="50" cy="20" rx="28" ry="8" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25" strokeDasharray="3,2"/>
+          {/* offense ref */}
+          {[38,43,50,57,62].map(x => <rect key={x} x={x-3} y={40} width="6" height="5" fill="rgba(255,255,255,0.12)" rx="1"/>)}
+          {/* assignment lines */}
+          <line x1="38" y1="33" x2="34" y2="29" stroke={color} strokeWidth="1" opacity="0.5"/>
+          <line x1="62" y1="33" x2="66" y2="29" stroke={color} strokeWidth="1" opacity="0.5"/>
+        </>
+      )}
+    </svg>
+  )
+}
+
+// ─── SCHEMES PAGE ─────────────────────────────────────────────────────────────
+function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ }) {
+  const cfg = SPORTS[sport] || SPORTS.Football
+  const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
+  const [offFields, setOffFields] = useState(initFields)
+  const [offResult, setOffResult] = useState(null)
+  const [offLoading, setOffLoading] = useState(false)
+  const [offError, setOffError] = useState('')
+  const [offOpen, setOffOpen] = useState(true)
+  const [defOpen, setDefOpen] = useState(true)
+  const [prevSport, setPrevSport] = useState(sport)
+
+  if (sport !== prevSport) {
+    setPrevSport(sport)
+    setOffFields(initFields())
+    setOffResult(null)
+    setOffError('')
+  }
+
+  async function generateOffense() {
+    setOffLoading(true); setOffResult(null); setOffError('')
+    try {
+      const raw = await callAI(cfg.buildPrompt(offFields))
+      const data = parseJSON(raw)
+      if (!data.plays) throw new Error('No plays returned')
+      setOffResult(data)
+      setGenHistory(prev => ({ ...prev, [sport]: [{ ...data, _sport:sport, _ts:Date.now() }, ...(prev[sport]||[])].slice(0,20) }))
+    } catch(e) { setOffError(e.message) }
+    setOffLoading(false)
+  }
+
+  function addToPlaybook(play, folderName) {
+    const sportFolders = playbook[sport] || {}
+    const folder = sportFolders[folderName] || []
+    setPlaybook(pb => ({
+      ...pb,
+      [sport]: { ...sportFolders, [folderName]: [...folder, { ...play, _fromPackage: offResult?.packageName, _addedAt: Date.now() }] }
+    }))
+  }
+
+  function createAndAdd(play, newFolderName) {
+    if (!newFolderName?.trim()) return
+    addToPlaybook(play, newFolderName.trim())
+  }
+
+  const sportHistory = genHistory[sport] || []
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      {/* OFFENSIVE GENERATOR */}
+      <Card>
+        <div style={{ padding:'11px 14px', borderBottom: offOpen ? '1px solid #1e2330' : 'none', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${P}`, cursor:'pointer' }} onClick={() => setOffOpen(o=>!o)}>
+          <span style={{ fontSize:15 }}>📋</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>Offensive Scheme Generator</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(P,0.15), color:P, textTransform:'uppercase' }}>{cfg.emoji}</span>
+          <span style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{offOpen ? '▲' : '▼'}</span>
         </div>
-        <div style={{ display:'flex', gap:4 }}>
-          {(pkg.plays||[]).slice(0,3).map((play,i) => (<span key={i} style={{ fontSize:8, padding:'1px 5px', borderRadius:3, background:al(typeColors[play.type]||P, 0.12), color:typeColors[play.type]||P }}>{play.type?.split(' ')[0]}</span>))}
+        {offOpen && (
+          <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+              {cfg.fields.map(f => (<Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
+            </div>
+            <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
+            {offLoading && <Shimmer />}
+            {offError && <ErrBox msg={offError} />}
+            {offResult && (
+              <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:17, letterSpacing:1, color:P, marginBottom:6 }}>{offResult.packageName}</div>
+                <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{offResult.summary}</p>
+                {offResult.defenseTip && (<div style={{ padding:'8px 12px', background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Defensive Context</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{offResult.defenseTip}</div></div>)}
+                {(offResult.plays||[]).map(play => (
+                  <PlayCardWithSave key={play.number} play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addToPlaybook} onCreateAndAdd={createAndAdd} />
+                ))}
+                {offResult.coachingCue && (<div style={{ marginTop:10, padding:10, background:al(P,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Coaching Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{offResult.coachingCue}"</div></div>)}
+              </div>
+            )}
+            {/* Recent generations */}
+            {sportHistory.length > 0 && (
+              <div style={{ marginTop:14 }}>
+                <div style={{ fontSize:9, letterSpacing:2, color:'#3d4559', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Recent Generations</div>
+                {sportHistory.slice(0,5).map((h,i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#0f1117', border:'1px solid #1e2330', borderRadius:6, marginBottom:6 }}>
+                    <div style={{ flex:1 }}><div style={{ fontSize:12, fontWeight:600, color:'#dde1f0' }}>{h.packageName}</div><div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{h.plays?.length} plays</div></div>
+                    <button onClick={() => setOffResult(h)} style={{ fontSize:9, color:P, background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'3px 8px', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>VIEW</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* DEFENSIVE GENERATOR */}
+      <DefenseGenCollapsible sport={sport} P={P} S={'#6b9fff'} al={al} callAI={callAI} parseJSON={parseJSON} defaultOpen={true} playbook={playbook} setPlaybook={setPlaybook} />
+    </div>
+  )
+}
+
+// ─── PLAY CARD WITH SAVE TO PLAYBOOK ─────────────────────────────────────────
+function PlayCardWithSave({ play, P, S, al, callAI, parseJSON, sport, playbook, onAddToPlaybook, onCreateAndAdd }) {
+  const [showSaveMenu, setShowSaveMenu] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const sportFolders = playbook[sport] || {}
+  const existingFolders = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
+  const [saved, setSaved] = useState(false)
+
+  function handleAdd(folder) {
+    onAddToPlaybook(play, folder)
+    setSaved(folder)
+    setShowSaveMenu(false)
+  }
+
+  return (
+    <div style={{ position:'relative' }}>
+      <PlayCard play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} extraAction={
+        <div style={{ position:'relative' }}>
+          {saved ? (
+            <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>✓ SAVED</span>
+          ) : (
+            <button onClick={e=>{e.stopPropagation();setShowSaveMenu(s=>!s)}} style={{ padding:'3px 8px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, whiteSpace:'nowrap' }}>+ PLAYBOOK</button>
+          )}
+          {showSaveMenu && (
+            <div style={{ position:'absolute', right:0, top:'100%', marginTop:4, background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:8, zIndex:50, minWidth:180, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
+              <div style={{ fontSize:9, color:'#6b7a96', letterSpacing:1.5, textTransform:'uppercase', fontWeight:700, marginBottom:6, padding:'0 4px' }}>Add to folder</div>
+              {existingFolders.map(f => (
+                <div key={f} onClick={()=>handleAdd(f)} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5, display:'flex', alignItems:'center', gap:6 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                  <span style={{ fontSize:11 }}>📁</span> {f}
+                </div>
+              ))}
+              <div style={{ borderTop:'1px solid #1e2330', marginTop:6, paddingTop:6 }}>
+                <div style={{ display:'flex', gap:6 }}>
+                  <input value={newFolderName} onChange={e=>setNewFolderName(e.target.value)} placeholder="New folder name..." style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:4, padding:'5px 8px', color:'#f2f4f8', fontSize:11, outline:'none', fontFamily:'inherit' }} onKeyDown={e=>{if(e.key==='Enter'&&newFolderName.trim()){onCreateAndAdd(play,newFolderName);setSaved(newFolderName);setNewFolderName('');setShowSaveMenu(false)}}} />
+                  <button onClick={()=>{if(newFolderName.trim()){onCreateAndAdd(play,newFolderName);setSaved(newFolderName);setNewFolderName('');setShowSaveMenu(false)}}} style={{ padding:'5px 8px', background:P, border:'none', borderRadius:4, color:'white', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        <div style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{open?'▲':'▼'}</div>
+      } />
+    </div>
+  )
+}
+
+// ─── DEFENSIVE GEN COLLAPSIBLE ────────────────────────────────────────────────
+function DefenseGenCollapsible({ sport, P, S, al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook }) {
+  const [open, setOpen] = useState(defaultOpen)
+  const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball'
+  const fbFields = [
+    {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option','Flexbone']},
+    {id:'personnel',label:'Their Key Threat',opts:['Dual Threat QB / Scrambler','Big Physical RB','Speed Receivers','Multiple TE Sets','Strong OL Run Game','Pass Heavy No Run','Option/Triple Option']},
+    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
+    {id:'skill',label:'Your Defensive Skill',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+    {id:'dline',label:'Your D-Line Strength',opts:['Big and Physical','Quick and Agile','Average Size','Undersized but Fast','Overpowering']},
+    {id:'style',label:'Defensive Identity',opts:['Gap Control / Physical','Speed and Pursuit','Bend Dont Break','Aggressive Blitz Heavy','Zone Heavy','Man Coverage Heavy','Multiple / Disguise']},
+  ]
+  const bbFields = [
+    {id:'offense',label:'Opponent Offense',opts:['Unknown / Scout First','Motion Heavy','Pick and Roll Heavy','Isolation / Star Player','Drive and Kick','Three Point Heavy','Post Dominant']},
+    {id:'personnel',label:'Their Key Threat',opts:['Elite Ball Handler','Dominant Big Man','Three Point Shooter','Athletic Wing','Balanced Team','Physical Post']},
+    {id:'roster',label:'Your Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
+    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+    {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Athletic']},
+    {id:'style',label:'Defensive Style',opts:['Man to Man Pressure','2-3 Zone','1-3-1 Zone','Full Court Press','Matchup Zone','Pack the Paint']},
+  ]
+  const bsbFields = [
+    {id:'batting',label:'Opponent Batting Style',opts:['Unknown / Scout First','Pull Hitters Heavy','Spray Hitters','Bunt Heavy / Small Ball','Power Hitters','Speed and Baserunning','Mixed Approach']},
+    {id:'personnel',label:'Their Key Threat',opts:['Elite Leadoff Hitter','Cleanup Power Hitter','Fast Baserunners','Contact Hitters','Patient / Walk Heavy','Switch Hitters']},
+    {id:'roster',label:'Your Roster Size',opts:['9-11 players','12-14 players','15+ players']},
+    {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+    {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Competitive']},
+    {id:'style',label:'Pitching Approach',opts:['Fastball First','Breaking Ball Setup','Change of Speed','Attack the Zone','Work the Corners','Keep Off Balance']},
+  ]
+  const activeCfg = isBB?bbFields:isBSB?bsbFields:fbFields
+  const initF = () => { const f={}; activeCfg.forEach(x=>{f[x.id]=x.opts[0]}); return f }
+  const [fields, setFields] = useState(initF)
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
+
+  async function generate() {
+    setLoading(true); setResult(null); setError('')
+    const inputSummary = Object.keys(fields).map(k=>k+': '+fields[k]).join(', ')
+    const prompt = isFB
+      ? 'You are an elite youth football defensive coordinator. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive formation name","type":"BASE or NICKEL or BLITZ or ZONE or MAN","assignment":"specific gap assignments and coverage","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important thing to stop","adjustmentTip":"halftime adjustment","coachingCue":"phrase"}'
+      : isBB
+      ? 'You are an elite youth basketball defensive coach. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive scheme name","type":"MAN or ZONE or PRESS or TRAP","assignment":"specific assignments and rotations","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important thing to take away","adjustmentTip":"halftime adjustment","coachingCue":"phrase"}'
+      : 'You are an elite youth baseball manager. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive alignment name","type":"STANDARD or SHIFT or WHEEL or FIVE MAN INFIELD","assignment":"specific positioning for all fielders","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important out to get","adjustmentTip":"adjustment tip","coachingCue":"phrase"}'
+    try {
+      const raw = await callAI(prompt)
+      const data = parseJSON(raw)
+      if (!data.formations) throw new Error('No formations in response')
+      setResult(data)
+    } catch(e) { setError(e.message) }
+    setLoading(false)
+  }
+
+  function addDefToPlaybook(formation, folderName) {
+    const sportFolders = playbook[sport] || {}
+    const folder = sportFolders[folderName] || []
+    const play = { number: formation.number, name: formation.name, type: formation.type, note: formation.assignment, _isDefense: true, _fromPackage: result?.packageName, _addedAt: Date.now() }
+    setPlaybook(pb => ({ ...pb, [sport]: { ...sportFolders, [folderName]: [...folder, play] } }))
+  }
+
+  return (
+    <Card>
+      <div style={{ padding:'11px 14px', borderBottom: open ? '1px solid #1e2330' : 'none', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${S}`, cursor:'pointer' }} onClick={() => setOpen(o=>!o)}>
+        <span style={{ fontSize:15 }}>🛡</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{isBSB ? 'Defensive Positioning' : 'Defensive Scheme Generator'}</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(S,0.15), color:S, textTransform:'uppercase' }}>DEFENSIVE</span>
+        <span style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{open ? '▲' : '▼'}</span>
       </div>
       {open && (
-        <div style={{ borderTop:'1px solid #1e2330', padding:'10px 14px', animation:'fadeIn 0.2s ease' }}>
-          {pkg.summary && <p style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{pkg.summary}</p>}
-          {(pkg.plays||[]).map(play => (<PlaybookCard key={play.number} play={play} packageName={pkg.packageName} packageIndex={pkgIndex+1} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />))}
+        <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+            {activeCfg.map(f => (<Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
+          </div>
+          <PBtn onClick={generate} disabled={loading} color={S}>{loading ? 'BUILDING...' : isBSB ? 'BUILD DEFENSIVE PLAN' : 'BUILD DEFENSIVE SCHEME'}</PBtn>
+          {loading && <Shimmer />}
+          {error && <ErrBox msg={error} />}
+          {result && (
+            <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(S,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:17, letterSpacing:1, color:S, marginBottom:6 }}>{result.packageName}</div>
+              <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
+              {result.keyStop && (<div style={{ padding:'8px 12px', background:al(S,0.1), border:`1px solid ${al(S,0.25)}`, borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Primary Assignment</div><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{result.keyStop}</div></div>)}
+              {(result.formations||[]).map(f => (
+                <DefFormationCardWithSave key={f.number} formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addDefToPlaybook} />
+              ))}
+              {result.adjustmentTip && (<div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div></div>)}
+              {result.coachingCue && (<div style={{ marginTop:8, padding:10, background:al(S,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defensive Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{result.coachingCue}"</div></div>)}
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+  )
+}
+
+function DefFormationCardWithSave({ formation: f, S, P, al, callAI, parseJSON, sport, playbook, onAddToPlaybook }) {
+  const [showSaveMenu, setShowSaveMenu] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [saved, setSaved] = useState(false)
+  const sportFolders = playbook[sport] || {}
+  const existingFolders = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
+
+  return (
+    <div style={{ position:'relative' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+        <div style={{ flex:1 }}><DefFormationCard formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} /></div>
+        <div style={{ flexShrink:0 }}>
+          {saved ? (
+            <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✓</span>
+          ) : (
+            <button onClick={()=>setShowSaveMenu(s=>!s)} style={{ padding:'3px 7px', background:al(S,0.12), border:`1px solid ${al(S,0.3)}`, borderRadius:3, color:S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif" }}>+PB</button>
+          )}
+          {showSaveMenu && (
+            <div style={{ position:'absolute', right:0, top:'100%', marginTop:4, background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:8, zIndex:50, minWidth:180, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
+              {existingFolders.map(fn => (
+                <div key={fn} onClick={()=>{onAddToPlaybook(f,fn);setSaved(fn);setShowSaveMenu(false)}} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                  <span style={{ fontSize:11 }}>📁</span> {fn}
+                </div>
+              ))}
+              <div style={{ borderTop:'1px solid #1e2330', marginTop:6, paddingTop:6, display:'flex', gap:6 }}>
+                <input value={newFolderName} onChange={e=>setNewFolderName(e.target.value)} placeholder="New folder..." style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:4, padding:'5px 8px', color:'#f2f4f8', fontSize:11, outline:'none', fontFamily:'inherit' }} onKeyDown={e=>{if(e.key==='Enter'&&newFolderName.trim()){onAddToPlaybook(f,newFolderName.trim());setSaved(newFolderName.trim());setNewFolderName('');setShowSaveMenu(false)}}} />
+                <button onClick={()=>{if(newFolderName.trim()){onAddToPlaybook(f,newFolderName.trim());setSaved(newFolderName.trim());setNewFolderName('');setShowSaveMenu(false)}}} style={{ padding:'5px 8px', background:S, border:'none', borderRadius:4, color:'white', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+// ─── PLAYBOOK PAGE (restructured) ────────────────────────────────────────────
+function PlaybookPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlaybook }) {
+  const sportFolders = playbook[sport] || {}
+  const allFolderNames = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
+  const [activeFolder, setActiveFolder] = useState(allFolderNames[0] || 'My Favorites')
+  const [newFolderName, setNewFolderName] = useState('')
+  const [showNewFolder, setShowNewFolder] = useState(false)
+
+  const folderPlays = sportFolders[activeFolder] || []
+
+  function removePlay(idx) {
+    const updated = folderPlays.filter((_,i)=>i!==idx)
+    setPlaybook(pb => ({ ...pb, [sport]: { ...sportFolders, [activeFolder]: updated } }))
+  }
+
+  function createFolder() {
+    if (!newFolderName.trim()) return
+    setActiveFolder(newFolderName.trim())
+    setNewFolderName('')
+    setShowNewFolder(false)
+  }
+
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Your saved plays</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Playbook</div>
+      </div>
+
+      {/* Folder tabs */}
+      <div style={{ overflowX:'auto', display:'flex', gap:6, paddingBottom:4, marginBottom:12 }}>
+        {allFolderNames.map(f => (
+          <button key={f} onClick={()=>setActiveFolder(f)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeFolder===f?P:'#1e2330'}`, background:activeFolder===f?al(P,0.15):'transparent', color:activeFolder===f?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px', whiteSpace:'nowrap' }}>
+            {f} <span style={{ opacity:0.6, marginLeft:3 }}>{(sportFolders[f]||[]).length}</span>
+          </button>
+        ))}
+        <button onClick={()=>setShowNewFolder(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Folder</button>
+      </div>
+
+      {showNewFolder && (
+        <div style={{ display:'flex', gap:7, marginBottom:10 }}>
+          <input value={newFolderName} onChange={e=>setNewFolderName(e.target.value)} placeholder="Folder name..." onKeyDown={e=>e.key==='Enter'&&createFolder()} style={{ flex:1, background:'#161922', border:`1px solid ${P}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+          <button onClick={createFolder} style={{ padding:'0 16px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CREATE</button>
+        </div>
+      )}
+
+      {folderPlays.length === 0 ? (
+        <Card>
+          <div style={{ padding:'32px 20px', textAlign:'center' }}>
+            <div style={{ fontSize:32, marginBottom:8 }}>📁</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:6 }}>{activeFolder} is empty</div>
+            <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Generate a scheme in the Schemes tab and tap "+ Playbook" to add plays here.</div>
+          </div>
+        </Card>
+      ) : (
+        <div>
+          <div style={{ fontSize:10, color:'#6b7a96', marginBottom:8 }}>{folderPlays.length} play{folderPlays.length!==1?'s':''} in {activeFolder}</div>
+          {folderPlays.map((play, i) => (
+            <div key={i} style={{ marginBottom:8, position:'relative' }}>
+              <div style={{ position:'absolute', top:8, right:8, zIndex:10 }}>
+                <button onClick={()=>removePlay(i)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:3, color:'#ef4444', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>REMOVE</button>
+              </div>
+              <PlayCard play={play} P={play._isDefense?'#6b9fff':P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  )
+}
+
+// ─── SCOUT PAGE ────────────────────────────────────────────────────────────────
+function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
+  const [opponents, setOpponents] = useState([])
+  const [activeOpp, setActiveOpp] = useState(null)
+  const [newOppName, setNewOppName] = useState('')
+  const [showAddOpp, setShowAddOpp] = useState(false)
+  const [scoutLoading, setScoutLoading] = useState(false)
+  const [scoutResult, setScoutResult] = useState(null)
+  const [notes, setNotes] = useState({})
+  const [tendencies, setTendencies] = useState({})
+  const [newTendency, setNewTendency] = useState('')
+  const [gameDate, setGameDate] = useState('')
+
+  function addOpponent() {
+    if (!newOppName.trim()) return
+    const opp = { id: Date.now(), name: newOppName.trim(), sport, notes: '', tendencies: [] }
+    setOpponents(prev => [...prev, opp])
+    setActiveOpp(opp.id)
+    setNewOppName('')
+    setShowAddOpp(false)
+  }
+
+  const currentOpp = opponents.find(o=>o.id===activeOpp)
+
+  async function generateScoutReport() {
+    if (!currentOpp) return
+    setScoutLoading(true); setScoutResult(null)
+    const oppTendencies = tendencies[activeOpp] || []
+    const oppNotes = notes[activeOpp] || ''
+    try {
+      const raw = await callAI(`You are an elite youth ${sport.toLowerCase()} scout. Generate a comprehensive opponent scouting report for: "${currentOpp.name}". Known tendencies: ${oppTendencies.join(', ') || 'None recorded yet'}. Coach notes: ${oppNotes || 'None'}. Return ONLY valid JSON: {"overview":"2-3 sentence opponent summary","keyThreats":[{"threat":"threat name","description":"what they do","howToStop":"counter strategy"},{"threat":"threat name","description":"what they do","howToStop":"counter strategy"},{"threat":"threat name","description":"what they do","howToStop":"counter strategy"}],"offensiveTendencies":["tendency 1","tendency 2","tendency 3"],"defensiveTendencies":["tendency 1","tendency 2","tendency 3"],"gameplan":"3-4 sentence overall game plan","keyAdjustment":"most important tactical adjustment","motivationalNote":"one line to tell your team"}`)
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      setScoutResult(JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1)))
+    } catch(e) { setScoutResult({ error: e.message }) }
+    setScoutLoading(false)
+  }
+
+  function addTendency() {
+    if (!newTendency.trim() || !activeOpp) return
+    setTendencies(prev => ({ ...prev, [activeOpp]: [...(prev[activeOpp]||[]), newTendency.trim()] }))
+    setNewTendency('')
+  }
+
+  function removeTendency(idx) {
+    setTendencies(prev => ({ ...prev, [activeOpp]: (prev[activeOpp]||[]).filter((_,i)=>i!==idx) }))
+  }
+
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Game preparation</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Scout</div>
+      </div>
+
+      {/* Opponent selector */}
+      <div style={{ overflowX:'auto', display:'flex', gap:6, paddingBottom:4, marginBottom:12 }}>
+        {opponents.map(o => (
+          <button key={o.id} onClick={()=>{setActiveOpp(o.id);setScoutResult(null)}} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeOpp===o.id?P:'#1e2330'}`, background:activeOpp===o.id?al(P,0.15):'transparent', color:activeOpp===o.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>{o.name}</button>
+        ))}
+        <button onClick={()=>setShowAddOpp(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ Add Opponent</button>
+      </div>
+
+      {showAddOpp && (
+        <div style={{ display:'flex', gap:7, marginBottom:10 }}>
+          <input value={newOppName} onChange={e=>setNewOppName(e.target.value)} placeholder="Opponent team name..." onKeyDown={e=>e.key==='Enter'&&addOpponent()} style={{ flex:1, background:'#161922', border:`1px solid ${P}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+          <input value={gameDate} onChange={e=>setGameDate(e.target.value)} placeholder="Game date" style={{ width:110, background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+          <button onClick={addOpponent} style={{ padding:'0 14px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>ADD</button>
+        </div>
+      )}
+
+      {!currentOpp ? (
+        <Card>
+          <div style={{ padding:'40px 20px', textAlign:'center' }}>
+            <div style={{ fontSize:36, marginBottom:10 }}>🔍</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Opponents Added Yet</div>
+            <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6, marginBottom:16 }}>Add an upcoming opponent to build a full AI scouting report, track their tendencies, and create a game plan.</div>
+            <button onClick={()=>setShowAddOpp(true)} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', cursor:'pointer' }}>ADD FIRST OPPONENT</button>
+          </div>
+        </Card>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <Card>
+            <CardHead icon="🔍" title={currentOpp.name} tag={sport.toUpperCase()} tagColor={P} accent={P} />
+            <div style={{ padding:14 }}>
+              {/* Notes */}
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6 }}>Coach Notes</div>
+                <textarea value={notes[activeOpp]||''} onChange={e=>setNotes(prev=>({...prev,[activeOpp]:e.target.value}))} placeholder="Add what you know about this team — formation tendencies, key players, things you've seen on film..." rows={3} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', resize:'vertical' }} />
+              </div>
+              {/* Tendencies */}
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6 }}>Observed Tendencies</div>
+                {(tendencies[activeOpp]||[]).map((t,i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5 }}>
+                    <div style={{ width:6, height:6, borderRadius:'50%', background:P, flexShrink:0 }} />
+                    <div style={{ flex:1, fontSize:12, color:'#f2f4f8' }}>{t}</div>
+                    <button onClick={()=>removeTendency(i)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
+                  </div>
+                ))}
+                <div style={{ display:'flex', gap:7 }}>
+                  <input value={newTendency} onChange={e=>setNewTendency(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addTendency()} placeholder="e.g. Always runs on 1st down..." style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:5, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+                  <button onClick={addTendency} style={{ padding:'0 12px', background:al(P,0.15), border:`1px solid ${P}`, borderRadius:5, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer' }}>ADD</button>
+                </div>
+              </div>
+              <PBtn onClick={generateScoutReport} disabled={scoutLoading} color={P}>{scoutLoading ? 'SCOUTING...' : '🔍 GENERATE SCOUT REPORT'}</PBtn>
+            </div>
+          </Card>
+
+          {scoutLoading && <div style={{ padding:16, textAlign:'center' }}><div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Building scouting report...</div></div>}
+
+          {scoutResult && !scoutResult.error && (
+            <div style={{ display:'flex', flexDirection:'column', gap:10, animation:'fadeIn 0.3s ease' }}>
+              <Card>
+                <CardHead icon="📊" title="Scouting Report" accent={P} />
+                <div style={{ padding:14 }}>
+                  <p style={{ fontSize:13, color:'#f2f4f8', lineHeight:1.6, marginBottom:12 }}>{scoutResult.overview}</p>
+                  <div style={{ marginBottom:12 }}>
+                    <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Key Threats</div>
+                    {(scoutResult.keyThreats||[]).map((t,i) => (
+                      <div key={i} style={{ background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:8, padding:'10px 12px', marginBottom:8 }}>
+                        <div style={{ fontSize:12, fontWeight:700, color:'#f87171', marginBottom:3 }}>⚠ {t.threat}</div>
+                        <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:5 }}>{t.description}</div>
+                        <div style={{ fontSize:11, color:'#4ade80', lineHeight:1.4 }}>✓ Counter: {t.howToStop}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+                    <div style={{ background:'#161922', borderRadius:8, padding:10 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#f59e0b', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Their Offense</div>
+                      {(scoutResult.offensiveTendencies||[]).map((t,i) => <div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:4, lineHeight:1.4 }}>• {t}</div>)}
+                    </div>
+                    <div style={{ background:'#161922', borderRadius:8, padding:10 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Their Defense</div>
+                      {(scoutResult.defensiveTendencies||[]).map((t,i) => <div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:4, lineHeight:1.4 }}>• {t}</div>)}
+                    </div>
+                  </div>
+                  <div style={{ background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, padding:'10px 12px', marginBottom:10 }}>
+                    <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:5 }}>Game Plan</div>
+                    <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{scoutResult.gameplan}</div>
+                  </div>
+                  {scoutResult.keyAdjustment && (<div style={{ background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:'10px 12px', marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Key Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{scoutResult.keyAdjustment}</div></div>)}
+                  {scoutResult.motivationalNote && (<div style={{ background:'rgba(0,0,0,0.3)', borderRadius:8, padding:'10px 12px', borderLeft:`3px solid ${P}` }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Tell Your Team</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{scoutResult.motivationalNote}"</div></div>)}
+                </div>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
+
+// ─── MORE PAGE (restructured) ─────────────────────────────────────────────────
+function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport }) {
+  const [activeSection, setActiveSection] = useState('features')
+  const colorOptions = {
+    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
+    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010'],
+  }
+
+  const coachFeatures = [
+    { icon:'📊', title:'Advanced Analytics', desc:'Win probability models, tendency heat maps, and opponent pattern recognition across every game.', status:'COMING SOON', color:'#f59e0b' },
+    { icon:'📋', title:'Printable Wristbands & Coach Sheets', desc:'Export your playbook into print-ready wristband cards, laminated coach sheets, and game-day checklists.', status:'IN PROGRESS', color:'#4ade80' },
+    { icon:'🎥', title:'Film Upload & AI Breakdown', desc:'Upload full game film and get automatic play-by-play breakdowns, error detection, and opponent scouting.', status:'COMING SOON', color:'#6b9fff' },
+    { icon:'🔁', title:'In-Game Adjustment Mode', desc:'Live sideline tool that tracks downs, suggests adjustments, and logs real-time game events.', status:'COMING SOON', color:'#c084fc' },
+    { icon:'📆', title:'Practice Planner', desc:'AI-generated week-by-week practice schedules tailored to your upcoming opponent and team needs.', status:'COMING SOON', color:'#f59e0b' },
+    { icon:'🤝', title:'Coach Network & Play Sharing', desc:'Share packages with other coaches, discover trending schemes, and follow elite youth coordinators.', status:'COMING SOON', color:'#6b9fff' },
+    { icon:'🏆', title:'League & Season Manager', desc:'Track standings, schedule games, and manage your full season across multiple teams from one dashboard.', status:'COMING SOON', color:'#f87171' },
+    { icon:'🎓', title:'Coaching Certification Path', desc:'AI-powered coursework with nationally recognized youth coaching certifications built in.', status:'COMING SOON', color:'#4ade80' },
+  ]
+
+  const bpDot = (color) => (
+    <span style={{ display:'inline-block', width:7, height:7, borderRadius:'50%', background:color, marginRight:5 }} />
+  )
+
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Platform & settings</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>More</div>
+      </div>
+
+      {/* Section switcher */}
+      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+        {[['features','🚀 Features'],['settings','⚙️ Settings']].map(([k,lbl]) => (
+          <button key={k} onClick={()=>setActiveSection(k)} style={{ flex:1, padding:'9px', borderRadius:4, fontSize:11, border:`1px solid ${activeSection===k?P:'#1e2330'}`, background:activeSection===k?al(P,0.15):'transparent', color:activeSection===k?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
+        ))}
+      </div>
+
+      {activeSection === 'features' && (
+        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.6, marginBottom:4 }}>CoachIQ is being built for coaches. Here's what's coming next on the roadmap — tap any feature to learn more.</div>
+          {coachFeatures.map((f,i) => (
+            <div key={i} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'13px 14px', display:'flex', gap:12, alignItems:'flex-start' }}>
+              <div style={{ fontSize:26, flexShrink:0, marginTop:2 }}>{f.icon}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:4, flexWrap:'wrap' }}>
+                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#f2f4f8' }}>{f.title}</div>
+                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(f.color.slice(1,3),16)},${parseInt(f.color.slice(3,5),16)},${parseInt(f.color.slice(5,7),16)},0.15)`, color:f.color, letterSpacing:'0.5px' }}>{f.status}</span>
+                </div>
+                <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.5 }}>{f.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeSection === 'settings' && (
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          {/* Brand / Logo color */}
+          <Card>
+            <CardHead icon="🎨" title="CoachIQ Logo Style" accent={P} />
+            <div style={{ padding:14 }}>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>Choose your brand palette for the CoachIQ logo across the app.</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {Object.entries(BRAND_PALETTES).map(([key, palette]) => (
+                  <div key={key} onClick={()=>setBrand(key)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', background:brand===key?al(P,0.08):'#161922', border:`1px solid ${brand===key?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
+                    <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, lineHeight:1, whiteSpace:'nowrap' }}>
+                      <span style={{ color:palette.logo1 }}>C</span>
+                      <span style={{ color:palette.logo2 }}>oach</span>
+                      <span style={{ color:palette.logo1 }}>IQ</span>
+                    </div>
+                    <div style={{ flex:1, fontSize:12, color:'#6b7a96' }}>{palette.name}</div>
+                    {brand===key && <span style={{ fontSize:14, color:'#4ade80' }}>✓</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* Team colors */}
+          <Card>
+            <CardHead icon="🏷" title="Team Colors" accent={P} />
+            <div style={{ padding:14 }}>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Primary Color</div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
+                {colorOptions.primary.map(c => (<div key={c} onClick={() => setCfg(prev=>({...prev,primary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.primary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+              </div>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Secondary Color</div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
+                {colorOptions.secondary.map(c => (<div key={c} onClick={() => setCfg(prev=>({...prev,secondary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.secondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+              </div>
+              <div style={{ height:6, borderRadius:3, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
+            </div>
+          </Card>
+
+          {/* App info */}
+          <div style={{ padding:'12px 14px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, textAlign:'center' }}>
+            <CoachIQLogo size={20} brand={brand} />
+            <div style={{ fontSize:10, color:'#3d4559', marginTop:6 }}>v1.0 · Built for youth coaches</div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+
+// ─── HOME PAGE ────────────────────────────────────────────────────────────────
+function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand }) {
+  const [feed, setFeed] = useState(null)
+  const [feedLoading, setFeedLoading] = useState(false)
+  const [activeMode, setActiveMode] = useState('dashboard')
+
+  useEffect(() => { if (!feed && !feedLoading) loadFeed() }, [sport])
+
+  async function loadFeed() {
+    setFeedLoading(true)
+    try {
+      const raw = await callAI('You are a sports coaching knowledge curator. Generate a daily coaching feed for a youth '+sport+' coach. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      setFeed(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
+    } catch(e) { setFeed({ items: [] }) }
+    setFeedLoading(false)
+  }
+
+  const feedTypeColor = t => t==='drill'?P:t==='science'?'#6b9fff':'#4ade80'
+
+  if (activeMode === 'gauntlet') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
+      </div>
+      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
+    </>
+  )
+
+  if (activeMode === 'film') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Film Room</span>
+      </div>
+      <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />
+    </>
+  )
+
+  if (activeMode === 'situational') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport==='Football'?'Situational Play Caller':sport==='Basketball'?'Live Game Adjustments':'Count & Situation Manager'}</span>
+      </div>
+      <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
+    </>
+  )
+
+  // DASHBOARD
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
+          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>{lastName ? `Coach ${lastName}` : 'CoachIQ'}</div>
+        </div>
+        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Coach IQ</div></div>
+          <div style={{ width:1, height:28, background:'#1c2235' }} />
+          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div></div>
+        </div>
+      </div>
+
+      {/* Ticker */}
+      <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
+        <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
+        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — AI Coaching Intelligence · Generate schemes · Scout opponents · Build your playbook`}</div></div>
+      </div>
+
+      {/* Scheme Generator Card — interactive preview */}
+      <div style={{ marginTop:14 }}>
+        <div style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', position:'relative', overflow:'hidden' }}>
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:10 }}>
+            <div>
+              <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, color:'#dde1f0', lineHeight:1, marginBottom:4 }}>Scheme Generator</div>
+              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:200 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — animated diagrams and coaching cues built in.</div>
+            </div>
+            <div style={{ display:'flex', gap:6, flexDirection:'column', alignItems:'flex-end' }}>
+              <div style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN →</span></div>
+            </div>
+          </div>
+          {/* Interactive mini diagrams */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+            <div style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative' }}>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE</div>
+              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="offense" P={P} /></div>
+            </div>
+            <div style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative' }}>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE</div>
+              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="defense" P={P} /></div>
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+            {['AI Diagrams','Educator Mode','Pro Comparison','Huddle Cards','Variations'].map(tag => (<span key={tag} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 8px', background:'rgba(192,57,43,0.1)', borderLeft:'2px solid rgba(192,57,43,0.3)', color:'rgba(192,57,43,0.7)', letterSpacing:'0.5px' }}>{tag}</span>))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick access grid */}
+      <div style={{ marginTop:8, display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
+        <div onClick={()=>setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>⚡</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Gauntlet</div></div>
+          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Test your coaching IQ with live AI scenarios</div>
+          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}><span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>IQ</span></div>
+        </div>
+        <div onClick={()=>setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>🎯</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Situational</div></div>
+          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Real-time play calls by down, distance & score</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700 }}>{sport==='Basketball'?'Live adjustments':sport==='Baseball'?'Count manager':'Live play caller'}</div>
+        </div>
+      </div>
+      <div style={{ marginTop:7 }}>
+        <div onClick={()=>setActiveMode('film')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 14px', display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
+          <span style={{ fontSize:16 }}>🎥</span>
+          <div style={{ flex:1 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Film Room</div><div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470' }}>Describe a problem or upload a clip — AI diagnoses it</div></div>
+          <div style={{ fontSize:12, color:'#3a4260' }}>›</div>
+        </div>
+      </div>
+
+      {/* Coaching Feed */}
+      <div style={{ marginTop:14 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+          <div style={{ width:3, height:10, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
+          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
+        </div>
+        {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching content...</div></div>}
+        {feed && (feed.items||[]).map((item,i) => (
+          <div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{item.type==='drill'?'Drill of the Day':item.type==='science'?'Coaching Science':'Concept Spotlight'}</span>
+              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
+            </div>
+            <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
+          </div>
+        </div>
+
+        <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
+          <div style={{ display: page==='home' ? 'contents' : 'none' }}><HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} sportColors={SPORT_COLORS} schemes={schemes} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} playbook={playbook} setPlaybook={setPlaybook} schemeResult={schemeResult} setSchemeResult={setSchemeResult} schemeFields={schemeFields} setSchemeFields={setSchemeFields} schemeSport={schemeSport} setSchemeSport={setSchemeSport} genHistory={genHistory} setGenHistory={setGenHistory} /></div>
+          <div style={{ display: page==='playbook' ? 'contents' : 'none' }}><PlaybookPage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
+          <div style={{ display: page==='more' ? 'contents' : 'none' }}><MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
+        </div>
+
+        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
+          {[['home','🏠','HOME'],['playbook','📖','PLAYBOOK'],['more','⋯','MORE']].map(([p,ico,lbl]) => (
+            <button key={p} onClick={() => setPage(p)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
+              {page===p && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:32, height:2, background:P }} />}
+              <span style={{ fontSize:16, color:page===p?P:'#3d4559' }}>{ico}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:page===p?P:'#3d4559', fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>{lbl}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+function SplashScreen({ onDone, alreadyAuthed }) {
+  const [phase, setPhase] = useState('logo')
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (alreadyAuthed) { onDone(true) } else { setPhase('cta') }
+    }, 1800)
+    return () => clearTimeout(t)
+  }, [])
+
+  const ballStyle = (anim, left, top, right, bottom) => ({
+    position:'absolute',
+    ...(left!==undefined?{left}:{}),
+    ...(top!==undefined?{top}:{}),
+    ...(right!==undefined?{right}:{}),
+    ...(bottom!==undefined?{bottom}:{}),
+    animation:`${anim} ease-in-out infinite`,
+    opacity:0.11,
+    zIndex:0,
+    pointerEvents:'none',
+  })
+
+  return (
+    <div style={{ minHeight:'100vh', maxWidth:480, margin:'0 auto', background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 28px', position:'relative', overflow:'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&display=swap');
+        * { box-sizing:border-box; margin:0; padding:0; }
+        @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
+        @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
+        @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
+        @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
+        @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
+        @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
+        @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
+        @keyframes logoReveal { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+      `}</style>
+
+      <div style={ballStyle('float1 7s',-16,undefined,undefined,'42%')}><svg width="78" height="50" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
+      <div style={ballStyle('float2 9s',undefined,undefined,8,'38%')}><svg width="64" height="64" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg></div>
+      <div style={ballStyle('float3 8s',14,undefined,undefined,'25%')}><svg width="52" height="52" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="20" x2="19" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="27" x2="16" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="20" x2="37" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="27" x2="40" y2="29" stroke="#C0392B" strokeWidth="1.2"/></svg></div>
+      <div style={ballStyle('float4 11s',undefined,8,undefined,undefined)}><svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg></div>
+      <div style={ballStyle('float5 6.5s',undefined,undefined,20,'18%')}><svg width="38" height="38" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg></div>
+      <div style={ballStyle('float6 10s',undefined,undefined,10,'58%')}><svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg></div>
+      <div style={ballStyle('float7 12s',20,undefined,undefined,'68%')}><svg width="50" height="50" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/></svg></div>
+
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:'35%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'35%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+
+      <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-58%) rotate(-8deg)', zIndex:1, opacity:0.06, pointerEvents:'none' }}>
+        <svg width="160" height="200" viewBox="0 0 220 280" fill="none">
+          <rect x="10" y="24" width="200" height="240" rx="6" fill="#c8b89a"/>
+          <rect x="80" y="10" width="60" height="30" rx="7" fill="#888880"/>
+          <rect x="90" y="4" width="40" height="18" rx="9" fill="#777770"/>
+          <line x1="30" y1="70" x2="190" y2="70" stroke="#5a4a3a" strokeWidth="2"/>
+          <line x1="30" y1="90" x2="190" y2="90" stroke="#5a4a3a" strokeWidth="2"/>
+          <line x1="30" y1="110" x2="160" y2="110" stroke="#5a4a3a" strokeWidth="2"/>
+          <rect x="30" y="130" width="160" height="110" rx="4" fill="none" stroke="#5a4a3a" strokeWidth="2"/>
+          <line x1="110" y1="130" x2="110" y2="240" stroke="#5a4a3a" strokeWidth="1.5"/>
+          <circle cx="65" cy="158" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
+          <circle cx="90" cy="172" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
+          <circle cx="148" cy="158" r="9" fill="#5a4a3a"/>
+          <circle cx="162" cy="175" r="9" fill="#5a4a3a"/>
+          <path d="M74 149 L88 140" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
+          <path d="M99 163 L115 158" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
+        </svg>
+      </div>
+
+      <div style={{ position:'relative', zIndex:2, textAlign:'center', animation:'logoReveal 0.7s ease forwards' }}>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:58, lineHeight:1, letterSpacing:'-0.5px', marginBottom:10 }}>
+          <span style={{ color:'#C0392B' }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
+        </div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>AI Coaching Intelligence</div>
+      </div>
+
+      {phase === 'cta' && (
+        <div style={{ position:'relative', zIndex:2, width:'100%', display:'flex', flexDirection:'column', gap:10, marginTop:48, animation:'ctaReveal 0.4s ease forwards' }}>
+          <button onClick={() => onDone(false)} style={{ width:'100%', background:'#C0392B', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Get Started — Free</button>
+          <button onClick={() => onDone(false)} style={{ width:'100%', background:'transparent', border:'1px solid #1c2235', borderRadius:4, padding:'13px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}>Sign In</button>
+          <div style={{ textAlign:'center', paddingTop:4 }}>
+            <span onClick={() => onDone(true)} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:'#C0392B', fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span>
+          </div>
         </div>
       )}
     </div>
   )
 }
 
-function PlaybookPage({ P, S, al, dk, cfg, setCfg, playbook, sport, callAI, parseJSON }) {
-  const [filter, setFilter] = useState('All')
-  const [sort, setSort] = useState('newest')
-  const sportPackages = playbook[sport] || []
-  const allTypes = ['All', ...new Set((sportPackages).flatMap(pkg => (pkg.plays||[]).map(p => p.type?.split(' ')[0])))]
-  const filtered = sportPackages.filter(pkg => filter==='All' || (pkg.plays||[]).some(p => p.type?.startsWith(filter)))
-  const sorted = sort==='newest' ? [...filtered].reverse() : sort==='oldest' ? filtered : [...filtered].sort((a,b) => (a.packageName||'').localeCompare(b.packageName||''))
+function Onboarding({ onLaunch }) {
+  const [screen, setScreen] = useState('signin')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [coachName, setCoachName] = useState('')
+  const [teamSport, setTeamSport] = useState('Football')
+  const [teamName, setTeamName] = useState('')
+  const [teamPrimary, setTeamPrimary] = useState('#C0392B')
+  const [teamSecondary, setTeamSecondary] = useState('#002868')
+  const [teams, setTeams] = useState([
+    { sport: 'Football', name: 'Tolland Youth Football', primary: '#C0392B', secondary: '#002868', coach: 'Coach Regisford', iq: 847, packages: 3 }
+  ])
 
-  return (
-    <>
-      <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Your saved schemes</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Playbook</div>
-      </div>
-      {sportPackages.length === 0 ? (
-        <Card>
-          <div style={{ padding:'32px 20px', textAlign:'center' }}>
-            <div style={{ fontSize:32, marginBottom:8 }}>📖</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:6 }}>No {sport} Packages Yet</div>
-            <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Generate a scheme from the Home tab and tap "+ Playbook" to save it here.</div>
-          </div>
-        </Card>
-      ) : (
-        <>
-          <div style={{ display:'flex', gap:7, marginBottom:10, flexWrap:'wrap' }}>
-            {allTypes.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding:'5px 10px', borderRadius:4, fontSize:10, border:`1px solid ${filter===t?P:'#1e2330'}`, background:filter===t?al(P,0.15):'transparent', color:filter===t?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{t}</button>))}
-          </div>
-          <div style={{ display:'flex', gap:7, marginBottom:12 }}>
-            {[['newest','Newest'],['oldest','Oldest'],['alpha','A–Z']].map(([v,lbl]) => (<button key={v} onClick={() => setSort(v)} style={{ padding:'4px 10px', borderRadius:4, fontSize:9, border:`1px solid ${sort===v?P:'#1e2330'}`, background:sort===v?al(P,0.15):'transparent', color:sort===v?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{lbl}</button>))}
-          </div>
-          <div style={{ fontSize:10, color:'#6b7a96', marginBottom:8 }}>{sorted.length} package{sorted.length!==1?'s':''} saved</div>
-          {sorted.map((pkg, i) => (<SchemeFolder key={i} pkg={pkg} pkgIndex={i} sport={sport} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />))}
-        </>
-      )}
-    </>
-  )
-}
+  const sportMeta = {
+    Football: { emoji: '🏈', grad: ['#6b0000','#C0392B'], label: 'Football' },
+    Basketball: { emoji: '🏀', grad: ['#7a3000','#D4600A'], label: 'Basketball' },
+    Baseball: { emoji: '⚾', grad: ['#0a2a0a','#1B5E20'], label: 'Baseball' },
+  }
 
-function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport, callAI, parseJSON }) {
   const colorOptions = {
     primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
     secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010'],
   }
-  const features = [
-    { icon:'📊', title:'Analytics Dashboard', desc:'Win probability, tendency charts, opponent scouting reports', badge:'COMING SOON' },
-    { icon:'🏆', title:'League Manager', desc:'Schedule, standings, and stats tracking for your league', badge:'COMING SOON' },
-    { icon:'👨‍👩‍👧', title:'Parent Portal', desc:'Practice schedules, game film, and player progress reports', badge:'COMING SOON' },
-    { icon:'📱', title:'Native App', desc:'Full offline access, push notifications, Apple Watch coaching cues', badge:'COMING SOON' },
-    { icon:'🤝', title:'Coach Network', desc:'Share plays, discover schemes, follow elite youth coaches', badge:'COMING SOON' },
-    { icon:'🎓', title:'Certification Path', desc:'AI-powered coaching education with certifications', badge:'COMING SOON' },
+
+  function handleSignIn() { setScreen('teams') }
+
+  function handleCreateTeam() {
+    if (!teamName.trim()) return
+    const newTeam = { sport: teamSport, name: teamName, primary: teamPrimary, secondary: teamSecondary, coach: coachName || 'Coach', iq: 500, packages: 0 }
+    setTeams(prev => [...prev, newTeam])
+    setScreen('teams')
+    setTeamName('')
+  }
+
+  function enterTeam(team) {
+    onLaunch({ coach: team.coach || 'Coach Regisford', team: team.name, primary: team.primary, secondary: team.secondary, sport: team.sport })
+  }
+
+  const S = { bg:'#07090d', surface:'#0d1117', card:'#0f1219', border:'#1e2330', text:'#f2f4f8', muted:'#6b7a96', dim:'#3d4559', red:'#C0392B' }
+  const Logo = ({ size=42, primary='#C0392B' }) => (
+    <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:size, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
+      <span style={{ color:primary }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
+    </div>
+  )
+  const BtnRed = { width:'100%', background:S.red, border:'none', borderRadius:4, padding:'13px', fontSize:13, fontWeight:700, color:'white', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'2px', textTransform:'uppercase', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }
+  const BtnGhost = { width:'100%', background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'12px', fontSize:12, color:S.text, cursor:'pointer', fontFamily:"'DM Sans',sans-serif" }
+
+  if (screen === 'signin') return (
+    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif", position:'relative', overflow:'hidden' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; } @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} } @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} } @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} } @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} } @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} } @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} } @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }`}</style>
+      <div style={{ position:'absolute', left:'-5%', top:'8%', animation:'float1 7s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="88" height="56" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
+      <div style={{ position:'absolute', right:'5%', top:'18%', animation:'float2 9s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg></div>
+      <div style={{ position:'absolute', left:'12%', bottom:'22%', animation:'float3 8s ease-in-out infinite', opacity:0.11, zIndex:0 }}><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="13" x2="19" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="20" x2="16" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="8" y1="27" x2="14" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="34" x2="16" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="13" y1="41" x2="19" y2="43" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="13" x2="37" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="20" x2="40" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="48" y1="27" x2="42" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="34" x2="40" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="41" x2="37" y2="43" stroke="#C0392B" strokeWidth="1.2"/></svg></div>
+      <div style={{ position:'absolute', right:'15%', top:'5%', animation:'float4 11s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg></div>
+      <div style={{ position:'absolute', left:'50%', top:'12%', animation:'float5 6.5s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg></div>
+      <div style={{ position:'absolute', right:'8%', bottom:'28%', animation:'float6 10s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><path d="M10 5 Q26 14 42 5" stroke="#2a8a2a" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg></div>
+      <div style={{ position:'absolute', left:'8%', top:'52%', animation:'float7 12s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="20" r="4" fill="rgba(255,255,255,0.25)"/></svg></div>
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:'30%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'30%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+      <div style={{ textAlign:'center', marginBottom:40, position:'relative', zIndex:2 }}><Logo size={66} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', marginTop:6, textTransform:'uppercase' }}>AI Coaching Intelligence</div></div>
+      <div style={{ width:'100%', maxWidth:360, display:'flex', flexDirection:'column', gap:10, position:'relative', zIndex:2 }}>
+        <button onClick={handleSignIn} style={BtnRed}>Get Started — Free</button>
+        <button onClick={handleSignIn} style={BtnGhost}>Sign In</button>
+        <div style={{ textAlign:'center', paddingTop:4 }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:S.red, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span></div>
+      </div>
+    </div>
+  )
+
+  if (screen === 'signup') return (
+    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <div style={{ textAlign:'center', marginBottom:28 }}><Logo size={42} /></div>
+      <div style={{ width:'100%', maxWidth:380, background:S.surface, border:`1px solid ${S.border}`, borderRadius:4, overflow:'hidden' }}>
+        <div style={{ height:3, background:`linear-gradient(90deg,${S.red},transparent)` }} />
+        <div style={{ padding:'28px 28px 24px' }}>
+          <div style={{ fontSize:20, fontWeight:600, color:S.text, marginBottom:6 }}>Create your account</div>
+          <div style={{ fontSize:13, color:S.muted, marginBottom:24 }}>Free to start. No credit card required.</div>
+          {[['Your name','text',coachName,setCoachName,'Coach Regisford'],['Email','email',email,setEmail,'coach@yourteam.com'],['Password','password',password,setPassword,'Min 8 characters']].map(([lbl,type,val,set,ph]) => (
+            <div key={lbl} style={{ marginBottom:14 }}>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:S.muted, marginBottom:6 }}>{lbl}</div>
+              <input type={type} value={val} onChange={e=>set(e.target.value)} placeholder={ph} style={{ width:'100%', background:S.card, border:`1px solid ${S.border}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit' }} />
+            </div>
+          ))}
+          <div style={{ marginBottom:22 }} />
+          <button onClick={() => { setScreen('createTeam') }} style={{ ...BtnRed, borderRadius:4 }}>Create Account</button>
+        </div>
+        <div style={{ borderTop:`1px solid ${S.border}`, padding:'14px 28px', textAlign:'center', fontSize:12, color:S.muted }}>Already have an account? <span onClick={() => setScreen('signin')} style={{ color:S.red, cursor:'pointer', fontWeight:500 }}>Sign in</span></div>
+      </div>
+    </div>
+  )
+
+  if (screen === 'createTeam') return (
+    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'24px 20px 40px' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=Big+Shoulders+Display:wght@900&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <div style={{ maxWidth:440, margin:'0 auto' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28, paddingTop:16 }}>
+          <button onClick={() => setScreen('teams')} style={{ background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'5px 12px', color:S.muted, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+          <Logo size={22} />
+        </div>
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Sport</div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:22 }}>
+          {Object.entries(sportMeta).map(([s,m]) => (
+            <div key={s} onClick={() => setTeamSport(s)} style={{ borderRadius:4, overflow:'hidden', cursor:'pointer', border:`2px solid ${teamSport===s?m.grad[1]:'transparent'}` }}>
+              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 8px', textAlign:'center' }}>
+                <div style={{ fontSize:28, lineHeight:1.2 }}>{m.emoji}</div>
+                <div style={{ fontSize:10, fontWeight:700, color:'white', marginTop:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>{m.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Team name</div>
+        <input value={teamName} onChange={e=>setTeamName(e.target.value)} placeholder={`e.g. Tolland Youth ${teamSport}`} style={{ width:'100%', background:S.card, border:`1px solid ${teamPrimary}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit', marginBottom:22 }} />
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Primary color <span style={{ color:S.red }}>*</span></div>
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:20 }}>
+          {colorOptions.primary.map(c => (<div key={c} onClick={() => setTeamPrimary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamPrimary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+        </div>
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Secondary color <span style={{ color:S.dim }}>optional</span></div>
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:28 }}>
+          {colorOptions.secondary.map(c => (<div key={c} onClick={() => setTeamSecondary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamSecondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+        </div>
+        <div style={{ marginBottom:20, borderRadius:4, overflow:'hidden' }}>
+          <div style={{ height:6, background:`linear-gradient(90deg,${teamPrimary} 55%,${teamSecondary} 55%)` }} />
+          <div style={{ background:`linear-gradient(135deg,${teamPrimary}33,#07090d)`, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
+            <svg viewBox="0 0 88 24" style={{ width:88, height:24, overflow:'visible' }}><text y="19" fontFamily="Kalam, cursive" fontSize="20" letterSpacing="-0.5"><tspan fill={teamPrimary}>Coach</tspan><tspan fill="#dde1f0">IQ</tspan></text></svg>
+            <div style={{ marginLeft:'auto', display:'flex', gap:6 }}>
+              {[['3','PKG'],['0','IQ']].map(([v,l]) => (<div key={l} style={{ background:'rgba(0,0,0,0.3)', padding:'4px 8px', clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:'white', lineHeight:1 }}>{v}</div><div style={{ fontSize:7, color:'rgba(255,255,255,0.4)', textTransform:'uppercase' }}>{l}</div></div>))}
+            </div>
+          </div>
+        </div>
+        <button onClick={handleCreateTeam} disabled={!teamName.trim()} style={{ width:'100%', background:teamName.trim()?teamPrimary:'#1e2330', border:'none', borderRadius:4, padding:'14px', fontSize:14, color:'white', cursor:teamName.trim()?'pointer':'not-allowed', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'2px', clipPath:'polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)' }}>Create Team</button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'0 0 40px' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${S.border}`, display:'flex', alignItems:'center', gap:10 }}>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap' }}><span style={{ color:S.red }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span></div>
+        <div style={{ fontSize:12, color:S.muted, marginLeft:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>Your locker room</div>
+      </div>
+      <div style={{ padding:'20px 20px 0', maxWidth:440, margin:'0 auto' }}>
+        <div style={{ fontSize:9, color:S.dim, letterSpacing:'2px', textTransform:'uppercase', marginBottom:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Your teams</div>
+        {teams.map((team, i) => {
+          const m = sportMeta[team.sport] || sportMeta.Football
+          return (
+            <div key={i} onClick={() => enterTeam(team)} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', border:`1px solid rgba(255,255,255,0.07)` }}>
+              <div style={{ background:`linear-gradient(135deg,${m.grad[0]} 0%,${team.primary} 100%)`, padding:'16px 18px', display:'flex', alignItems:'center', gap:14, position:'relative', overflow:'hidden' }}>
+                <div style={{ position:'absolute', bottom:-4, right:-4, height:6, background:`linear-gradient(90deg,${team.primary} 55%,${team.secondary||'#002868'} 55%)`, left:0 }} />
+                <div style={{ fontSize:32, lineHeight:1, flexShrink:0 }}>{m.emoji}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontFamily:"'Kalam',cursive", fontSize:18, color:'white', letterSpacing:'-0.5px' }}>{team.name}</div>
+                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.6)', marginTop:2 }}>IQ {team.iq} · {team.packages} package{team.packages!==1?'s':''} · {team.coach}</div>
+                </div>
+                <div style={{ fontSize:20, color:'rgba(255,255,255,0.5)' }}>›</div>
+              </div>
+            </div>
+          )
+        })}
+        {['Football','Basketball','Baseball'].filter(s => !teams.find(t=>t.sport===s)).map(s => {
+          const m = sportMeta[s]
+          return (
+            <div key={s} onClick={() => { setTeamSport(s); setScreen('createTeam') }} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', opacity:0.5 }}>
+              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 18px', display:'flex', alignItems:'center', gap:14 }}>
+                <div style={{ fontSize:26, lineHeight:1, flexShrink:0, opacity:0.6 }}>{m.emoji}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.7)', fontFamily:"'Barlow Condensed',sans-serif" }}>Add {m.label} team</div>
+                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)' }}>Tap to set up</div>
+                </div>
+                <div style={{ fontSize:20, color:'rgba(255,255,255,0.3)' }}>+</div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function Card({ children, style={} }) {
+  return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
+}
+function CardHead({ icon, title, tag, tagColor, accent }) {
+  const tc = tagColor || '#C0392B'
+  return (
+    <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#C0392B'}` }}>
+      <span style={{ fontSize:15 }}>{icon}</span>
+      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{title}</span>
+      {tag && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(tc.slice(1,3),16)},${parseInt(tc.slice(3,5),16)},${parseInt(tc.slice(5,7),16)},0.15)`, color:tc, textTransform:'uppercase' }}>{tag}</span>}
+    </div>
+  )
+}
+function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
+  )
+}
+function Sel({ label, value, onChange, options }) {
+  return (
+    <div>
+      <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>{label}</label>
+      <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+        {options.map(o => <option key={o}>{o}</option>)}
+      </select>
+    </div>
+  )
+}
+function Shimmer() {
+  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', borderRadius:0, margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
+}
+function ErrBox({ msg }) {
+  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
+}
+function Hero({ greet, left, right, P, S, dk, children }) {
+  return (
+    <div style={{ borderRadius:4, padding:'16px 15px', position:'relative', overflow:'hidden', border:'1px solid #1e2330', background:`linear-gradient(135deg,${dk(S,40)} 0%,#07090d 65%)` }}>
+      <div style={{ position:'absolute', top:0, right:0, width:4, height:'100%', background:P }} />
+      <div style={{ position:'relative', zIndex:1 }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{greet}</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:26, letterSpacing:'1px', lineHeight:1, marginBottom:children?11:0, textTransform:'uppercase' }}>{left} <span style={{ color:P }}>{right}</span></div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+const SPORTS = {
+  Football: {
+    emoji:'FB',
+    fields:[
+      {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing','Flexbone','Run and Shoot']},
+      {id:'personnel',label:'Your Best Personnel',opts:['Athletic QB / Dual Threat','Big Physical RB','Fast Skill Players','Strong Offensive Line','Well-Balanced','Small But Fast Team','Big But Slower Team']},
+      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
+      {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+      {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
+      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Dual-Threat QB','Speed / Fast Athletes','Big Physical Players','Pass Heavy / Spread','Run Heavy / Power','Option / Misdirection Heavy','Blitzes Every Down','Zone Coverage Heavy','Man Press Every Play']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
+    ],
+    positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
+    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme for this teams personnel.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types like: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
+  },
+  Basketball: {
+    emoji:'BB',
+    fields:[
+      {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
+      {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
+      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
+      {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
+      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','One Star Player ISO Heavy','Strong Inside Post','Three Point Shooting Team','Fast Break Heavy','Ball Control Slow Pace','Full Court Press Every Possession','Zone Defense Only','Aggressive Man Pressure','Weak Ball Handlers']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
+    ],
+    positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
+    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays or sets. Use types like: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario using basketball terminology only. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 BALL ON OWN 30 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using basketball terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
+  },
+  Baseball: {
+    emoji:'BSB',
+    fields:[
+      {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
+      {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
+      {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
+      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
+      {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
+      {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Pull Hitters Heavy','Spray / Opposite Field Hitters','Speed Team — Steals Often','Power Hitting Lineup','Bunt Heavy Small Ball','Strong Pitching','Aggressive Base Running','Struggles with Off-Speed','Rarely Strike Out']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
+    ],
+    positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
+    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types like: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario using baseball manager terminology only. No football references. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario for a manager","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using baseball manager terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
+  },
+}
+
+
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+export default function CoachIQ() {
+  const [launched, setLaunched] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
+  const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
+  const [brand, setBrand] = useState('Red & White')
+  const [page, setPage] = useState('home')
+  const [sport, setSport] = useState('Football')
+  const [iq, setIQ] = useState(847)
+  const [gauntlets, setGauntlets] = useState(0)
+  const [playbook, setPlaybook] = useState({ Football:{}, Basketball:{}, Baseball:{} })
+  const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[] })
+
+  const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
+  const P = sportColors.primary
+  const S = sportColors.secondary
+  const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
+
+  async function callAI(prompt, imageData) {
+    const messages = imageData
+      ? [{ role:'user', content:[{ type:'image', source:{ type:'base64', media_type:imageData.mime, data:imageData.b64 } },{ type:'text', text:prompt }] }]
+      : [{ role:'user', content:prompt }]
+    const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ messages }) })
+    const d = await res.json()
+    if (!res.ok) throw new Error(d.error || 'API error')
+    return d.text
+  }
+
+  function parseJSON(raw) {
+    const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+    const a = s.indexOf('{'), b = s.lastIndexOf('}')
+    if (a < 0 || b <= a) throw new Error('No JSON in response')
+    return JSON.parse(s.slice(a, b+1))
+  }
+
+  if (showSplash) return (
+    <SplashScreen onDone={(skipToApp) => { setShowSplash(false); if (skipToApp) setLaunched(true) }} alreadyAuthed={launched} />
+  )
+  if (!launched) return (
+    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} />
+  )
+
+  const NAV_ITEMS = [
+    { id:'home',   icon:'🏠', label:'HOME' },
+    { id:'schemes',icon:'📋', label:'SCHEMES' },
+    { id:'scout',  icon:'🔍', label:'SCOUT' },
+    { id:'playbook',icon:'📖',label:'PLAYBOOK' },
+    { id:'more',   icon:'⋯',  label:'MORE' },
   ]
 
   return (
     <>
-      <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Settings & features</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>More</div>
-      </div>
+      <Head><title>CoachIQ</title></Head>
+      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@400;600;700&family=Big+Shoulders+Display:wght@500;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+          * { box-sizing:border-box; margin:0; padding:0; }
+          ::-webkit-scrollbar { width:4px; }
+          ::-webkit-scrollbar-thumb { background:#1e2330; border-radius:0; }
+          select option { background:#161922; }
+          @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+          @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+          @keyframes ticker { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+          @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
+          @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
+          @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
+          @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
+          @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
+          @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
+          @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
+          @keyframes logoReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+          @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+        `}</style>
 
-      <Card>
-        <CardHead icon="🎨" title="Team Colors" accent={P} />
-        <div style={{ padding:14 }}>
-          <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Primary Color</div>
-          <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
-            {colorOptions.primary.map(c => (<div key={c} onClick={() => setCfg(prev=>({...prev,primary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.primary===c?'white':'transparent'}`, cursor:'pointer', transition:'border-color 0.15s' }} />))}
+        {/* TOP BAR */}
+        <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
+          <CoachIQLogo size={22} brand={brand} />
+          <div style={{ display:'flex', gap:3, marginLeft:2 }}>
+            {[['FB','Football','🏈'],['BB','Basketball','🏀'],['BSB','Baseball','⚾']].map(([lbl,s,ico]) => (
+              <button key={lbl} onClick={()=>setSport(s)} style={{ padding:'3px 8px', borderRadius:2, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
+                <span style={{ fontSize:10 }}>{ico}</span><span>{lbl}</span>
+              </button>
+            ))}
           </div>
-          <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Secondary Color</div>
-          <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
-            {colorOptions.secondary.map(c => (<div key={c} onClick={() => setCfg(prev=>({...prev,secondary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.secondary===c?'white':'transparent'}`, cursor:'pointer', transition:'border-color 0.15s' }} />))}
+          <div style={{ display:'flex', alignItems:'center', gap:4, background:`rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:2, padding:'3px 8px', marginLeft:'auto' }}>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
+            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
           </div>
-          <div style={{ height:6, borderRadius:3, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
         </div>
-      </Card>
 
-      <div style={{ marginTop:14 }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:10 }}>Coming Soon</div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-          {features.map((f,i) => (
-            <div key={i} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'12px', opacity:0.7 }}>
-              <div style={{ fontSize:20, marginBottom:6 }}>{f.icon}</div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, color:'#6b7a96', marginBottom:4 }}>{f.title}</div>
-              <div style={{ fontSize:10, color:'#3d4559', lineHeight:1.4, marginBottom:8 }}>{f.desc}</div>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, padding:'2px 6px', background:'#1e2330', color:'#3d4559', borderRadius:2, letterSpacing:1 }}>{f.badge}</span>
-            </div>
+        {/* PAGE CONTENT */}
+        <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
+          {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} />}
+          {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
+          {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
+          {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
+          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} />}
+        </div>
+
+        {/* BOTTOM NAV */}
+        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
+          {NAV_ITEMS.map(({ id, icon, label }) => (
+            <button key={id} onClick={()=>setPage(id)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
+              {page===id && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2, background:P }} />}
+              <span style={{ fontSize:14, color:page===id?P:'#3d4559' }}>{icon}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page===id?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
+            </button>
           ))}
         </div>
-      </div>
-
-      <div style={{ marginTop:14, padding:'12px 14px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, textAlign:'center' }}>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:18, marginBottom:4 }}><span style={{ color:P }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span></div>
-        <div style={{ fontSize:10, color:'#3d4559' }}>v1.0 · Built for youth coaches</div>
       </div>
     </>
   )
