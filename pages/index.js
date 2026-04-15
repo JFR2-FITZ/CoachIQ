@@ -2635,46 +2635,6 @@ function ScoutPage({ P, S, al, sport, callAI, parseJSON, teams, activeTeam }) {
 
 
 // ─── TEAM TAB PAGE ────────────────────────────────────────────────────────────
-function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, brand }) {
-  const [section, setSection] = useState('roster') // roster | practice | analytics | print
-  const currentTeam = activeTeam[sport]
-  const sportTeams = teams[sport] || []
-
-  return (
-    <>
-      <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Team management</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
-      </div>
-
-      {/* Team Manager (create/switch) */}
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} />
-
-      {!currentTeam ? (
-        <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
-          <div style={{ fontSize:36, marginBottom:10 }}>🏆</div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Team Selected</div>
-          <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Create or select a team above to access practice plans, analytics, and printable sheets.</div>
-        </div>
-      ) : (
-        <>
-          {/* Section nav */}
-          <div style={{ display:'flex', gap:6, marginTop:14, marginBottom:14, overflowX:'auto', paddingBottom:2 }}>
-            {[['roster','👥 Roster'],['practice','📆 Practice'],['analytics','📊 Analytics'],['print','🖨 Print']].map(([s,lbl]) => (
-              <button key={s} onClick={()=>setSection(s)} style={{ flexShrink:0, padding:'8px 14px', borderRadius:4, fontSize:11, border:`1px solid ${section===s?P:'#1e2330'}`, background:section===s?al(P,0.15):'transparent', color:section===s?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
-            ))}
-          </div>
-
-          {section === 'roster' && <RosterSection team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
-          {section === 'practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} />}
-          {section === 'analytics' && <AnalyticsSection team={currentTeam} P={P} al={al} />}
-          {section === 'print' && <PrintSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} />}
-        </>
-      )}
-    </>
-  )
-}
-
 function RosterSection({ team, P, al, teams, setTeams, sport }) {
   const [players, setPlayers] = useState(team.players || [])
   const [newName, setNewName] = useState('')
@@ -3338,6 +3298,10 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function CoachIQ() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!mounted) return null
+
   const [launched, setLaunched] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
   const [cfg, setCfg] = useState({ coach:'', primary:'#C0392B', secondary:'#002868' })
