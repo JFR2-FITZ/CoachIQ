@@ -1,30 +1,113 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Head from 'next/head'
 
-// ─── BRAND CONFIG ────────────────────────────────────────────────────────────
+// ─── MASCOTS ─────────────────────────────────────────────────────────────────
+const MASCOTS = [
+  { id:'eagles',    name:'Eagles',    emoji:'🦅' },
+  { id:'hawks',     name:'Hawks',     emoji:'🦆' },
+  { id:'falcons',   name:'Falcons',   emoji:'🦅' },
+  { id:'ravens',    name:'Ravens',    emoji:'🐦‍⬛' },
+  { id:'cardinals', name:'Cardinals', emoji:'🐦' },
+  { id:'owls',      name:'Owls',      emoji:'🦉' },
+  { id:'tigers',    name:'Tigers',    emoji:'🐯' },
+  { id:'lions',     name:'Lions',     emoji:'🦁' },
+  { id:'bears',     name:'Bears',     emoji:'🐻' },
+  { id:'panthers',  name:'Panthers',  emoji:'🐆' },
+  { id:'cougars',   name:'Cougars',   emoji:'🦓' },
+  { id:'jaguars',   name:'Jaguars',   emoji:'🐆' },
+  { id:'wolves',    name:'Wolves',    emoji:'🐺' },
+  { id:'huskies',   name:'Huskies',   emoji:'🐕' },
+  { id:'bulldogs',  name:'Bulldogs',  emoji:'🐶' },
+  { id:'vipers',    name:'Vipers',    emoji:'🐍' },
+  { id:'cobras',    name:'Cobras',    emoji:'🐍' },
+  { id:'gators',    name:'Gators',    emoji:'🐊' },
+  { id:'dragons',   name:'Dragons',   emoji:'🐉' },
+  { id:'mustangs',  name:'Mustangs',  emoji:'🐎' },
+  { id:'stallions', name:'Stallions', emoji:'🐎' },
+  { id:'broncos',   name:'Broncos',   emoji:'🐴' },
+  { id:'rams',      name:'Rams',      emoji:'🐏' },
+  { id:'bulls',     name:'Bulls',     emoji:'🐂' },
+  { id:'bison',     name:'Bison',     emoji:'🦬' },
+  { id:'sharks',    name:'Sharks',    emoji:'🦈' },
+  { id:'barracudas',name:'Barracudas',emoji:'🐟' },
+  { id:'warriors',  name:'Warriors',  emoji:'⚔️' },
+  { id:'knights',   name:'Knights',   emoji:'🛡️' },
+  { id:'spartans',  name:'Spartans',  emoji:'🗡️' },
+  { id:'titans',    name:'Titans',    emoji:'💪' },
+  { id:'giants',    name:'Giants',    emoji:'🏔️' },
+  { id:'rockets',   name:'Rockets',   emoji:'🚀' },
+  { id:'blazers',   name:'Blazers',   emoji:'🔥' },
+  { id:'thunder',   name:'Thunder',   emoji:'⚡' },
+  { id:'storm',     name:'Storm',     emoji:'🌩️' },
+  { id:'lightning', name:'Lightning', emoji:'⚡' },
+  { id:'cyclones',  name:'Cyclones',  emoji:'🌀' },
+  { id:'tornados',  name:'Tornados',  emoji:'🌪️' },
+  { id:'comets',    name:'Comets',    emoji:'☄️' },
+  { id:'jets',      name:'Jets',      emoji:'✈️' },
+  { id:'phantoms',  name:'Phantoms',  emoji:'👻' },
+  { id:'chargers',  name:'Chargers',  emoji:'⚡' },
+  { id:'colts',     name:'Colts',     emoji:'🐴' },
+  { id:'patriots',  name:'Patriots',  emoji:'🦅' },
+  { id:'rebels',    name:'Rebels',    emoji:'🔱' },
+  { id:'trojans',   name:'Trojans',   emoji:'🏛️' },
+  { id:'vikings',   name:'Vikings',   emoji:'🪓' },
+  { id:'pirates',   name:'Pirates',   emoji:'🏴‍☠️' },
+  { id:'raiders',   name:'Raiders',   emoji:'💀' },
+]
+
+// ─── TEAM NAME FONTS ──────────────────────────────────────────────────────────
+const TEAM_FONTS = [
+  { id:'kalam',     name:'Kalam',          style:"'Kalam', cursive",                    preview:'Handwritten' },
+  { id:'barlow',    name:'Barlow Condensed',style:"'Barlow Condensed', sans-serif",      preview:'Bold Athletic' },
+  { id:'bigshoul',  name:'Big Shoulders',  style:"'Big Shoulders Display', sans-serif", preview:'BLOCK CAPS' },
+  { id:'dmsans',    name:'DM Sans',        style:"'DM Sans', sans-serif",               preview:'Clean Modern' },
+  { id:'mono',      name:'DM Mono',        style:"'DM Mono', monospace",                preview:'Monospace' },
+]
+
+// ─── BRAND CONFIG ─────────────────────────────────────────────────────────────
 const BRAND_PALETTES = {
-  'Red — C+IQ colored':   { accent: '#C0392B', accentOn: 'CIQ', name: 'Red — C+IQ colored' },
-  'Red — oach colored':   { accent: '#C0392B', accentOn: 'oach', name: 'Red — oach colored' },
-  'Blue — C+IQ colored':  { accent: '#1565C0', accentOn: 'CIQ', name: 'Blue — C+IQ colored' },
-  'Blue — oach colored':  { accent: '#1565C0', accentOn: 'oach', name: 'Blue — oach colored' },
-  'Gold — C+IQ colored':  { accent: '#f59e0b', accentOn: 'CIQ', name: 'Gold — C+IQ colored' },
+  'Red — C+IQ colored':  { accent:'#C0392B', accentOn:'CIQ',  name:'Red — C+IQ colored' },
+  'Red — oach colored':  { accent:'#C0392B', accentOn:'oach', name:'Red — oach colored' },
+  'Blue — C+IQ colored': { accent:'#1565C0', accentOn:'CIQ',  name:'Blue — C+IQ colored' },
+  'Blue — oach colored': { accent:'#1565C0', accentOn:'oach', name:'Blue — oach colored' },
+  'Gold — C+IQ colored': { accent:'#f59e0b', accentOn:'CIQ',  name:'Gold — C+IQ colored' },
 }
 
-// ─── SPORT COLORS ────────────────────────────────────────────────────────────
+// ─── SPORT COLORS ─────────────────────────────────────────────────────────────
 const SPORT_COLORS = {
-  Football:   { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', label: 'Football' },
-  Basketball: { primary: '#D4600A', secondary: '#1a1208', accent: '#fff3e0', label: 'Basketball' },
-  Baseball:   { primary: '#1B5E20', secondary: '#1a1208', accent: '#f1f8e9', label: 'Baseball' },
+  Football:   { primary:'#C0392B', secondary:'#1a3a1a', label:'Football' },
+  Basketball: { primary:'#D4600A', secondary:'#1a1208', label:'Basketball' },
+  Baseball:   { primary:'#1B5E20', secondary:'#1a1208', label:'Baseball' },
 }
 
-// ─── DEFAULT PLAYBOOK FOLDERS ────────────────────────────────────────────────
+// ─── DEFAULT PLAYBOOK FOLDERS ─────────────────────────────────────────────────
 const DEFAULT_FOLDERS = {
   Football:   ['Base Offense','Red Zone','2-Minute Drill','Base Defense','Special Teams','My Favorites'],
   Basketball: ['Base Offense','End of Game','Press Break','Zone Attack','Inbounds','My Favorites'],
   Baseball:   ['Base Offense','Late Innings','Small Ball','Pitching Strategy','Defensive Sets','My Favorites'],
 }
 
-// ─── SPORTS CONFIG ───────────────────────────────────────────────────────────
+// ─── WEATHER GAME LIKELIHOOD ──────────────────────────────────────────────────
+const GAME_THRESHOLDS = {
+  Football:   { lightRain:85, heavyRain:60, thunderstorm:10, snow:70, wind:75, extreme:5 },
+  Basketball: { lightRain:100, heavyRain:100, thunderstorm:100, snow:100, wind:100, extreme:100 }, // indoor
+  Baseball:   { lightRain:70, heavyRain:20, thunderstorm:5, snow:15, wind:80, extreme:5 },
+}
+
+function getGameLikelihood(sport, weatherCode, windSpeed) {
+  const t = GAME_THRESHOLDS[sport] || GAME_THRESHOLDS.Football
+  if (weatherCode >= 200 && weatherCode < 300) return t.thunderstorm // thunderstorm
+  if (weatherCode >= 300 && weatherCode < 400) return t.lightRain    // drizzle
+  if (weatherCode >= 500 && weatherCode < 502) return t.lightRain    // light rain
+  if (weatherCode >= 502 && weatherCode < 600) return t.heavyRain    // heavy rain
+  if (weatherCode >= 600 && weatherCode < 700) return t.snow         // snow
+  if (windSpeed > 35) return t.wind
+  if (weatherCode >= 771 || weatherCode === 781) return t.extreme    // squall/tornado
+  return 95
+}
+
+
+// ─── SPORTS CONFIG ────────────────────────────────────────────────────────────
 const SPORTS = {
   Football: {
     emoji:'FB',
@@ -34,12 +117,12 @@ const SPORTS = {
       {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
       {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
       {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
-      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Dual-Threat QB','Speed / Fast Athletes','Big Physical Players','Pass Heavy / Spread','Run Heavy / Power','Option / Misdirection Heavy','Blitzes Every Down','Zone Coverage Heavy','Man Press Every Play']},
+      {id:'defense',label:'Opponent Formation',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
+      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
-    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Tailor to attack the ${f.defense} formation against their ${f.oppTendency} coverage. Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple terms why this play is called this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
   },
   Basketball: {
@@ -51,11 +134,11 @@ const SPORTS = {
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
       {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','One Star Player ISO Heavy','Strong Inside Post','Three Point Shooting Team','Fast Break Heavy','Ball Control Slow Pace','Full Court Press Every Possession','Zone Defense Only','Aggressive Man Pressure','Weak Ball Handlers']},
+      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain why this play is called this name in simple terms a youth coach would understand"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -66,41 +149,38 @@ const SPORTS = {
       {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
       {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
-      {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Pull Hitters Heavy','Spray / Opposite Field Hitters','Speed Team — Steals Often','Power Hitting Lineup','Bunt Heavy Small Ball','Strong Pitching','Aggressive Base Running','Struggles with Off-Speed','Rarely Strike Out']},
+      {id:'defense',label:'Batting Order Style',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
+      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explain why this strategy is called this name in simple terms"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
 }
 
 
-// ─── LOGO COMPONENT ──────────────────────────────────────────────────────────
+// ─── LOGO COMPONENT ───────────────────────────────────────────────────────────
 function CoachIQLogo({ size=22, brand='Red — C+IQ colored' }) {
   const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red — C+IQ colored']
   const CIQ = p.accentOn === 'CIQ'
-  const coloredC    = CIQ ? p.accent : '#f2f4f8'
-  const coloredOach = CIQ ? '#f2f4f8' : p.accent
-  const coloredIQ   = CIQ ? p.accent : '#f2f4f8'
   return (
     <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:size, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
-      <span style={{ color:coloredC }}>C</span>
-      <span style={{ color:coloredOach }}>oach</span>
-      <span style={{ color:coloredIQ }}>IQ</span>
+      <span style={{ color: CIQ ? p.accent : '#f2f4f8' }}>C</span>
+      <span style={{ color: CIQ ? '#f2f4f8' : p.accent }}>oach</span>
+      <span style={{ color: CIQ ? p.accent : '#f2f4f8' }}>IQ</span>
     </div>
   )
 }
 
-// ─── SHARED UI ───────────────────────────────────────────────────────────────
+// ─── SHARED UI ────────────────────────────────────────────────────────────────
 function al(hex, a) {
-  if (!hex || hex.length < 7) return `rgba(0,0,0,${a})`
+  if (!hex||hex.length<7) return `rgba(0,0,0,${a})`
   const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
   return `rgba(${r},${g},${b},${a})`
 }
 function dk(hex, amt) {
-  if (!hex || hex.length < 7) return hex
+  if (!hex||hex.length<7) return hex
   const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
   return '#'+[r,g,b].map(x=>Math.max(0,x-amt).toString(16).padStart(2,'0')).join('')
 }
@@ -108,35 +188,491 @@ function Card({ children, style={} }) {
   return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
 }
 function CardHead({ icon, title, tag, tagColor, accent }) {
-  const tc = tagColor||'#C0392B'
+  const tc=tagColor||'#C0392B'
   return (
     <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#C0392B'}` }}>
       <span style={{ fontSize:15 }}>{icon}</span>
       <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{title}</span>
-      {tag && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(tc.slice(1,3),16)},${parseInt(tc.slice(3,5),16)},${parseInt(tc.slice(5,7),16)},0.15)`, color:tc, textTransform:'uppercase' }}>{tag}</span>}
+      {tag && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(tc,0.15), color:tc, textTransform:'uppercase' }}>{tag}</span>}
     </div>
   )
 }
 function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
-  return (
-    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
-  )
+  return <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
 }
 function Sel({ label, value, onChange, options }) {
   return (
     <div>
       <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>{label}</label>
       <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-        {options.map(o => <option key={o}>{o}</option>)}
+        {options.map(o=><option key={o}>{o}</option>)}
       </select>
     </div>
   )
 }
 function Shimmer() {
-  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', borderRadius:0, margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
+  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
 }
 function ErrBox({ msg }) {
-  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
+  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96' }}>Error: {msg}</div>
+}
+
+// ─── WEATHER HOOK ─────────────────────────────────────────────────────────────
+function useWeather(location) {
+  const [weather, setWeather] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!location) return
+    setLoading(true)
+    // Use Open-Meteo (free, no key required) with geocoding
+    const fetchWeather = async () => {
+      try {
+        // Geocode location name to lat/lon
+        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`)
+        const geoData = await geoRes.json()
+        if (!geoData.results?.length) return
+        const { latitude, longitude, name, admin1 } = geoData.results[0]
+        const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,precipitation&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`)
+        const wxData = await wxRes.json()
+        const c = wxData.current
+        setWeather({ temp: Math.round(c.temperature_2m), code: c.weather_code, wind: Math.round(c.wind_speed_10m), precip: c.precipitation, city: name, state: admin1 })
+      } catch(e) { console.error('Weather fetch failed:', e) }
+      setLoading(false)
+    }
+    fetchWeather()
+  }, [location])
+
+  return { weather, loading }
+}
+
+function weatherDesc(code) {
+  if (!code && code !== 0) return 'Unknown'
+  if (code === 0) return 'Clear'
+  if (code <= 3) return 'Partly Cloudy'
+  if (code <= 49) return 'Foggy'
+  if (code <= 69) return 'Rainy'
+  if (code <= 79) return 'Snowy'
+  if (code <= 99) return 'Thunderstorm'
+  return 'Unknown'
+}
+
+function weatherEmoji(code) {
+  if (!code && code !== 0) return '🌡️'
+  if (code === 0) return '☀️'
+  if (code <= 3) return '⛅'
+  if (code <= 49) return '🌫️'
+  if (code <= 69) return '🌧️'
+  if (code <= 79) return '❄️'
+  if (code <= 99) return '⛈️'
+  return '🌡️'
+}
+
+// ─── ROTATING INFO WIDGET ─────────────────────────────────────────────────────
+function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, al }) {
+  const [slot, setSlot] = useState(0)
+  const [now, setNow] = useState(new Date())
+  const { weather: homeWeather } = useWeather(homeLocation)
+  const { weather: awayWeather } = useWeather(awayLocation)
+  const SPORT_BALL = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
+
+  useEffect(() => {
+    const t = setInterval(() => setSlot(s => (s+1) % 4), 4000)
+    const tc = setInterval(() => setNow(new Date()), 60000)
+    return () => { clearInterval(t); clearInterval(tc) }
+  }, [])
+
+  const likelihood = homeWeather ? getGameLikelihood(sport, homeWeather.code, homeWeather.wind) : null
+
+  function getCountdown() {
+    if (!nextEvent?.date) return null
+    const diff = new Date(nextEvent.date) - now
+    if (diff < 0) return null
+    const days = Math.floor(diff / 86400000)
+    const hrs = Math.floor((diff % 86400000) / 3600000)
+    if (days > 0) return `${days}d ${hrs}h`
+    if (hrs > 0) return `${hrs}h`
+    return 'Today!'
+  }
+
+  const slots = [
+    // Slot 0: Home weather + game likelihood
+    homeWeather ? (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+        <div style={{ fontSize:16 }}>{weatherEmoji(homeWeather.code)}</div>
+        <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:15, color:'#f2f4f8', lineHeight:1 }}>{homeWeather.temp}°F</div>
+        <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center', lineHeight:1.2 }}>{homeWeather.city}</div>
+        {likelihood !== null && <div style={{ fontSize:8, color: likelihood > 70 ? '#4ade80' : likelihood > 40 ? '#f59e0b' : '#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{likelihood}% game on</div>}
+      </div>
+    ) : <div style={{ fontSize:18 }}>🌡️</div>,
+
+    // Slot 1: Away weather (if different location)
+    awayWeather && awayLocation !== homeLocation ? (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+        <div style={{ fontSize:16 }}>{weatherEmoji(awayWeather.code)}</div>
+        <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:15, color:'#f2f4f8', lineHeight:1 }}>{awayWeather.temp}°F</div>
+        <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center', lineHeight:1.2 }}>{awayWeather.city} (Away)</div>
+      </div>
+    ) : null,
+
+    // Slot 2: Next event countdown
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+      <div style={{ fontSize:14 }}>{nextEvent?.type==='practice'?'📋':'🏆'}</div>
+      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, lineHeight:1, textAlign:'center' }}>{getCountdown() || '—'}</div>
+      <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center', lineHeight:1.3, maxWidth:60 }}>{nextEvent ? nextEvent.opponent || nextEvent.type : 'No events'}</div>
+    </div>,
+
+    // Slot 3: Date/time
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+      <div style={{ fontSize:14 }}>📅</div>
+      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:'#f2f4f8', lineHeight:1 }}>{now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+      <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center' }}>{now.toLocaleDateString([],{month:'short',day:'numeric'})}</div>
+    </div>,
+  ].filter(Boolean)
+
+  const activeSlot = slots[slot % slots.length]
+
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+      <div style={{ fontSize:22, lineHeight:1, opacity:0.7 }}>{SPORT_BALL[sport]||'🏈'}</div>
+      <div style={{ minWidth:68, display:'flex', alignItems:'center', justifyContent:'center', animation:'fadeIn 0.4s ease' }} key={slot}>
+        {activeSlot}
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+        {slots.map((_,i) => <div key={i} style={{ width:3, height:3, borderRadius:'50%', background: i===slot%slots.length ? P : '#3d4559' }} />)}
+      </div>
+    </div>
+  )
+}
+
+
+// ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
+function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
+  const [mode, setMode] = useState('view')
+  const [expanded, setExpanded] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
+  const [error, setError] = useState('')
+
+  const sportTeams = teams[sport] || []
+  const current = activeTeam[sport]
+  const MAX_TEAMS = 5
+  const seasons = ['Fall 2025','Winter 2025','Spring 2026','Summer 2026','Fall 2026','Winter 2026','Spring 2027','Summer 2027','Year Round']
+  const sportEmoji = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
+  const currentMascot = MASCOTS.find(m=>m.id===current?.mascot) || null
+
+  function createTeam() {
+    if (!form.name.trim()) { setError('Team name is required'); return }
+    if (sportTeams.length >= MAX_TEAMS) { setError(`Max ${MAX_TEAMS} teams per sport`); return }
+    const newTeam = { id:Date.now(), name:form.name.trim(), season:form.season||'Season N/A', mascot:form.mascot, teamFont:form.teamFont, hometown:form.hometown.trim(), primary:form.primary, secondary:form.secondary, accent1:form.accent1, accent2:form.accent2, sport, players:[], schedule:[] }
+    const updated = { ...teams, [sport]:[...sportTeams, newTeam] }
+    setTeams(updated)
+    setActiveTeam(prev=>({...prev,[sport]:newTeam}))
+    setCfg(prev=>({...prev, primary:newTeam.primary, secondary:newTeam.secondary}))
+    setForm({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
+    setMode('view'); setError('')
+  }
+
+  function selectTeam(team) {
+    setActiveTeam(prev=>({...prev,[sport]:team}))
+    setCfg(prev=>({...prev, primary:team.primary, secondary:team.secondary}))
+    setExpanded(false)
+  }
+
+  function deselectTeam() {
+    setActiveTeam(prev=>({...prev,[sport]:null}))
+    setExpanded(false)
+  }
+
+  function confirmDelete(team) { setDeleteConfirm(team) }
+
+  function doDelete() {
+    if (!deleteConfirm) return
+    const updated = sportTeams.filter(t=>t.id!==deleteConfirm.id)
+    setTeams(prev=>({...prev,[sport]:updated}))
+    if (current?.id===deleteConfirm.id) {
+      const next = updated[0]||null
+      setActiveTeam(prev=>({...prev,[sport]:next}))
+      if (next) setCfg(prev=>({...prev, primary:next.primary, secondary:next.secondary}))
+    }
+    setDeleteConfirm(null)
+  }
+
+  return (
+    <>
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+          <div style={{ background:'#0f1219', border:'1px solid rgba(239,68,68,0.4)', borderRadius:8, padding:24, width:'100%', maxWidth:340 }}>
+            <div style={{ fontSize:24, textAlign:'center', marginBottom:10 }}>⚠️</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:18, color:'#f2f4f8', textAlign:'center', marginBottom:6 }}>Delete Team?</div>
+            <div style={{ fontSize:13, color:'#6b7a96', textAlign:'center', lineHeight:1.6, marginBottom:20 }}>This will permanently delete <span style={{ color:'#f2f4f8', fontWeight:600 }}>{deleteConfirm.name}</span> and all associated data. This cannot be undone.</div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={()=>setDeleteConfirm(null)} style={{ flex:1, padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>CANCEL</button>
+              <button onClick={doDelete} style={{ flex:1, padding:'11px', background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.5)', borderRadius:4, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>DELETE</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ marginTop:14 }}>
+        <div onClick={()=>setExpanded(e=>!e)} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
+          <span style={{ fontSize:16 }}>{current ? (MASCOTS.find(m=>m.id===current.mascot)?.emoji||sportEmoji[sport]) : sportEmoji[sport]}</span>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:current?(TEAM_FONTS.find(f=>f.id===current.teamFont)?.style||"'Barlow Condensed',sans-serif"):"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:current?15:13, letterSpacing:'0.5px', color:'#f2f4f8', textTransform:'uppercase' }}>
+              {current ? current.name : `No ${sport} Team Selected`}
+            </div>
+            {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
+            {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
+          </div>
+          {current && <div style={{ display:'flex', gap:3 }}>{[current.primary,current.secondary,current.accent1,current.accent2].filter(Boolean).map((c,i)=><div key={i} style={{ width:10, height:10, borderRadius:2, background:c }} />)}</div>}
+          <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded?'▲':'▼'}</span>
+        </div>
+
+        {expanded && (
+          <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
+
+            {/* Team list */}
+            {sportTeams.length>0 && mode==='view' && (
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
+                {sportTeams.map(team => {
+                  const mascot = MASCOTS.find(m=>m.id===team.mascot)
+                  const fontStyle = TEAM_FONTS.find(f=>f.id===team.teamFont)?.style||"'Barlow Condensed',sans-serif"
+                  return (
+                    <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:current?.id===team.id?al(P,0.1):'#161922', border:`1px solid ${current?.id===team.id?al(P,0.4):'#1e2330'}`, borderRadius:6, marginBottom:6 }}>
+                      <span style={{ fontSize:18, flexShrink:0 }}>{mascot?.emoji||'🏆'}</span>
+                      <div style={{ flex:1, cursor:'pointer' }} onClick={()=>selectTeam(team)}>
+                        <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
+                        <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?` · ${team.hometown}`:''}</div>
+                      </div>
+                      <div style={{ display:'flex', gap:3, flexShrink:0 }}>
+                        {[team.primary,team.secondary].map((c,i)=><div key={i} style={{ width:12,height:12,borderRadius:2,background:c }} />)}
+                      </div>
+                      {current?.id===team.id && (
+                        <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>DESELECT</button>
+                      )}
+                      {onOpenTeamTab && current?.id===team.id && (
+                        <button onClick={onOpenTeamTab} style={{ padding:'3px 7px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>OPEN →</button>
+                      )}
+                      <button onClick={()=>confirmDelete(team)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.7)', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Create form */}
+            {mode==='create' && (
+              <div style={{ animation:'fadeIn 0.2s ease' }}>
+                <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:12 }}>Create New Team</div>
+                {/* Name + Season */}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                  <div style={{ gridColumn:'1/-1' }}>
+                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
+                    <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={`e.g. Tolland Youth ${sport}`} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                  </div>
+                  <Sel label="Season" value={form.season||seasons[0]} onChange={v=>setForm(f=>({...f,season:v}))} options={seasons} />
+                  <div>
+                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Hometown / City</label>
+                    <input value={form.hometown} onChange={e=>setForm(f=>({...f,hometown:e.target.value}))} placeholder="e.g. Tolland, CT" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                  </div>
+                </div>
+
+                {/* Mascot picker */}
+                <div style={{ marginBottom:12 }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Mascot</label>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:4, maxHeight:120, overflowY:'auto', padding:4, background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
+                    {MASCOTS.map(m => (
+                      <div key={m.id} onClick={()=>setForm(f=>({...f,mascot:m.id}))} title={m.name} style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'6px 2px', borderRadius:4, background:form.mascot===m.id?al(P,0.2):'transparent', border:`1px solid ${form.mascot===m.id?P:'transparent'}`, cursor:'pointer', gap:1 }}>
+                        <span style={{ fontSize:18 }}>{m.emoji}</span>
+                        <span style={{ fontSize:6, color:'#6b7a96', textAlign:'center', lineHeight:1.1 }}>{m.name.slice(0,6)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {form.mascot && <div style={{ fontSize:11, color:P, marginTop:4, fontFamily:"'Barlow Condensed',sans-serif" }}>Selected: {MASCOTS.find(m=>m.id===form.mascot)?.emoji} {MASCOTS.find(m=>m.id===form.mascot)?.name}</div>}
+                </div>
+
+                {/* Font picker */}
+                <div style={{ marginBottom:12 }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Name Font</label>
+                  <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                    {TEAM_FONTS.map(tf => (
+                      <div key={tf.id} onClick={()=>setForm(f=>({...f,teamFont:tf.id}))} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', background:form.teamFont===tf.id?al(P,0.1):'#161922', border:`1px solid ${form.teamFont===tf.id?P:'#1e2330'}`, borderRadius:5, cursor:'pointer' }}>
+                        <span style={{ fontFamily:tf.style, fontSize:16, color:'#f2f4f8', flex:1 }}>{form.name||'Team Name'}</span>
+                        <span style={{ fontSize:9, color:'#6b7a96' }}>{tf.preview}</span>
+                        {form.teamFont===tf.id && <span style={{ fontSize:12, color:'#4ade80' }}>✓</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 4 color pickers */}
+                {[['primary','Primary'],['secondary','Secondary'],['accent1','Accent 1'],['accent2','Accent 2']].map(([key,label]) => (
+                  <div key={key} style={{ marginBottom:10 }}>
+                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>{label} Color</label>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <input type="color" value={form[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))} style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0, background:'none' }} />
+                      <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+                        {['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#f59e0b','#374151'].map(c => (
+                          <div key={c} onClick={()=>setForm(f=>({...f,[key]:c}))} style={{ width:22, height:22, borderRadius:3, background:c, border:`2px solid ${form[key]===c?'white':'transparent'}`, cursor:'pointer' }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Color preview */}
+                <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 25%,${form.secondary} 25%,${form.secondary} 50%,${form.accent1} 50%,${form.accent1} 75%,${form.accent2} 75%)`, marginBottom:12 }} />
+
+                {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
+                <div style={{ display:'flex', gap:8 }}>
+                  <button onClick={()=>{setMode('view');setError('')}} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                  <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
+                </div>
+              </div>
+            )}
+
+            {/* Add button */}
+            {mode==='view' && sportTeams.length<MAX_TEAMS && (
+              <button onClick={()=>setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+
+// ─── SCHEDULE SECTION ─────────────────────────────────────────────────────────
+function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
+  const [savedOpponents, setSavedOpponents] = useState([])
+
+  const schedule = team.schedule || []
+
+  function saveEvent() {
+    if (!form.date) return
+    const event = { id:Date.now(), ...form }
+    const updated = [...schedule, event].sort((a,b)=>new Date(a.date)-new Date(b.date))
+    updateTeam({ schedule: updated })
+    // Save opponent for reuse
+    if (form.opponent && !savedOpponents.includes(form.opponent)) {
+      setSavedOpponents(prev=>[...prev, form.opponent])
+    }
+    setForm({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
+    setShowAdd(false)
+  }
+
+  function removeEvent(id) {
+    updateTeam({ schedule: schedule.filter(e=>e.id!==id) })
+  }
+
+  function updateTeam(updates) {
+    setTeams(prev=>({ ...prev, [sport]: (prev[sport]||[]).map(t=>t.id===team.id ? {...t,...updates} : t) }))
+  }
+
+  const typeColors = { Game:P, Practice:'#4ade80', Scrimmage:'#f59e0b', Tournament:'#c084fc' }
+  const typeIcons = { Game:'🏆', Practice:'📋', Scrimmage:'⚡', Tournament:'🥇' }
+
+  const upcoming = schedule.filter(e=>new Date(e.date)>=new Date())
+  const past = schedule.filter(e=>new Date(e.date)<new Date())
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      <Card>
+        <CardHead icon="📅" title="Schedule" tag={`${upcoming.length} upcoming`} tagColor={P} accent={P} />
+        <div style={{ padding:14 }}>
+          {!showAdd ? (
+            <button onClick={()=>setShowAdd(true)} style={{ width:'100%', padding:'10px', background:al(P,0.1), border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', marginBottom:upcoming.length?12:0 }}>+ ADD EVENT</button>
+          ) : (
+            <div style={{ animation:'fadeIn 0.2s ease', marginBottom:12 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:10 }}>Add Event</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
+                <Sel label="Type" value={form.type} onChange={v=>setForm(f=>({...f,type:v}))} options={['Game','Practice','Scrimmage','Tournament']} />
+                <Sel label="Home / Away" value={form.homeAway} onChange={v=>setForm(f=>({...f,homeAway:v}))} options={['Home','Away','Neutral']} />
+                <div style={{ gridColumn:'1/-1' }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Opponent / Event Name</label>
+                  <input value={form.opponent} onChange={e=>setForm(f=>({...f,opponent:e.target.value}))} placeholder={form.type==='Practice'?'Practice session':'e.g. Westport Eagles'} list="saved-opps" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                  <datalist id="saved-opps">{savedOpponents.map(o=><option key={o} value={o}/>)}</datalist>
+                </div>
+                <div>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Date</label>
+                  <input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:`1px solid ${form.date?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Start Time</label>
+                  <input type="time" value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Arrival Time</label>
+                  <input type="time" value={form.arrivalTime} onChange={e=>setForm(f=>({...f,arrivalTime:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / City</label>
+                  <input value={form.location} onChange={e=>setForm(f=>({...f,location:e.target.value}))} placeholder={form.homeAway==='Home'?team.hometown||'Home field':'e.g. Westport, CT'} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div style={{ gridColumn:'1/-1' }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
+                  <input value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="e.g. Bring extra water, wear red jerseys" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={()=>setShowAdd(false)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                <button onClick={saveEvent} disabled={!form.date} style={{ flex:2, padding:'9px', background:form.date?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:form.date?'pointer':'not-allowed', letterSpacing:'1px' }}>SAVE EVENT</button>
+              </div>
+            </div>
+          )}
+
+          {upcoming.length===0 && !showAdd && (
+            <div style={{ textAlign:'center', padding:'16px 0', color:'#3d4559', fontSize:12 }}>No upcoming events — add your schedule above</div>
+          )}
+
+          {upcoming.map(event => {
+            const tc = typeColors[event.type]||P
+            return (
+              <div key={event.id} style={{ padding:'10px 12px', background:'#161922', border:`1px solid ${al(tc,0.25)}`, borderRadius:6, marginBottom:8, borderLeft:`3px solid ${tc}` }}>
+                <div style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
+                  <span style={{ fontSize:16, flexShrink:0 }}>{typeIcons[event.type]||'📅'}</span>
+                  <div style={{ flex:1 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{event.opponent||event.type}</div>
+                      <span style={{ fontSize:8, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} · {event.homeAway}</span>
+                    </div>
+                    <div style={{ fontSize:11, color:'#6b7a96', marginTop:2 }}>
+                      {new Date(event.date+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
+                      {event.time && ` · ${event.time}`}
+                      {event.arrivalTime && ` · Arrive ${event.arrivalTime}`}
+                    </div>
+                    {event.location && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>📍 {event.location}</div>}
+                    {event.notes && <div style={{ fontSize:10, color:'#3d4559', marginTop:1, fontStyle:'italic' }}>{event.notes}</div>}
+                  </div>
+                  <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, flexShrink:0 }}>×</button>
+                </div>
+              </div>
+            )
+          })}
+
+          {past.length>0 && (
+            <details style={{ marginTop:8 }}>
+              <summary style={{ fontSize:10, color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>PAST EVENTS ({past.length})</summary>
+              <div style={{ marginTop:6, opacity:0.5 }}>
+                {past.map(event => (
+                  <div key={event.id} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5, fontSize:11, color:'#6b7a96' }}>
+                    {typeIcons[event.type]} {event.opponent||event.type} · {new Date(event.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'})}
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+        </div>
+      </Card>
+    </div>
+  )
 }
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
@@ -2399,6 +2935,43 @@ function PrintSection({ team, P, S, al, callAI, sport }) {
       </Card>
     </div>
   )
+
+// ─── TEAM PAGE (updated with schedule tab) ────────────────────────────────────
+function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, brand }) {
+  const [section, setSection] = useState('roster')
+  const currentTeam = activeTeam[sport]
+
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Team management</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
+      </div>
+
+      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} />
+
+      {!currentTeam ? (
+        <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
+          <div style={{ fontSize:36, marginBottom:10 }}>🏆</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Team Selected</div>
+          <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Create or select a team above to access roster, schedule, practice plans, and printable sheets.</div>
+        </div>
+      ) : (
+        <>
+          <div style={{ display:'flex', gap:6, marginTop:14, marginBottom:14, overflowX:'auto', paddingBottom:2 }}>
+            {[['roster','👥 Roster'],['schedule','📅 Schedule'],['practice','📆 Practice'],['analytics','📊 Analytics'],['print','🖨 Print']].map(([s,lbl]) => (
+              <button key={s} onClick={()=>setSection(s)} style={{ flexShrink:0, padding:'8px 12px', borderRadius:4, fontSize:11, border:`1px solid ${section===s?P:'#1e2330'}`, background:section===s?al(P,0.15):'transparent', color:section===s?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
+            ))}
+          </div>
+          {section==='roster'   && <RosterSection team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
+          {section==='schedule' && <ScheduleSection team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
+          {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} schedule={currentTeam.schedule||[]} />}
+          {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} />}
+          {section==='print'    && <PrintSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} />}
+        </>
+      )}
+    </>
+  )
 }
 
 function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
@@ -2607,31 +3180,39 @@ function MorePage({ P, al, cfg, setCfg, brand, setBrand }) {
 }
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
+
+// ─── HOME PAGE ────────────────────────────────────────────────────────────────
 function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg, setPage }) {
   const [feed, setFeed] = useState(null)
   const [feedLoading, setFeedLoading] = useState(false)
   const [activeMode, setActiveMode] = useState('dashboard')
+  const currentTeam = activeTeam[sport]
+  const mascot = currentTeam ? MASCOTS.find(m=>m.id===currentTeam.mascot) : null
+  const teamFont = currentTeam ? (TEAM_FONTS.find(f=>f.id===currentTeam.teamFont)?.style || "'Barlow Condensed',sans-serif") : null
+
+  // Get next upcoming event for the current team
+  const nextEvent = currentTeam?.schedule?.filter(e=>new Date(e.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date))[0] || null
+  const awayLocation = nextEvent?.homeAway==='Away' && nextEvent?.location ? nextEvent.location : null
 
   useEffect(() => { if (!feed && !feedLoading) loadFeed() }, [sport])
 
   async function loadFeed() {
     setFeedLoading(true)
     try {
-      const raw = await callAI('You are a sports coaching knowledge curator. Generate a daily coaching feed for a youth '+sport+' coach. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      const raw = await callAI('Generate a daily coaching feed for a youth '+sport+' coach. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"2 sentences","source":"source"},{"type":"science","title":"Coaching Science","body":"2 sentences","source":"source"},{"type":"concept","title":"Concept Spotlight","body":"2 sentences","source":"source"}]}')
+      const s=raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setFeed(JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1)))
     } catch(e) { setFeed({ items:[] }) }
     setFeedLoading(false)
   }
 
   const feedTypeColor = t => t==='drill'?P:t==='science'?'#6b9fff':'#4ade80'
-  const currentTeam = activeTeam[sport]
 
   if (activeMode==='gauntlet') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
         <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
       </div>
       <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
     </>
@@ -2640,7 +3221,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
         <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Situational</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Situational</span>
       </div>
       <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
     </>
@@ -2648,50 +3229,67 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
 
   return (
     <>
-      {/* Header */}
-      <div style={{ padding:'16px 0 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
-          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>{lastName?`Coach ${lastName}`:'CoachIQ'}</div>
-        </div>
-        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Coach IQ</div></div>
-          <div style={{ width:1, height:28, background:'#1c2235' }} />
-          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div></div>
+      {/* Welcome hero card */}
+      <div style={{ marginTop:14, borderRadius:4, overflow:'hidden', border:`1px solid ${al(P,0.25)}`, position:'relative', minHeight:90, background: currentTeam ? `linear-gradient(135deg,${currentTeam.primary}22,${currentTeam.secondary||'#07090d'}44,#07090d)` : 'linear-gradient(135deg,#0f1219,#07090d)' }}>
+        {/* Mascot watermark */}
+        {mascot && (
+          <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:64, opacity:0.15, pointerEvents:'none', userSelect:'none', lineHeight:1 }}>{mascot.emoji}</div>
+        )}
+        <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background: currentTeam ? `linear-gradient(90deg,${currentTeam.primary},${currentTeam.secondary||P},${currentTeam.accent1||P},${currentTeam.accent2||P})` : `linear-gradient(90deg,${P},${S})` }} />
+        <div style={{ padding:'14px 16px', display:'flex', alignItems:'center', gap:12, position:'relative', zIndex:1 }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
+            <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#f2f4f8', lineHeight:1, marginBottom: currentTeam ? 4 : 0 }}>Coach {lastName||'—'}</div>
+            {currentTeam && (
+              <div style={{ fontFamily:teamFont, fontStyle:'italic', fontSize:14, color:currentTeam.primary, letterSpacing:'0.5px' }}>
+                {mascot?.emoji} {currentTeam.name}
+              </div>
+            )}
+            {currentTeam?.season && <div style={{ fontSize:10, color:'#3d4559', marginTop:2, fontFamily:"'Barlow Condensed',sans-serif" }}>{currentTeam.season}{currentTeam.hometown?` · ${currentTeam.hometown}`:''}</div>}
+          </div>
+          {/* Rotating info widget */}
+          <RotatingInfoWidget
+            sport={sport}
+            homeLocation={currentTeam?.hometown || null}
+            awayLocation={awayLocation}
+            nextEvent={nextEvent}
+            P={P}
+            al={al}
+          />
         </div>
       </div>
 
       {/* Live ticker */}
       <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
         <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
-        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):'CoachIQ — AI Coaching Intelligence · Schemes · Scout · Playbook · Team Management'}</div></div>
+        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):'CoachIQ — AI Coaching Intelligence · Schemes · Scout · Playbook · Team Management'}</div></div>
       </div>
 
-      {/* Team Manager */}
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} />
+      {/* Team Manager card */}
+      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setPage('team')} />
 
       {/* Scheme Generator card */}
       <div style={{ marginTop:10 }}>
-        <div onClick={()=>setPage('schemes')} style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', position:'relative', overflow:'hidden', cursor:'pointer' }}>
+        <div onClick={()=>setPage('schemes')} style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', cursor:'pointer', overflow:'hidden', position:'relative' }}>
           <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:10 }}>
             <div>
               <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, color:'#dde1f0', lineHeight:1, marginBottom:4 }}>Scheme Generator</div>
-              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:200 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — animated diagrams and coaching cues built in.</div>
+              <div style={{ fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:200 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — animated diagrams and coaching cues built in.</div>
             </div>
             <div style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)', flexShrink:0 }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN →</span></div>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-            <div style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative' }}>
+            <div onClick={e=>{e.stopPropagation();setPage('schemes')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative', cursor:'pointer' }}>
               <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE ›</div>
               <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="offense" P={P} /></div>
             </div>
-            <div style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative' }}>
+            <div onClick={e=>{e.stopPropagation();setPage('schemes')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative', cursor:'pointer' }}>
               <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE ›</div>
               <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="defense" P={P} /></div>
             </div>
           </div>
           <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-            {['AI Diagrams','Educator Mode','Pro Comparison','Huddle Cards','Variations'].map(tag => (<span key={tag} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 8px', background:'rgba(192,57,43,0.1)', borderLeft:'2px solid rgba(192,57,43,0.3)', color:'rgba(192,57,43,0.7)' }}>{tag}</span>))}
+            {['AI Diagrams','Educator Mode','Pro Comparison','Huddle Cards','Variations'].map(tag=><span key={tag} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 8px', background:'rgba(192,57,43,0.1)', borderLeft:'2px solid rgba(192,57,43,0.3)', color:'rgba(192,57,43,0.7)' }}>{tag}</span>)}
           </div>
         </div>
       </div>
@@ -2700,12 +3298,12 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
       <div style={{ marginTop:8, display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
         <div onClick={()=>setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>⚡</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Gauntlet</div></div>
-          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:6 }}>Test your coaching IQ with live AI scenarios</div>
+          <div style={{ fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:6 }}>Test your coaching IQ with live AI scenarios</div>
           <div style={{ display:'flex', alignItems:'baseline', gap:4 }}><span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>IQ</span></div>
         </div>
         <div onClick={()=>setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>🎯</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Situational</div></div>
-          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:6 }}>Real-time play calls by situation</div>
+          <div style={{ fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:6 }}>Real-time play calls by situation</div>
           <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700 }}>{sport==='Basketball'?'Live adjustments':sport==='Baseball'?'Count manager':'Live play caller'}</div>
         </div>
       </div>
@@ -2732,164 +3330,14 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   )
 }
 
-// ─── TEAM MANAGER CARD ─────────────────────────────────────────────────────────
-function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg }) {
-  const [mode, setMode] = useState('view') // view | create
-  const [expanded, setExpanded] = useState(false)
-  const [form, setForm] = useState({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
-  const [error, setError] = useState('')
 
-  const sportTeams = teams[sport] || []
-  const current = activeTeam[sport]
-  const MAX_TEAMS = 5
-
-  const colorOptions = {
-    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#E91E63','#FF6F00'],
-    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010','#0d2137','#3e0a1e','#1a1200'],
-  }
-
-  const seasons = ['Fall 2025','Winter 2025','Spring 2026','Summer 2026','Fall 2026','Winter 2026','Spring 2027','Summer 2027','Year Round']
-  const sportEmoji = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
-
-  function createTeam() {
-    if (!form.name.trim()) { setError('Team name is required'); return }
-    if (sportTeams.length >= MAX_TEAMS) { setError(`Max ${MAX_TEAMS} teams per sport`); return }
-    const newTeam = { id: Date.now(), name: form.name.trim(), season: form.season || 'Season N/A', primary: form.primary, secondary: form.secondary, sport, createdAt: Date.now() }
-    const updated = { ...teams, [sport]: [...sportTeams, newTeam] }
-    setTeams(updated)
-    setActiveTeam(prev => ({ ...prev, [sport]: newTeam }))
-    setCfg(prev => ({ ...prev, primary: newTeam.primary, secondary: newTeam.secondary }))
-    setForm({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
-    setMode('view')
-    setError('')
-  }
-
-  function selectTeam(team) {
-    setActiveTeam(prev => ({ ...prev, [sport]: team }))
-    setCfg(prev => ({ ...prev, primary: team.primary, secondary: team.secondary }))
-    setExpanded(false)
-  }
-
-  function deleteTeam(id) {
-    const updated = sportTeams.filter(t => t.id !== id)
-    setTeams(prev => ({ ...prev, [sport]: updated }))
-    if (current?.id === id) {
-      const next = updated[0] || null
-      setActiveTeam(prev => ({ ...prev, [sport]: next }))
-      if (next) setCfg(prev => ({ ...prev, primary: next.primary, secondary: next.secondary }))
-    }
-  }
-
-  const hasTeams = sportTeams.length > 0
-
-  return (
-    <div style={{ marginTop:14 }}>
-      {/* Header bar */}
-      <div
-        onClick={() => setExpanded(e => !e)}
-        style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${hasTeams ? al(P,0.3) : '#1e2330'}`, borderRadius: expanded ? '4px 4px 0 0' : 4, cursor:'pointer', borderLeft:`3px solid ${P}` }}
-      >
-        <span style={{ fontSize:16 }}>{sportEmoji[sport] || '🏆'}</span>
-        <div style={{ flex:1 }}>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'0.5px', color:'#f2f4f8', textTransform:'uppercase' }}>
-            {current ? current.name : `No ${sport} Team Selected`}
-          </div>
-          {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
-          {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
-        </div>
-        {current && (
-          <div style={{ display:'flex', gap:4 }}>
-            <div style={{ width:12, height:12, borderRadius:2, background:current.primary }} />
-            <div style={{ width:12, height:12, borderRadius:2, background:current.secondary }} />
-          </div>
-        )}
-        <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded ? '▲' : '▼'}</span>
-      </div>
-
-      {expanded && (
-        <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
-
-          {/* Existing teams list */}
-          {hasTeams && mode === 'view' && (
-            <div style={{ marginBottom:12 }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
-              {sportTeams.map(team => (
-                <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background: current?.id===team.id ? al(P,0.1) : '#161922', border:`1px solid ${current?.id===team.id ? al(P,0.4) : '#1e2330'}`, borderRadius:6, marginBottom:6 }}>
-                  <div style={{ display:'flex', gap:3, flexShrink:0 }}>
-                    <div style={{ width:14, height:14, borderRadius:2, background:team.primary }} />
-                    <div style={{ width:14, height:14, borderRadius:2, background:team.secondary }} />
-                  </div>
-                  <div style={{ flex:1, cursor:'pointer' }} onClick={() => selectTeam(team)}>
-                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{team.name}</div>
-                    <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}</div>
-                  </div>
-                  {current?.id === team.id && <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>ACTIVE</span>}
-                  <button onClick={() => deleteTeam(team.id)} style={{ background:'transparent', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.6)', fontSize:10, padding:'3px 7px', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Create team form */}
-          {mode === 'create' && (
-            <div style={{ animation:'fadeIn 0.2s ease' }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:10 }}>Create New Team</div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-                <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
-                  <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={`e.g. Tolland Youth ${sport}`} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-                <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Season</label>
-                  <select value={form.season} onChange={e=>setForm(f=>({...f,season:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:form.season?'#f2f4f8':'#6b7a96', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-                    <option value="">Select season...</option>
-                    {seasons.map(s => <option key={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div style={{ marginBottom:10 }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Primary Color</label>
-                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                  {colorOptions.primary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,primary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.primary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-                </div>
-              </div>
-              <div style={{ marginBottom:12 }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Secondary Color</label>
-                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                  {colorOptions.secondary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,secondary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.secondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-                </div>
-              </div>
-              {/* Color preview strip */}
-              <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 55%,${form.secondary} 55%)`, marginBottom:12 }} />
-              {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
-              <div style={{ display:'flex', gap:8 }}>
-                <button onClick={() => { setMode('view'); setError('') }} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CANCEL</button>
-                <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
-              </div>
-            </div>
-          )}
-
-          {/* Add team button */}
-          {mode === 'view' && sportTeams.length < MAX_TEAMS && (
-            <button onClick={() => setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-              <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
-            </button>
-          )}
-          {mode === 'view' && sportTeams.length >= MAX_TEAMS && (
-            <div style={{ fontSize:11, color:'#3d4559', textAlign:'center', padding:'8px 0' }}>Max {MAX_TEAMS} teams reached for {sport}</div>
-          )}
-        </div>
-      )}
-    </div>
-  )
 }
-
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function CoachIQ() {
   const [launched, setLaunched] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
-  const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
+  const [cfg, setCfg] = useState({ coach:'', primary:'#C0392B', secondary:'#002868' })
   const [brand, setBrand] = useState('Red — C+IQ colored')
   const [page, setPage] = useState('home')
   const [sport, setSport] = useState('Football')
@@ -2920,18 +3368,14 @@ export default function CoachIQ() {
   }
 
   function parseJSON(raw) {
-    const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-    const a = s.indexOf('{'), b = s.lastIndexOf('}')
+    const s=raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+    const a=s.indexOf('{'), b=s.lastIndexOf('}')
     if (a<0||b<=a) throw new Error('No JSON in response')
     return JSON.parse(s.slice(a,b+1))
   }
 
-  if (showSplash) return (
-    <SplashScreen onDone={(skip) => { setShowSplash(false); if (skip) setLaunched(true) }} alreadyAuthed={launched} brand={brand} />
-  )
-  if (!launched) return (
-    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} brand={brand} />
-  )
+  if (showSplash) return <SplashScreen onDone={(skip)=>{ setShowSplash(false); if(skip) setLaunched(true) }} alreadyAuthed={launched} brand={brand} />
+  if (!launched) return <Onboarding onLaunch={(c)=>{ setCfg(c); setLaunched(true) }} brand={brand} />
 
   const NAV = [
     { id:'home',    icon:'🏠', label:'HOME' },
@@ -2939,6 +3383,7 @@ export default function CoachIQ() {
     { id:'team',    icon:'🏆', label:'TEAM' },
     { id:'playbook',icon:'📖', label:'PLAYBOOK' },
     { id:'scout',   icon:'🔍', label:'SCOUT' },
+    { id:'more',    icon:'⋯',  label:'MORE' },
   ]
 
   return (
@@ -2962,19 +3407,22 @@ export default function CoachIQ() {
 
         {/* TOP BAR */}
         <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%,${S} 55%)` }} />
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P},${S})` }} />
           <CoachIQLogo size={22} brand={brand} />
-          {/* Sport dropdown */}
           <div style={{ position:'relative', marginLeft:4 }}>
             <select value={sport} onChange={e=>setSport(e.target.value)} style={{ background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'4px 28px 4px 8px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'0.5px', outline:'none', appearance:'none', cursor:'pointer' }}>
-              {ALL_SPORTS.map(s => <option key={s} value={s}>{SPORT_ICONS[s]} {s}</option>)}
+              {ALL_SPORTS.map(s=><option key={s} value={s}>{SPORT_ICONS[s]} {s}</option>)}
             </select>
             <span style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:4, background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:2, padding:'3px 8px', marginLeft:'auto' }}>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1 }}>IQ</span>
-            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, lineHeight:1 }}>{iq}</span>
-          </div>
+          {/* Top right: active team accent strip */}
+          {currentTeam && (
+            <div style={{ display:'flex', alignItems:'center', gap:4, marginLeft:'auto', background:al(P,0.1), border:`1px solid ${al(P,0.25)}`, borderRadius:3, padding:'3px 8px' }}>
+              <span style={{ fontSize:12 }}>{MASCOTS.find(m=>m.id===currentTeam.mascot)?.emoji||'🏆'}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{currentTeam.name}</span>
+            </div>
+          )}
+          {!currentTeam && <div style={{ marginLeft:'auto' }} />}
         </div>
 
         {/* CONTENT */}
@@ -2990,18 +3438,12 @@ export default function CoachIQ() {
         {/* BOTTOM NAV */}
         <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
           {NAV.map(({ id, icon, label }) => (
-            <button key={id} onClick={()=>setPage(id)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 2px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
+            <button key={id} onClick={()=>setPage(id)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 1px 6px', cursor:'pointer', gap:1, background:'none', border:'none', position:'relative' }}>
               {page===id && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:P }} />}
-              <span style={{ fontSize:13, color:page===id?P:'#3d4559' }}>{icon}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page===id?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
+              <span style={{ fontSize:12, color:page===id?P:'#3d4559' }}>{icon}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page===id?P:'#3d4559', fontWeight:700, letterSpacing:'0.5px', textTransform:'uppercase' }}>{label}</span>
             </button>
           ))}
-          {/* Settings via More — hidden nav item */}
-          <button onClick={()=>setPage('more')} style={{ padding:'8px 10px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', display:'flex', flexDirection:'column', alignItems:'center' }}>
-            {page==='more' && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:P }} />}
-            <span style={{ fontSize:13, color:page==='more'?P:'#3d4559' }}>⋯</span>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page==='more'?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>MORE</span>
-          </button>
         </div>
       </div>
     </>
