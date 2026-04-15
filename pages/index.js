@@ -189,7 +189,7 @@ function Sel({ label, value, onChange, options }) {
   return (
     <div>
       <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>{label}</label>
-      <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+      <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none', WebkitAppearance:'none', colorScheme:'dark' }}>
         {options.map(o => <option key={o}>{o}</option>)}
       </select>
     </div>
@@ -201,6 +201,58 @@ function Shimmer() {
 function ErrBox({ msg }) {
   return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
 }
+
+// ─── FOOTBALL HOLE NUMBER DIAGRAM ─────────────────────────────────────────────
+function FootballHoleDiagram({ P }) {
+  return (
+    <div style={{ background:'#0f1117', borderRadius:6, padding:'10px 8px', marginTop:6 }}>
+      <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:6 }}>Hole Number Reference</div>
+      <svg viewBox="0 0 280 80" style={{ width:'100%', maxWidth:280 }}>
+        {/* Field line */}
+        <line x1="10" y1="48" x2="270" y2="48" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="4,3"/>
+        {/* OL positions */}
+        {[
+          { x:80,  label:'LT' },
+          { x:105, label:'LG' },
+          { x:130, label:'C'  },
+          { x:155, label:'RG' },
+          { x:180, label:'RT' },
+        ].map(pos => (
+          <g key={pos.label}>
+            <rect x={pos.x-10} y={38} width={20} height={20} rx={2} fill={P} opacity={0.85} />
+            <text x={pos.x} y={52} textAnchor="middle" fill="white" fontSize={9} fontWeight="700" fontFamily="sans-serif">{pos.label}</text>
+          </g>
+        ))}
+        {/* QB */}
+        <circle cx={130} cy={68} r={9} fill={P} opacity={0.7} />
+        <text x={130} y={72} textAnchor="middle" fill="white" fontSize={8} fontWeight="700" fontFamily="sans-serif">QB</text>
+        {/* Hole numbers — between linemen */}
+        {[
+          { x:15,  n:'1', side:'L', color:'#4ade80' },
+          { x:57,  n:'3', side:'L', color:'#4ade80' },
+          { x:92,  n:'5', side:'L', color:'#4ade80' },
+          { x:117, n:'1', side:'L', color:'#4ade80' },
+          { x:142, n:'0', side:'',  color:'#f59e0b' },
+          { x:167, n:'2', side:'R', color:'#6b9fff' },
+          { x:192, n:'4', side:'R', color:'#6b9fff' },
+          { x:217, n:'6', side:'R', color:'#6b9fff' },
+          { x:255, n:'8', side:'R', color:'#6b9fff' },
+        ].map((h, i) => (
+          <g key={i}>
+            <circle cx={h.x} cy={20} r={10} fill={h.color} opacity={0.2} />
+            <text x={h.x} y={24} textAnchor="middle" fill={h.color} fontSize={11} fontWeight="900" fontFamily="sans-serif">{h.n}</text>
+          </g>
+        ))}
+        {/* Labels */}
+        <text x={50} y={12} textAnchor="middle" fill="#4ade80" fontSize={7} fontFamily="sans-serif" opacity={0.8}>ODD = LEFT</text>
+        <text x={220} y={12} textAnchor="middle" fill="#6b9fff" fontSize={7} fontFamily="sans-serif" opacity={0.8}>EVEN = RIGHT</text>
+        <text x={142} y={12} textAnchor="middle" fill="#f59e0b" fontSize={7} fontFamily="sans-serif" opacity={0.8}>0=QB SNEAK</text>
+      </svg>
+      <div style={{ fontSize:9, color:'#3d4559', marginTop:4, lineHeight:1.5 }}>Odd numbers run left, even numbers run right. The number tells the ball carrier which gap to hit.</div>
+    </div>
+  )
+}
+
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
   const [expanded, setExpanded] = useState(false)
@@ -261,7 +313,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
       const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
       const league = isBB ? 'NBA' : isBSB ? 'MLB' : 'NFL'
       const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
-      const raw = await callAI('You are an expert ' + sportName + ' analyst. A youth coach is running: "' + play.name + '" (' + play.type + '). ' + play.note + ' Find the closest real ' + league + ' equivalent. Return ONLY valid JSON: {"proPlay":"exact name","proTeam":"team most known for it","famousExample":"specific famous game moment","whatMatches":"what the youth version gets right","keyDifference":"main tactical difference","proTip":"one thing pros do that youth can develop toward","watchFor":"YouTube search term"}')
+      const raw = await callAI('You are an expert ' + sportName + ' analyst. A youth coach is running: "' + play.name + '" (' + play.type + '). ' + play.note + ' Find the closest real ' + league + ' equivalent. If there is no perfect match, explain exactly why it differs. Return ONLY valid JSON: {"proPlay":"exact name or closest equivalent","proTeam":"team most known for it","famousExample":"specific famous game moment","whatMatches":"what the youth version gets right","keyDifference":"the most important tactical difference between this play and the pro version","gapExplanation":"explain specifically what the youth coach would need to change or develop to run the true pro version — be honest if it cannot be replicated at youth level","proTip":"one concrete thing to develop toward the pro version","watchFor":"YouTube search term"}')
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setNflComp(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
       setShowNfl(true)
@@ -300,6 +352,9 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
             <div style={{ marginTop:5, padding:'5px 8px', background:`rgba(${parseInt(P.slice(1,3),16)||192},${parseInt(P.slice(3,5),16)||57},${parseInt(P.slice(5,7),16)||43},0.08)`, borderRadius:4, borderLeft:`2px solid ${P}` }}>
               <div style={{ fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:2 }}>Why this name?</div>
               <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.nameExplanation}</div>
+              {(play.type||'').includes('RUN') && /\b[0-9]+\b/.test(play.nameExplanation||play.name||'') && (
+                <FootballHoleDiagram P={P} />
+              )}
             </div>
           )}
           <div style={{ fontSize:10, color:P, marginTop:4 }}>{expanded ? '▲ Tap to collapse' : '▼ Tap to expand breakdown + diagram'}</div>
@@ -386,7 +441,8 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
                   <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:4 }}>What Matches</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.whatMatches}</div></div>
                   <div style={{ padding:'8px 10px', background:'rgba(208,2,27,0.06)', borderRadius:8, border:'1px solid rgba(208,2,27,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#ff6b6b', fontWeight:700, marginBottom:4 }}>Key Difference</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.keyDifference}</div></div>
                 </div>
-                {nflComp.proTip && (<div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)', marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:4 }}>Pro Tip</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.proTip}</div></div>)}
+                {nflComp.gapExplanation && (<div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.07)', borderRadius:8, border:'1px solid rgba(239,68,68,0.2)', marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f87171', fontWeight:700, marginBottom:4 }}>The Gap — What Needs to Change</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.gapExplanation}</div></div>)}
+                {nflComp.proTip && (<div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)', marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:4 }}>One Thing to Work Toward</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.proTip}</div></div>)}
                 {nflComp.watchFor && (<div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.3)', borderRadius:8, display:'flex', alignItems:'center', gap:8 }}><span style={{ fontSize:16 }}>▶</span><div><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:2 }}>Search on YouTube</div><div style={{ fontSize:12, color:'#f59e0b', fontWeight:600 }}>{nflComp.watchFor}</div></div></div>)}
               </div>
             )}
@@ -2418,7 +2474,9 @@ export default function CoachIQ() {
           * { box-sizing:border-box; margin:0; padding:0; }
           ::-webkit-scrollbar { width:4px; }
           ::-webkit-scrollbar-thumb { background:#1e2330; border-radius:0; }
-          select option { background:#161922; }
+          select, select option { background:#161922 !important; color:#f2f4f8 !important; }
+          select:focus { outline:none !important; box-shadow:none !important; }
+          select option:checked { background:#1e2330 !important; }
           @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
           @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
           @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -2556,6 +2614,9 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
 
 function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
   const [plans, setPlans] = useState([])
+  function setPlanLinked(planId, evtId) {
+    setPlans(prev => prev.map(p => p.id===planId ? {...p,_linkedTo:evtId} : p))
+  }
   const [generating, setGenerating] = useState(false)
   const [planForm, setPlanForm] = useState({ focus:'', duration:'90 minutes', intensity:'Medium', opponent:'', date:'' })
   const [showForm, setShowForm] = useState(false)
@@ -2620,6 +2681,13 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase' }}>{plan.title}</div>
               <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{plan.date} · {plan.duration}</div>
             </div>
+            {!plan._linkedTo && (team.schedule||[]).filter(e=>e.type==='Practice').length > 0 && (
+              <select onChange={e=>{ if(e.target.value) setPlanLinked(plan.id, parseInt(e.target.value)) }} style={{ fontSize:10, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, padding:'3px 6px', cursor:'pointer', colorScheme:'dark', maxWidth:130 }}>
+                <option value="">Link to practice...</option>
+                {(team.schedule||[]).filter(e=>e.type==='Practice').map(e=><option key={e.id} value={e.id}>{new Date(e.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'})}{e.time?' '+e.time:''}</option>)}
+              </select>
+            )}
+            {plan._linkedTo && <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>✓ LINKED</span>}
           </div>
           <div style={{ padding:14 }}>
             {plan.warmup && <div style={{ padding:'8px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Warmup — {plan.warmup.time}</div>{(plan.warmup.activities||[]).map((a,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:2 }}>• {a}</div>)}</div>}
@@ -2971,6 +3039,105 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
 }
 
 
+// ─── ADDRESS SEARCH ───────────────────────────────────────────────────────────
+function AddressSearch({ value, onChange, placeholder, P, al }) {
+  const [query, setQuery] = useState(value || '')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const timerRef = useRef(null)
+  const wrapRef = useRef(null)
+
+  // Close on outside click
+  useEffect(() => {
+    function handle(e) { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [])
+
+  // Sync if parent value changes
+  useEffect(() => { if (value !== query) setQuery(value || '') }, [value])
+
+  function search(q) {
+    setQuery(q)
+    if (!q.trim() || q.length < 3) { setResults([]); setOpen(false); return }
+    clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const res = await fetch(
+          'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=' + encodeURIComponent(q),
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        const data = await res.json()
+        setResults(data || [])
+        setOpen(data && data.length > 0)
+      } catch(e) { setResults([]) }
+      setLoading(false)
+    }, 400)
+  }
+
+  function select(item) {
+    const addr = item.address || {}
+    // Build a clean display string
+    const parts = []
+    if (item.name && !item.display_name.startsWith(item.name + ',')) parts.push(item.name)
+    if (addr.road) parts.push(addr.road)
+    if (addr.house_number) parts[parts.length-1] = addr.house_number + ' ' + (addr.road || '')
+    const city = addr.city || addr.town || addr.village || addr.county || ''
+    const state = addr.state || ''
+    const zip = addr.postcode || ''
+    const cityLine = [city, state, zip].filter(Boolean).join(', ')
+    const full = parts.length ? parts.join(', ') + (cityLine ? ', ' + cityLine : '') : item.display_name.split(',').slice(0,4).join(',').trim()
+    setQuery(full)
+    onChange(full)
+    setResults([])
+    setOpen(false)
+  }
+
+  return (
+    <div ref={wrapRef} style={{ position:'relative' }}>
+      <div style={{ position:'relative' }}>
+        <input
+          value={query}
+          onChange={e => search(e.target.value)}
+          onFocus={() => results.length > 0 && setOpen(true)}
+          placeholder={placeholder || 'Search address or venue...'}
+          style={{ width:'100%', background:'#161922', border:`1px solid ${query ? al(P,0.5) : '#1e2330'}`, borderRadius:4, padding:'9px 36px 9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }}
+        />
+        {loading ? (
+          <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', width:14, height:14, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.7s linear infinite' }} />
+        ) : (
+          <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:14, opacity:0.4 }}>📍</span>
+        )}
+      </div>
+      {open && results.length > 0 && (
+        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:'0 0 6px 6px', zIndex:100, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.6)' }}>
+          {results.map((item, i) => {
+            const addr = item.address || {}
+            const city = addr.city || addr.town || addr.village || ''
+            const state = addr.state || ''
+            const mainText = item.name || item.display_name.split(',')[0]
+            const subText = [city, state].filter(Boolean).join(', ')
+            return (
+              <div key={i} onMouseDown={()=>select(item)} style={{ padding:'9px 12px', borderBottom:i<results.length-1?'1px solid #1e2330':'none', cursor:'pointer', display:'flex', alignItems:'flex-start', gap:8 }}
+                onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'}
+                onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                <span style={{ fontSize:13, flexShrink:0, marginTop:1 }}>📍</span>
+                <div>
+                  <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.3 }}>{mainText}</div>
+                  {subText && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{subText}</div>}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 // ─── SCHEDULE SECTION ─────────────────────────────────────────────────────────
 function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
   const [showAdd, setShowAdd] = useState(false)
@@ -3035,8 +3202,14 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
                 <input type="time" value={form.arrivalTime} onChange={e=>setForm(f=>({...f,arrivalTime:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
               </div>
               <div>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / City</label>
-                <input value={form.location} onChange={e=>setForm(f=>({...f,location:e.target.value}))} placeholder={form.homeAway==='Home' ? (team.hometown||'Home field') : 'e.g. Westport, CT'} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / Address</label>
+                <AddressSearch
+                  value={form.location}
+                  onChange={v=>setForm(f=>({...f,location:v}))}
+                  placeholder={form.homeAway==='Home' ? (team.hometown||'Search home field address...') : 'Search away venue address...'}
+                  P={P}
+                  al={al}
+                />
               </div>
               <div style={{ gridColumn:'1/-1' }}>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
