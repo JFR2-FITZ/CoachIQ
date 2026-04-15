@@ -63,57 +63,66 @@ export default function CoachIQ() {
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
   if (!launched) return (
-    <Onboarding onLaunch={(c) => { setCfg(c); setLaunched(true) }} />
+    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} />
   )
 
   return (
     <>
       <Head><title>CoachIQ</title></Head>
-      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#080a0e', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
+      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@400;600;700&family=Big+Shoulders+Display:wght@500;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
           * { box-sizing: border-box; margin: 0; padding: 0; }
           ::-webkit-scrollbar { width: 4px; }
-          ::-webkit-scrollbar-thumb { background: #1e2330; border-radius: 2px; }
+          ::-webkit-scrollbar-thumb { background: #1e2330; border-radius: 0; }
           select option { background: #161922; }
           @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
           @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
           @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+          @keyframes ticker { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+          @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
+          @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
+          @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
+          @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
+          @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
+          @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
+          @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
         `}</style>
 
-        {/* TOPBAR - sport color aware */}
-        <div style={{ background:'#0d1117', borderBottom:`1px solid ${al(P,0.25)}`, padding:'10px 16px', display:'flex', alignItems:'center', gap:10, position:'relative' }}>
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P},${al(P,0.2)})` }} />
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, letterSpacing:2, color:P }}>CoachIQ</div>
-          <div style={{ fontSize:11, fontWeight:600, color:'#6b7a96', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{cfg.team}</div>
-          <div style={{ display:'flex', gap:3 }}>
+        {/* TOPBAR */}
+        <div style={{ background:'#07090d', borderBottom:`1px solid #0e1220`, padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%, ${cfg.secondary || '#002868'} 55%)` }} />
+          {/* Sacramento logo - tight letter-spacing */}
+          <div style={{ fontFamily:"'Sacramento',cursive", fontSize:22, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
+            <span style={{ color:P }}>C</span><span style={{ color:'#dde1f0' }}>oach</span><span style={{ color:P }}>IQ</span>
+          </div>
+          <div style={{ display:'flex', gap:3, marginLeft:2 }}>
             {[['FB','Football','🏈'],['BB','Basketball','🏀'],['BSB','Baseball','⚾']].map(([lbl,s,ico]) => (
-              <button key={lbl} onClick={() => setSport(s)} style={{ padding:'3px 8px', borderRadius:20, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3 }}>
-                <span style={{ fontSize:10 }}>{ico}</span><span style={{ fontFamily:"'Bebas Neue',sans-serif", letterSpacing:0.5 }}>{lbl}</span>
+              <button key={lbl} onClick={() => setSport(s)} style={{ padding:'3px 8px', borderRadius:2, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
+                <span style={{ fontSize:10 }}>{ico}</span><span>{lbl}</span>
               </button>
             ))}
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:4, background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:20, padding:'3px 10px' }}>
-            <span style={{ fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
-            <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, color:P, letterSpacing:1 }}>{iq}</span>
+          <div style={{ display:'flex', alignItems:'center', gap:4, background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:2, padding:'3px 8px', marginLeft:'auto' }}>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
+            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
           </div>
         </div>
 
         {/* CONTENT */}
         <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
           <div style={{ display: page==='home' ? 'contents' : 'none' }}><HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} sportColors={SPORT_COLORS} schemes={schemes} iq={iq} gauntlets={gauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} playbook={playbook} setPlaybook={setPlaybook} schemeResult={schemeResult} setSchemeResult={setSchemeResult} schemeFields={schemeFields} setSchemeFields={setSchemeFields} schemeSport={schemeSport} setSchemeSport={setSchemeSport} genHistory={genHistory} setGenHistory={setGenHistory} /></div>
-          <div style={{ display: page==='gauntlet' ? 'contents' : 'none' }}><GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} /></div>
-          <div style={{ display: page==='film' ? 'contents' : 'none' }}><FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
+          <div style={{ display: page==='playbook' ? 'contents' : 'none' }}><PlaybookPage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
           <div style={{ display: page==='more' ? 'contents' : 'none' }}><MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
         </div>
 
-        {/* BOTTOM NAV */}
-        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#0f1117', borderTop:`2px solid ${P}`, display:'flex', zIndex:50 }}>
-          {[['home','H','Home'],['gauntlet','G','Gauntlet'],['film','F','Film'],['more','M','More']].map(([p,ico,lbl]) => (
-            <button key={p} onClick={() => setPage(p)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'9px 4px 5px', cursor:'pointer', gap:3, background:'none', border:'none', position:'relative' }}>
-              <span style={{ fontSize:17, color:page===p?P:'#3d4559' }}>{ico}</span>
-              <span style={{ fontSize:9, color:page===p?P:'#3d4559', fontWeight:600, letterSpacing:0.5, textTransform:'uppercase', fontFamily:'inherit' }}>{lbl}</span>
-              {p==='gauntlet' && <div style={{ position:'absolute', top:6, right:'calc(50% - 14px)', width:6, height:6, background:P, borderRadius:'50%', border:'1.5px solid #0f1117' }} />}
+        {/* BOTTOM NAV - 3 tabs, sharp corners, active line above icon */}
+        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
+          {[['home','🏠','HOME'],['playbook','📖','PLAYBOOK'],['more','⋯','MORE']].map(([p,ico,lbl]) => (
+            <button key={p} onClick={() => setPage(p)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
+              {page===p && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:32, height:2, background:P }} />}
+              <span style={{ fontSize:16, color:page===p?P:'#3d4559' }}>{ico}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:page===p?P:'#3d4559', fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>{lbl}</span>
             </button>
           ))}
         </div>
@@ -124,68 +133,290 @@ export default function CoachIQ() {
 
 // -- ONBOARDING --
 function Onboarding({ onLaunch }) {
-  const [coach, setCoach] = useState('Coach Regisford')
-  const [team, setTeam] = useState('Tolland Youth Football')
-  const [primary, setPrimary] = useState('#D0021B')
-  const [secondary, setSecondary] = useState('#002868')
-  const PP = ['#D0021B','#E8460C','#FF6B00','#1a7a3c','#0066CC','#8B0014','#C8A400','#4a0080']
-  const SP = ['#002868','#1a3a6b','#0a4d2e','#3a0060','#1a1a1a','#5c3a00','#004d40','#6b0010']
-  const inp = { width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:14, outline:'none', marginBottom:12 }
-  return (
-    <div style={{ minHeight:'100vh', background:'#080a0e', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:20, fontFamily:"'DM Sans',system-ui,sans-serif", color:'#f2f4f8' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap'); *{box-sizing:border-box}`}</style>
-      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:48, letterSpacing:4, color:primary, marginBottom:6 }}>CoachIQ</div>
-      <div style={{ fontSize:11, color:'#6b7a96', letterSpacing:3, textTransform:'uppercase', marginBottom:28 }}>AI Coaching Intelligence Platform</div>
-      <div style={{ width:'100%', maxWidth:380, background:'#0f1117', border:'1px solid #1e2330', borderRadius:16, padding:24 }}>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, letterSpacing:1.5, marginBottom:4 }}>Build Your Experience</div>
-        <div style={{ fontSize:12, color:'#6b7a96', marginBottom:18, lineHeight:1.5 }}>Your team colors theme the entire app.</div>
-        <label style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Coach Name</label>
-        <input value={coach} onChange={e=>setCoach(e.target.value)} style={inp} />
-        <label style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Team Name</label>
-        <input value={team} onChange={e=>setTeam(e.target.value)} style={inp} />
-        {[[primary,setPrimary,PP,'Primary'],[secondary,setSecondary,SP,'Secondary']].map(([val,set,presets,lbl]) => (
-          <div key={lbl} style={{ marginBottom:14 }}>
-            <label style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:5, display:'block' }}>{lbl} Color</label>
-            <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-              <div style={{ position:'relative', flexShrink:0 }}>
-                <div style={{ width:34, height:34, borderRadius:8, border:'2px solid white', background:val }} />
-                <input type="color" value={val} onChange={e=>set(e.target.value)} style={{ position:'absolute', inset:0, opacity:0, cursor:'pointer', width:'100%', height:'100%' }} />
-              </div>
-              <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                {presets.map(c => <div key={c} onClick={()=>set(c)} style={{ width:26, height:26, borderRadius:6, cursor:'pointer', border:val===c?'2px solid white':'2px solid transparent', background:c }} />)}
+  // AUTH FLOW: 'signin' | 'signup' | 'teams' | 'createTeam'
+  const [screen, setScreen] = useState('signin')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [coachName, setCoachName] = useState('')
+  // Team creation state
+  const [teamSport, setTeamSport] = useState('Football')
+  const [teamName, setTeamName] = useState('')
+  const [teamPrimary, setTeamPrimary] = useState('#C0392B')
+  const [teamSecondary, setTeamSecondary] = useState('#002868')
+  // Simulated saved teams (in real app, fetched from backend)
+  const [teams, setTeams] = useState([
+    { sport: 'Football', name: 'Tolland Youth Football', primary: '#C0392B', secondary: '#002868', coach: 'Coach Regisford', iq: 847, packages: 3 }
+  ])
+
+  const sportMeta = {
+    Football: { emoji: '🏈', grad: ['#6b0000','#C0392B'], label: 'Football' },
+    Basketball: { emoji: '🏀', grad: ['#7a3000','#D4600A'], label: 'Basketball' },
+    Baseball: { emoji: '⚾', grad: ['#0a2a0a','#1B5E20'], label: 'Baseball' },
+  }
+
+  const colorOptions = {
+    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
+    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010'],
+  }
+
+  // ⚡ TEST MODE: tap sign in button skips auth entirely
+  // TODO: Remove bypass before launch — force real email/password validation
+  function handleSignIn() {
+    setScreen('teams')
+  }
+
+  function handleCreateTeam() {
+    if (!teamName.trim()) return
+    const newTeam = { sport: teamSport, name: teamName, primary: teamPrimary, secondary: teamSecondary, coach: coachName || 'Coach', iq: 500, packages: 0 }
+    setTeams(prev => [...prev, newTeam])
+    setScreen('teams')
+    setTeamName('')
+  }
+
+  function enterTeam(team) {
+    onLaunch({ coach: team.coach || 'Coach Regisford', team: team.name, primary: team.primary, secondary: team.secondary, sport: team.sport })
+  }
+
+  const S = {
+    bg: '#07090d',
+    surface: '#0d1117',
+    card: '#0f1219',
+    border: '#1e2330',
+    text: '#f2f4f8',
+    muted: '#6b7a96',
+    dim: '#3d4559',
+    red: '#C0392B',
+  }
+
+  // Shared Sacramento logo component
+  const Logo = ({ size=42 }) => (
+    <div style={{ fontFamily:"'Sacramento',cursive", fontSize:size, letterSpacing:'-1px', lineHeight:1, whiteSpace:'nowrap' }}>
+      <span style={{ color:S.red }}>C</span><span style={{ color:'#dde1f0' }}>oach</span><span style={{ color:S.red }}>IQ</span>
+    </div>
+  )
+
+  // Shared angular button style
+  const BtnRed = { width:'100%', background:S.red, border:'none', borderRadius:4, padding:'13px', fontSize:13, fontWeight:700, color:'white', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'2px', textTransform:'uppercase', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }
+  const BtnGhost = { width:'100%', background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'12px', fontSize:12, color:S.text, cursor:'pointer', fontFamily:"'DM Sans',sans-serif" }
+
+  // ── SPLASH / SIGN IN ─────────────────────────────────────────────────────
+  if (screen === 'signin') return (
+    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif", position:'relative', overflow:'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
+        * { box-sizing:border-box; margin:0; padding:0; }
+        @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
+        @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
+        @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
+        @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
+        @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
+        @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
+        @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
+      `}</style>
+
+      {/* Animated floating sport balls */}
+      <div style={{ position:'absolute', left:'-5%', top:'8%', animation:'float1 7s ease-in-out infinite', opacity:0.1, zIndex:0 }}>
+        <svg width="88" height="56" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg>
+      </div>
+      <div style={{ position:'absolute', right:'5%', top:'18%', animation:'float2 9s ease-in-out infinite', opacity:0.1, zIndex:0 }}>
+        <svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg>
+      </div>
+      <div style={{ position:'absolute', left:'12%', bottom:'22%', animation:'float3 8s ease-in-out infinite', opacity:0.11, zIndex:0 }}>
+        <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="13" x2="19" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="20" x2="16" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="8" y1="27" x2="14" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="34" x2="16" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="13" y1="41" x2="19" y2="43" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="13" x2="37" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="20" x2="40" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="48" y1="27" x2="42" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="34" x2="40" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="41" x2="37" y2="43" stroke="#C0392B" strokeWidth="1.2"/></svg>
+      </div>
+      <div style={{ position:'absolute', right:'15%', top:'5%', animation:'float4 11s ease-in-out infinite', opacity:0.09, zIndex:0 }}>
+        <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg>
+      </div>
+      <div style={{ position:'absolute', left:'50%', top:'12%', animation:'float5 6.5s ease-in-out infinite', opacity:0.09, zIndex:0 }}>
+        <svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg>
+      </div>
+      <div style={{ position:'absolute', right:'8%', bottom:'28%', animation:'float6 10s ease-in-out infinite', opacity:0.09, zIndex:0 }}>
+        <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><path d="M10 5 Q26 14 42 5" stroke="#2a8a2a" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg>
+      </div>
+      <div style={{ position:'absolute', left:'8%', top:'52%', animation:'float7 12s ease-in-out infinite', opacity:0.1, zIndex:0 }}>
+        <svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="27" cy="27" r="24" fill="none" stroke="#d8d8d0" strokeWidth="1"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="20" r="4" fill="rgba(255,255,255,0.25)"/></svg>
+      </div>
+
+      {/* Gradient fades top/bottom */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:'30%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'30%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+
+      {/* Logo + tagline */}
+      <div style={{ textAlign:'center', marginBottom:40, position:'relative', zIndex:2 }}>
+        <Logo size={66} />
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', marginTop:6, textTransform:'uppercase' }}>AI Coaching Intelligence</div>
+      </div>
+
+      {/* CTA buttons */}
+      <div style={{ width:'100%', maxWidth:360, display:'flex', flexDirection:'column', gap:10, position:'relative', zIndex:2 }}>
+        <button onClick={handleSignIn} style={BtnRed}>Get Started — Free</button>
+        <button onClick={handleSignIn} style={BtnGhost}>Sign In</button>
+        <div style={{ textAlign:'center', paddingTop:4 }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:S.red, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span>
+        </div>
+      </div>
+    </div>
+  )
+
+  // ── SIGN UP ──────────────────────────────────────────────
+  if (screen === 'signup') return (
+    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <div style={{ textAlign:'center', marginBottom:28 }}>
+        <Logo size={42} />
+      </div>
+      <div style={{ width:'100%', maxWidth:380, background:S.surface, border:`1px solid ${S.border}`, borderRadius:4, overflow:'hidden' }}>
+        <div style={{ height:3, background:`linear-gradient(90deg,${S.red},transparent)` }} />
+        <div style={{ padding:'28px 28px 24px' }}>
+          <div style={{ fontSize:20, fontWeight:600, color:S.text, marginBottom:6 }}>Create your account</div>
+          <div style={{ fontSize:13, color:S.muted, marginBottom:24 }}>Free to start. No credit card required.</div>
+          {[['Your name','text',coachName,setCoachName,'Coach Regisford'],['Email','email',email,setEmail,'coach@yourteam.com'],['Password','password',password,setPassword,'Min 8 characters']].map(([lbl,type,val,set,ph]) => (
+            <div key={lbl} style={{ marginBottom:14 }}>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:S.muted, marginBottom:6 }}>{lbl}</div>
+              <input type={type} value={val} onChange={e=>set(e.target.value)} placeholder={ph} style={{ width:'100%', background:S.card, border:`1px solid ${S.border}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit' }} />
+            </div>
+          ))}
+          <div style={{ marginBottom:22 }} />
+          <button onClick={() => { setScreen('createTeam') }} style={{ ...BtnRed, borderRadius:4 }}>Create Account</button>
+        </div>
+        <div style={{ borderTop:`1px solid ${S.border}`, padding:'14px 28px', textAlign:'center', fontSize:12, color:S.muted }}>
+          Already have an account?{' '}
+          <span onClick={() => setScreen('signin')} style={{ color:S.red, cursor:'pointer', fontWeight:500 }}>Sign in</span>
+        </div>
+      </div>
+    </div>
+  )
+
+  // ── CREATE TEAM ──────────────────────────────────────────
+  if (screen === 'createTeam') return (
+    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'24px 20px 40px' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=Big+Shoulders+Display:wght@900&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <div style={{ maxWidth:440, margin:'0 auto' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28, paddingTop:16 }}>
+          <button onClick={() => setScreen('teams')} style={{ background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'5px 12px', color:S.muted, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+          <Logo size={22} />
+        </div>
+
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Sport</div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:22 }}>
+          {Object.entries(sportMeta).map(([s,m]) => (
+            <div key={s} onClick={() => setTeamSport(s)} style={{ borderRadius:4, overflow:'hidden', cursor:'pointer', border:`2px solid ${teamSport===s?m.grad[1]:'transparent'}` }}>
+              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 8px', textAlign:'center' }}>
+                <div style={{ fontSize:28, lineHeight:1.2 }}>{m.emoji}</div>
+                <div style={{ fontSize:10, fontWeight:700, color:'white', marginTop:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>{m.label}</div>
               </div>
             </div>
-          </div>
-        ))}
-        <label style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:6, display:'block' }}>Preview</label>
-        <div style={{ width:'100%', height:36, borderRadius:8, marginBottom:16, overflow:'hidden', display:'flex', border:'1px solid #1e2330' }}>
-          <div style={{ flex:1, background:primary }} /><div style={{ flex:1, background:'white' }} /><div style={{ flex:1, background:secondary }} />
+          ))}
         </div>
-        <button onClick={() => onLaunch({coach,team,primary,secondary})} style={{ width:'100%', background:primary, color:'white', border:'none', borderRadius:8, padding:13, fontFamily:"'Bebas Neue',sans-serif", fontSize:18, letterSpacing:2, cursor:'pointer' }}>
-          LETS COACH
+
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Team name</div>
+        <input value={teamName} onChange={e=>setTeamName(e.target.value)} placeholder={`e.g. Tolland Youth ${teamSport}`} style={{ width:'100%', background:S.card, border:`1px solid ${teamPrimary}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit', marginBottom:22 }} />
+
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Primary color <span style={{ color:S.red }}>*</span></div>
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:20 }}>
+          {colorOptions.primary.map(c => (
+            <div key={c} onClick={() => setTeamPrimary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamPrimary===c?'white':'transparent'}`, cursor:'pointer' }} />
+          ))}
+        </div>
+
+        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Secondary color <span style={{ color:S.dim }}>optional</span></div>
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:28 }}>
+          {colorOptions.secondary.map(c => (
+            <div key={c} onClick={() => setTeamSecondary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamSecondary===c?'white':'transparent'}`, cursor:'pointer' }} />
+          ))}
+        </div>
+
+        {/* Live preview */}
+        <div style={{ marginBottom:20, borderRadius:4, overflow:'hidden' }}>
+          <div style={{ height:6, background:`linear-gradient(90deg,${teamPrimary} 55%,${teamSecondary} 55%)` }} />
+          <div style={{ background:`linear-gradient(135deg,${teamPrimary}33,#07090d)`, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
+            <div style={{ fontFamily:"'Sacramento',cursive", fontSize:18, letterSpacing:'-0.5px', color:'white' }}>
+              <span style={{ color:teamPrimary }}>C</span><span>oach</span><span style={{ color:teamPrimary }}>IQ</span>
+            </div>
+            <div style={{ marginLeft:'auto', display:'flex', gap:6 }}>
+              {[['3','PKG'],['0','IQ']].map(([v,l]) => (
+                <div key={l} style={{ background:'rgba(0,0,0,0.3)', padding:'4px 8px', clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
+                  <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:'white', lineHeight:1 }}>{v}</div>
+                  <div style={{ fontSize:7, color:'rgba(255,255,255,0.4)', textTransform:'uppercase' }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <button onClick={handleCreateTeam} disabled={!teamName.trim()} style={{ width:'100%', background:teamName.trim()?teamPrimary:'#1e2330', border:'none', borderRadius:4, padding:'14px', fontSize:14, color:'white', cursor:teamName.trim()?'pointer':'not-allowed', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'2px', clipPath:'polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)' }}>
+          Create Team
         </button>
+      </div>
+    </div>
+  )
+
+  // ── LOCKER ROOM ───────────────────────────────────────────
+  return (
+    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'0 0 40px' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${S.border}`, display:'flex', alignItems:'center', gap:10 }}>
+        <Logo size={28} />
+        <div style={{ fontSize:12, color:S.muted, marginLeft:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>Your locker room</div>
+      </div>
+
+      <div style={{ padding:'20px 20px 0', maxWidth:440, margin:'0 auto' }}>
+        <div style={{ fontSize:9, color:S.dim, letterSpacing:'2px', textTransform:'uppercase', marginBottom:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Your teams</div>
+
+        {teams.map((team, i) => {
+          const m = sportMeta[team.sport] || sportMeta.Football
+          return (
+            <div key={i} onClick={() => enterTeam(team)} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', border:`1px solid rgba(255,255,255,0.07)` }}>
+              <div style={{ background:`linear-gradient(135deg,${m.grad[0]} 0%,${team.primary} 100%)`, padding:'16px 18px', display:'flex', alignItems:'center', gap:14, position:'relative', overflow:'hidden' }}>
+                <div style={{ position:'absolute', bottom:-4, right:-4, height:6, background:`linear-gradient(90deg,${team.primary} 55%,${team.secondary||'#002868'} 55%)`, left:0 }} />
+                <div style={{ fontSize:32, lineHeight:1, flexShrink:0 }}>{m.emoji}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontFamily:"'Sacramento',cursive", fontSize:18, color:'white', letterSpacing:'-0.5px' }}>{team.name}</div>
+                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.6)', marginTop:2 }}>IQ {team.iq} · {team.packages} package{team.packages!==1?'s':''} · {team.coach}</div>
+                </div>
+                <div style={{ fontSize:20, color:'rgba(255,255,255,0.5)' }}>›</div>
+              </div>
+            </div>
+          )
+        })}
+
+        {['Football','Basketball','Baseball'].filter(s => !teams.find(t=>t.sport===s)).map(s => {
+          const m = sportMeta[s]
+          return (
+            <div key={s} onClick={() => { setTeamSport(s); setScreen('createTeam') }} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', opacity:0.5 }}>
+              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 18px', display:'flex', alignItems:'center', gap:14 }}>
+                <div style={{ fontSize:26, lineHeight:1, flexShrink:0, opacity:0.6 }}>{m.emoji}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.7)', fontFamily:"'Barlow Condensed',sans-serif" }}>Add {m.label} team</div>
+                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)' }}>Tap to set up</div>
+                </div>
+                <div style={{ fontSize:20, color:'rgba(255,255,255,0.3)' }}>+</div>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
-// -- SHARED COMPONENTS --
+
 function Card({ children, style={} }) {
-  return <div style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:12, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
+  return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
 }
 function CardHead({ icon, title, tag, tagColor, accent, tagVariant }) {
-  const tc = tagColor || '#D0021B'
+  const tc = tagColor || '#C0392B'
   return (
-    <div style={{ padding:'12px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#D0021B'}` }}>
+    <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#C0392B'}` }}>
       <span style={{ fontSize:15 }}>{icon}</span>
-      <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:15, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{title}</span>
-      {tag && <span style={{ fontSize:9, fontWeight:700, letterSpacing:1, padding:'2px 7px', borderRadius:10, background:`rgba(${parseInt(tc.slice(1,3),16)},${parseInt(tc.slice(3,5),16)},${parseInt(tc.slice(5,7),16)},0.15)`, color:tc }}>{tag}</span>}
+      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{title}</span>
+      {tag && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(tc.slice(1,3),16)},${parseInt(tc.slice(3,5),16)},${parseInt(tc.slice(5,7),16)},0.15)`, color:tc, textTransform:'uppercase' }}>{tag}</span>}
     </div>
   )
 }
-function PBtn({ onClick, disabled, children, color='#D0021B', style={} }) {
+function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
   return (
-    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:8, padding:12, fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:2, cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, ...style }}>
+    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>
       {children}
     </button>
   )
@@ -193,26 +424,26 @@ function PBtn({ onClick, disabled, children, color='#D0021B', style={} }) {
 function Sel({ label, value, onChange, options }) {
   return (
     <div>
-      <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>{label}</label>
-      <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+      <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>{label}</label>
+      <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
         {options.map(o => <option key={o}>{o}</option>)}
       </select>
     </div>
   )
 }
 function Shimmer() {
-  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#D0021B,#002868,#D0021B)', backgroundSize:'200% 100%', borderRadius:2, margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
+  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', borderRadius:0, margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
 }
 function ErrBox({ msg }) {
-  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(208,2,27,0.3)', borderRadius:10, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
+  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
 }
 function Hero({ greet, left, right, P, S, dk, children }) {
   return (
-    <div style={{ borderRadius:12, padding:'16px 15px', position:'relative', overflow:'hidden', border:'1px solid #1e2330', background:`linear-gradient(135deg,${dk(S,40)} 0%,#080a0e 65%)` }}>
-      <div style={{ position:'absolute', top:0, right:0, width:5, height:'100%', background:P }} />
+    <div style={{ borderRadius:4, padding:'16px 15px', position:'relative', overflow:'hidden', border:'1px solid #1e2330', background:`linear-gradient(135deg,${dk(S,40)} 0%,#07090d 65%)` }}>
+      <div style={{ position:'absolute', top:0, right:0, width:4, height:'100%', background:P }} />
       <div style={{ position:'relative', zIndex:1 }}>
-        <div style={{ fontSize:10, color:'#6b7a96', letterSpacing:2, textTransform:'uppercase', marginBottom:2 }}>{greet}</div>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:1.5, lineHeight:1, marginBottom:children?11:0 }}>{left} <span style={{ color:P }}>{right}</span></div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{greet}</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:26, letterSpacing:'1px', lineHeight:1, marginBottom:children?11:0, textTransform:'uppercase' }}>{left} <span style={{ color:P }}>{right}</span></div>
         {children}
       </div>
     </div>
@@ -2205,24 +2436,19 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
   // DASHBOARD VIEW
   if (activeMode === 'dashboard') return (
     <>
-      {/* Hero Card */}
-      <div style={{ position:'relative', borderRadius:14, overflow:'hidden', marginBottom:0 }}>
-        <div style={{ background:`linear-gradient(135deg, ${dk(P,40)} 0%, ${P} 70%)`, padding:'20px 18px 18px', position:'relative', overflow:'hidden' }}>
-          {/* Field texture */}
-          <div style={{ position:'absolute', inset:0, opacity:0.06 }}>
-            {[0,1,2,3,4].map(i => <div key={i} style={{ position:'absolute', left:0, right:0, top:`${15+i*18}%`, height:1, background:'white' }} />)}
-            <div style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'white' }} />
-          </div>
-          {/* Sport watermark */}
-          <div style={{ position:'absolute', right:-10, bottom:-15, fontSize:90, opacity:0.1, lineHeight:1, userSelect:'none', pointerEvents:'none' }}>{sportEmoji}</div>
-          <div style={{ position:'relative' }}>
-            <p style={{ margin:'0 0 2px', fontSize:10, color:'rgba(255,255,255,0.65)', textTransform:'uppercase', letterSpacing:1.5 }}>Good to see you,</p>
-            <p style={{ margin:'0 0 14px', fontFamily:"'Bebas Neue',sans-serif", fontSize:26, letterSpacing:2, color:'white', lineHeight:1 }}>{lastName}</p>
-            <div style={{ display:'flex', gap:8 }}>
-              {[[schemes,'Schemes'],[iq,'Coach IQ'],[(playbook[sport]||[]).length,'Saved']].map(([v,l]) => (
-                <div key={l} style={{ background:'rgba(0,0,0,0.28)', borderRadius:8, padding:'7px 11px', textAlign:'center', flex:1 }}>
-                  <p style={{ margin:0, fontFamily:"'Bebas Neue',sans-serif", fontSize:20, color:'white', letterSpacing:1, lineHeight:1 }}>{v}</p>
-                  <p style={{ margin:'2px 0 0', fontSize:9, color:'rgba(255,255,255,0.65)', textTransform:'uppercase', letterSpacing:0.5 }}>{l}</p>
+      {/* Team hero band — diagonal cut bottom edge */}
+      <div style={{ position:'relative', overflow:'hidden', marginBottom:0, borderRadius:4 }}>
+        <div style={{ background:`linear-gradient(135deg,${dk(P,50)} 0%,${P} 100%)`, padding:'14px 16px 26px', position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', right:-10, bottom:-15, fontSize:90, opacity:0.08, lineHeight:1, userSelect:'none', pointerEvents:'none' }}>{sportEmoji}</div>
+          <div style={{ position:'absolute', bottom:-1, left:0, right:0, height:18, background:'#07090d', clipPath:'polygon(0 100%,100% 0,100% 100%)' }} />
+          <div style={{ position:'relative', zIndex:1 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'rgba(255,255,255,0.5)', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{cfg.team}</div>
+            <div style={{ fontFamily:"'Sacramento',cursive", fontSize:22, color:'white', letterSpacing:'-0.5px', lineHeight:1.1, marginBottom:10 }}>Coach {lastName}</div>
+            <div style={{ display:'flex', gap:7 }}>
+              {[[schemes,'Schemes'],[iq,'IQ'],[(playbook[sport]||[]).length,'Saved']].map(([v,l]) => (
+                <div key={l} style={{ background:'rgba(0,0,0,0.3)', padding:'6px 10px', flex:1, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
+                  <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:'white', lineHeight:1 }}>{v}</div>
+                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'rgba(255,255,255,0.45)', textTransform:'uppercase', letterSpacing:'1px', marginTop:1 }}>{l}</div>
                 </div>
               ))}
             </div>
@@ -2230,59 +2456,145 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
         </div>
       </div>
 
-      {/* Quick Launch Grid */}
-      <div style={{ marginTop:14 }}>
-        <p style={{ margin:'0 0 8px', fontSize:9, color:'#3d4559', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>Tools</p>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-          {[
-            { key:'schemes', icon:'📋', label:'Scheme Generator', sub:'Build offensive packages', color:P },
-            { key:'defense', icon:'🛡', label:'Defensive Schemes', sub:'Build defensive packages', color:'#6b9fff' },
-            { key:'situational', icon:'🎯', label:'Situational Tool', sub:sport==='Football'?'Play caller':'Live adjustments', color:'#4ade80' },
-            { key:'film', icon:'🎥', label:'Film Room', sub:'Diagnose + analyze', color:'#f59e0b', external:true },
-          ].map(m => (
-            <div key={m.key} onClick={() => m.external ? null : setActiveMode(m.key)} style={{ background:'#0f1117', border:`0.5px solid ${al(m.color,0.2)}`, borderRadius:12, padding:'13px 13px', cursor:'pointer', position:'relative', overflow:'hidden' }}>
-              <div style={{ position:'absolute', bottom:-8, right:-4, fontSize:36, opacity:0.08, lineHeight:1 }}>{m.icon}</div>
-              <p style={{ margin:'0 0 3px', fontSize:18, lineHeight:1 }}>{m.icon}</p>
-              <p style={{ margin:'0 0 2px', fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{m.label}</p>
-              <p style={{ margin:0, fontSize:10, color:'#6b7a96' }}>{m.sub}</p>
-            </div>
-          ))}
+      {/* Live ticker */}
+      <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26 }}>
+        <div style={{ background:P, padding:'0 8px 0 10px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)', paddingRight:14 }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span>
+        </div>
+        <div style={{ overflow:'hidden', flex:1 }}>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>
+            {feed && feed.items && feed.items.length > 0
+              ? feed.items.map(i=>`${i.title}: ${i.body}`).join(' · ')
+              : `🏈 Tennessee Rip drill eliminates hesitation · 🧠 NSCA: 15-min focused reps beat 60-min mixed sessions · ${sport} coaching intelligence live`}
+          </div>
         </div>
       </div>
 
-      {/* Live Coaching Feed */}
-      <div style={{ marginTop:14 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-          <div style={{ width:6, height:6, background:'#4ade80', borderRadius:'50%' }} />
-          <p style={{ margin:0, fontSize:9, color:'#4ade80', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>Coaching Feed</p>
-          <button onClick={loadFeed} style={{ marginLeft:'auto', fontSize:10, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:10, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
+      {/* Tools section */}
+      <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:4 }}>
+          <div style={{ width:3, height:12, background:P, transform:'skewX(-15deg)', flexShrink:0 }} />
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#3a4260' }}>TOOLS</span>
         </div>
-        {feedLoading && <div style={{ padding:'16px', background:'#0f1117', borderRadius:10, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><p style={{ margin:0, fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching content...</p></div>}
-        {feed && (feed.items||[]).map((item,i) => (
-          <div key={i} style={{ background:'#0f1117', border:'0.5px solid #1e2330', borderRadius:10, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
-              <p style={{ margin:0, fontSize:9, color:feedTypeColor(item.type), fontWeight:700, textTransform:'uppercase', letterSpacing:0.5 }}>{feedTypeLabel(item.type)}</p>
-              {item.source && <p style={{ margin:0, fontSize:9, color:'#3d4559' }}>· {item.source}</p>}
+
+        {/* SCHEMES — hero card, gradient fill, most visual weight */}
+        <div
+          onClick={() => setActiveMode('schemes')}
+          style={{ background:'linear-gradient(135deg,#1a0404,#1e0808)', border:'1px solid rgba(192,57,43,0.25)', borderRadius:4, padding:'13px 14px', cursor:'pointer', position:'relative', overflow:'hidden' }}
+        >
+          <div style={{ position:'absolute', bottom:-10, right:-10, fontSize:60, opacity:0.06, lineHeight:1, pointerEvents:'none' }}>📋</div>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <div style={{ width:32, height:32, background:'rgba(192,57,43,0.15)', borderRadius:4, display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }}>📋</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#dde1f0', letterSpacing:'0.5px' }}>Schemes</div>
+              <div style={{ fontSize:9, color:'rgba(192,57,43,0.65)', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>Offense + Defense</div>
             </div>
-            <p style={{ margin:0, fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</p>
+            <div style={{ background:'rgba(192,57,43,0.9)', padding:'3px 10px', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:9, color:'white', letterSpacing:'1px' }}>OPEN</span>
+            </div>
+          </div>
+          {/* Play chips */}
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap', marginBottom:10 }}>
+            {(result?.plays?.slice(0,2) || []).map((p,i) => (
+              <span key={i} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'rgba(192,57,43,0.12)', borderLeft:'2px solid #C0392B', color:'#C0392B', letterSpacing:'0.5px' }}>{p.name}</span>
+            ))}
+            {(!result || !result.plays) && (
+              <>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'rgba(192,57,43,0.12)', borderLeft:'2px solid #C0392B', color:'#C0392B' }}>Belly Handoff</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'#0a0c14', borderLeft:'2px solid #1c2235', color:'#6b7896' }}>Sweep Right</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 7px', background:'#0a0c14', borderLeft:'2px solid #1c2235', color:'#3a4260' }}>+tap to generate</span>
+              </>
+            )}
+          </div>
+          {/* Mini diagram preview */}
+          <div style={{ background:'rgba(0,0,0,0.35)', borderRadius:3, padding:'7px 10px', display:'flex', alignItems:'center', gap:9 }}>
+            <svg width="42" height="26" viewBox="0 0 42 26">
+              <line x1="0" y1="13" x2="42" y2="13" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
+              <circle cx="21" cy="16" r="3" fill={P}/>
+              <circle cx="11" cy="16" r="2" fill={P} opacity="0.5"/>
+              <circle cx="31" cy="16" r="2" fill={P} opacity="0.5"/>
+              <path d="M21 16 L21 6" stroke={P} strokeWidth="1.5" opacity="0.7"/>
+              <path d="M11 16 L7 8" stroke={P} strokeWidth="1" opacity="0.4"/>
+              <path d="M31 16 L35 8" stroke={P} strokeWidth="1" opacity="0.4"/>
+            </svg>
+            <div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:P, fontWeight:700, letterSpacing:'0.5px' }}>AI Diagrams included</div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', letterSpacing:'0.3px' }}>Animated plays + educator mode</div>
+            </div>
+          </div>
+        </div>
+
+        {/* GAUNTLET + SITUATIONAL — compact 2-col row */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+          <div onClick={() => setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 12px', cursor:'pointer' }}>
+            <div style={{ fontSize:15, marginBottom:6 }}>⚡</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0', marginBottom:6, letterSpacing:'0.5px' }}>Gauntlet</div>
+            <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:3 }}>
+              <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>IQ</span>
+            </div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', letterSpacing:'0.5px' }}>🔥 {gauntlets} streak</div>
+          </div>
+          <div onClick={() => setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 12px', cursor:'pointer' }}>
+            <div style={{ fontSize:15, marginBottom:6 }}>🎯</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0', marginBottom:6, letterSpacing:'0.5px' }}>Situational</div>
+            <div style={{ background:'#0a0c14', borderRadius:3, padding:'5px 7px' }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700, letterSpacing:'0.5px' }}>
+                {sport==='Basketball' ? 'Q3 · UP 4' : sport==='Baseball' ? '5th · 1 out' : '3rd & 5'}
+              </div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#6b7896', marginTop:1 }}>
+                {sport==='Basketball' ? 'Half Court Set' : sport==='Baseball' ? 'Runner on 1st' : 'Slot Cross · 84%'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FILM ROOM — slim single row */}
+        <div onClick={() => setActiveMode('film')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 14px', display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
+          <div style={{ fontSize:15 }}>🎥</div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0', letterSpacing:'0.5px' }}>Film Room</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', letterSpacing:'0.3px' }}>Describe · Upload · AI Diagnose</div>
+          </div>
+          <div style={{ fontSize:11, color:'#3a4260' }}>›</div>
+        </div>
+
+      </div>
+
+      {/* Coaching Feed */}
+      <div style={{ marginTop:6 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+          <div style={{ width:3, height:12, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
+          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer', letterSpacing:'0.5px' }}>Refresh</button>
+        </div>
+        {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontSize:11, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Loading {sport} coaching content...</div></div>}
+        {feed && (feed.items||[]).map((item,i) => (
+          <div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{feedTypeLabel(item.type)}</span>
+              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
+            </div>
+            <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div>
           </div>
         ))}
       </div>
 
       {/* Generation History */}
       {sportHistory.length > 0 && (
-        <div style={{ marginTop:14 }}>
+        <div style={{ marginTop:6 }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8, cursor:'pointer' }} onClick={() => setShowHistory(h=>!h)}>
-            <p style={{ margin:0, fontSize:9, color:'#6b7a96', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700, flex:1 }}>Generation History ({sportHistory.length})</p>
+            <div style={{ width:3, height:12, background:'#3a4260', transform:'skewX(-15deg)', flexShrink:0 }} />
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', flex:1 }}>Generation History ({sportHistory.length})</span>
             <span style={{ fontSize:11, color:'#6b7a96' }}>{showHistory ? '▲' : '▼'}</span>
           </div>
           {showHistory && sportHistory.map((h,i) => (
-            <div key={i} style={{ background:'#0a0c10', border:'0.5px solid #1e2330', borderRadius:10, padding:'10px 12px', marginBottom:6, display:'flex', alignItems:'center', gap:10 }}>
+            <div key={i} style={{ background:'#0a0c10', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:6, display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ flex:1 }}>
-                <p style={{ margin:'0 0 2px', fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{h.packageName}</p>
-                <p style={{ margin:0, fontSize:10, color:'#6b7a96' }}>{h._inputs}</p>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>{h.packageName}</div>
+                <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{h._inputs}</div>
               </div>
-              <button onClick={() => { setResult(h); setActiveMode('schemes') }} style={{ fontSize:10, color:P, background:al(P,0.1), border:`0.5px solid ${al(P,0.3)}`, borderRadius:8, padding:'4px 10px', cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap' }}>View</button>
+              <button onClick={() => { setResult(h); setActiveMode('schemes') }} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:9, color:P, background:al(P,0.1), border:`0.5px solid ${al(P,0.3)}`, borderRadius:2, padding:'4px 10px', cursor:'pointer', letterSpacing:'1px', whiteSpace:'nowrap' }}>View</button>
             </div>
           ))}
         </div>
@@ -2294,8 +2606,8 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
   if (activeMode === 'schemes') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:8, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <p style={{ margin:0, fontFamily:"'Bebas Neue',sans-serif", fontSize:16, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{sport} Offensive Scheme Generator</p>
+        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Scheme Generator</span>
       </div>
       <Card>
         <div style={{ padding:14 }}>
@@ -2328,12 +2640,34 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
     </>
   )
 
+  // GAUNTLET MODE (inline from home)
+  if (activeMode === 'gauntlet') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
+        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
+      </div>
+      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
+    </>
+  )
+
+  // FILM MODE (inline from home)
+  if (activeMode === 'film') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
+        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Film Room</span>
+      </div>
+      <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />
+    </>
+  )
+
   // DEFENSE MODE
   if (activeMode === 'defense') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:8, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <p style={{ margin:0, fontFamily:"'Bebas Neue',sans-serif", fontSize:16, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{sport} Defensive Scheme Generator</p>
+        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Defensive Schemes</span>
       </div>
       <DefenseGen sport={sport} P={P} S={'#6b9fff'} al={al} callAI={callAI} parseJSON={parseJSON} inlineMode={true} />
     </>
@@ -2343,10 +2677,10 @@ function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, gau
   if (activeMode === 'situational') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:8, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <p style={{ margin:0, fontFamily:"'Bebas Neue',sans-serif", fontSize:16, letterSpacing:1, color:'#f2f4f8', flex:1 }}>
+        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>
           {sport==='Football' ? 'Situational Play Caller' : sport==='Basketball' ? 'Live Game Adjustments' : 'Count & Situation Manager'}
-        </p>
+        </span>
       </div>
       <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
     </>
@@ -2771,18 +3105,13 @@ function SchemeFolder({ scheme, P, S, al, callAI, parseJSON, filterType }) {
   )
 }
 
-// -- MORE PAGE --
-function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport, callAI, parseJSON }) {
-  const [moreTab, setMoreTab] = useState('playbook')
+// -- PLAYBOOK PAGE (tab 2) --
+function PlaybookPage({ P, S, al, dk, cfg, setCfg, playbook, sport, callAI, parseJSON }) {
   const [sortBy, setSortBy] = useState('recent')
   const [filterType, setFilterType] = useState('All')
-
-  // Only show schemes for the currently selected sport
   const sportSchemes = (playbook?.[sport] || [])
-  // Group by package for "by package" view
   const byPackage = sportSchemes.map((scheme, idx) => ({
-    ...scheme,
-    packageIndex: idx + 1,
+    ...scheme, packageIndex: idx + 1,
     plays: (scheme.plays||[]).map(p => ({ ...p, packageName: scheme.packageName, packageIndex: idx+1, schemeInputs: scheme._inputs || '' }))
   }))
   const allPlayItems = byPackage.flatMap(s => s.plays)
@@ -2790,98 +3119,111 @@ function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport, callAI, parseJSO
   const filteredByPackage = byPackage.filter(scheme =>
     filterType === 'All' || (scheme.plays||[]).some(p => p.type === filterType)
   )
-  const filteredPlays = allPlayItems
-    .filter(p => filterType === 'All' || p.type === filterType)
-    .sort((a,b) =>
-      sortBy === 'name' ? a.name.localeCompare(b.name) :
-      sortBy === 'type' ? (a.type||'').localeCompare(b.type||'') :
-      sortBy === 'package' ? a.packageIndex - b.packageIndex : 0
-    )
 
   return (
     <>
-      <Hero greet="Pro Plan - All Features" left="Your" right="Playbook" P={P} S={S} dk={dk} />
+      {/* Header band */}
+      <div style={{ position:'relative', overflow:'hidden', borderRadius:4 }}>
+        <div style={{ background:`linear-gradient(135deg,${dk(P,50)} 0%,${P} 100%)`, padding:'14px 16px 26px', position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', right:-10, bottom:-15, fontSize:90, opacity:0.08, lineHeight:1, userSelect:'none', pointerEvents:'none' }}>📖</div>
+          <div style={{ position:'absolute', bottom:-1, left:0, right:0, height:18, background:'#07090d', clipPath:'polygon(0 100%,100% 0,100% 100%)' }} />
+          <div style={{ position:'relative', zIndex:1 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'rgba(255,255,255,0.5)', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} Playbook</div>
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:28, color:'white', lineHeight:1, marginBottom:8 }}>{allPlayItems.length} <span style={{ fontSize:16, fontWeight:500, opacity:0.7 }}>plays · {sportSchemes.length} packages</span></div>
+          </div>
+        </div>
+      </div>
+
+      {sportSchemes.length === 0 ? (
+        <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'32px 20px', textAlign:'center', marginTop:8 }}>
+          <div style={{ fontSize:32, marginBottom:12 }}>📖</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:18, letterSpacing:'1px', marginBottom:8, textTransform:'uppercase' }}>No {sport} Schemes Saved</div>
+          <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6 }}>Generate a scheme on the Home tab and tap "Save to Playbook" to build your collection.</div>
+        </div>
+      ) : (
+        <>
+          <div style={{ display:'flex', gap:8, marginTop:8, marginBottom:10, flexWrap:'wrap' }}>
+            <div style={{ flex:1, minWidth:120 }}>
+              <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Sort</label>
+              <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+                <option value="package">By Package</option>
+                <option value="name">Name A-Z</option>
+                <option value="type">Play Type</option>
+              </select>
+            </div>
+            <div style={{ flex:1, minWidth:120 }}>
+              <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Filter</label>
+              <select value={filterType} onChange={e=>setFilterType(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+                {typeOptions.map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+          {filteredByPackage.map((scheme, si) => (
+            <SchemeFolder key={si} scheme={scheme} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} filterType={filterType} />
+          ))}
+        </>
+      )}
+    </>
+  )
+}
+
+// -- MORE PAGE (tab 3) --
+function MorePage({ P, S, al, dk, cfg, setCfg, playbook, sport, callAI, parseJSON }) {
+  const [moreTab, setMoreTab] = useState('features')
+
+  return (
+    <>
+      <Hero greet="Everything else" left="More" right="Tools" P={P} S={S} dk={dk} />
 
       {/* Sub tabs */}
-      <div style={{ display:'flex', borderRadius:10, overflow:'hidden', border:'1px solid #1e2330' }}>
-        {[['playbook','Playbook'],['features','Features'],['settings','Settings']].map(([t,lbl]) => (
-          <button key={t} onClick={()=>setMoreTab(t)} style={{ flex:1, padding:'9px', background:moreTab===t?P:'#161922', color:moreTab===t?'white':'#6b7a96', border:'none', cursor:'pointer', fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1, transition:'all 0.15s' }}>{lbl}</button>
+      <div style={{ display:'flex', borderRadius:4, overflow:'hidden', border:'1px solid #1e2330' }}>
+        {[['features','Features'],['settings','Settings']].map(([t,lbl]) => (
+          <button key={t} onClick={()=>setMoreTab(t)} style={{ flex:1, padding:'10px', background:moreTab===t?P:'#161922', color:moreTab===t?'white':'#6b7a96', border:'none', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'1.5px', textTransform:'uppercase' }}>{lbl}</button>
         ))}
       </div>
 
-      {/* PLAYBOOK TAB */}
-      {moreTab === 'playbook' && (
-        <div>
-          {sportSchemes.length === 0 ? (
-            <div style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:12, padding:'32px 20px', textAlign:'center' }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>📖</div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, letterSpacing:1, marginBottom:8 }}>No {sport} Schemes Saved</div>
-              <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6 }}>Generate a scheme and tap "Save to Playbook" to build your collection. Each saved scheme appears here as a folder.</div>
-            </div>
-          ) : (
-            <>
-              {/* Sort and filter controls */}
-              <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap' }}>
-                <div style={{ flex:1, minWidth:120 }}>
-                  <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Sort By</label>
-                  <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-                    <option value="package">By Package</option>
-                    <option value="name">Name A-Z</option>
-                    <option value="type">Play Type</option>
-                  </select>
-                </div>
-                <div style={{ flex:1, minWidth:120 }}>
-                  <label style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:600, marginBottom:4, display:'block' }}>Filter Type</label>
-                  <select value={filterType} onChange={e=>setFilterType(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-                    {typeOptions.map(t => <option key={t}>{t}</option>)}
-                  </select>
-                </div>
+      {/* FEATURES TAB */}
+      {moreTab === 'features' && (
+        <>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:4, marginBottom:10 }}>
+            <div style={{ width:3, height:12, background:P, transform:'skewX(-15deg)', flexShrink:0 }} />
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#3a4260' }}>Coming Soon — Elite Plan</span>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+            {[['🏟','Game Day Mode','Sideline ready',true],['👥','Roster Manager','14 players',true],['📅','Season Planner','Week 6 of 10',true],['🎨','Play Designer','Coming soon',true],['🏆','Certifications','Coming soon',true],['📊','Analytics','Coming soon',true]].map(([ico,ttl,sub,locked]) => (
+              <div key={ttl} style={{ background:'#0f1219', border:`1px solid ${locked?'#1e2330':al(P,0.25)}`, borderRadius:4, padding:'14px 12px', textAlign:'center', opacity:locked?0.55:1 }}>
+                <div style={{ fontSize:24, marginBottom:5 }}>{ico}</div>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'0.5px', textTransform:'uppercase' }}>{ttl}</div>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:locked?'#3a4260':P, marginTop:3, letterSpacing:'0.5px' }}>{sub}</div>
               </div>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10 }}>
-                {filteredByPackage.length} scheme{filteredByPackage.length!==1?'s':''} · {allPlayItems.length} plays saved in {sport}
-              </div>
-
-              {/* Scheme folders */}
-              {filteredByPackage.map((scheme, si) => (
-                <SchemeFolder key={si} scheme={scheme} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} filterType={filterType} />
-              ))}
-            </>
-          )}
-        </div>
+            ))}
+          </div>
+        </>
       )}
 
-      {/* FEATURES TAB */}
-      {moreTab === 'features' && <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-        {[['📖','Playbook Builder','63 plays saved',false],['🏟','Game Day Mode','Sideline ready',false],['👥','Roster Manager','14 players',false],['📅','Season Planner','Week 6 of 10',false],['🎨','Play Designer','COMING SOON',true],['🏆','Certifications','COMING SOON',true]].map(([ico,ttl,sub,hi]) => (
-          <div key={ttl} style={{ background:'#0f1117', border:`1px solid ${hi?al(P,0.25):'#1e2330'}`, borderRadius:12, padding:'15px 11px', textAlign:'center', cursor:'pointer' }}>
-            <div style={{ fontSize:24, marginBottom:5 }}>{ico}</div>
-            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1 }}>{ttl}</div>
-            <div style={{ fontSize:10, color:hi?P:'#6b7a96', marginTop:2 }}>{sub}</div>
-          </div>
-        ))}
-      </div>}
-
       {/* SETTINGS TAB */}
-      {moreTab === 'settings' && <Card>
-        <CardHead icon="🎨" title="Team Colors" tag="LIVE" tagColor={P} accent={P} />
-        <div style={{ padding:14 }}>
-          {[['Primary Color',cfg.primary,'primary'],['Secondary Color',cfg.secondary,'secondary']].map(([lbl,val,key]) => (
-            <div key={lbl} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'11px 0', borderBottom:'1px solid #1e2330' }}>
-              <span style={{ fontSize:13 }}>{lbl}</span>
-              <div style={{ display:'flex', gap:9, alignItems:'center' }}>
-                <div style={{ width:30, height:30, borderRadius:7, border:'2px solid #1e2330', background:val, cursor:'pointer', position:'relative', overflow:'hidden' }}>
-                  <input type="color" value={val} onChange={e=>setCfg(c=>({...c,[key]:e.target.value}))} style={{ position:'absolute', inset:0, opacity:0, cursor:'pointer', width:'100%', height:'100%' }} />
+      {moreTab === 'settings' && (
+        <Card>
+          <CardHead icon="🎨" title="Team Colors" tag="LIVE" tagColor={P} accent={P} />
+          <div style={{ padding:14 }}>
+            {[['Primary Color',cfg.primary,'primary'],['Secondary Color',cfg.secondary,'secondary']].map(([lbl,val,key]) => (
+              <div key={lbl} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'11px 0', borderBottom:'1px solid #1e2330' }}>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600, fontSize:13 }}>{lbl}</span>
+                <div style={{ display:'flex', gap:9, alignItems:'center' }}>
+                  <div style={{ width:30, height:30, borderRadius:4, border:'2px solid #1e2330', background:val, cursor:'pointer', position:'relative', overflow:'hidden' }}>
+                    <input type="color" value={val} onChange={e=>setCfg(c=>({...c,[key]:e.target.value}))} style={{ position:'absolute', inset:0, opacity:0, cursor:'pointer', width:'100%', height:'100%' }} />
+                  </div>
+                  <span style={{ fontFamily:"'DM Mono',monospace", fontSize:12, color:'#6b7a96' }}>{val}</span>
                 </div>
-                <span style={{ fontSize:12, color:'#6b7a96' }}>{val}</span>
               </div>
+            ))}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'11px 0' }}>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600, fontSize:13 }}>{cfg.team}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, color:P, cursor:'pointer', letterSpacing:'0.5px' }} onClick={()=>{const n=prompt('Team name:');if(n)setCfg(c=>({...c,team:n}))}}>Edit</span>
             </div>
-          ))}
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'11px 0' }}>
-            <span style={{ fontSize:13 }}>{cfg.team}</span>
-            <span style={{ fontSize:12, color:P, fontWeight:600, cursor:'pointer' }} onClick={()=>{const n=prompt('Team name:');if(n)setCfg(c=>({...c,team:n}))}}>Edit</span>
           </div>
-        </div>
-      </Card>}
+        </Card>
+      )}
     </>
   )
 }
