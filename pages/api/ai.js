@@ -3,10 +3,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { prompt } = req.body
+  const { messages } = req.body
 
-  if (!prompt) {
-    return res.status(400).json({ error: 'prompt field is required' })
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'messages array is required' })
   }
 
   try {
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1600,
-        messages: [{ role: 'user', content: prompt }],
+        messages: messages,
       }),
     })
 
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: data?.error?.message || 'Anthropic API error' })
     }
 
-    return res.status(200).json({ result: data.content[0].text })
+    return res.status(200).json({ text: data.content[0].text })
   } catch (error) {
     return res.status(500).json({ error: error.message })
   }
