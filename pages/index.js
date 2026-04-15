@@ -1,113 +1,30 @@
 import { useState, useEffect, useRef } from 'react'
 import Head from 'next/head'
 
-// ─── MASCOTS ─────────────────────────────────────────────────────────────────
-const MASCOTS = [
-  { id:'eagles',    name:'Eagles',    emoji:'🦅' },
-  { id:'hawks',     name:'Hawks',     emoji:'🦆' },
-  { id:'falcons',   name:'Falcons',   emoji:'🦅' },
-  { id:'ravens',    name:'Ravens',    emoji:'🐦‍⬛' },
-  { id:'cardinals', name:'Cardinals', emoji:'🐦' },
-  { id:'owls',      name:'Owls',      emoji:'🦉' },
-  { id:'tigers',    name:'Tigers',    emoji:'🐯' },
-  { id:'lions',     name:'Lions',     emoji:'🦁' },
-  { id:'bears',     name:'Bears',     emoji:'🐻' },
-  { id:'panthers',  name:'Panthers',  emoji:'🐆' },
-  { id:'cougars',   name:'Cougars',   emoji:'🦓' },
-  { id:'jaguars',   name:'Jaguars',   emoji:'🐆' },
-  { id:'wolves',    name:'Wolves',    emoji:'🐺' },
-  { id:'huskies',   name:'Huskies',   emoji:'🐕' },
-  { id:'bulldogs',  name:'Bulldogs',  emoji:'🐶' },
-  { id:'vipers',    name:'Vipers',    emoji:'🐍' },
-  { id:'cobras',    name:'Cobras',    emoji:'🐍' },
-  { id:'gators',    name:'Gators',    emoji:'🐊' },
-  { id:'dragons',   name:'Dragons',   emoji:'🐉' },
-  { id:'mustangs',  name:'Mustangs',  emoji:'🐎' },
-  { id:'stallions', name:'Stallions', emoji:'🐎' },
-  { id:'broncos',   name:'Broncos',   emoji:'🐴' },
-  { id:'rams',      name:'Rams',      emoji:'🐏' },
-  { id:'bulls',     name:'Bulls',     emoji:'🐂' },
-  { id:'bison',     name:'Bison',     emoji:'🦬' },
-  { id:'sharks',    name:'Sharks',    emoji:'🦈' },
-  { id:'barracudas',name:'Barracudas',emoji:'🐟' },
-  { id:'warriors',  name:'Warriors',  emoji:'⚔️' },
-  { id:'knights',   name:'Knights',   emoji:'🛡️' },
-  { id:'spartans',  name:'Spartans',  emoji:'🗡️' },
-  { id:'titans',    name:'Titans',    emoji:'💪' },
-  { id:'giants',    name:'Giants',    emoji:'🏔️' },
-  { id:'rockets',   name:'Rockets',   emoji:'🚀' },
-  { id:'blazers',   name:'Blazers',   emoji:'🔥' },
-  { id:'thunder',   name:'Thunder',   emoji:'⚡' },
-  { id:'storm',     name:'Storm',     emoji:'🌩️' },
-  { id:'lightning', name:'Lightning', emoji:'⚡' },
-  { id:'cyclones',  name:'Cyclones',  emoji:'🌀' },
-  { id:'tornados',  name:'Tornados',  emoji:'🌪️' },
-  { id:'comets',    name:'Comets',    emoji:'☄️' },
-  { id:'jets',      name:'Jets',      emoji:'✈️' },
-  { id:'phantoms',  name:'Phantoms',  emoji:'👻' },
-  { id:'chargers',  name:'Chargers',  emoji:'⚡' },
-  { id:'colts',     name:'Colts',     emoji:'🐴' },
-  { id:'patriots',  name:'Patriots',  emoji:'🦅' },
-  { id:'rebels',    name:'Rebels',    emoji:'🔱' },
-  { id:'trojans',   name:'Trojans',   emoji:'🏛️' },
-  { id:'vikings',   name:'Vikings',   emoji:'🪓' },
-  { id:'pirates',   name:'Pirates',   emoji:'🏴‍☠️' },
-  { id:'raiders',   name:'Raiders',   emoji:'💀' },
-]
-
-// ─── TEAM NAME FONTS ──────────────────────────────────────────────────────────
-const TEAM_FONTS = [
-  { id:'kalam',     name:'Kalam',          style:"'Kalam', cursive",                    preview:'Handwritten' },
-  { id:'barlow',    name:'Barlow Condensed',style:"'Barlow Condensed', sans-serif",      preview:'Bold Athletic' },
-  { id:'bigshoul',  name:'Big Shoulders',  style:"'Big Shoulders Display', sans-serif", preview:'BLOCK CAPS' },
-  { id:'dmsans',    name:'DM Sans',        style:"'DM Sans', sans-serif",               preview:'Clean Modern' },
-  { id:'mono',      name:'DM Mono',        style:"'DM Mono', monospace",                preview:'Monospace' },
-]
-
-// ─── BRAND CONFIG ─────────────────────────────────────────────────────────────
+// ─── BRAND CONFIG ────────────────────────────────────────────────────────────
 const BRAND_PALETTES = {
-  'Red — C+IQ colored':  { accent:'#C0392B', accentOn:'CIQ',  name:'Red — C+IQ colored' },
-  'Red — oach colored':  { accent:'#C0392B', accentOn:'oach', name:'Red — oach colored' },
-  'Blue — C+IQ colored': { accent:'#1565C0', accentOn:'CIQ',  name:'Blue — C+IQ colored' },
-  'Blue — oach colored': { accent:'#1565C0', accentOn:'oach', name:'Blue — oach colored' },
-  'Gold — C+IQ colored': { accent:'#f59e0b', accentOn:'CIQ',  name:'Gold — C+IQ colored' },
+  'Red — C+IQ colored':   { accent: '#C0392B', accentOn: 'CIQ', name: 'Red — C+IQ colored' },
+  'Red — oach colored':   { accent: '#C0392B', accentOn: 'oach', name: 'Red — oach colored' },
+  'Blue — C+IQ colored':  { accent: '#1565C0', accentOn: 'CIQ', name: 'Blue — C+IQ colored' },
+  'Blue — oach colored':  { accent: '#1565C0', accentOn: 'oach', name: 'Blue — oach colored' },
+  'Gold — C+IQ colored':  { accent: '#f59e0b', accentOn: 'CIQ', name: 'Gold — C+IQ colored' },
 }
 
-// ─── SPORT COLORS ─────────────────────────────────────────────────────────────
+// ─── SPORT COLORS ────────────────────────────────────────────────────────────
 const SPORT_COLORS = {
-  Football:   { primary:'#C0392B', secondary:'#1a3a1a', label:'Football' },
-  Basketball: { primary:'#D4600A', secondary:'#1a1208', label:'Basketball' },
-  Baseball:   { primary:'#1B5E20', secondary:'#1a1208', label:'Baseball' },
+  Football:   { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', label: 'Football' },
+  Basketball: { primary: '#D4600A', secondary: '#1a1208', accent: '#fff3e0', label: 'Basketball' },
+  Baseball:   { primary: '#1B5E20', secondary: '#1a1208', accent: '#f1f8e9', label: 'Baseball' },
 }
 
-// ─── DEFAULT PLAYBOOK FOLDERS ─────────────────────────────────────────────────
+// ─── DEFAULT PLAYBOOK FOLDERS ────────────────────────────────────────────────
 const DEFAULT_FOLDERS = {
   Football:   ['Base Offense','Red Zone','2-Minute Drill','Base Defense','Special Teams','My Favorites'],
   Basketball: ['Base Offense','End of Game','Press Break','Zone Attack','Inbounds','My Favorites'],
   Baseball:   ['Base Offense','Late Innings','Small Ball','Pitching Strategy','Defensive Sets','My Favorites'],
 }
 
-// ─── WEATHER GAME LIKELIHOOD ──────────────────────────────────────────────────
-const GAME_THRESHOLDS = {
-  Football:   { lightRain:85, heavyRain:60, thunderstorm:10, snow:70, wind:75, extreme:5 },
-  Basketball: { lightRain:100, heavyRain:100, thunderstorm:100, snow:100, wind:100, extreme:100 }, // indoor
-  Baseball:   { lightRain:70, heavyRain:20, thunderstorm:5, snow:15, wind:80, extreme:5 },
-}
-
-function getGameLikelihood(sport, weatherCode, windSpeed) {
-  const t = GAME_THRESHOLDS[sport] || GAME_THRESHOLDS.Football
-  if (weatherCode >= 200 && weatherCode < 300) return t.thunderstorm // thunderstorm
-  if (weatherCode >= 300 && weatherCode < 400) return t.lightRain    // drizzle
-  if (weatherCode >= 500 && weatherCode < 502) return t.lightRain    // light rain
-  if (weatherCode >= 502 && weatherCode < 600) return t.heavyRain    // heavy rain
-  if (weatherCode >= 600 && weatherCode < 700) return t.snow         // snow
-  if (windSpeed > 35) return t.wind
-  if (weatherCode >= 771 || weatherCode === 781) return t.extreme    // squall/tornado
-  return 95
-}
-
-
-// ─── SPORTS CONFIG ────────────────────────────────────────────────────────────
+// ─── SPORTS CONFIG ───────────────────────────────────────────────────────────
 const SPORTS = {
   Football: {
     emoji:'FB',
@@ -117,12 +34,12 @@ const SPORTS = {
       {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
       {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
       {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
-      {id:'defense',label:'Opponent Formation',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
-      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
+      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Dual-Threat QB','Speed / Fast Athletes','Big Physical Players','Pass Heavy / Spread','Run Heavy / Power','Option / Misdirection Heavy','Blitzes Every Down','Zone Coverage Heavy','Man Press Every Play']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
-    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Tailor to attack the ${f.defense} formation against their ${f.oppTendency} coverage. Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple terms why this play is called this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
   },
   Basketball: {
@@ -134,11 +51,11 @@ const SPORTS = {
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
       {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
-      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','One Star Player ISO Heavy','Strong Inside Post','Three Point Shooting Team','Fast Break Heavy','Ball Control Slow Pace','Full Court Press Every Possession','Zone Defense Only','Aggressive Man Pressure','Weak Ball Handlers']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain why this play is called this name in simple terms a youth coach would understand"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -149,38 +66,41 @@ const SPORTS = {
       {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
       {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
-      {id:'defense',label:'Batting Order Style',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
-      {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
+      {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
+      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Pull Hitters Heavy','Spray / Opposite Field Hitters','Speed Team — Steals Often','Power Hitting Lineup','Bunt Heavy Small Ball','Strong Pitching','Aggressive Base Running','Struggles with Off-Speed','Rarely Strike Out']},
       {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explain why this strategy is called this name in simple terms"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
 }
 
 
-// ─── LOGO COMPONENT ───────────────────────────────────────────────────────────
+// ─── LOGO COMPONENT ──────────────────────────────────────────────────────────
 function CoachIQLogo({ size=22, brand='Red — C+IQ colored' }) {
   const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red — C+IQ colored']
   const CIQ = p.accentOn === 'CIQ'
+  const coloredC    = CIQ ? p.accent : '#f2f4f8'
+  const coloredOach = CIQ ? '#f2f4f8' : p.accent
+  const coloredIQ   = CIQ ? p.accent : '#f2f4f8'
   return (
     <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:size, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
-      <span style={{ color: CIQ ? p.accent : '#f2f4f8' }}>C</span>
-      <span style={{ color: CIQ ? '#f2f4f8' : p.accent }}>oach</span>
-      <span style={{ color: CIQ ? p.accent : '#f2f4f8' }}>IQ</span>
+      <span style={{ color:coloredC }}>C</span>
+      <span style={{ color:coloredOach }}>oach</span>
+      <span style={{ color:coloredIQ }}>IQ</span>
     </div>
   )
 }
 
-// ─── SHARED UI ────────────────────────────────────────────────────────────────
+// ─── SHARED UI ───────────────────────────────────────────────────────────────
 function al(hex, a) {
-  if (!hex||hex.length<7) return `rgba(0,0,0,${a})`
+  if (!hex || hex.length < 7) return `rgba(0,0,0,${a})`
   const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
   return `rgba(${r},${g},${b},${a})`
 }
 function dk(hex, amt) {
-  if (!hex||hex.length<7) return hex
+  if (!hex || hex.length < 7) return hex
   const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
   return '#'+[r,g,b].map(x=>Math.max(0,x-amt).toString(16).padStart(2,'0')).join('')
 }
@@ -188,491 +108,35 @@ function Card({ children, style={} }) {
   return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
 }
 function CardHead({ icon, title, tag, tagColor, accent }) {
-  const tc=tagColor||'#C0392B'
+  const tc = tagColor||'#C0392B'
   return (
     <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#C0392B'}` }}>
       <span style={{ fontSize:15 }}>{icon}</span>
       <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{title}</span>
-      {tag && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(tc,0.15), color:tc, textTransform:'uppercase' }}>{tag}</span>}
+      {tag && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(tc.slice(1,3),16)},${parseInt(tc.slice(3,5),16)},${parseInt(tc.slice(5,7),16)},0.15)`, color:tc, textTransform:'uppercase' }}>{tag}</span>}
     </div>
   )
 }
 function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
-  return <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
+  return (
+    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
+  )
 }
 function Sel({ label, value, onChange, options }) {
   return (
     <div>
       <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>{label}</label>
       <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-        {options.map(o=><option key={o}>{o}</option>)}
+        {options.map(o => <option key={o}>{o}</option>)}
       </select>
     </div>
   )
 }
 function Shimmer() {
-  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
+  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', borderRadius:0, margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
 }
 function ErrBox({ msg }) {
-  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96' }}>Error: {msg}</div>
-}
-
-// ─── WEATHER HOOK ─────────────────────────────────────────────────────────────
-function useWeather(location) {
-  const [weather, setWeather] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (!location) return
-    setLoading(true)
-    // Use Open-Meteo (free, no key required) with geocoding
-    const fetchWeather = async () => {
-      try {
-        // Geocode location name to lat/lon
-        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`)
-        const geoData = await geoRes.json()
-        if (!geoData.results?.length) return
-        const { latitude, longitude, name, admin1 } = geoData.results[0]
-        const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,precipitation&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`)
-        const wxData = await wxRes.json()
-        const c = wxData.current
-        setWeather({ temp: Math.round(c.temperature_2m), code: c.weather_code, wind: Math.round(c.wind_speed_10m), precip: c.precipitation, city: name, state: admin1 })
-      } catch(e) { console.error('Weather fetch failed:', e) }
-      setLoading(false)
-    }
-    fetchWeather()
-  }, [location])
-
-  return { weather, loading }
-}
-
-function weatherDesc(code) {
-  if (!code && code !== 0) return 'Unknown'
-  if (code === 0) return 'Clear'
-  if (code <= 3) return 'Partly Cloudy'
-  if (code <= 49) return 'Foggy'
-  if (code <= 69) return 'Rainy'
-  if (code <= 79) return 'Snowy'
-  if (code <= 99) return 'Thunderstorm'
-  return 'Unknown'
-}
-
-function weatherEmoji(code) {
-  if (!code && code !== 0) return '🌡️'
-  if (code === 0) return '☀️'
-  if (code <= 3) return '⛅'
-  if (code <= 49) return '🌫️'
-  if (code <= 69) return '🌧️'
-  if (code <= 79) return '❄️'
-  if (code <= 99) return '⛈️'
-  return '🌡️'
-}
-
-// ─── ROTATING INFO WIDGET ─────────────────────────────────────────────────────
-function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, al }) {
-  const [slot, setSlot] = useState(0)
-  const [now, setNow] = useState(new Date())
-  const { weather: homeWeather } = useWeather(homeLocation)
-  const { weather: awayWeather } = useWeather(awayLocation)
-  const SPORT_BALL = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
-
-  useEffect(() => {
-    const t = setInterval(() => setSlot(s => (s+1) % 4), 4000)
-    const tc = setInterval(() => setNow(new Date()), 60000)
-    return () => { clearInterval(t); clearInterval(tc) }
-  }, [])
-
-  const likelihood = homeWeather ? getGameLikelihood(sport, homeWeather.code, homeWeather.wind) : null
-
-  function getCountdown() {
-    if (!nextEvent?.date) return null
-    const diff = new Date(nextEvent.date) - now
-    if (diff < 0) return null
-    const days = Math.floor(diff / 86400000)
-    const hrs = Math.floor((diff % 86400000) / 3600000)
-    if (days > 0) return `${days}d ${hrs}h`
-    if (hrs > 0) return `${hrs}h`
-    return 'Today!'
-  }
-
-  const slots = [
-    // Slot 0: Home weather + game likelihood
-    homeWeather ? (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
-        <div style={{ fontSize:16 }}>{weatherEmoji(homeWeather.code)}</div>
-        <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:15, color:'#f2f4f8', lineHeight:1 }}>{homeWeather.temp}°F</div>
-        <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center', lineHeight:1.2 }}>{homeWeather.city}</div>
-        {likelihood !== null && <div style={{ fontSize:8, color: likelihood > 70 ? '#4ade80' : likelihood > 40 ? '#f59e0b' : '#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{likelihood}% game on</div>}
-      </div>
-    ) : <div style={{ fontSize:18 }}>🌡️</div>,
-
-    // Slot 1: Away weather (if different location)
-    awayWeather && awayLocation !== homeLocation ? (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
-        <div style={{ fontSize:16 }}>{weatherEmoji(awayWeather.code)}</div>
-        <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:15, color:'#f2f4f8', lineHeight:1 }}>{awayWeather.temp}°F</div>
-        <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center', lineHeight:1.2 }}>{awayWeather.city} (Away)</div>
-      </div>
-    ) : null,
-
-    // Slot 2: Next event countdown
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
-      <div style={{ fontSize:14 }}>{nextEvent?.type==='practice'?'📋':'🏆'}</div>
-      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, lineHeight:1, textAlign:'center' }}>{getCountdown() || '—'}</div>
-      <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center', lineHeight:1.3, maxWidth:60 }}>{nextEvent ? nextEvent.opponent || nextEvent.type : 'No events'}</div>
-    </div>,
-
-    // Slot 3: Date/time
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
-      <div style={{ fontSize:14 }}>📅</div>
-      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:'#f2f4f8', lineHeight:1 }}>{now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
-      <div style={{ fontSize:8, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', textAlign:'center' }}>{now.toLocaleDateString([],{month:'short',day:'numeric'})}</div>
-    </div>,
-  ].filter(Boolean)
-
-  const activeSlot = slots.length > 0 ? slots[slot % slots.length] : null
-
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-      <div style={{ fontSize:22, lineHeight:1, opacity:0.7 }}>{SPORT_BALL[sport]||'🏈'}</div>
-      <div style={{ minWidth:68, display:'flex', alignItems:'center', justifyContent:'center', animation:'fadeIn 0.4s ease' }} key={slot}>
-        {activeSlot || <div style={{ fontSize:18 }}>📅</div>}
-      </div>
-      <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
-        {slots.map((_,i) => <div key={i} style={{ width:3, height:3, borderRadius:'50%', background: i===slot%slots.length ? P : '#3d4559' }} />)}
-      </div>
-    </div>
-  )
-}
-
-
-// ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
-function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
-  const [mode, setMode] = useState('view')
-  const [expanded, setExpanded] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
-  const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
-  const [error, setError] = useState('')
-
-  const sportTeams = teams[sport] || []
-  const current = activeTeam[sport]
-  const MAX_TEAMS = 5
-  const seasons = ['Fall 2025','Winter 2025','Spring 2026','Summer 2026','Fall 2026','Winter 2026','Spring 2027','Summer 2027','Year Round']
-  const sportEmoji = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
-  const currentMascot = MASCOTS.find(m=>m.id===current?.mascot) || null
-
-  function createTeam() {
-    if (!form.name.trim()) { setError('Team name is required'); return }
-    if (sportTeams.length >= MAX_TEAMS) { setError(`Max ${MAX_TEAMS} teams per sport`); return }
-    const newTeam = { id:Date.now(), name:form.name.trim(), season:form.season||'Season N/A', mascot:form.mascot, teamFont:form.teamFont, hometown:form.hometown.trim(), primary:form.primary, secondary:form.secondary, accent1:form.accent1, accent2:form.accent2, sport, players:[], schedule:[] }
-    const updated = { ...teams, [sport]:[...sportTeams, newTeam] }
-    setTeams(updated)
-    setActiveTeam(prev=>({...prev,[sport]:newTeam}))
-    setCfg(prev=>({...prev, primary:newTeam.primary, secondary:newTeam.secondary}))
-    setForm({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
-    setMode('view'); setError('')
-  }
-
-  function selectTeam(team) {
-    setActiveTeam(prev=>({...prev,[sport]:team}))
-    setCfg(prev=>({...prev, primary:team.primary, secondary:team.secondary}))
-    setExpanded(false)
-  }
-
-  function deselectTeam() {
-    setActiveTeam(prev=>({...prev,[sport]:null}))
-    setExpanded(false)
-  }
-
-  function confirmDelete(team) { setDeleteConfirm(team) }
-
-  function doDelete() {
-    if (!deleteConfirm) return
-    const updated = sportTeams.filter(t=>t.id!==deleteConfirm.id)
-    setTeams(prev=>({...prev,[sport]:updated}))
-    if (current?.id===deleteConfirm.id) {
-      const next = updated[0]||null
-      setActiveTeam(prev=>({...prev,[sport]:next}))
-      if (next) setCfg(prev=>({...prev, primary:next.primary, secondary:next.secondary}))
-    }
-    setDeleteConfirm(null)
-  }
-
-  return (
-    <>
-      {/* Delete confirmation modal */}
-      {deleteConfirm && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-          <div style={{ background:'#0f1219', border:'1px solid rgba(239,68,68,0.4)', borderRadius:8, padding:24, width:'100%', maxWidth:340 }}>
-            <div style={{ fontSize:24, textAlign:'center', marginBottom:10 }}>⚠️</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:18, color:'#f2f4f8', textAlign:'center', marginBottom:6 }}>Delete Team?</div>
-            <div style={{ fontSize:13, color:'#6b7a96', textAlign:'center', lineHeight:1.6, marginBottom:20 }}>This will permanently delete <span style={{ color:'#f2f4f8', fontWeight:600 }}>{deleteConfirm.name}</span> and all associated data. This cannot be undone.</div>
-            <div style={{ display:'flex', gap:8 }}>
-              <button onClick={()=>setDeleteConfirm(null)} style={{ flex:1, padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>CANCEL</button>
-              <button onClick={doDelete} style={{ flex:1, padding:'11px', background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.5)', borderRadius:4, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>DELETE</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginTop:14 }}>
-        <div onClick={()=>setExpanded(e=>!e)} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
-          <span style={{ fontSize:16 }}>{current ? (MASCOTS.find(m=>m.id===current.mascot)?.emoji||sportEmoji[sport]) : sportEmoji[sport]}</span>
-          <div style={{ flex:1 }}>
-            <div style={{ fontFamily:current?(TEAM_FONTS.find(f=>f.id===current.teamFont)?.style||"'Barlow Condensed',sans-serif"):"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:current?15:13, letterSpacing:'0.5px', color:'#f2f4f8', textTransform:'uppercase' }}>
-              {current ? current.name : `No ${sport} Team Selected`}
-            </div>
-            {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
-            {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
-          </div>
-          {current && <div style={{ display:'flex', gap:3 }}>{[current.primary,current.secondary,current.accent1,current.accent2].filter(Boolean).map((c,i)=><div key={i} style={{ width:10, height:10, borderRadius:2, background:c }} />)}</div>}
-          <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded?'▲':'▼'}</span>
-        </div>
-
-        {expanded && (
-          <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
-
-            {/* Team list */}
-            {sportTeams.length>0 && mode==='view' && (
-              <div style={{ marginBottom:12 }}>
-                <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
-                {sportTeams.map(team => {
-                  const mascot = MASCOTS.find(m=>m.id===team.mascot)
-                  const fontStyle = TEAM_FONTS.find(f=>f.id===team.teamFont)?.style||"'Barlow Condensed',sans-serif"
-                  return (
-                    <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:current?.id===team.id?al(P,0.1):'#161922', border:`1px solid ${current?.id===team.id?al(P,0.4):'#1e2330'}`, borderRadius:6, marginBottom:6 }}>
-                      <span style={{ fontSize:18, flexShrink:0 }}>{mascot?.emoji||'🏆'}</span>
-                      <div style={{ flex:1, cursor:'pointer' }} onClick={()=>selectTeam(team)}>
-                        <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
-                        <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?` · ${team.hometown}`:''}</div>
-                      </div>
-                      <div style={{ display:'flex', gap:3, flexShrink:0 }}>
-                        {[team.primary,team.secondary].map((c,i)=><div key={i} style={{ width:12,height:12,borderRadius:2,background:c }} />)}
-                      </div>
-                      {current?.id===team.id && (
-                        <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>DESELECT</button>
-                      )}
-                      {onOpenTeamTab && current?.id===team.id && (
-                        <button onClick={onOpenTeamTab} style={{ padding:'3px 7px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>OPEN →</button>
-                      )}
-                      <button onClick={()=>confirmDelete(team)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.7)', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Create form */}
-            {mode==='create' && (
-              <div style={{ animation:'fadeIn 0.2s ease' }}>
-                <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:12 }}>Create New Team</div>
-                {/* Name + Season */}
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-                  <div style={{ gridColumn:'1/-1' }}>
-                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
-                    <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={`e.g. Tolland Youth ${sport}`} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                  </div>
-                  <Sel label="Season" value={form.season||seasons[0]} onChange={v=>setForm(f=>({...f,season:v}))} options={seasons} />
-                  <div>
-                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Hometown / City</label>
-                    <input value={form.hometown} onChange={e=>setForm(f=>({...f,hometown:e.target.value}))} placeholder="e.g. Tolland, CT" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                  </div>
-                </div>
-
-                {/* Mascot picker */}
-                <div style={{ marginBottom:12 }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Mascot</label>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:4, maxHeight:120, overflowY:'auto', padding:4, background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
-                    {MASCOTS.map(m => (
-                      <div key={m.id} onClick={()=>setForm(f=>({...f,mascot:m.id}))} title={m.name} style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'6px 2px', borderRadius:4, background:form.mascot===m.id?al(P,0.2):'transparent', border:`1px solid ${form.mascot===m.id?P:'transparent'}`, cursor:'pointer', gap:1 }}>
-                        <span style={{ fontSize:18 }}>{m.emoji}</span>
-                        <span style={{ fontSize:6, color:'#6b7a96', textAlign:'center', lineHeight:1.1 }}>{m.name.slice(0,6)}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {form.mascot && <div style={{ fontSize:11, color:P, marginTop:4, fontFamily:"'Barlow Condensed',sans-serif" }}>Selected: {MASCOTS.find(m=>m.id===form.mascot)?.emoji} {MASCOTS.find(m=>m.id===form.mascot)?.name}</div>}
-                </div>
-
-                {/* Font picker */}
-                <div style={{ marginBottom:12 }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Name Font</label>
-                  <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
-                    {TEAM_FONTS.map(tf => (
-                      <div key={tf.id} onClick={()=>setForm(f=>({...f,teamFont:tf.id}))} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', background:form.teamFont===tf.id?al(P,0.1):'#161922', border:`1px solid ${form.teamFont===tf.id?P:'#1e2330'}`, borderRadius:5, cursor:'pointer' }}>
-                        <span style={{ fontFamily:tf.style, fontSize:16, color:'#f2f4f8', flex:1 }}>{form.name||'Team Name'}</span>
-                        <span style={{ fontSize:9, color:'#6b7a96' }}>{tf.preview}</span>
-                        {form.teamFont===tf.id && <span style={{ fontSize:12, color:'#4ade80' }}>✓</span>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 4 color pickers */}
-                {[['primary','Primary'],['secondary','Secondary'],['accent1','Accent 1'],['accent2','Accent 2']].map(([key,label]) => (
-                  <div key={key} style={{ marginBottom:10 }}>
-                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>{label} Color</label>
-                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                      <input type="color" value={form[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))} style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0, background:'none' }} />
-                      <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                        {['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#f59e0b','#374151'].map(c => (
-                          <div key={c} onClick={()=>setForm(f=>({...f,[key]:c}))} style={{ width:22, height:22, borderRadius:3, background:c, border:`2px solid ${form[key]===c?'white':'transparent'}`, cursor:'pointer' }} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Color preview */}
-                <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 25%,${form.secondary} 25%,${form.secondary} 50%,${form.accent1} 50%,${form.accent1} 75%,${form.accent2} 75%)`, marginBottom:12 }} />
-
-                {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
-                <div style={{ display:'flex', gap:8 }}>
-                  <button onClick={()=>{setMode('view');setError('')}} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
-                  <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
-                </div>
-              </div>
-            )}
-
-            {/* Add button */}
-            {mode==='view' && sportTeams.length<MAX_TEAMS && (
-              <button onClick={()=>setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </>
-  )
-}
-
-
-// ─── SCHEDULE SECTION ─────────────────────────────────────────────────────────
-function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
-  const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
-  const [savedOpponents, setSavedOpponents] = useState([])
-
-  const schedule = team.schedule || []
-
-  function saveEvent() {
-    if (!form.date) return
-    const event = { id:Date.now(), ...form }
-    const updated = [...schedule, event].sort((a,b)=>new Date(a.date)-new Date(b.date))
-    updateTeam({ schedule: updated })
-    // Save opponent for reuse
-    if (form.opponent && !savedOpponents.includes(form.opponent)) {
-      setSavedOpponents(prev=>[...prev, form.opponent])
-    }
-    setForm({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
-    setShowAdd(false)
-  }
-
-  function removeEvent(id) {
-    updateTeam({ schedule: schedule.filter(e=>e.id!==id) })
-  }
-
-  function updateTeam(updates) {
-    setTeams(prev=>({ ...prev, [sport]: (prev[sport]||[]).map(t=>t.id===team.id ? {...t,...updates} : t) }))
-  }
-
-  const typeColors = { Game:P, Practice:'#4ade80', Scrimmage:'#f59e0b', Tournament:'#c084fc' }
-  const typeIcons = { Game:'🏆', Practice:'📋', Scrimmage:'⚡', Tournament:'🥇' }
-
-  const upcoming = schedule.filter(e=>new Date(e.date)>=new Date())
-  const past = schedule.filter(e=>new Date(e.date)<new Date())
-
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-      <Card>
-        <CardHead icon="📅" title="Schedule" tag={`${upcoming.length} upcoming`} tagColor={P} accent={P} />
-        <div style={{ padding:14 }}>
-          {!showAdd ? (
-            <button onClick={()=>setShowAdd(true)} style={{ width:'100%', padding:'10px', background:al(P,0.1), border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', marginBottom:upcoming.length?12:0 }}>+ ADD EVENT</button>
-          ) : (
-            <div style={{ animation:'fadeIn 0.2s ease', marginBottom:12 }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:10 }}>Add Event</div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
-                <Sel label="Type" value={form.type} onChange={v=>setForm(f=>({...f,type:v}))} options={['Game','Practice','Scrimmage','Tournament']} />
-                <Sel label="Home / Away" value={form.homeAway} onChange={v=>setForm(f=>({...f,homeAway:v}))} options={['Home','Away','Neutral']} />
-                <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Opponent / Event Name</label>
-                  <input value={form.opponent} onChange={e=>setForm(f=>({...f,opponent:e.target.value}))} placeholder={form.type==='Practice'?'Practice session':'e.g. Westport Eagles'} list="saved-opps" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                  <datalist id="saved-opps">{savedOpponents.map(o=><option key={o} value={o}/>)}</datalist>
-                </div>
-                <div>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Date</label>
-                  <input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:`1px solid ${form.date?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-                <div>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Start Time</label>
-                  <input type="time" value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-                <div>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Arrival Time</label>
-                  <input type="time" value={form.arrivalTime} onChange={e=>setForm(f=>({...f,arrivalTime:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-                <div>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / City</label>
-                  <input value={form.location} onChange={e=>setForm(f=>({...f,location:e.target.value}))} placeholder={form.homeAway==='Home'?team.hometown||'Home field':'e.g. Westport, CT'} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-                <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
-                  <input value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="e.g. Bring extra water, wear red jerseys" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-              </div>
-              <div style={{ display:'flex', gap:8 }}>
-                <button onClick={()=>setShowAdd(false)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
-                <button onClick={saveEvent} disabled={!form.date} style={{ flex:2, padding:'9px', background:form.date?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:form.date?'pointer':'not-allowed', letterSpacing:'1px' }}>SAVE EVENT</button>
-              </div>
-            </div>
-          )}
-
-          {upcoming.length===0 && !showAdd && (
-            <div style={{ textAlign:'center', padding:'16px 0', color:'#3d4559', fontSize:12 }}>No upcoming events — add your schedule above</div>
-          )}
-
-          {upcoming.map(event => {
-            const tc = typeColors[event.type]||P
-            return (
-              <div key={event.id} style={{ padding:'10px 12px', background:'#161922', border:`1px solid ${al(tc,0.25)}`, borderRadius:6, marginBottom:8, borderLeft:`3px solid ${tc}` }}>
-                <div style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
-                  <span style={{ fontSize:16, flexShrink:0 }}>{typeIcons[event.type]||'📅'}</span>
-                  <div style={{ flex:1 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
-                      <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{event.opponent||event.type}</div>
-                      <span style={{ fontSize:8, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} · {event.homeAway}</span>
-                    </div>
-                    <div style={{ fontSize:11, color:'#6b7a96', marginTop:2 }}>
-                      {new Date(event.date+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
-                      {event.time && ` · ${event.time}`}
-                      {event.arrivalTime && ` · Arrive ${event.arrivalTime}`}
-                    </div>
-                    {event.location && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>📍 {event.location}</div>}
-                    {event.notes && <div style={{ fontSize:10, color:'#3d4559', marginTop:1, fontStyle:'italic' }}>{event.notes}</div>}
-                  </div>
-                  <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, flexShrink:0 }}>×</button>
-                </div>
-              </div>
-            )
-          })}
-
-          {past.length>0 && (
-            <details style={{ marginTop:8 }}>
-              <summary style={{ fontSize:10, color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>PAST EVENTS ({past.length})</summary>
-              <div style={{ marginTop:6, opacity:0.5 }}>
-                {past.map(event => (
-                  <div key={event.id} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5, fontSize:11, color:'#6b7a96' }}>
-                    {typeIcons[event.type]} {event.opponent||event.type} · {new Date(event.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'})}
-                  </div>
-                ))}
-              </div>
-            </details>
-          )}
-        </div>
-      </Card>
-    </div>
-  )
+  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
 }
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
@@ -1905,101 +1369,7 @@ function SchemePreviewMini({ type='offense', P }) {
 }
 
 // ─── SCHEMES PAGE ─────────────────────────────────────────────────────────────
-
-// ─── INDIVIDUAL PLAY CREATOR ──────────────────────────────────────────────────
-function IndividualPlayCreator({ sport, P, S, al, callAI, parseJSON, onSavePlay }) {
-  const isFB = sport==='Football', isBB = sport==='Basketball', isBSB = sport==='Baseball'
-
-  const fbFields = [
-    {id:'formation',label:'Offensive Formation',opts:['I-Formation','Shotgun','Pistol','Single Back','Under Center','Wildcat','Empty Set']},
-    {id:'playType',label:'Play Type',opts:['Run — Inside','Run — Outside','Run — Misdirection','Pass — Quick Game','Pass — Play Action','Pass — Deep Shot','Special Teams','Two-Point Conversion','Goal Line']},
-    {id:'situation',label:'Situation',opts:['1st & 10','2nd & Short (1-3)','2nd & Medium (4-7)','2nd & Long (8+)','3rd & Short (1-3)','3rd & Medium (4-7)','3rd & Long (8+)','4th Down','Red Zone (inside 20)','Goal Line (inside 5)','2-Minute Drill','Opening Drive']},
-    {id:'personnel',label:'Personnel Package',opts:['11 Personnel (3 WR)','12 Personnel (2 WR 1 TE)','21 Personnel (2 RB)','Jumbo / Heavy','Empty Backfield','Trips Formation','Bunch Formation']},
-    {id:'defense',label:'Expected Defense',opts:['Unknown','4-3 Base','3-4 Base','Nickel','Dime','Cover 2','Cover 3','Cover 4','Man Press','Blitz Package','Zone Blitz']},
-    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
-  ]
-  const bbFields = [
-    {id:'setType',label:'Play / Set Type',opts:['Half Court Set','Inbound — Baseline','Inbound — Sideline','Press Break','Fast Break Sequence','End of Game','Zone Attack','Pick & Roll','Isolation','Horns Set','Box Set']},
-    {id:'situation',label:'Situation',opts:['Opening Possession','Up by 1-5 (protect)','Down by 1-5 (attack)','Tie Game','Final Possession','After Timeout','After Made Basket','Bonus Situation','Full Court Press Situation','Transition']},
-    {id:'personnel',label:'Primary Option',opts:['Best Ball Handler','Dominant Big','Best Shooter','Athletic Wing','Balanced — No Star','Post Entry','Perimeter Drive']},
-    {id:'defense',label:'Expected Defense',opts:['Man-to-Man','2-3 Zone','1-3-1 Zone','3-2 Zone','Full Court Press','Half Court Trap','Box-and-One','Triangle-and-Two']},
-    {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-  ]
-  const bsbFields = [
-    {id:'playType',label:'Play / Strategy Type',opts:['Hit and Run','Bunt — Sacrifice','Bunt — Squeeze','Stolen Base','Delayed Steal','First and Third','Double Steal','Walk-Up Hitter Approach','Defensive Shift','Intentional Walk','Pitching Change','Pinch Hitter']},
-    {id:'situation',label:'Situation',opts:['Leadoff Inning','Runner on 1st','Runner on 2nd','Runner on 3rd','1st & 2nd','1st & 3rd','Bases Loaded','2 Outs','Less than 2 Outs','Tie Game Late','Up by 1 Late','Down by 1 Late']},
-    {id:'count',label:'Count',opts:['0-0','1-0','2-0','3-0','0-1','0-2','1-2','2-2','3-2','Full Count']},
-    {id:'inning',label:'Inning',opts:['1st','2nd','3rd','4th','5th','6th','7th','Extra Innings']},
-    {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-  ]
-
-  const activeCfg = isBB ? bbFields : isBSB ? bsbFields : fbFields
-  const initF = () => { const f={}; activeCfg.forEach(x=>{f[x.id]=x.opts[0]}); return f }
-  const [fields, setFields] = useState(initF)
-  const [playName, setPlayName] = useState('')
-  const [customNotes, setCustomNotes] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState(null)
-  const [error, setError] = useState('')
-  const [saved, setSaved] = useState(false)
-
-  async function generate() {
-    if (!playName.trim()) { setError('Give your play a name first'); return }
-    setLoading(true); setResult(null); setError(''); setSaved(false)
-    const inputSummary = Object.keys(fields).map(k=>k+': '+fields[k]).join(', ')
-    const extraNotes = customNotes.trim() ? ' Additional coach notes: '+customNotes : ''
-    const sportLabel = isBB?'basketball':isBSB?'baseball':'football'
-    const typeHint = isBB?'SET PLAY HALF COURT or INBOUND BASELINE or PRESS BREAK or FAST BREAK or ZONE ATTACK or END OF GAME':isBSB?'OFFENSE SITUATIONAL or DEFENSE ALIGNMENT or BASERUNNING RULE or PITCHING STRATEGY or BATTING APPROACH':'RUN BASE or RUN PERIMETER or RUN MISDIRECTION or PASS PLAY ACTION or PASS QUICK GAME or RUN SHORT YARDAGE'
-    const prompt = `You are an elite youth ${sportLabel} coordinator. Design ONE specific play called "${playName.trim()}". Inputs: ${inputSummary}.${extraNotes} Return ONLY valid JSON: {"number":1,"name":"${playName.trim()}","type":"${typeHint.split(' or ')[0]}","note":"precise when-to-use description","summary":"2-3 sentence tactical overview","keyPlayers":["role 1","role 2","role 3"],"coachingCue":"exact phrase to say in huddle"}`
-    try {
-      const raw = await callAI(prompt)
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      const data = JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1))
-      setResult(data)
-    } catch(e) { setError(e.message) }
-    setLoading(false)
-  }
-
-  function handleSave(folderName, teamId) {
-    if (!result) return
-    onSavePlay({ ...result, _individual: true, _sport: sport, _savedAt: Date.now() }, folderName, teamId)
-    setSaved(true)
-  }
-
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-      <Card>
-        <CardHead icon="✏️" title="Create Individual Play" tag={sport.toUpperCase()} tagColor={P} accent={P} />
-        <div style={{ padding:14 }}>
-          <div style={{ marginBottom:10 }}>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Play Name *</label>
-            <input value={playName} onChange={e=>{setPlayName(e.target.value);setError('')}} placeholder={isBB?"e.g. Horns Flare":isBSB?"e.g. First & Third Squeeze":"e.g. Power 34 Counter"} style={{ width:'100%', background:'#161922', border:`1px solid ${playName?P:'#1e2330'}`, borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-            {activeCfg.map(f => (<Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
-          </div>
-          <div style={{ marginBottom:10 }}>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Additional Notes <span style={{ color:'#3d4559', fontSize:8 }}>(optional — describe anything specific)</span></label>
-            <textarea value={customNotes} onChange={e=>setCustomNotes(e.target.value)} placeholder="e.g. My best receiver runs a skinny post, QB is left-handed, defender always jumps routes..." rows={2} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', resize:'vertical' }} />
-          </div>
-          {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
-          <PBtn onClick={generate} disabled={loading||!playName.trim()} color={P}>{loading?'CREATING PLAY...':'CREATE PLAY'}</PBtn>
-          {loading && <Shimmer />}
-        </div>
-      </Card>
-
-      {result && (
-        <div style={{ animation:'fadeIn 0.3s ease' }}>
-          <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your Play — Full Breakdown</div>
-          <PlayCardWithSave play={result} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={{[sport]:{}}} onAddToPlaybook={handleSave} onCreateAndAdd={handleSave} />
-          {saved && <div style={{ marginTop:8, padding:'8px 12px', background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6, fontSize:12, color:'#4ade80', textAlign:'center' }}>✓ Play saved to playbook</div>}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function SchemesPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ }) {
+function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
   const [offFields, setOffFields] = useState(initFields)
@@ -2272,30 +1642,18 @@ function DefFormationCardWithSave({ formation: f, S, P, al, callAI, parseJSON, s
 
 
 // ─── PLAYBOOK PAGE (restructured) ────────────────────────────────────────────
-function PlaybookPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlaybook, teams, activeTeam }) {
-  const sportTeams = teams[sport] || []
-  // Active team for playbook view — default to active team, or first team, or null
-  const [viewingTeam, setViewingTeam] = useState(() => activeTeam[sport]?.id || null)
-  const [playMode, setPlayMode] = useState('browse') // browse | create
-  const [activeFolder, setActiveFolder] = useState(DEFAULT_FOLDERS[sport]?.[0] || 'My Favorites')
+function PlaybookPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlaybook }) {
+  const sportFolders = playbook[sport] || {}
+  const allFolderNames = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
+  const [activeFolder, setActiveFolder] = useState(allFolderNames[0] || 'My Favorites')
   const [newFolderName, setNewFolderName] = useState('')
   const [showNewFolder, setShowNewFolder] = useState(false)
-  const [copyTarget, setCopyTarget] = useState(null) // { play, fromTeamId, fromFolder }
 
-  // Determine which playbook we're viewing
-  const teamKey = viewingTeam ? `team_${viewingTeam}` : 'general'
-  const currentPb = playbook[sport]?.[teamKey] || {}
-  const allFolderNames = [...new Set([...(DEFAULT_FOLDERS[sport]||[]), ...Object.keys(currentPb)])]
-  const folderPlays = currentPb[activeFolder] || []
-
-  const viewingTeamName = sportTeams.find(t=>t.id===viewingTeam)?.name || 'General Playbook'
+  const folderPlays = sportFolders[activeFolder] || []
 
   function removePlay(idx) {
     const updated = folderPlays.filter((_,i)=>i!==idx)
-    setPlaybook(pb => ({
-      ...pb,
-      [sport]: { ...(pb[sport]||{}), [teamKey]: { ...currentPb, [activeFolder]: updated } }
-    }))
+    setPlaybook(pb => ({ ...pb, [sport]: { ...sportFolders, [activeFolder]: updated } }))
   }
 
   function createFolder() {
@@ -2305,203 +1663,100 @@ function PlaybookPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlayboo
     setShowNewFolder(false)
   }
 
-  function copyPlay(play, targetTeamId, targetFolder) {
-    const targetKey = targetTeamId ? `team_${targetTeamId}` : 'general'
-    const targetPb = playbook[sport]?.[targetKey] || {}
-    const targetFolderPlays = targetPb[targetFolder] || []
-    setPlaybook(pb => ({
-      ...pb,
-      [sport]: {
-        ...(pb[sport]||{}),
-        [targetKey]: { ...targetPb, [targetFolder]: [...targetFolderPlays, { ...play, _copiedFrom: viewingTeamName, _copiedAt: Date.now() }] }
-      }
-    }))
-    setCopyTarget(null)
-  }
-
   return (
     <>
       <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Saved plays · {sport}</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Your saved plays</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Playbook</div>
       </div>
 
-      {/* Team playbook switcher */}
-      <div style={{ marginBottom:10 }}>
-        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Viewing playbook for</label>
-        <select value={viewingTeam||''} onChange={e=>{ setViewingTeam(e.target.value||null); setActiveFolder(DEFAULT_FOLDERS[sport]?.[0]||'My Favorites') }} style={{ width:'100%', background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-          <option value="">General Playbook (no team)</option>
-          {sportTeams.map(t => <option key={t.id} value={t.id}>{t.name} — {t.season}</option>)}
-        </select>
-      </div>
-
-      {/* Mode switcher */}
-      <div style={{ display:'flex', gap:6, marginBottom:12 }}>
-        {[['browse','📖 Browse Plays'],['create','✏️ Create Play']].map(([m,lbl]) => (
-          <button key={m} onClick={()=>setPlayMode(m)} style={{ flex:1, padding:'9px', borderRadius:4, fontSize:11, border:`1px solid ${playMode===m?P:'#1e2330'}`, background:playMode===m?al(P,0.15):'transparent', color:playMode===m?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
+      {/* Folder tabs */}
+      <div style={{ overflowX:'auto', display:'flex', gap:6, paddingBottom:4, marginBottom:12 }}>
+        {allFolderNames.map(f => (
+          <button key={f} onClick={()=>setActiveFolder(f)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeFolder===f?P:'#1e2330'}`, background:activeFolder===f?al(P,0.15):'transparent', color:activeFolder===f?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px', whiteSpace:'nowrap' }}>
+            {f} <span style={{ opacity:0.6, marginLeft:3 }}>{(sportFolders[f]||[]).length}</span>
+          </button>
         ))}
+        <button onClick={()=>setShowNewFolder(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Folder</button>
       </div>
 
-      {playMode === 'create' && (
-        <IndividualPlayCreator
-          sport={sport} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON}
-          onSavePlay={(play, folder) => {
-            const f = folder || activeFolder
-            const existing = currentPb[f] || []
-            setPlaybook(pb => ({
-              ...pb,
-              [sport]: { ...(pb[sport]||{}), [teamKey]: { ...currentPb, [f]: [...existing, play] } }
-            }))
-          }}
-        />
+      {showNewFolder && (
+        <div style={{ display:'flex', gap:7, marginBottom:10 }}>
+          <input value={newFolderName} onChange={e=>setNewFolderName(e.target.value)} placeholder="Folder name..." onKeyDown={e=>e.key==='Enter'&&createFolder()} style={{ flex:1, background:'#161922', border:`1px solid ${P}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+          <button onClick={createFolder} style={{ padding:'0 16px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CREATE</button>
+        </div>
       )}
 
-      {playMode === 'browse' && (
-        <>
-          {/* Folder tabs */}
-          <div style={{ overflowX:'auto', display:'flex', gap:6, paddingBottom:4, marginBottom:10 }}>
-            {allFolderNames.map(f => (
-              <button key={f} onClick={()=>setActiveFolder(f)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeFolder===f?P:'#1e2330'}`, background:activeFolder===f?al(P,0.15):'transparent', color:activeFolder===f?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>
-                {f} <span style={{ opacity:0.6 }}>{(currentPb[f]||[]).length}</span>
-              </button>
-            ))}
-            <button onClick={()=>setShowNewFolder(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New</button>
+      {folderPlays.length === 0 ? (
+        <Card>
+          <div style={{ padding:'32px 20px', textAlign:'center' }}>
+            <div style={{ fontSize:32, marginBottom:8 }}>📁</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:6 }}>{activeFolder} is empty</div>
+            <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Generate a scheme in the Schemes tab and tap "+ Playbook" to add plays here.</div>
           </div>
-
-          {showNewFolder && (
-            <div style={{ display:'flex', gap:7, marginBottom:10 }}>
-              <input value={newFolderName} onChange={e=>setNewFolderName(e.target.value)} placeholder="Folder name..." onKeyDown={e=>e.key==='Enter'&&createFolder()} style={{ flex:1, background:'#161922', border:`1px solid ${P}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
-              <button onClick={createFolder} style={{ padding:'0 16px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CREATE</button>
-            </div>
-          )}
-
-          {folderPlays.length === 0 ? (
-            <Card>
-              <div style={{ padding:'32px 20px', textAlign:'center' }}>
-                <div style={{ fontSize:32, marginBottom:8 }}>📁</div>
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:6 }}>{activeFolder} is empty</div>
-                <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6, marginBottom:12 }}>Generate a scheme in Schemes tab or create an individual play above, then save it here.</div>
-                <button onClick={()=>setPlayMode('create')} style={{ padding:'9px 18px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px' }}>CREATE A PLAY</button>
+        </Card>
+      ) : (
+        <div>
+          <div style={{ fontSize:10, color:'#6b7a96', marginBottom:8 }}>{folderPlays.length} play{folderPlays.length!==1?'s':''} in {activeFolder}</div>
+          {folderPlays.map((play, i) => (
+            <div key={i} style={{ marginBottom:8, position:'relative' }}>
+              <div style={{ position:'absolute', top:8, right:8, zIndex:10 }}>
+                <button onClick={()=>removePlay(i)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:3, color:'#ef4444', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>REMOVE</button>
               </div>
-            </Card>
-          ) : (
-            <div>
-              <div style={{ fontSize:10, color:'#6b7a96', marginBottom:8 }}>{folderPlays.length} play{folderPlays.length!==1?'s':''} · {viewingTeamName} · {activeFolder}</div>
-              {folderPlays.map((play, i) => (
-                <div key={i} style={{ marginBottom:8, position:'relative' }}>
-                  <div style={{ position:'absolute', top:8, right:8, zIndex:10, display:'flex', gap:5 }}>
-                    <button onClick={()=>setCopyTarget({ play, fromFolder:activeFolder })} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>COPY</button>
-                    <button onClick={()=>removePlay(i)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:3, color:'#ef4444', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
-                  </div>
-                  <PlayCard play={play} P={play._isDefense?'#6b9fff':P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />
-                </div>
-              ))}
+              <PlayCard play={play} P={play._isDefense?'#6b9fff':P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />
             </div>
-          )}
-
-          {/* Copy play modal */}
-          {copyTarget && (
-            <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-              <div style={{ background:'#0f1219', border:`1px solid ${al(P,0.3)}`, borderRadius:8, padding:20, width:'100%', maxWidth:380 }}>
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', marginBottom:4 }}>Copy "{copyTarget.play.name}"</div>
-                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:14 }}>Choose destination team and folder</div>
-                <div style={{ marginBottom:10 }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Destination Team</label>
-                  <select id="copyTeamSel" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-                    <option value="">General Playbook</option>
-                    {sportTeams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
-                  </select>
-                </div>
-                <div style={{ marginBottom:14 }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Destination Folder</label>
-                  <select id="copyFolderSel" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-                    {(DEFAULT_FOLDERS[sport]||[]).map(f=><option key={f}>{f}</option>)}
-                  </select>
-                </div>
-                <div style={{ display:'flex', gap:8 }}>
-                  <button onClick={()=>setCopyTarget(null)} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
-                  <button onClick={()=>{ const ts=document.getElementById('copyTeamSel'); const fs=document.getElementById('copyFolderSel'); copyPlay(copyTarget.play, ts?.value||null, fs?.value||DEFAULT_FOLDERS[sport]?.[0]) }} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>COPY PLAY</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
     </>
   )
 }
 
-
-// ─── SCOUT PAGE (rebuilt with dropdowns + film) ────────────────────────────────
-function ScoutPage({ P, S, al, sport, callAI, parseJSON, teams, activeTeam }) {
-  const [scoutMode, setScoutMode] = useState('opponent') // opponent | self
+// ─── SCOUT PAGE ────────────────────────────────────────────────────────────────
+function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
   const [opponents, setOpponents] = useState([])
   const [activeOpp, setActiveOpp] = useState(null)
+  const [newOppName, setNewOppName] = useState('')
   const [showAddOpp, setShowAddOpp] = useState(false)
   const [scoutLoading, setScoutLoading] = useState(false)
   const [scoutResult, setScoutResult] = useState(null)
   const [notes, setNotes] = useState({})
   const [tendencies, setTendencies] = useState({})
   const [newTendency, setNewTendency] = useState('')
-
-  const isFB = sport==='Football', isBB = sport==='Basketball', isBSB = sport==='Baseball'
-  const currentTeam = activeTeam[sport]
-
-  // Structured scouting dropdowns
-  const [oppForm, setOppForm] = useState({
-    offStyle: '', defStyle: '', keyThreat: '', tempo: '', specialty: ''
-  })
-
-  const fbOppOpts = {
-    offStyle: ['Unknown','Spread / Pass Heavy','Wing-T / Misdirection','Power Run','Option / Read Heavy','Balanced','Air It Out'],
-    defStyle: ['Unknown','4-3 Base','3-4 Base','5-2 Youth','Blitz Heavy','Zone Heavy','Man Press','Multiple'],
-    keyThreat: ['Unknown','Elite QB / Scrambler','Power RB','Speed Receivers','Big Physical OL','Multiple Threats','No Clear Star'],
-    tempo: ['Unknown','Hurry-Up / No Huddle','Slow / Methodical','Balanced','Two-Minute Style'],
-    specialty: ['None Known','Strong Special Teams','Trick Plays Heavy','Goal Line Package','Screen Game Heavy','Jet Sweeps'],
-  }
-  const bbOppOpts = {
-    offStyle: ['Unknown','Motion / Ball Movement','ISO / Star Player','Pick & Roll Heavy','Drive & Kick','Post Dominant','Transition Heavy'],
-    defStyle: ['Unknown','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Matchup Zone','Switching Everything'],
-    keyThreat: ['Unknown','Elite Ball Handler','Dominant Big','3-Point Shooter','Athletic Wing','Balanced Team'],
-    tempo: ['Unknown','Fast Pace / Push It','Slow / Grind','Balanced','End of Shot Clock'],
-    specialty: ['None Known','Trap Heavy','Technical Fouls / Physical','Zone Trap','Pressing Every Possession','Hack-a-Player'],
-  }
-  const bsbOppOpts = {
-    offStyle: ['Unknown','Pull Hitters','Spray Hitters','Small Ball / Bunts','Power Lineup','Speed & Steals','Patient / Walk Heavy'],
-    defStyle: ['Unknown','Standard Alignments','Heavy Shifting','Five Man Infield Late','Aggressive Outfield','Wheel Play Heavy'],
-    keyThreat: ['Unknown','Elite Leadoff Hitter','Cleanup Power Hitter','Speed on Bases','Strong Pitching','Balanced Lineup'],
-    tempo: ['Unknown','Aggressive Base Running','Conservative','Steal on 1st Pitch','Take Pitches'],
-    specialty: ['None Known','Strong Bullpen','Knuckleball / Junk','Elite Defense','Hit & Run Heavy'],
-  }
-  const oppOpts = isBB ? bbOppOpts : isBSB ? bsbOppOpts : fbOppOpts
-
-  const [newOppName, setNewOppName] = useState('')
   const [gameDate, setGameDate] = useState('')
 
   function addOpponent() {
     if (!newOppName.trim()) return
-    const opp = { id: Date.now(), name: newOppName.trim(), sport, gameDate, teamId: currentTeam?.id || null }
+    const opp = { id: Date.now(), name: newOppName.trim(), sport, notes: '', tendencies: [] }
     setOpponents(prev => [...prev, opp])
     setActiveOpp(opp.id)
-    setNewOppName(''); setGameDate('')
+    setNewOppName('')
     setShowAddOpp(false)
   }
 
-  const currentOpp = opponents.find(o => o.id === activeOpp)
+  const currentOpp = opponents.find(o=>o.id===activeOpp)
 
   async function generateScoutReport() {
     if (!currentOpp) return
     setScoutLoading(true); setScoutResult(null)
-    const structured = Object.entries(oppForm).filter(([,v])=>v).map(([k,v])=>k+': '+v).join(', ')
-    const freeNotes = notes[activeOpp] || ''
-    const tendList = (tendencies[activeOpp]||[]).join(', ')
-    const teamCtx = currentTeam ? `Scouting for team: ${currentTeam.name} (${sport}).` : ''
+    const oppTendencies = tendencies[activeOpp] || []
+    const oppNotes = notes[activeOpp] || ''
     try {
-      const raw = await callAI(`You are an elite youth ${sport.toLowerCase()} scout. ${teamCtx} Generate a comprehensive opponent scouting report for: "${currentOpp.name}". Structured info: ${structured||'None'}. Observed tendencies: ${tendList||'None'}. Coach notes: ${freeNotes||'None'}. Return ONLY valid JSON: {"overview":"2-3 sentence opponent summary","keyThreats":[{"threat":"name","description":"what they do","howToStop":"counter"},{"threat":"name","description":"what they do","howToStop":"counter"},{"threat":"name","description":"what they do","howToStop":"counter"}],"offensiveTendencies":["t1","t2","t3"],"defensiveTendencies":["t1","t2","t3"],"gameplan":"3-4 sentence overall game plan","keyAdjustment":"most important tactical adjustment","motivationalNote":"one line for your team"}`)
+      const raw = await callAI(`You are an elite youth ${sport.toLowerCase()} scout. Generate a comprehensive opponent scouting report for: "${currentOpp.name}". Known tendencies: ${oppTendencies.join(', ') || 'None recorded yet'}. Coach notes: ${oppNotes || 'None'}. Return ONLY valid JSON: {"overview":"2-3 sentence opponent summary","keyThreats":[{"threat":"threat name","description":"what they do","howToStop":"counter strategy"},{"threat":"threat name","description":"what they do","howToStop":"counter strategy"},{"threat":"threat name","description":"what they do","howToStop":"counter strategy"}],"offensiveTendencies":["tendency 1","tendency 2","tendency 3"],"defensiveTendencies":["tendency 1","tendency 2","tendency 3"],"gameplan":"3-4 sentence overall game plan","keyAdjustment":"most important tactical adjustment","motivationalNote":"one line to tell your team"}`)
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setScoutResult(JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1)))
     } catch(e) { setScoutResult({ error: e.message }) }
     setScoutLoading(false)
+  }
+
+  function addTendency() {
+    if (!newTendency.trim() || !activeOpp) return
+    setTendencies(prev => ({ ...prev, [activeOpp]: [...(prev[activeOpp]||[]), newTendency.trim()] }))
+    setNewTendency('')
+  }
+
+  function removeTendency(idx) {
+    setTendencies(prev => ({ ...prev, [activeOpp]: (prev[activeOpp]||[]).filter((_,i)=>i!==idx) }))
   }
 
   return (
@@ -2511,428 +1766,375 @@ function ScoutPage({ P, S, al, sport, callAI, parseJSON, teams, activeTeam }) {
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Scout</div>
       </div>
 
-      {/* Mode switcher */}
-      <div style={{ display:'flex', gap:6, marginBottom:12 }}>
-        {[['opponent','🔍 Opponent Scout'],['self','🎥 Self Scout / Film']].map(([m,lbl]) => (
-          <button key={m} onClick={()=>setScoutMode(m)} style={{ flex:1, padding:'9px', borderRadius:4, fontSize:11, border:`1px solid ${scoutMode===m?P:'#1e2330'}`, background:scoutMode===m?al(P,0.15):'transparent', color:scoutMode===m?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{lbl}</button>
+      {/* Opponent selector */}
+      <div style={{ overflowX:'auto', display:'flex', gap:6, paddingBottom:4, marginBottom:12 }}>
+        {opponents.map(o => (
+          <button key={o.id} onClick={()=>{setActiveOpp(o.id);setScoutResult(null)}} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeOpp===o.id?P:'#1e2330'}`, background:activeOpp===o.id?al(P,0.15):'transparent', color:activeOpp===o.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>{o.name}</button>
         ))}
+        <button onClick={()=>setShowAddOpp(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ Add Opponent</button>
       </div>
 
-      {scoutMode === 'self' && (
-        <FilmPage P={P} S={S} al={al} dk={(h,a)=>h} sport={sport} callAI={callAI} parseJSON={parseJSON} teamContext={currentTeam} />
+      {showAddOpp && (
+        <div style={{ display:'flex', gap:7, marginBottom:10 }}>
+          <input value={newOppName} onChange={e=>setNewOppName(e.target.value)} placeholder="Opponent team name..." onKeyDown={e=>e.key==='Enter'&&addOpponent()} style={{ flex:1, background:'#161922', border:`1px solid ${P}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+          <input value={gameDate} onChange={e=>setGameDate(e.target.value)} placeholder="Game date" style={{ width:110, background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+          <button onClick={addOpponent} style={{ padding:'0 14px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>ADD</button>
+        </div>
       )}
 
-      {scoutMode === 'opponent' && (
-        <>
-          {currentTeam && <div style={{ padding:'6px 10px', background:al(P,0.08), border:`1px solid ${al(P,0.2)}`, borderRadius:4, marginBottom:10, fontSize:11, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Scouting for: {currentTeam.name} — {currentTeam.season}</div>}
-
-          {/* Opponent tabs */}
-          <div style={{ overflowX:'auto', display:'flex', gap:6, paddingBottom:4, marginBottom:10 }}>
-            {opponents.filter(o=>o.sport===sport&&(!currentTeam||o.teamId===currentTeam?.id||!o.teamId)).map(o => (
-              <button key={o.id} onClick={()=>{setActiveOpp(o.id);setScoutResult(null)}} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeOpp===o.id?P:'#1e2330'}`, background:activeOpp===o.id?al(P,0.15):'transparent', color:activeOpp===o.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>{o.name}</button>
-            ))}
-            <button onClick={()=>setShowAddOpp(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ Add Opponent</button>
+      {!currentOpp ? (
+        <Card>
+          <div style={{ padding:'40px 20px', textAlign:'center' }}>
+            <div style={{ fontSize:36, marginBottom:10 }}>🔍</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Opponents Added Yet</div>
+            <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6, marginBottom:16 }}>Add an upcoming opponent to build a full AI scouting report, track their tendencies, and create a game plan.</div>
+            <button onClick={()=>setShowAddOpp(true)} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', cursor:'pointer' }}>ADD FIRST OPPONENT</button>
           </div>
-
-          {showAddOpp && (
-            <div style={{ display:'flex', gap:7, marginBottom:10, flexWrap:'wrap' }}>
-              <input value={newOppName} onChange={e=>setNewOppName(e.target.value)} placeholder="Opponent name (optional)..." onKeyDown={e=>e.key==='Enter'&&addOpponent()} style={{ flex:2, minWidth:140, background:'#161922', border:`1px solid ${P}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
-              <input value={gameDate} onChange={e=>setGameDate(e.target.value)} placeholder="Game date" style={{ flex:1, minWidth:100, background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
-              <button onClick={addOpponent} style={{ padding:'0 14px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>ADD</button>
-            </div>
-          )}
-
-          {!currentOpp ? (
-            <Card>
-              <div style={{ padding:'40px 20px', textAlign:'center' }}>
-                <div style={{ fontSize:36, marginBottom:10 }}>🔍</div>
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Opponent Added Yet</div>
-                <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6, marginBottom:16 }}>Add an upcoming opponent to build a full AI scouting report. Opponent name is optional — you can scout anonymously.</div>
-                <button onClick={()=>setShowAddOpp(true)} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', cursor:'pointer' }}>ADD OPPONENT</button>
+        </Card>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <Card>
+            <CardHead icon="🔍" title={currentOpp.name} tag={sport.toUpperCase()} tagColor={P} accent={P} />
+            <div style={{ padding:14 }}>
+              {/* Notes */}
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6 }}>Coach Notes</div>
+                <textarea value={notes[activeOpp]||''} onChange={e=>setNotes(prev=>({...prev,[activeOpp]:e.target.value}))} placeholder="Add what you know about this team — formation tendencies, key players, things you've seen on film..." rows={3} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', resize:'vertical' }} />
               </div>
-            </Card>
-          ) : (
-            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              <Card>
-                <CardHead icon="🔍" title={currentOpp.name || 'Next Opponent'} tag={sport.toUpperCase()} tagColor={P} accent={P} />
-                <div style={{ padding:14 }}>
-                  {/* Structured dropdowns */}
-                  <div style={{ marginBottom:12 }}>
-                    <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Scouting Profile</div>
-                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-                      {Object.entries(oppOpts).map(([key, opts]) => (
-                        <Sel key={key} label={key.replace(/([A-Z])/g,' $1').trim()} value={oppForm[key]||opts[0]} onChange={v=>setOppForm(f=>({...f,[key]:v}))} options={opts} />
-                      ))}
-                    </div>
+              {/* Tendencies */}
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6 }}>Observed Tendencies</div>
+                {(tendencies[activeOpp]||[]).map((t,i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5 }}>
+                    <div style={{ width:6, height:6, borderRadius:'50%', background:P, flexShrink:0 }} />
+                    <div style={{ flex:1, fontSize:12, color:'#f2f4f8' }}>{t}</div>
+                    <button onClick={()=>removeTendency(i)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
                   </div>
-                  {/* Observed tendencies */}
+                ))}
+                <div style={{ display:'flex', gap:7 }}>
+                  <input value={newTendency} onChange={e=>setNewTendency(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addTendency()} placeholder="e.g. Always runs on 1st down..." style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:5, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
+                  <button onClick={addTendency} style={{ padding:'0 12px', background:al(P,0.15), border:`1px solid ${P}`, borderRadius:5, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer' }}>ADD</button>
+                </div>
+              </div>
+              <PBtn onClick={generateScoutReport} disabled={scoutLoading} color={P}>{scoutLoading ? 'SCOUTING...' : '🔍 GENERATE SCOUT REPORT'}</PBtn>
+            </div>
+          </Card>
+
+          {scoutLoading && <div style={{ padding:16, textAlign:'center' }}><div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Building scouting report...</div></div>}
+
+          {scoutResult && !scoutResult.error && (
+            <div style={{ display:'flex', flexDirection:'column', gap:10, animation:'fadeIn 0.3s ease' }}>
+              <Card>
+                <CardHead icon="📊" title="Scouting Report" accent={P} />
+                <div style={{ padding:14 }}>
+                  <p style={{ fontSize:13, color:'#f2f4f8', lineHeight:1.6, marginBottom:12 }}>{scoutResult.overview}</p>
                   <div style={{ marginBottom:12 }}>
-                    <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Observed Tendencies <span style={{ color:'#3d4559', fontSize:8 }}>(add anything not in dropdowns)</span></div>
-                    {(tendencies[activeOpp]||[]).map((t,i) => (
-                      <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5 }}>
-                        <div style={{ width:6, height:6, borderRadius:'50%', background:P, flexShrink:0 }} />
-                        <div style={{ flex:1, fontSize:12, color:'#f2f4f8' }}>{t}</div>
-                        <button onClick={()=>setTendencies(prev=>({...prev,[activeOpp]:(prev[activeOpp]||[]).filter((_,j)=>j!==i)}))} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>×</button>
+                    <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Key Threats</div>
+                    {(scoutResult.keyThreats||[]).map((t,i) => (
+                      <div key={i} style={{ background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:8, padding:'10px 12px', marginBottom:8 }}>
+                        <div style={{ fontSize:12, fontWeight:700, color:'#f87171', marginBottom:3 }}>⚠ {t.threat}</div>
+                        <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:5 }}>{t.description}</div>
+                        <div style={{ fontSize:11, color:'#4ade80', lineHeight:1.4 }}>✓ Counter: {t.howToStop}</div>
                       </div>
                     ))}
-                    <div style={{ display:'flex', gap:7 }}>
-                      <input value={newTendency} onChange={e=>setNewTendency(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&newTendency.trim()){setTendencies(prev=>({...prev,[activeOpp]:[...(prev[activeOpp]||[]),newTendency.trim()]}));setNewTendency('')}}} placeholder="e.g. Always runs on 1st down, QB scrambles left..." style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:5, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
-                      <button onClick={()=>{if(newTendency.trim()){setTendencies(prev=>({...prev,[activeOpp]:[...(prev[activeOpp]||[]),newTendency.trim()]}));setNewTendency('')}}} style={{ padding:'0 12px', background:al(P,0.15), border:`1px solid ${P}`, borderRadius:5, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer' }}>ADD</button>
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+                    <div style={{ background:'#161922', borderRadius:8, padding:10 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#f59e0b', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Their Offense</div>
+                      {(scoutResult.offensiveTendencies||[]).map((t,i) => <div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:4, lineHeight:1.4 }}>• {t}</div>)}
+                    </div>
+                    <div style={{ background:'#161922', borderRadius:8, padding:10 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Their Defense</div>
+                      {(scoutResult.defensiveTendencies||[]).map((t,i) => <div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:4, lineHeight:1.4 }}>• {t}</div>)}
                     </div>
                   </div>
-                  {/* Free-form notes */}
-                  <div style={{ marginBottom:12 }}>
-                    <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Coach Notes</div>
-                    <textarea value={notes[activeOpp]||''} onChange={e=>setNotes(prev=>({...prev,[activeOpp]:e.target.value}))} placeholder="Add anything else you know — personnel, tendencies, coaches, film observations..." rows={3} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', resize:'vertical' }} />
+                  <div style={{ background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, padding:'10px 12px', marginBottom:10 }}>
+                    <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:5 }}>Game Plan</div>
+                    <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{scoutResult.gameplan}</div>
                   </div>
-                  <PBtn onClick={generateScoutReport} disabled={scoutLoading} color={P}>{scoutLoading?'SCOUTING...':'🔍 GENERATE SCOUT REPORT'}</PBtn>
+                  {scoutResult.keyAdjustment && (<div style={{ background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:'10px 12px', marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Key Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{scoutResult.keyAdjustment}</div></div>)}
+                  {scoutResult.motivationalNote && (<div style={{ background:'rgba(0,0,0,0.3)', borderRadius:8, padding:'10px 12px', borderLeft:`3px solid ${P}` }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Tell Your Team</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{scoutResult.motivationalNote}"</div></div>)}
                 </div>
               </Card>
-
-              {scoutLoading && <div style={{ padding:16, textAlign:'center' }}><div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Building scouting report...</div></div>}
-
-              {scoutResult && !scoutResult.error && (
-                <Card>
-                  <CardHead icon="📊" title="Scouting Report" accent={P} />
-                  <div style={{ padding:14 }}>
-                    <p style={{ fontSize:13, color:'#f2f4f8', lineHeight:1.6, marginBottom:12 }}>{scoutResult.overview}</p>
-                    <div style={{ marginBottom:12 }}>
-                      <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Key Threats</div>
-                      {(scoutResult.keyThreats||[]).map((t,i) => (
-                        <div key={i} style={{ background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:8, padding:'10px 12px', marginBottom:8 }}>
-                          <div style={{ fontSize:12, fontWeight:700, color:'#f87171', marginBottom:3 }}>⚠ {t.threat}</div>
-                          <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:5 }}>{t.description}</div>
-                          <div style={{ fontSize:11, color:'#4ade80' }}>✓ Counter: {t.howToStop}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
-                      <div style={{ background:'#161922', borderRadius:8, padding:10 }}>
-                        <div style={{ fontSize:9, letterSpacing:1.5, color:'#f59e0b', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Their Offense</div>
-                        {(scoutResult.offensiveTendencies||[]).map((t,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:4, lineHeight:1.4 }}>• {t}</div>)}
-                      </div>
-                      <div style={{ background:'#161922', borderRadius:8, padding:10 }}>
-                        <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Their Defense</div>
-                        {(scoutResult.defensiveTendencies||[]).map((t,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:4, lineHeight:1.4 }}>• {t}</div>)}
-                      </div>
-                    </div>
-                    <div style={{ background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, padding:'10px 12px', marginBottom:10 }}>
-                      <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:5 }}>Game Plan</div>
-                      <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{scoutResult.gameplan}</div>
-                    </div>
-                    {scoutResult.keyAdjustment && <div style={{ background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:'10px 12px', marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Key Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{scoutResult.keyAdjustment}</div></div>}
-                    {scoutResult.motivationalNote && <div style={{ background:'rgba(0,0,0,0.3)', borderRadius:8, padding:'10px 12px', borderLeft:`3px solid ${P}` }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Tell Your Team</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{scoutResult.motivationalNote}"</div></div>}
-                  </div>
-                </Card>
-              )}
             </div>
           )}
-        </>
+        </div>
       )}
     </>
   )
 }
 
 
-// ─── TEAM TAB PAGE ────────────────────────────────────────────────────────────
-function RosterSection({ team, P, al, teams, setTeams, sport }) {
-  const [players, setPlayers] = useState(team.players || [])
-  const [newName, setNewName] = useState('')
-  const [newPos, setNewPos] = useState('')
-  const [newNum, setNewNum] = useState('')
-
-  const positions = {
-    Football: ['QB','RB','WR','TE','OL','DL','LB','CB','S','K','P'],
-    Basketball: ['PG','SG','SF','PF','C'],
-    Baseball: ['P','C','1B','2B','3B','SS','LF','CF','RF','DH'],
+// ─── MORE PAGE (restructured) ─────────────────────────────────────────────────
+function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport }) {
+  const [activeSection, setActiveSection] = useState('features')
+  const colorOptions = {
+    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
+    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010'],
   }
 
-  function addPlayer() {
-    if (!newName.trim()) return
-    const p = { id: Date.now(), name: newName.trim(), position: newPos, number: newNum }
-    const updated = [...players, p]
-    setPlayers(updated)
-    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, players:updated} : t) }))
-    setNewName(''); setNewPos(''); setNewNum('')
-  }
-
-  function removePlayer(id) {
-    const updated = players.filter(p=>p.id!==id)
-    setPlayers(updated)
-    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, players:updated} : t) }))
-  }
-
-  return (
-    <Card>
-      <CardHead icon="👥" title="Roster" tag={`${players.length} players`} tagColor={P} accent={P} />
-      <div style={{ padding:14 }}>
-        <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr auto', gap:7, marginBottom:12, alignItems:'end' }}>
-          <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Name</label>
-            <input value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addPlayer()} placeholder="Player name" style={{ width:'100%', background:'#161922', border:`1px solid ${newName?P:'#1e2330'}`, borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
-          </div>
-          <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Pos</label>
-            <select value={newPos} onChange={e=>setNewPos(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 6px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', appearance:'none' }}>
-              <option value="">—</option>
-              {(positions[sport]||[]).map(p=><option key={p}>{p}</option>)}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>#</label>
-            <input value={newNum} onChange={e=>setNewNum(e.target.value)} placeholder="00" maxLength={2} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', textAlign:'center' }} />
-          </div>
-          <button onClick={addPlayer} style={{ padding:'8px 12px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', marginTop:18 }}>+</button>
-        </div>
-        {players.length === 0 ? (
-          <div style={{ textAlign:'center', padding:'20px 0', color:'#3d4559', fontSize:12 }}>No players added yet</div>
-        ) : (
-          <div>
-            {players.map(p => (
-              <div key={p.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:6 }}>
-                {p.number && <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, flexShrink:0 }}>{p.number}</div>}
-                <div style={{ flex:1 }}><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:500 }}>{p.name}</div>{p.position&&<div style={{ fontSize:10, color:'#6b7a96' }}>{p.position}</div>}</div>
-                <button onClick={()=>removePlayer(p.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>×</button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </Card>
-  )
-}
-
-function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
-  const [plans, setPlans] = useState([])
-  const [generating, setGenerating] = useState(false)
-  const [planForm, setPlanForm] = useState({ focus:'', duration:'90 minutes', intensity:'Medium', opponent:'', date:'' })
-  const [showForm, setShowForm] = useState(false)
-
-  const focusOpts = {
-    Football: ['Balanced / Full Team','Offense Only','Defense Only','Special Teams','Red Zone','Two-Minute Drill','Goal Line','Opening Drive','Game Preparation'],
-    Basketball: ['Balanced / Full Team','Offense Only','Defense Only','Press Break','Transition','End of Game Situations','Free Throws','Post Play','Perimeter'],
-    Baseball: ['Balanced / Full Team','Hitting Only','Pitching / Bullpen','Fielding / Defense','Baserunning','Situations','Batting Practice','Infield / Outfield'],
-  }
-
-  async function generatePlan() {
-    setGenerating(true)
-    const ctx = `Team: ${team.name}, Sport: ${sport}, Season: ${team.season}, Players: ${(team.players||[]).length} on roster.`
-    const inputs = `Focus: ${planForm.focus||'Balanced'}, Duration: ${planForm.duration}, Intensity: ${planForm.intensity}${planForm.opponent?', Upcoming opponent: '+planForm.opponent:''}.`
-    try {
-      const raw = await callAI(`You are an elite youth ${sport.toLowerCase()} coach. Generate a detailed practice plan. ${ctx} ${inputs} Return ONLY valid JSON: {"title":"practice plan name","date":"${planForm.date||'Next Practice'}","duration":"${planForm.duration}","warmup":{"time":"X min","activities":["activity 1","activity 2"]},"segments":[{"name":"segment name","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"how many reps or time"},{"name":"segment 2","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"},{"name":"segment 3","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"},{"name":"segment 4","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"}],"teamPeriod":{"time":"X min","activity":"full team activity","notes":"coaching emphasis"},"cooldown":{"time":"X min","activity":"cooldown activity"},"coachNote":"motivational note for the team"}`)
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      const plan = { ...JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1)), id: Date.now(), _form: planForm }
-      setPlans(prev => [plan, ...prev])
-      setShowForm(false)
-    } catch(e) { console.error(e) }
-    setGenerating(false)
-  }
-
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-      <Card>
-        <CardHead icon="📆" title="Practice Planner" accent={P} />
-        <div style={{ padding:14 }}>
-          {!showForm ? (
-            <button onClick={()=>setShowForm(true)} style={{ width:'100%', padding:'11px', background:al(P,0.12), border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>+ GENERATE PRACTICE PLAN</button>
-          ) : (
-            <div style={{ animation:'fadeIn 0.2s ease' }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-                <Sel label="Focus Area" value={planForm.focus||focusOpts[sport][0]} onChange={v=>setPlanForm(f=>({...f,focus:v}))} options={focusOpts[sport]||focusOpts.Football} />
-                <Sel label="Duration" value={planForm.duration} onChange={v=>setPlanForm(f=>({...f,duration:v}))} options={['45 minutes','60 minutes','75 minutes','90 minutes','2 hours','2.5 hours']} />
-                <Sel label="Intensity" value={planForm.intensity} onChange={v=>setPlanForm(f=>({...f,intensity:v}))} options={['Light / Recovery','Medium','High / Game Prep','Game Week Intensity']} />
-                <div>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Practice Date</label>
-                  <input value={planForm.date} onChange={e=>setPlanForm(f=>({...f,date:e.target.value}))} placeholder="e.g. Monday 4/21" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-                <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Upcoming Opponent <span style={{ color:'#3d4559' }}>(optional)</span></label>
-                  <input value={planForm.opponent} onChange={e=>setPlanForm(f=>({...f,opponent:e.target.value}))} placeholder="e.g. Coventry Eagles" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-                </div>
-              </div>
-              <div style={{ display:'flex', gap:8 }}>
-                <button onClick={()=>setShowForm(false)} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
-                <button onClick={generatePlan} disabled={generating} style={{ flex:2, padding:'10px', background:generating?'#3d4559':P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:generating?'not-allowed':'pointer', letterSpacing:'1px' }}>{generating?'GENERATING...':'GENERATE PLAN'}</button>
-              </div>
-              {generating && <Shimmer />}
-            </div>
-          )}
-        </div>
-      </Card>
-
-      {plans.map(plan => (
-        <Card key={plan.id}>
-          <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${P}` }}>
-            <span style={{ fontSize:15 }}>📋</span>
-            <div style={{ flex:1 }}>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase' }}>{plan.title}</div>
-              <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{plan.date} · {plan.duration}</div>
-            </div>
-          </div>
-          <div style={{ padding:14 }}>
-            {plan.warmup && <div style={{ padding:'8px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Warmup — {plan.warmup.time}</div>{(plan.warmup.activities||[]).map((a,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:2 }}>• {a}</div>)}</div>}
-            {(plan.segments||[]).map((seg,i) => (
-              <div key={i} style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:8 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
-                  <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:P }}>{i+1}</div>
-                  <div><div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{seg.name}</div><div style={{ fontSize:10, color:'#6b7a96' }}>{seg.time} · {seg.reps}</div></div>
-                </div>
-                <div style={{ fontSize:11, color:'#dde1f0', marginBottom:4, fontWeight:600 }}>📍 {seg.drill}</div>
-                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:4 }}>Purpose: {seg.purpose}</div>
-                <div style={{ fontSize:11, color:P, fontStyle:'italic' }}>Coach: "{seg.coaching}"</div>
-              </div>
-            ))}
-            {plan.teamPeriod && <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Team Period — {plan.teamPeriod.time}</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600, marginBottom:3 }}>{plan.teamPeriod.activity}</div><div style={{ fontSize:11, color:'#6b7a96' }}>{plan.teamPeriod.notes}</div></div>}
-            {plan.coachNote && <div style={{ padding:'8px 12px', background:'rgba(0,0,0,0.3)', borderRadius:8, borderLeft:`3px solid ${P}` }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Coach's Note</div><div style={{ fontSize:12, color:'#f2f4f8', fontStyle:'italic' }}>"{plan.coachNote}"</div></div>}
-          </div>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-function AnalyticsSection({ team, P, al }) {
-  const metrics = [
-    { label:'Schemes Generated', val: 0, color: P, icon:'📋' },
-    { label:'Plays in Playbook', val: 0, color:'#4ade80', icon:'📖' },
-    { label:'Gauntlet Score', val: 847, color:'#f59e0b', icon:'⚡' },
-    { label:'Scout Reports', val: 0, color:'#6b9fff', icon:'🔍' },
-    { label:'Practice Plans', val: 0, color:'#c084fc', icon:'📆' },
-  ]
-  return (
-    <Card>
-      <CardHead icon="📊" title="Analytics" tag="COMING SOON" tagColor="#f59e0b" accent={P} />
-      <div style={{ padding:14 }}>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
-          {metrics.map((m,i) => (
-            <div key={i} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'12px' }}>
-              <div style={{ fontSize:20, marginBottom:4 }}>{m.icon}</div>
-              <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:24, color:m.color, lineHeight:1, marginBottom:3 }}>{m.val}</div>
-              <div style={{ fontSize:10, color:'#6b7a96' }}>{m.label}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ padding:'12px', background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8, textAlign:'center' }}>
-          <div style={{ fontSize:12, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, marginBottom:4 }}>FULL ANALYTICS COMING SOON</div>
-          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>Win probability models, tendency heat maps, opponent pattern recognition, and season-wide performance tracking.</div>
-        </div>
-      </div>
-    </Card>
-  )
-}
-
-function PrintSection({ team, P, S, al, callAI, sport }) {
-  const [printType, setPrintType] = useState('wristband')
-  const [generating, setGenerating] = useState(false)
-  const [generated, setGenerated] = useState(null)
-
-  const printTypes = [
-    { id:'wristband', label:'📿 Wristband', desc:'QR/play call strips for game day' },
-    { id:'playbook', label:'📋 Playbook Sheet', desc:'Full play diagrams for your playbook' },
-    { id:'coach', label:'🗂 Coach Sheet', desc:'Sideline reference sheet' },
-    { id:'practice', label:'📆 Practice Plan', desc:'Print-ready practice schedule' },
+  const coachFeatures = [
+    { icon:'📊', title:'Advanced Analytics', desc:'Win probability models, tendency heat maps, and opponent pattern recognition across every game.', status:'COMING SOON', color:'#f59e0b' },
+    { icon:'📋', title:'Printable Wristbands & Coach Sheets', desc:'Export your playbook into print-ready wristband cards, laminated coach sheets, and game-day checklists.', status:'IN PROGRESS', color:'#4ade80' },
+    { icon:'🎥', title:'Film Upload & AI Breakdown', desc:'Upload full game film and get automatic play-by-play breakdowns, error detection, and opponent scouting.', status:'COMING SOON', color:'#6b9fff' },
+    { icon:'🔁', title:'In-Game Adjustment Mode', desc:'Live sideline tool that tracks downs, suggests adjustments, and logs real-time game events.', status:'COMING SOON', color:'#c084fc' },
+    { icon:'📆', title:'Practice Planner', desc:'AI-generated week-by-week practice schedules tailored to your upcoming opponent and team needs.', status:'COMING SOON', color:'#f59e0b' },
+    { icon:'🤝', title:'Coach Network & Play Sharing', desc:'Share packages with other coaches, discover trending schemes, and follow elite youth coordinators.', status:'COMING SOON', color:'#6b9fff' },
+    { icon:'🏆', title:'League & Season Manager', desc:'Track standings, schedule games, and manage your full season across multiple teams from one dashboard.', status:'COMING SOON', color:'#f87171' },
+    { icon:'🎓', title:'Coaching Certification Path', desc:'AI-powered coursework with nationally recognized youth coaching certifications built in.', status:'COMING SOON', color:'#4ade80' },
   ]
 
-  async function generatePDF() {
-    setGenerating(true)
-    try {
-      const content = await callAI(`You are a ${sport} coordinator. Generate content for a ${printType} sheet for team: ${team.name}, ${team.season}. Return a plain text formatted document suitable for printing. Include team name, sport, season, and relevant ${printType} content with clear sections and formatting. Keep it concise and professional.`)
-      setGenerated({ type: printType, team: team.name, content, generatedAt: new Date().toLocaleString() })
-    } catch(e) { console.error(e) }
-    setGenerating(false)
-  }
-
-  function downloadAsPDF() {
-    if (!generated) return
-    const printWindow = window.open('', '_blank')
-    const scriptTag = '<scr' + 'ipt>window.onload=()=>{window.print()}</scr' + 'ipt>'
-    const html = [
-      '<html><head><title>' + team.name + ' — ' + generated.type + '</title>',
-      '<style>',
-      'body { font-family: Arial, sans-serif; padding: 24px; max-width: 800px; margin: 0 auto; color: #111; }',
-      'h1 { font-size: 22px; margin-bottom: 4px; }',
-      'h2 { font-size: 14px; color: #555; margin-bottom: 16px; font-weight: normal; }',
-      'pre { white-space: pre-wrap; font-family: inherit; font-size: 13px; line-height: 1.6; }',
-      '.header { border-bottom: 3px solid ' + P + '; padding-bottom: 12px; margin-bottom: 16px; }',
-      '.footer { margin-top: 24px; font-size: 11px; color: #888; border-top: 1px solid #ddd; padding-top: 8px; }',
-      '@media print { body { padding: 12px; } }',
-      '</style></head><body>',
-      '<div class="header"><h1>' + team.name + '</h1>',
-      '<h2>' + sport + ' · ' + (team.season||'') + ' · ' + generated.type.toUpperCase() + ' SHEET</h2></div>',
-      '<pre>' + generated.content + '</pre>',
-      '<div class="footer">Generated by CoachIQ · ' + generated.generatedAt + '</div>',
-      scriptTag,
-      '</body></html>'
-    ].join('')
-    printWindow.document.write(html)
-    printWindow.document.close()
-  }
-
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-      <Card>
-        <CardHead icon="🖨" title="Printable Sheets" accent={P} />
-        <div style={{ padding:14 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
-            {printTypes.map(pt => (
-              <div key={pt.id} onClick={()=>setPrintType(pt.id)} style={{ padding:'10px 12px', background:printType===pt.id?al(P,0.12):'#161922', border:`1px solid ${printType===pt.id?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
-                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:3 }}>{pt.label}</div>
-                <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.4 }}>{pt.desc}</div>
-              </div>
-            ))}
-          </div>
-          <PBtn onClick={generatePDF} disabled={generating} color={P}>{generating?'GENERATING...':'GENERATE '+printType.toUpperCase()}</PBtn>
-          {generating && <Shimmer />}
-          {generated && (
-            <div style={{ marginTop:12, animation:'fadeIn 0.2s ease' }}>
-              <div style={{ padding:'10px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}>
-                <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Ready to Print</div>
-                <div style={{ fontSize:12, color:'#f2f4f8' }}>{team.name} — {generated.type} sheet generated</div>
-              </div>
-              <button onClick={downloadAsPDF} style={{ width:'100%', padding:'11px', background:'linear-gradient(135deg,#1B5E20,#2e7d32)', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
-                <span>🖨</span> OPEN PRINT DIALOG (PDF)
-              </button>
-            </div>
-          )}
-        </div>
-      </Card>
-    </div>
+  const bpDot = (color) => (
+    <span style={{ display:'inline-block', width:7, height:7, borderRadius:'50%', background:color, marginRight:5 }} />
   )
-
-// ─── TEAM PAGE (updated with schedule tab) ────────────────────────────────────
-function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, brand }) {
-  const [section, setSection] = useState('roster')
-  const currentTeam = activeTeam[sport]
 
   return (
     <>
       <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Team management</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Platform & settings</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>More</div>
       </div>
 
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} />
+      {/* Section switcher */}
+      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+        {[['features','🚀 Features'],['settings','⚙️ Settings']].map(([k,lbl]) => (
+          <button key={k} onClick={()=>setActiveSection(k)} style={{ flex:1, padding:'9px', borderRadius:4, fontSize:11, border:`1px solid ${activeSection===k?P:'#1e2330'}`, background:activeSection===k?al(P,0.15):'transparent', color:activeSection===k?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
+        ))}
+      </div>
 
-      {!currentTeam ? (
-        <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
-          <div style={{ fontSize:36, marginBottom:10 }}>🏆</div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Team Selected</div>
-          <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Create or select a team above to access roster, schedule, practice plans, and printable sheets.</div>
+      {activeSection === 'features' && (
+        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.6, marginBottom:4 }}>CoachIQ is being built for coaches. Here's what's coming next on the roadmap — tap any feature to learn more.</div>
+          {coachFeatures.map((f,i) => (
+            <div key={i} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'13px 14px', display:'flex', gap:12, alignItems:'flex-start' }}>
+              <div style={{ fontSize:26, flexShrink:0, marginTop:2 }}>{f.icon}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:4, flexWrap:'wrap' }}>
+                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#f2f4f8' }}>{f.title}</div>
+                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(f.color.slice(1,3),16)},${parseInt(f.color.slice(3,5),16)},${parseInt(f.color.slice(5,7),16)},0.15)`, color:f.color, letterSpacing:'0.5px' }}>{f.status}</span>
+                </div>
+                <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.5 }}>{f.desc}</div>
+              </div>
+            </div>
+          ))}
         </div>
-      ) : (
-        <>
-          <div style={{ display:'flex', gap:6, marginTop:14, marginBottom:14, overflowX:'auto', paddingBottom:2 }}>
-            {[['roster','👥 Roster'],['schedule','📅 Schedule'],['practice','📆 Practice'],['analytics','📊 Analytics'],['print','🖨 Print']].map(([s,lbl]) => (
-              <button key={s} onClick={()=>setSection(s)} style={{ flexShrink:0, padding:'8px 12px', borderRadius:4, fontSize:11, border:`1px solid ${section===s?P:'#1e2330'}`, background:section===s?al(P,0.15):'transparent', color:section===s?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
-            ))}
-          </div>
-          {section==='roster'   && <RosterSection team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
-          {section==='schedule' && <ScheduleSection team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
-          {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} schedule={currentTeam.schedule||[]} />}
-          {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} />}
-          {section==='print'    && <PrintSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} />}
-        </>
       )}
+
+      {activeSection === 'settings' && (
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          {/* Brand / Logo color */}
+          <Card>
+            <CardHead icon="🎨" title="CoachIQ Logo Style" accent={P} />
+            <div style={{ padding:14 }}>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>Choose your brand palette for the CoachIQ logo across the app.</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {Object.entries(BRAND_PALETTES).map(([key, palette]) => {
+                  const isCIQ = palette.accentOn === 'CIQ'
+                  return (
+                    <div key={key} onClick={()=>setBrand(key)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', background:brand===key?al(P,0.08):'#161922', border:`1px solid ${brand===key?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
+                      <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, lineHeight:1, whiteSpace:'nowrap' }}>
+                        <span style={{ color:isCIQ?palette.accent:'#f2f4f8' }}>C</span>
+                        <span style={{ color:isCIQ?'#f2f4f8':palette.accent }}>oach</span>
+                        <span style={{ color:isCIQ?palette.accent:'#f2f4f8' }}>IQ</span>
+                      </div>
+                      <div style={{ flex:1, fontSize:12, color:'#6b7a96' }}>{palette.name}</div>
+                      {brand===key && <span style={{ fontSize:14, color:'#4ade80' }}>✓</span>}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </Card>
+
+          {/* Team colors */}
+          <Card>
+            <CardHead icon="🏷" title="Team Colors" accent={P} />
+            <div style={{ padding:14 }}>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Primary Color</div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
+                {colorOptions.primary.map(c => (<div key={c} onClick={() => setCfg(prev=>({...prev,primary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.primary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+              </div>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Secondary Color</div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
+                {colorOptions.secondary.map(c => (<div key={c} onClick={() => setCfg(prev=>({...prev,secondary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.secondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+              </div>
+              <div style={{ height:6, borderRadius:3, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
+            </div>
+          </Card>
+
+          {/* App info */}
+          <div style={{ padding:'12px 14px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, textAlign:'center' }}>
+            <CoachIQLogo size={20} brand={brand} />
+            <div style={{ fontSize:10, color:'#3d4559', marginTop:6 }}>v1.0 · Built for youth coaches</div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+
+// ─── HOME PAGE ────────────────────────────────────────────────────────────────
+function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg }) {
+  const [feed, setFeed] = useState(null)
+  const [feedLoading, setFeedLoading] = useState(false)
+  const [activeMode, setActiveMode] = useState('dashboard')
+
+  useEffect(() => { if (!feed && !feedLoading) loadFeed() }, [sport])
+
+  async function loadFeed() {
+    setFeedLoading(true)
+    try {
+      const raw = await callAI('You are a sports coaching knowledge curator. Generate a daily coaching feed for a youth '+sport+' coach. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      setFeed(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
+    } catch(e) { setFeed({ items: [] }) }
+    setFeedLoading(false)
+  }
+
+  const feedTypeColor = t => t==='drill'?P:t==='science'?'#6b9fff':'#4ade80'
+
+  if (activeMode === 'schemes_offense' || activeMode === 'schemes_defense') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} {activeMode==='schemes_offense'?'Offensive':'Defensive'} Schemes</span>
+      </div>
+      <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={{Football:{},Basketball:{},Baseball:{}}} setPlaybook={()=>{}} genHistory={{Football:[],Basketball:[],Baseball:[]}} setGenHistory={()=>{}} iq={iq} setIQ={setIQ} defaultOpenOff={activeMode==='schemes_offense'} defaultOpenDef={activeMode==='schemes_defense'} />
+    </>
+  )
+
+  if (activeMode === 'gauntlet') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
+      </div>
+      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
+    </>
+  )
+
+  if (activeMode === 'film') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Film Room</span>
+      </div>
+      <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />
+    </>
+  )
+
+  if (activeMode === 'situational') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport==='Football'?'Situational Play Caller':sport==='Basketball'?'Live Game Adjustments':'Count & Situation Manager'}</span>
+      </div>
+      <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
+    </>
+  )
+
+  // DASHBOARD
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
+          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>{lastName ? `Coach ${lastName}` : 'CoachIQ'}</div>
+        </div>
+        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Coach IQ</div></div>
+          <div style={{ width:1, height:28, background:'#1c2235' }} />
+          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div></div>
+        </div>
+      </div>
+
+      {/* Ticker */}
+      <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
+        <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
+        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — AI Coaching Intelligence · Generate schemes · Scout opponents · Build your playbook`}</div></div>
+      </div>
+
+      {/* Team Manager Card */}
+      <TeamManagerCard
+        sport={sport}
+        teams={teams}
+        setTeams={setTeams}
+        activeTeam={activeTeam}
+        setActiveTeam={setActiveTeam}
+        P={P}
+        al={al}
+        setCfg={setCfg}
+      />
+
+            {/* Scheme Generator Card — interactive preview */}
+      <div style={{ marginTop:14 }}>
+        <div onClick={()=>setActiveMode('schemes_offense')} style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', position:'relative', overflow:'hidden', cursor:'pointer' }}>
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:10 }}>
+            <div>
+              <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, color:'#dde1f0', lineHeight:1, marginBottom:4 }}>Scheme Generator</div>
+              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:200 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — animated diagrams and coaching cues built in.</div>
+            </div>
+            <div style={{ display:'flex', gap:6, flexDirection:'column', alignItems:'flex-end' }}>
+              <div onClick={()=>setActiveMode('schemes_offense')} style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)', cursor:'pointer' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN →</span></div>
+            </div>
+          </div>
+          {/* Interactive mini diagrams — click to navigate */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+            <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_offense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative', cursor:'pointer' }}>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE ›</div>
+              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="offense" P={P} /></div>
+            </div>
+            <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_defense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative', cursor:'pointer' }}>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE ›</div>
+              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="defense" P={P} /></div>
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+            {['AI Diagrams','Educator Mode','Pro Comparison','Huddle Cards','Variations'].map(tag => (<span key={tag} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 8px', background:'rgba(192,57,43,0.1)', borderLeft:'2px solid rgba(192,57,43,0.3)', color:'rgba(192,57,43,0.7)', letterSpacing:'0.5px' }}>{tag}</span>))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick access grid */}
+      <div style={{ marginTop:8, display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
+        <div onClick={()=>setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>⚡</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Gauntlet</div></div>
+          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Test your coaching IQ with live AI scenarios</div>
+          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}><span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>IQ</span></div>
+        </div>
+        <div onClick={()=>setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>🎯</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Situational</div></div>
+          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Real-time play calls by down, distance & score</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700 }}>{sport==='Basketball'?'Live adjustments':sport==='Baseball'?'Count manager':'Live play caller'}</div>
+        </div>
+      </div>
+      <div style={{ marginTop:7 }}>
+        <div onClick={()=>setActiveMode('film')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 14px', display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
+          <span style={{ fontSize:16 }}>🎥</span>
+          <div style={{ flex:1 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Film Room</div><div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470' }}>Describe a problem or upload a clip — AI diagnoses it</div></div>
+          <div style={{ fontSize:12, color:'#3a4260' }}>›</div>
+        </div>
+      </div>
+
+      {/* Coaching Feed */}
+      <div style={{ marginTop:14 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+          <div style={{ width:3, height:10, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
+          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
+        </div>
+        {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching content...</div></div>}
+        {feed && (feed.items||[]).map((item,i) => (
+          <div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{item.type==='drill'?'Drill of the Day':item.type==='science'?'Coaching Science':'Concept Spotlight'}</span>
+              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
+            </div>
+            <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div>
+          </div>
+        ))}
+      </div>
     </>
   )
 }
@@ -3054,254 +2256,12 @@ function Onboarding({ onLaunch, brand='Red — C+IQ colored' }) {
 }
 
 
-// ─── MORE PAGE ────────────────────────────────────────────────────────────────
-function MorePage({ P, al, cfg, setCfg, brand, setBrand }) {
-  const [section, setSection] = useState('settings')
-  const colorOptions = {
-    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#E91E63','#FF6F00'],
-    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010','#0d2137','#3e0a1e','#1a1200'],
-  }
-  return (
-    <>
-      <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Platform & settings</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>More</div>
-      </div>
-      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
-        {[['settings','⚙️ Settings'],['about','ℹ️ About']].map(([k,lbl]) => (
-          <button key={k} onClick={()=>setSection(k)} style={{ flex:1, padding:'9px', borderRadius:4, fontSize:11, border:`1px solid ${section===k?P:'#1e2330'}`, background:section===k?al(P,0.15):'transparent', color:section===k?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{lbl}</button>
-        ))}
-      </div>
-      {section === 'settings' && (
-        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-          <Card>
-            <CardHead icon="🎨" title="CoachIQ Logo Style" accent={P} />
-            <div style={{ padding:14 }}>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>Choose logo color orientation — applies everywhere in the app.</div>
-              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-                {Object.entries(BRAND_PALETTES).map(([key, palette]) => {
-                  const isCIQ = palette.accentOn === 'CIQ'
-                  return (
-                    <div key={key} onClick={()=>setBrand(key)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', background:brand===key?al(P,0.08):'#161922', border:`1px solid ${brand===key?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
-                      <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, lineHeight:1, whiteSpace:'nowrap' }}>
-                        <span style={{ color:isCIQ?palette.accent:'#f2f4f8' }}>C</span>
-                        <span style={{ color:isCIQ?'#f2f4f8':palette.accent }}>oach</span>
-                        <span style={{ color:isCIQ?palette.accent:'#f2f4f8' }}>IQ</span>
-                      </div>
-                      <div style={{ flex:1, fontSize:12, color:'#6b7a96' }}>{palette.name}</div>
-                      {brand===key && <span style={{ fontSize:14, color:'#4ade80' }}>✓</span>}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </Card>
-          <Card>
-            <CardHead icon="🏷" title="Team Colors" accent={P} />
-            <div style={{ padding:14 }}>
-              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Primary Color</div>
-              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
-                {colorOptions.primary.map(c => (<div key={c} onClick={()=>setCfg(prev=>({...prev,primary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.primary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-              </div>
-              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:10 }}>Secondary Color</div>
-              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:14 }}>
-                {colorOptions.secondary.map(c => (<div key={c} onClick={()=>setCfg(prev=>({...prev,secondary:c}))} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${cfg.secondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-              </div>
-              <div style={{ height:6, borderRadius:3, background:`linear-gradient(90deg,${cfg.primary||P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
-            </div>
-          </Card>
-        </div>
-      )}
-      {section === 'about' && (
-        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-          <div style={{ padding:'20px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, textAlign:'center' }}>
-            <CoachIQLogo size={28} brand={brand} />
-            <div style={{ fontSize:10, color:'#3d4559', marginTop:8 }}>v2.0 · Built for youth coaches</div>
-          </div>
-          {[
-            { icon:'📋', title:'Printable Wristbands & Coach Sheets', status:'IN PROGRESS', color:'#4ade80' },
-            { icon:'📊', title:'Advanced Analytics Dashboard', status:'COMING SOON', color:'#f59e0b' },
-            { icon:'🎥', title:'Full Game Film Upload & AI Breakdown', status:'COMING SOON', color:'#6b9fff' },
-            { icon:'🔁', title:'In-Game Live Adjustment Mode', status:'COMING SOON', color:'#c084fc' },
-            { icon:'🤝', title:'Coach Network & Play Sharing', status:'COMING SOON', color:'#6b9fff' },
-            { icon:'🎓', title:'Coaching Certification Path', status:'COMING SOON', color:'#4ade80' },
-          ].map((f,i) => (
-            <div key={i} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'12px 14px', display:'flex', gap:12, alignItems:'flex-start' }}>
-              <div style={{ fontSize:22, flexShrink:0 }}>{f.icon}</div>
-              <div style={{ flex:1 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap', marginBottom:3 }}>
-                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{f.title}</div>
-                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, padding:'2px 6px', borderRadius:2, background:al(f.color,0.15), color:f.color }}>{f.status}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
-  )
-}
-
-// ─── HOME PAGE ────────────────────────────────────────────────────────────────
-
-// ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg, setPage }) {
-  const [feed, setFeed] = useState(null)
-  const [feedLoading, setFeedLoading] = useState(false)
-  const [activeMode, setActiveMode] = useState('dashboard')
-  const currentTeam = activeTeam[sport]
-  const mascot = currentTeam ? MASCOTS.find(m=>m.id===currentTeam.mascot) : null
-  const teamFont = currentTeam ? (TEAM_FONTS.find(f=>f.id===currentTeam.teamFont)?.style || "'Barlow Condensed',sans-serif") : null
-
-  // Get next upcoming event for the current team
-  const nextEvent = currentTeam?.schedule?.filter(e=>new Date(e.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date))[0] || null
-  const awayLocation = nextEvent?.homeAway==='Away' && nextEvent?.location ? nextEvent.location : null
-
-  useEffect(() => { if (!feed && !feedLoading) loadFeed() }, [sport])
-
-  async function loadFeed() {
-    setFeedLoading(true)
-    try {
-      const raw = await callAI('Generate a daily coaching feed for a youth '+sport+' coach. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"2 sentences","source":"source"},{"type":"science","title":"Coaching Science","body":"2 sentences","source":"source"},{"type":"concept","title":"Concept Spotlight","body":"2 sentences","source":"source"}]}')
-      const s=raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      setFeed(JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1)))
-    } catch(e) { setFeed({ items:[] }) }
-    setFeedLoading(false)
-  }
-
-  const feedTypeColor = t => t==='drill'?P:t==='science'?'#6b9fff':'#4ade80'
-
-  if (activeMode==='gauntlet') return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
-      </div>
-      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
-    </>
-  )
-  if (activeMode==='situational') return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Situational</span>
-      </div>
-      <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
-    </>
-  )
-
-  return (
-    <>
-      {/* Welcome hero card */}
-      <div style={{ marginTop:14, borderRadius:4, overflow:'hidden', border:`1px solid ${al(P,0.25)}`, position:'relative', minHeight:90, background: currentTeam ? `linear-gradient(135deg,${currentTeam.primary}22,${currentTeam.secondary||'#07090d'}44,#07090d)` : 'linear-gradient(135deg,#0f1219,#07090d)' }}>
-        {/* Mascot watermark */}
-        {mascot && (
-          <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:64, opacity:0.15, pointerEvents:'none', userSelect:'none', lineHeight:1 }}>{mascot.emoji}</div>
-        )}
-        <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background: currentTeam ? `linear-gradient(90deg,${currentTeam.primary},${currentTeam.secondary||P},${currentTeam.accent1||P},${currentTeam.accent2||P})` : `linear-gradient(90deg,${P},${S})` }} />
-        <div style={{ padding:'14px 16px', display:'flex', alignItems:'center', gap:12, position:'relative', zIndex:1 }}>
-          <div style={{ flex:1 }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
-            <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#f2f4f8', lineHeight:1, marginBottom: currentTeam ? 4 : 0 }}>Coach {lastName||'—'}</div>
-            {currentTeam && (
-              <div style={{ fontFamily:teamFont, fontStyle:'italic', fontSize:14, color:currentTeam.primary, letterSpacing:'0.5px' }}>
-                {mascot?.emoji} {currentTeam.name}
-              </div>
-            )}
-            {currentTeam?.season && <div style={{ fontSize:10, color:'#3d4559', marginTop:2, fontFamily:"'Barlow Condensed',sans-serif" }}>{currentTeam.season}{currentTeam.hometown?` · ${currentTeam.hometown}`:''}</div>}
-          </div>
-          {/* Rotating info widget */}
-          <RotatingInfoWidget
-            sport={sport}
-            homeLocation={currentTeam?.hometown || null}
-            awayLocation={awayLocation}
-            nextEvent={nextEvent}
-            P={P}
-            al={al}
-          />
-        </div>
-      </div>
-
-      {/* Live ticker */}
-      <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
-        <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
-        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):'CoachIQ — AI Coaching Intelligence · Schemes · Scout · Playbook · Team Management'}</div></div>
-      </div>
-
-      {/* Team Manager card */}
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setPage('team')} />
-
-      {/* Scheme Generator card */}
-      <div style={{ marginTop:10 }}>
-        <div onClick={()=>setPage('schemes')} style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', cursor:'pointer', overflow:'hidden', position:'relative' }}>
-          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:10 }}>
-            <div>
-              <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, color:'#dde1f0', lineHeight:1, marginBottom:4 }}>Scheme Generator</div>
-              <div style={{ fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:200 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — animated diagrams and coaching cues built in.</div>
-            </div>
-            <div style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)', flexShrink:0 }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN →</span></div>
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-            <div onClick={e=>{e.stopPropagation();setPage('schemes')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative', cursor:'pointer' }}>
-              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE ›</div>
-              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="offense" P={P} /></div>
-            </div>
-            <div onClick={e=>{e.stopPropagation();setPage('schemes')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative', cursor:'pointer' }}>
-              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE ›</div>
-              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="defense" P={P} /></div>
-            </div>
-          </div>
-          <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-            {['AI Diagrams','Educator Mode','Pro Comparison','Huddle Cards','Variations'].map(tag=><span key={tag} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 8px', background:'rgba(192,57,43,0.1)', borderLeft:'2px solid rgba(192,57,43,0.3)', color:'rgba(192,57,43,0.7)' }}>{tag}</span>)}
-          </div>
-        </div>
-      </div>
-
-      {/* Quick access */}
-      <div style={{ marginTop:8, display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
-        <div onClick={()=>setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>⚡</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Gauntlet</div></div>
-          <div style={{ fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:6 }}>Test your coaching IQ with live AI scenarios</div>
-          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}><span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>IQ</span></div>
-        </div>
-        <div onClick={()=>setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>🎯</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Situational</div></div>
-          <div style={{ fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:6 }}>Real-time play calls by situation</div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700 }}>{sport==='Basketball'?'Live adjustments':sport==='Baseball'?'Count manager':'Live play caller'}</div>
-        </div>
-      </div>
-
-      {/* Coaching feed */}
-      <div style={{ marginTop:14 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-          <div style={{ width:3, height:10, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
-          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
-        </div>
-        {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching content...</div></div>}
-        {feed&&(feed.items||[]).map((item,i) => (
-          <div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{item.type==='drill'?'Drill of the Day':item.type==='science'?'Coaching Science':'Concept Spotlight'}</span>
-              {item.source&&<span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
-            </div>
-            <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div>
-          </div>
-        ))}
-      </div>
-    </>
-  )
-}
-
-
-}
-
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function CoachIQ() {
+  // All hooks must be declared before any early returns (React Rules of Hooks)
   const [mounted, setMounted] = useState(false)
   const [launched, setLaunched] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
-  const [cfg, setCfg] = useState({ coach:'', primary:'#C0392B', secondary:'#002868' })
+  const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
   const [brand, setBrand] = useState('Red — C+IQ colored')
   const [page, setPage] = useState('home')
   const [sport, setSport] = useState('Football')
@@ -3311,11 +2271,11 @@ export default function CoachIQ() {
   const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[] })
   const [teams, setTeams] = useState({ Football:[], Basketball:[], Baseball:[] })
   const [activeTeam, setActiveTeam] = useState({ Football:null, Basketball:null, Baseball:null })
+
+  // SSR guard - prevents crash during Next.js prerendering
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
-  const ALL_SPORTS = ['Football','Basketball','Baseball']
-  const SPORT_ICONS = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
 
   const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
   const currentTeam = activeTeam[sport]
@@ -3325,93 +2285,250 @@ export default function CoachIQ() {
 
   async function callAI(prompt, imageData) {
     const messages = imageData
-      ? [{ role:'user', content:[{ type:'image', source:{ type:'base64', media_type:imageData.mime, data:imageData.b64 }},{ type:'text', text:prompt }]}]
+      ? [{ role:'user', content:[{ type:'image', source:{ type:'base64', media_type:imageData.mime, data:imageData.b64 } },{ type:'text', text:prompt }] }]
       : [{ role:'user', content:prompt }]
     const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ messages }) })
     const d = await res.json()
-    if (!res.ok) throw new Error(d.error||'API error')
+    if (!res.ok) throw new Error(d.error || 'API error')
     return d.text
   }
 
   function parseJSON(raw) {
-    const s=raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-    const a=s.indexOf('{'), b=s.lastIndexOf('}')
-    if (a<0||b<=a) throw new Error('No JSON in response')
-    return JSON.parse(s.slice(a,b+1))
+    const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+    const a = s.indexOf('{'), b = s.lastIndexOf('}')
+    if (a < 0 || b <= a) throw new Error('No JSON in response')
+    return JSON.parse(s.slice(a, b+1))
   }
 
-  if (showSplash) return <SplashScreen onDone={(skip)=>{ setShowSplash(false); if(skip) setLaunched(true) }} alreadyAuthed={launched} brand={brand} />
-  if (!launched) return <Onboarding onLaunch={(c)=>{ setCfg(c); setLaunched(true) }} brand={brand} />
+  if (showSplash) return (
+    <SplashScreen onDone={(skipToApp) => { setShowSplash(false); if (skipToApp) setLaunched(true) }} alreadyAuthed={launched} brand={brand} />
+  )
+  if (!launched) return (
+    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} brand={brand} />
+  )
 
-  const NAV = [
-    { id:'home',    icon:'🏠', label:'HOME' },
-    { id:'schemes', icon:'📋', label:'SCHEMES' },
-    { id:'team',    icon:'🏆', label:'TEAM' },
-    { id:'playbook',icon:'📖', label:'PLAYBOOK' },
-    { id:'scout',   icon:'🔍', label:'SCOUT' },
-    { id:'more',    icon:'⋯',  label:'MORE' },
+  const NAV_ITEMS = [
+    { id:'home',   icon:'🏠', label:'HOME' },
+    { id:'schemes',icon:'📋', label:'SCHEMES' },
+    { id:'scout',  icon:'🔍', label:'SCOUT' },
+    { id:'playbook',icon:'📖',label:'PLAYBOOK' },
+    { id:'more',   icon:'⋯',  label:'MORE' },
   ]
 
   return (
     <>
       <Head><title>CoachIQ</title></Head>
-      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans',system-ui,sans-serif" }}>
+      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@400;600;700&family=Big+Shoulders+Display:wght@500;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
           * { box-sizing:border-box; margin:0; padding:0; }
           ::-webkit-scrollbar { width:4px; }
-          ::-webkit-scrollbar-thumb { background:#1e2330; }
+          ::-webkit-scrollbar-thumb { background:#1e2330; border-radius:0; }
           select option { background:#161922; }
           @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
           @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
           @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
           @keyframes ticker { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
-          @keyframes floatA { 0%,100%{transform:translate(0,0) rotate(-8deg)} 50%{transform:translate(6px,-12px) rotate(-3deg)} }
-          @keyframes floatB { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-8px,8px)} }
-          @keyframes floatC { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(10px,-6px) rotate(16deg)} }
+          @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
+          @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
+          @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
+          @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} }
+          @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
+          @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
+          @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
+          @keyframes logoReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+          @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
         `}</style>
 
         {/* TOP BAR */}
         <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P},${S})` }} />
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
           <CoachIQLogo size={22} brand={brand} />
-          <div style={{ position:'relative', marginLeft:4 }}>
-            <select value={sport} onChange={e=>setSport(e.target.value)} style={{ background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'4px 28px 4px 8px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'0.5px', outline:'none', appearance:'none', cursor:'pointer' }}>
-              {ALL_SPORTS.map(s=><option key={s} value={s}>{SPORT_ICONS[s]} {s}</option>)}
-            </select>
-            <span style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
+          <div style={{ display:'flex', gap:3, marginLeft:2 }}>
+            {[['FB','Football','🏈'],['BB','Basketball','🏀'],['BSB','Baseball','⚾']].map(([lbl,s,ico]) => (
+              <button key={lbl} onClick={()=>setSport(s)} style={{ padding:'3px 8px', borderRadius:2, fontSize:11, border:`1px solid ${sport===s?SPORT_COLORS[s].primary:al(SPORT_COLORS[s].primary,0.25)}`, background:sport===s?SPORT_COLORS[s].primary:'transparent', color:sport===s?'white':al(SPORT_COLORS[s].primary,0.7), cursor:'pointer', display:'flex', alignItems:'center', gap:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
+                <span style={{ fontSize:10 }}>{ico}</span><span>{lbl}</span>
+              </button>
+            ))}
           </div>
-          {/* Top right: active team accent strip */}
-          {currentTeam && (
-            <div style={{ display:'flex', alignItems:'center', gap:4, marginLeft:'auto', background:al(P,0.1), border:`1px solid ${al(P,0.25)}`, borderRadius:3, padding:'3px 8px' }}>
-              <span style={{ fontSize:12 }}>{MASCOTS.find(m=>m.id===currentTeam.mascot)?.emoji||'🏆'}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{currentTeam.name}</span>
-            </div>
-          )}
-          {!currentTeam && <div style={{ marginLeft:'auto' }} />}
+          <div style={{ display:'flex', alignItems:'center', gap:4, background:`rgba(${parseInt(P.slice(1,3),16)},${parseInt(P.slice(3,5),16)},${parseInt(P.slice(5,7),16)},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:2, padding:'3px 8px', marginLeft:'auto' }}>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
+            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
+          </div>
         </div>
 
-        {/* CONTENT */}
+        {/* PAGE CONTENT */}
         <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
-          {page==='home'     && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} setPage={setPage} />}
-          {page==='schemes'  && <SchemesPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
-          {page==='team'     && <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} brand={brand} />}
-          {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} teams={teams} activeTeam={activeTeam} />}
-          {page==='scout'    && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} teams={teams} activeTeam={activeTeam} />}
-          {page==='more'     && <MorePage P={P} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} />}
+          {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} />}
+          {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
+          {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
+          {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
+          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} />}
         </div>
 
         {/* BOTTOM NAV */}
         <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
-          {NAV.map(({ id, icon, label }) => (
-            <button key={id} onClick={()=>setPage(id)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 1px 6px', cursor:'pointer', gap:1, background:'none', border:'none', position:'relative' }}>
-              {page===id && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:P }} />}
-              <span style={{ fontSize:12, color:page===id?P:'#3d4559' }}>{icon}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page===id?P:'#3d4559', fontWeight:700, letterSpacing:'0.5px', textTransform:'uppercase' }}>{label}</span>
+          {NAV_ITEMS.map(({ id, icon, label }) => (
+            <button key={id} onClick={()=>setPage(id)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
+              {page===id && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2, background:P }} />}
+              <span style={{ fontSize:14, color:page===id?P:'#3d4559' }}>{icon}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page===id?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
             </button>
           ))}
         </div>
       </div>
     </>
+  )
+}
+
+// ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
+function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg }) {
+  const [mode, setMode] = useState('view') // view | create
+  const [expanded, setExpanded] = useState(false)
+  const [form, setForm] = useState({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
+  const [error, setError] = useState('')
+
+  const sportTeams = teams[sport] || []
+  const current = activeTeam[sport]
+  const MAX_TEAMS = 5
+
+  const colorOptions = {
+    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#E91E63','#FF6F00'],
+    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010','#0d2137','#3e0a1e','#1a1200'],
+  }
+
+  const seasons = ['Fall 2025','Winter 2025','Spring 2026','Summer 2026','Fall 2026','Winter 2026','Spring 2027','Summer 2027','Year Round']
+  const sportEmoji = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
+
+  function createTeam() {
+    if (!form.name.trim()) { setError('Team name is required'); return }
+    if (sportTeams.length >= MAX_TEAMS) { setError(`Max ${MAX_TEAMS} teams per sport`); return }
+    const newTeam = { id: Date.now(), name: form.name.trim(), season: form.season || 'Season N/A', primary: form.primary, secondary: form.secondary, sport, createdAt: Date.now() }
+    const updated = { ...teams, [sport]: [...sportTeams, newTeam] }
+    setTeams(updated)
+    setActiveTeam(prev => ({ ...prev, [sport]: newTeam }))
+    setCfg(prev => ({ ...prev, primary: newTeam.primary, secondary: newTeam.secondary }))
+    setForm({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
+    setMode('view')
+    setError('')
+  }
+
+  function selectTeam(team) {
+    setActiveTeam(prev => ({ ...prev, [sport]: team }))
+    setCfg(prev => ({ ...prev, primary: team.primary, secondary: team.secondary }))
+    setExpanded(false)
+  }
+
+  function deleteTeam(id) {
+    const updated = sportTeams.filter(t => t.id !== id)
+    setTeams(prev => ({ ...prev, [sport]: updated }))
+    if (current?.id === id) {
+      const next = updated[0] || null
+      setActiveTeam(prev => ({ ...prev, [sport]: next }))
+      if (next) setCfg(prev => ({ ...prev, primary: next.primary, secondary: next.secondary }))
+    }
+  }
+
+  const hasTeams = sportTeams.length > 0
+
+  return (
+    <div style={{ marginTop:14 }}>
+      {/* Header bar */}
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${hasTeams ? al(P,0.3) : '#1e2330'}`, borderRadius: expanded ? '4px 4px 0 0' : 4, cursor:'pointer', borderLeft:`3px solid ${P}` }}
+      >
+        <span style={{ fontSize:16 }}>{sportEmoji[sport] || '🏆'}</span>
+        <div style={{ flex:1 }}>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'0.5px', color:'#f2f4f8', textTransform:'uppercase' }}>
+            {current ? current.name : `No ${sport} Team Selected`}
+          </div>
+          {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
+          {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
+        </div>
+        {current && (
+          <div style={{ display:'flex', gap:4 }}>
+            <div style={{ width:12, height:12, borderRadius:2, background:current.primary }} />
+            <div style={{ width:12, height:12, borderRadius:2, background:current.secondary }} />
+          </div>
+        )}
+        <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded ? '▲' : '▼'}</span>
+      </div>
+
+      {expanded && (
+        <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
+
+          {/* Existing teams list */}
+          {hasTeams && mode === 'view' && (
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
+              {sportTeams.map(team => (
+                <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background: current?.id===team.id ? al(P,0.1) : '#161922', border:`1px solid ${current?.id===team.id ? al(P,0.4) : '#1e2330'}`, borderRadius:6, marginBottom:6 }}>
+                  <div style={{ display:'flex', gap:3, flexShrink:0 }}>
+                    <div style={{ width:14, height:14, borderRadius:2, background:team.primary }} />
+                    <div style={{ width:14, height:14, borderRadius:2, background:team.secondary }} />
+                  </div>
+                  <div style={{ flex:1, cursor:'pointer' }} onClick={() => selectTeam(team)}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{team.name}</div>
+                    <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}</div>
+                  </div>
+                  {current?.id === team.id && <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>ACTIVE</span>}
+                  <button onClick={() => deleteTeam(team.id)} style={{ background:'transparent', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.6)', fontSize:10, padding:'3px 7px', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Create team form */}
+          {mode === 'create' && (
+            <div style={{ animation:'fadeIn 0.2s ease' }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:10 }}>Create New Team</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                <div style={{ gridColumn:'1/-1' }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
+                  <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={`e.g. Tolland Youth ${sport}`} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div style={{ gridColumn:'1/-1' }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Season</label>
+                  <select value={form.season} onChange={e=>setForm(f=>({...f,season:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:form.season?'#f2f4f8':'#6b7a96', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+                    <option value="">Select season...</option>
+                    {seasons.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ marginBottom:10 }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Primary Color</label>
+                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                  {colorOptions.primary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,primary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.primary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+                </div>
+              </div>
+              <div style={{ marginBottom:12 }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Secondary Color</label>
+                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                  {colorOptions.secondary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,secondary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.secondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+                </div>
+              </div>
+              {/* Color preview strip */}
+              <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 55%,${form.secondary} 55%)`, marginBottom:12 }} />
+              {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={() => { setMode('view'); setError('') }} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CANCEL</button>
+                <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
+              </div>
+            </div>
+          )}
+
+          {/* Add team button */}
+          {mode === 'view' && sportTeams.length < MAX_TEAMS && (
+            <button onClick={() => setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+              <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
+            </button>
+          )}
+          {mode === 'view' && sportTeams.length >= MAX_TEAMS && (
+            <div style={{ fontSize:11, color:'#3d4559', textAlign:'center', padding:'8px 0' }}>Max {MAX_TEAMS} teams reached for {sport}</div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
