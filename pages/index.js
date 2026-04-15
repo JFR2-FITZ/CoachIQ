@@ -2122,11 +2122,21 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
                 {ct && <div style={{ fontFamily:teamFont, fontStyle:'italic', fontSize:14, color:ct.primary, letterSpacing:'0.5px' }}>{mascotObj?.emoji} {ct.name}</div>}
                 {ct?.season && <div style={{ fontSize:10, color:'#3d4559', marginTop:2, fontFamily:"'Barlow Condensed',sans-serif" }}>{ct.season}{ct.hometown?' · '+ct.hometown:''}</div>}
               </div>
-              <div style={{ display:'flex', gap:10, alignItems:'center', flexShrink:0 }}>
-                <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>IQ</div></div>
-                <div style={{ width:1, height:24, background:'#1c2235' }} />
-                <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div></div>
-              </div>
+              {(() => {
+                const ct = activeTeam[sport]
+                const nextEvt = ct && ct.schedule ? ct.schedule.filter(e => new Date(e.date+'T23:59:59') >= new Date()).sort((a,b) => new Date(a.date)-new Date(b.date))[0] : null
+                const awayLoc = nextEvt && nextEvt.homeAway === 'Away' && nextEvt.location ? nextEvt.location : null
+                return (
+                  <RotatingInfoWidget
+                    sport={sport}
+                    homeLocation={ct ? ct.hometown : null}
+                    awayLocation={awayLoc}
+                    nextEvent={nextEvt}
+                    P={P}
+                    al={al}
+                  />
+                )
+              })()}
             </div>
           </div>
         )
@@ -3087,5 +3097,137 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
         )}
       </div>
     </Card>
+  )
+}
+
+
+
+// ─── WEATHER UTILITIES ────────────────────────────────────────────────────────
+const GAME_THRESHOLDS = {
+  Football:   { thunderstorm:10, heavyRain:60, lightRain:85, snow:70, wind:5  },
+  Basketball: { thunderstorm:100,heavyRain:100,lightRain:100,snow:100,wind:100 },
+  Baseball:   { thunderstorm:5,  heavyRain:20, lightRain:70, snow:15, wind:80  },
+}
+
+function getGameLikelihood(sport, weatherCode, windSpeed) {
+  const t = GAME_THRESHOLDS[sport] || GAME_THRESHOLDS.Football
+  if (weatherCode >= 200 && weatherCode < 300) return t.thunderstorm
+  if (weatherCode >= 500 && weatherCode < 502) return t.lightRain
+  if (weatherCode >= 502 && weatherCode < 600) return t.heavyRain
+  if (weatherCode >= 300 && weatherCode < 400) return t.lightRain
+  if (weatherCode >= 600 && weatherCode < 700) return t.snow
+  if (windSpeed > 35) return t.wind
+  return 95
+}
+
+function weatherEmoji(code) {
+  if (code === 0) return '☀️'
+  if (code <= 3)  return '⛅'
+  if (code <= 49) return '🌫️'
+  if (code <= 69) return '🌧️'
+  if (code <= 79) return '❄️'
+  if (code <= 99) return '⛈️'
+  return '🌡️'
+}
+
+function useWeather(location) {
+  const [weather, setWeather] = useState(null)
+  useEffect(() => {
+    if (!location || !location.trim()) return
+    let cancelled = false
+    const run = async () => {
+      try {
+        const geo = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(location) + '&count=1&language=en&format=json')
+        const geoData = await geo.json()
+        if (cancelled || !geoData.results || !geoData.results.length) return
+        const { latitude, longitude, name } = geoData.results[0]
+        const wx = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + latitude + '&longitude=' + longitude + '&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph')
+        const wxData = await wx.json()
+        if (cancelled) return
+        const c = wxData.current
+        setWeather({ temp: Math.round(c.temperature_2m), code: c.weather_code, wind: Math.round(c.wind_speed_10m), city: name })
+      } catch(e) { /* silent fail - weather is non-critical */ }
+    }
+    run()
+    return () => { cancelled = true }
+  }, [location])
+  return weather
+}
+
+// ─── ROTATING INFO WIDGET ─────────────────────────────────────────────────────
+function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, al }) {
+  const [slot, setSlot] = useState(0)
+  const [now, setNow] = useState(() => new Date())
+  const homeWeather = useWeather(homeLocation)
+  const awayWeather = useWeather(awayLocation !== homeLocation ? awayLocation : null)
+
+  useEffect(() => {
+    const t1 = setInterval(() => setSlot(s => (s + 1) % 4), 4000)
+    const t2 = setInterval(() => setNow(new Date()), 30000)
+    return () => { clearInterval(t1); clearInterval(t2) }
+  }, [])
+
+  function getCountdown() {
+    if (!nextEvent || !nextEvent.date) return null
+    const diff = new Date(nextEvent.date + 'T12:00:00') - now
+    if (diff < 0) return null
+    const days = Math.floor(diff / 86400000)
+    const hrs  = Math.floor((diff % 86400000) / 3600000)
+    if (days > 0) return days + 'd ' + hrs + 'h'
+    if (hrs > 0)  return hrs + 'h'
+    return 'Today!'
+  }
+
+  const likelihood = homeWeather ? getGameLikelihood(sport, homeWeather.code, homeWeather.wind) : null
+
+  const slots = [
+    homeWeather ? (
+      <div key="hw" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+        <div style={{ fontSize:18 }}>{weatherEmoji(homeWeather.code)}</div>
+        <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8', lineHeight:1 }}>{homeWeather.temp}°</div>
+        <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center', lineHeight:1.2, maxWidth:60 }}>{homeWeather.city}</div>
+        {likelihood !== null && (
+          <div style={{ fontSize:8, color: likelihood > 70 ? '#4ade80' : likelihood > 40 ? '#f59e0b' : '#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:1 }}>{likelihood}% on</div>
+        )}
+      </div>
+    ) : null,
+
+    awayWeather && awayLocation && awayLocation !== homeLocation ? (
+      <div key="aw" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+        <div style={{ fontSize:18 }}>{weatherEmoji(awayWeather.code)}</div>
+        <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8', lineHeight:1 }}>{awayWeather.temp}°</div>
+        <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center', lineHeight:1.2, maxWidth:60 }}>{awayWeather.city}</div>
+        <div style={{ fontSize:7, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Away</div>
+      </div>
+    ) : null,
+
+    <div key="evt" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+      <div style={{ fontSize:14 }}>{nextEvent && nextEvent.type === 'Practice' ? '📋' : '🏆'}</div>
+      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, lineHeight:1, textAlign:'center' }}>{getCountdown() || '—'}</div>
+      <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center', lineHeight:1.3, maxWidth:64 }}>{nextEvent ? (nextEvent.opponent || nextEvent.type) : 'No events'}</div>
+    </div>,
+
+    <div key="dt" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+      <div style={{ fontSize:14 }}>📅</div>
+      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:'#f2f4f8', lineHeight:1 }}>{now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+      <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center' }}>{now.toLocaleDateString([],{month:'short',day:'numeric'})}</div>
+    </div>,
+  ].filter(Boolean)
+
+  if (slots.length === 0) return null
+
+  const activeSlot = slots[slot % slots.length]
+
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:5, flexShrink:0 }}>
+      <div style={{ width:70, display:'flex', alignItems:'center', justifyContent:'center', minHeight:60 }} key={'slot-' + slot}>
+        {activeSlot}
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+        {slots.map((_,i) => (
+          <div key={i} style={{ width:3, height:3, borderRadius:'50%', background: i === (slot % slots.length) ? P : '#3d4559', transition:'background 0.3s' }} />
+        ))}
+      </div>
+    </div>
   )
 }
