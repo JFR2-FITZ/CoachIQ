@@ -133,7 +133,7 @@ function ErrBox({ msg }) {
   return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
 }
 
-function PlayCard({ play, P, S, al, callAI, parseJSON }) {
+function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
   const [expanded, setExpanded] = useState(false)
   const [showAnim, setShowAnim] = useState(false)
   const [steps, setSteps] = useState(null)
@@ -230,6 +230,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON }) {
           <div style={{ fontSize:10, color:P, marginTop:4 }}>{expanded ? '▲ Tap to collapse' : '▼ Tap to expand breakdown + diagram'}</div>
         </div>
         <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
+          {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
           <button onClick={e => { e.stopPropagation(); setShowAnim(a => !a); if (!expanded) setExpanded(true) }} style={{ padding:'4px 9px', background:showAnim ? P : `rgba(${pr},${pg},${pb},0.12)`, border:`1px solid ${P}`, borderRadius:6, color:showAnim?'white':P, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap' }}>{showAnim ? 'HIDE PLAY' : 'SHOW PLAY'}</button>
           <span style={{ fontSize:14, color:'#6b7a96', userSelect:'none' }}>{expanded ? '▲' : '▼'}</span>
         </div>
@@ -1032,204 +1033,6 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
   return null
 }
 
-
-function HomePage({ P, S, al, dk, lastName, sport, sportColors, schemes, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, onScheme, playbook, setPlaybook, schemeResult, setSchemeResult, schemeFields, setSchemeFields, schemeSport, setSchemeSport, genHistory, setGenHistory }) {
-  const [feed, setFeed] = useState(null)
-  const [feedLoading, setFeedLoading] = useState(false)
-  const cfg = SPORTS[sport] || SPORTS.Football
-  const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
-  const [fields, setFields] = useState(() => (schemeSport===sport && schemeFields) ? schemeFields : initFields())
-  const [prevSport, setPrevSport] = useState(sport)
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState((schemeSport===sport && schemeResult) ? schemeResult : null)
-  const [error, setError] = useState('')
-  const [showHistory, setShowHistory] = useState(false)
-  const [activeMode, setActiveMode] = useState('dashboard')
-
-  if (sport !== prevSport) {
-    setPrevSport(sport)
-    setFields((schemeSport===sport && schemeFields) ? schemeFields : initFields())
-    setResult((schemeSport===sport && schemeResult) ? schemeResult : null)
-    setError(''); setFeed(null); setActiveMode('dashboard')
-  }
-
-  useEffect(() => { if (!feed && !feedLoading) loadFeed() }, [sport])
-
-  async function loadFeed() {
-    setFeedLoading(true)
-    try {
-      const raw = await callAI('You are a sports coaching knowledge curator. Generate a daily coaching feed for a youth '+sport+' coach. Include real proven concepts. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences, mention the coach or program","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy from a noted coach in 2 sentences","source":"coach name"}]}')
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      setFeed(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
-    } catch(e) { setFeed({ items: [] }) }
-    setFeedLoading(false)
-  }
-
-  async function generate() {
-    setLoading(true); setResult(null); setError('')
-    try {
-      const activeCfg = SPORTS[sport] || SPORTS.Football
-      const raw = await callAI(activeCfg.buildPrompt(fields))
-      const data = parseJSON(raw)
-      if (!data.plays) throw new Error('No plays in response')
-      const historyEntry = { ...data, _sport: sport, _inputs: Object.entries(fields).map(([k,v])=>v).join(' · '), _ts: Date.now() }
-      setGenHistory(prev => ({ ...prev, [sport]: [historyEntry, ...(prev[sport]||[])].slice(0,20) }))
-      setResult(data); setSchemeResult(data); setSchemeFields(fields); setSchemeSport(sport)
-      if (onScheme) onScheme()
-    } catch(e) { setError(e.message) }
-    setLoading(false)
-  }
-
-  function saveToPlaybook() {
-    if (!result) return
-    const entry = { ...result, _sport: sport, _inputs: Object.entries(fields).map(([k,v])=>v).join(' · '), _savedAt: Date.now() }
-    setPlaybook(pb => ({ ...pb, [sport]: [...(pb[sport]||[]), entry] }))
-  }
-  const isAlreadySaved = result && (playbook[sport]||[]).some(p => p.packageName===result.packageName && p._inputs===Object.entries(fields).map(([k,v])=>v).join(' · '))
-
-  const feedTypeColor = (t) => t==='drill'?P:t==='science'?'#6b9fff':'#4ade80'
-  const sportHistory = (genHistory[sport]||[])
-
-  if (activeMode === 'dashboard') return (
-    <>
-      <div style={{ padding:'16px 0 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Welcome back</div>
-          <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>{lastName ? `Coach ${lastName}` : 'CoachIQ'}</div>
-        </div>
-        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#f59e0b', lineHeight:1 }}>{iq}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Coach IQ</div></div>
-          <div style={{ width:1, height:28, background:'#1c2235' }} />
-          <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:'#4ade80', lineHeight:1 }}>{gauntlets}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase', letterSpacing:'1px' }}>Streak 🔥</div></div>
-        </div>
-      </div>
-      <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
-        <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
-        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items&&feed.items.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 Tennessee Rip drill eliminates hesitation · 🧠 NSCA: 15-min focused reps beat 60-min mixed sessions · ${sport} coaching intelligence live`}</div></div>
-      </div>
-      <div style={{ marginTop:14 }}>
-        <div onClick={() => setActiveMode('schemes')} style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', cursor:'pointer', position:'relative', overflow:'hidden' }}>
-          <div style={{ position:'absolute', right:-12, bottom:-12, opacity:0.05, pointerEvents:'none' }}><svg width="110" height="130" viewBox="0 0 220 280" fill="none"><rect x="10" y="24" width="200" height="240" rx="6" fill="#c8b89a"/><rect x="80" y="10" width="60" height="30" rx="7" fill="#888"/><line x1="30" y1="70" x2="190" y2="70" stroke="white" strokeWidth="3"/><line x1="30" y1="90" x2="190" y2="90" stroke="white" strokeWidth="3"/><line x1="30" y1="110" x2="160" y2="110" stroke="white" strokeWidth="3"/><rect x="30" y="130" width="160" height="110" rx="4" fill="none" stroke="white" strokeWidth="3"/></svg></div>
-          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:10 }}>
-            <div>
-              <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:22, color:'#dde1f0', lineHeight:1, marginBottom:4 }}>Scheme Generator</div>
-              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:220 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — with animated diagrams and coaching cues built in.</div>
-            </div>
-            <div style={{ background:'#C0392B', padding:'5px 12px', borderRadius:2, clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)', flexShrink:0, marginLeft:10, marginTop:2 }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN</span></div>
-          </div>
-          <div style={{ display:'flex', gap:5, flexWrap:'wrap', marginBottom:12 }}>
-            {['Offense','Defense','AI Diagrams','Educator Mode','Pro Comparison'].map(tag => (<span key={tag} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, padding:'2px 8px', background:'rgba(192,57,43,0.12)', borderLeft:'2px solid rgba(192,57,43,0.4)', color:'rgba(192,57,43,0.8)', letterSpacing:'0.5px' }}>{tag}</span>))}
-          </div>
-          <div style={{ background:'rgba(0,0,0,0.4)', borderRadius:3, padding:'8px 12px', display:'flex', alignItems:'center', gap:12 }}>
-            <svg width="52" height="32" viewBox="0 0 52 32"><line x1="0" y1="16" x2="52" y2="16" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/><rect x="20" y="17" width="5" height="5" fill={P} opacity="0.9"/><rect x="10" y="17" width="4" height="4" fill={P} opacity="0.5"/><rect x="31" y="17" width="4" height="4" fill={P} opacity="0.5"/><path d="M22 17 L22 6" stroke={P} strokeWidth="1.8" opacity="0.8"/><path d="M12 17 L8 7" stroke={P} strokeWidth="1.2" opacity="0.5"/><path d="M33 17 L40 8" stroke={P} strokeWidth="1.2" opacity="0.5"/><circle cx="22" cy="5" r="2" fill={P} opacity="0.6"/></svg>
-            <div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:P, letterSpacing:'0.5px' }}>{result?`Last: ${result.packageName}`:'Tap to generate your first package'}</div><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', marginTop:1 }}>{result?`${result.plays?.length||0} plays · animated diagrams ready`:'Football · Basketball · Baseball'}</div></div>
-          </div>
-        </div>
-      </div>
-      <div style={{ marginTop:8 }}>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7, marginBottom:7 }}>
-          <div onClick={() => setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>⚡</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Gauntlet</div></div>
-            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Test your coaching IQ with live AI scenarios</div>
-            <div style={{ display:'flex', alignItems:'baseline', gap:4 }}><span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>your IQ</span></div>
-          </div>
-          <div onClick={() => setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>🎯</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Situational</div></div>
-            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Real-time play calls by down, distance & score</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4ade80', fontWeight:700 }}>{sport==='Basketball'?'Q3 · Live adjustments':sport==='Baseball'?'5th · Count manager':'3rd & 5 · Live caller'}</div>
-          </div>
-        </div>
-        <div onClick={() => setActiveMode('film')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 14px', display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
-          <span style={{ fontSize:16 }}>🎥</span>
-          <div style={{ flex:1 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Film Room</div><div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470' }}>Describe a problem or upload a clip — AI diagnoses it</div></div>
-          <div style={{ fontSize:12, color:'#3a4260' }}>›</div>
-        </div>
-      </div>
-      <div style={{ marginTop:14 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-          <div style={{ width:3, height:10, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
-          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
-        </div>
-        {feedLoading&&<div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching content...</div></div>}
-        {feed&&(feed.items||[]).map((item,i)=>(<div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}><div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{item.type==='drill'?'Drill of the Day':item.type==='science'?'Coaching Science':'Concept Spotlight'}</span>{item.source&&<span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div></div>))}
-      </div>
-      {sportHistory.length>0&&(
-        <div style={{ marginTop:6, marginBottom:14 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8, cursor:'pointer' }} onClick={() => setShowHistory(h=>!h)}>
-            <div style={{ width:3, height:10, background:'#3a4260', transform:'skewX(-15deg)', flexShrink:0 }} />
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', flex:1 }}>Recent Generations ({sportHistory.length})</span>
-            <span style={{ fontSize:11, color:'#6b7a96' }}>{showHistory?'▲':'▼'}</span>
-          </div>
-          {showHistory&&sportHistory.map((h,i)=>(<div key={i} style={{ background:'#0a0c10', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:6, display:'flex', alignItems:'center', gap:10 }}><div style={{ flex:1 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>{h.packageName}</div><div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{h._inputs}</div></div><button onClick={() => { setResult(h); setActiveMode('schemes') }} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:9, color:P, background:al(P,0.1), border:`0.5px solid ${al(P,0.3)}`, borderRadius:2, padding:'4px 10px', cursor:'pointer', letterSpacing:'1px', whiteSpace:'nowrap' }}>View</button></div>))}
-        </div>
-      )}
-    </>
-  )
-
-  if (activeMode === 'gauntlet') return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}><button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span></div>
-      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
-    </>
-  )
-
-  if (activeMode === 'film') return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}><button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Film Room</span></div>
-      <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />
-    </>
-  )
-
-  if (activeMode === 'situational') return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}><button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport==='Football'?'Situational Play Caller':sport==='Basketball'?'Live Game Adjustments':'Count & Situation Manager'}</span></div>
-      <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
-    </>
-  )
-
-  if (activeMode === 'defense') return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}><button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Defensive Schemes</span></div>
-      <DefenseGen sport={sport} P={P} S={'#6b9fff'} al={al} callAI={callAI} parseJSON={parseJSON} />
-    </>
-  )
-
-  // SCHEMES MODE
-  const activeCfg = SPORTS[sport] || SPORTS.Football
-  return (
-    <>
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-        <button onClick={() => setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Scheme Generator</span>
-      </div>
-      <Card>
-        <CardHead icon="📋" title="Offensive Scheme Generator" tag={activeCfg.emoji} tagColor={P} accent={P} />
-        <div style={{ padding:14 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-            {activeCfg.fields.map(f => (<Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
-          </div>
-          <PBtn onClick={generate} disabled={loading} color={P}>{loading?'GENERATING...':(sport==='Baseball'?'GENERATE GAME PLAN':'GENERATE SCHEME')}</PBtn>
-          {loading && <Shimmer />}
-          {error && <ErrBox msg={error} />}
-          {result && (
-            <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
-                <div style={{ flex:1 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:17, letterSpacing:1, color:P }}>{result.packageName}</div><p style={{ fontSize:12, color:'#6b7a96', marginTop:4, lineHeight:1.5 }}>{result.summary}</p></div>
-                {!isAlreadySaved && <button onClick={saveToPlaybook} style={{ padding:'6px 12px', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:6, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, letterSpacing:1, cursor:'pointer', whiteSpace:'nowrap' }}>+ PLAYBOOK</button>}
-                {isAlreadySaved && <span style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>✓ SAVED</span>}
-              </div>
-              {result.defenseTip && (<div style={{ padding:'8px 12px', background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Defensive Context</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.defenseTip}</div></div>)}
-              {(result.plays||[]).map(play => (<PlayCard key={play.number} play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} />))}
-              {result.coachingCue && (<div style={{ marginTop:10, padding:10, background:al(P,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Coaching Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic', fontWeight:500 }}>"{result.coachingCue}"</div></div>)}
-            </div>
-          )}
-        </div>
-      </Card>
-      <DefenseGen sport={sport} P={P} S={'#6b9fff'} al={al} callAI={callAI} parseJSON={parseJSON} />
-    </>
-  )
-}
 
 function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON }) {
   const [difficulty, setDifficulty] = useState('Varsity')
@@ -2305,30 +2108,6 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   )
 }
 
-            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
-          </div>
-        </div>
-
-        <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
-          <div style={{ display: page==='home' ? 'contents' : 'none' }}><HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} sportColors={SPORT_COLORS} schemes={schemes} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} onScheme={() => setSchemes(s=>s+1)} playbook={playbook} setPlaybook={setPlaybook} schemeResult={schemeResult} setSchemeResult={setSchemeResult} schemeFields={schemeFields} setSchemeFields={setSchemeFields} schemeSport={schemeSport} setSchemeSport={setSchemeSport} genHistory={genHistory} setGenHistory={setGenHistory} /></div>
-          <div style={{ display: page==='playbook' ? 'contents' : 'none' }}><PlaybookPage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
-          <div style={{ display: page==='more' ? 'contents' : 'none' }}><MorePage P={P} S={S} al={al} dk={dk} cfg={cfg} setCfg={setCfg} playbook={playbook} sport={sport} callAI={callAI} parseJSON={parseJSON} /></div>
-        </div>
-
-        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:640, background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
-          {[['home','🏠','HOME'],['playbook','📖','PLAYBOOK'],['more','⋯','MORE']].map(([p,ico,lbl]) => (
-            <button key={p} onClick={() => setPage(p)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
-              {page===p && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:32, height:2, background:P }} />}
-              <span style={{ fontSize:16, color:page===p?P:'#3d4559' }}>{ico}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:page===p?P:'#3d4559', fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>{lbl}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </>
-  )
-}
-
 function SplashScreen({ onDone, alreadyAuthed }) {
   const [phase, setPhase] = useState('logo')
 
@@ -2596,107 +2375,6 @@ function Onboarding({ onLaunch }) {
   )
 }
 
-function Card({ children, style={} }) {
-  return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
-}
-function CardHead({ icon, title, tag, tagColor, accent }) {
-  const tc = tagColor || '#C0392B'
-  return (
-    <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#C0392B'}` }}>
-      <span style={{ fontSize:15 }}>{icon}</span>
-      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{title}</span>
-      {tag && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(tc.slice(1,3),16)},${parseInt(tc.slice(3,5),16)},${parseInt(tc.slice(5,7),16)},0.15)`, color:tc, textTransform:'uppercase' }}>{tag}</span>}
-    </div>
-  )
-}
-function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
-  return (
-    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
-  )
-}
-function Sel({ label, value, onChange, options }) {
-  return (
-    <div>
-      <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>{label}</label>
-      <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
-        {options.map(o => <option key={o}>{o}</option>)}
-      </select>
-    </div>
-  )
-}
-function Shimmer() {
-  return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', borderRadius:0, margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
-}
-function ErrBox({ msg }) {
-  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
-}
-function Hero({ greet, left, right, P, S, dk, children }) {
-  return (
-    <div style={{ borderRadius:4, padding:'16px 15px', position:'relative', overflow:'hidden', border:'1px solid #1e2330', background:`linear-gradient(135deg,${dk(S,40)} 0%,#07090d 65%)` }}>
-      <div style={{ position:'absolute', top:0, right:0, width:4, height:'100%', background:P }} />
-      <div style={{ position:'relative', zIndex:1 }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{greet}</div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:26, letterSpacing:'1px', lineHeight:1, marginBottom:children?11:0, textTransform:'uppercase' }}>{left} <span style={{ color:P }}>{right}</span></div>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-const SPORTS = {
-  Football: {
-    emoji:'FB',
-    fields:[
-      {id:'system',label:'Offensive System',opts:['Wing-T','Spread','I-Formation','Single Wing','Pistol','Power I','Double Wing','Flexbone','Run and Shoot']},
-      {id:'personnel',label:'Your Best Personnel',opts:['Athletic QB / Dual Threat','Big Physical RB','Fast Skill Players','Strong Offensive Line','Well-Balanced','Small But Fast Team','Big But Slower Team']},
-      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School JV','High School Varsity']},
-      {id:'skill',label:'Team Skill Level',opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
-      {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
-      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Dual-Threat QB','Speed / Fast Athletes','Big Physical Players','Pass Heavy / Spread','Run Heavy / Power','Option / Misdirection Heavy','Blitzes Every Down','Zone Coverage Heavy','Man Press Every Play']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
-    ],
-    positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
-    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme for this teams personnel.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types like: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
-  },
-  Basketball: {
-    emoji:'BB',
-    fields:[
-      {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
-      {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
-      {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
-      {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
-      {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','One Star Player ISO Heavy','Strong Inside Post','Three Point Shooting Team','Fast Break Heavy','Ball Control Slow Pace','Full Court Press Every Possession','Zone Defense Only','Aggressive Man Pressure','Weak Ball Handlers']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
-    ],
-    positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays or sets. Use types like: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use"},{"number":2,"name":"play name","type":"TYPE","note":"when to use"},{"number":3,"name":"play name","type":"TYPE","note":"when to use"},{"number":4,"name":"play name","type":"TYPE","note":"when to use"},{"number":5,"name":"play name","type":"TYPE","note":"when to use"},{"number":6,"name":"play name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario using basketball terminology only. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 BALL ON OWN 30 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using basketball terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
-  },
-  Baseball: {
-    emoji:'BSB',
-    fields:[
-      {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
-      {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
-      {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
-      {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
-      {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
-      {id:'oppTendency',label:'Opposing Team Tendency',opts:['Unknown / Balanced','Pull Hitters Heavy','Spray / Opposite Field Hitters','Speed Team — Steals Often','Power Hitting Lineup','Bunt Heavy Small Ball','Strong Pitching','Aggressive Base Running','Struggles with Off-Speed','Rarely Strike Out']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
-    ],
-    positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types like: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
-    scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario using baseball manager terminology only. No football references. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario for a manager","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation using baseball manager terms"} Rules: exactly 1 correct, randomize which letter, make wrong answers plausible.`,
-  },
-}
-
-
-
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function CoachIQ() {
   const [launched, setLaunched] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
