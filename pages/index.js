@@ -3,9 +3,11 @@ import Head from 'next/head'
 
 // ─── BRAND CONFIG ────────────────────────────────────────────────────────────
 const BRAND_PALETTES = {
-  'Red & White': { logo1: '#C0392B', logo2: '#f2f4f8', name: 'Red & White' },
-  'Blue & White': { logo1: '#1565C0', logo2: '#f2f4f8', name: 'Blue & White' },
-  'Black & Gold': { logo1: '#f59e0b', logo2: '#f2f4f8', name: 'Black & Gold' },
+  'Red — C+IQ colored':   { accent: '#C0392B', accentOn: 'CIQ', name: 'Red — C+IQ colored' },
+  'Red — oach colored':   { accent: '#C0392B', accentOn: 'oach', name: 'Red — oach colored' },
+  'Blue — C+IQ colored':  { accent: '#1565C0', accentOn: 'CIQ', name: 'Blue — C+IQ colored' },
+  'Blue — oach colored':  { accent: '#1565C0', accentOn: 'oach', name: 'Blue — oach colored' },
+  'Gold — C+IQ colored':  { accent: '#f59e0b', accentOn: 'CIQ', name: 'Gold — C+IQ colored' },
 }
 
 // ─── SPORT COLORS ────────────────────────────────────────────────────────────
@@ -76,13 +78,17 @@ const SPORTS = {
 
 
 // ─── LOGO COMPONENT ──────────────────────────────────────────────────────────
-function CoachIQLogo({ size=22, brand='Red & White' }) {
-  const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red & White']
+function CoachIQLogo({ size=22, brand='Red — C+IQ colored' }) {
+  const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red — C+IQ colored']
+  const CIQ = p.accentOn === 'CIQ'
+  const coloredC    = CIQ ? p.accent : '#f2f4f8'
+  const coloredOach = CIQ ? '#f2f4f8' : p.accent
+  const coloredIQ   = CIQ ? p.accent : '#f2f4f8'
   return (
     <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:size, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
-      <span style={{ color:p.logo1 }}>C</span>
-      <span style={{ color:p.logo2 }}>oach</span>
-      <span style={{ color:p.logo1 }}>IQ</span>
+      <span style={{ color:coloredC }}>C</span>
+      <span style={{ color:coloredOach }}>oach</span>
+      <span style={{ color:coloredIQ }}>IQ</span>
     </div>
   )
 }
@@ -1922,17 +1928,20 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport }) {
             <div style={{ padding:14 }}>
               <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>Choose your brand palette for the CoachIQ logo across the app.</div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-                {Object.entries(BRAND_PALETTES).map(([key, palette]) => (
-                  <div key={key} onClick={()=>setBrand(key)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', background:brand===key?al(P,0.08):'#161922', border:`1px solid ${brand===key?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
-                    <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, lineHeight:1, whiteSpace:'nowrap' }}>
-                      <span style={{ color:palette.logo1 }}>C</span>
-                      <span style={{ color:palette.logo2 }}>oach</span>
-                      <span style={{ color:palette.logo1 }}>IQ</span>
+                {Object.entries(BRAND_PALETTES).map(([key, palette]) => {
+                  const isCIQ = palette.accentOn === 'CIQ'
+                  return (
+                    <div key={key} onClick={()=>setBrand(key)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', background:brand===key?al(P,0.08):'#161922', border:`1px solid ${brand===key?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
+                      <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, lineHeight:1, whiteSpace:'nowrap' }}>
+                        <span style={{ color:isCIQ?palette.accent:'#f2f4f8' }}>C</span>
+                        <span style={{ color:isCIQ?'#f2f4f8':palette.accent }}>oach</span>
+                        <span style={{ color:isCIQ?palette.accent:'#f2f4f8' }}>IQ</span>
+                      </div>
+                      <div style={{ flex:1, fontSize:12, color:'#6b7a96' }}>{palette.name}</div>
+                      {brand===key && <span style={{ fontSize:14, color:'#4ade80' }}>✓</span>}
                     </div>
-                    <div style={{ flex:1, fontSize:12, color:'#6b7a96' }}>{palette.name}</div>
-                    {brand===key && <span style={{ fontSize:14, color:'#4ade80' }}>✓</span>}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </Card>
@@ -1966,7 +1975,7 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport }) {
 
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand }) {
+function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg }) {
   const [feed, setFeed] = useState(null)
   const [feedLoading, setFeedLoading] = useState(false)
   const [activeMode, setActiveMode] = useState('dashboard')
@@ -1984,6 +1993,16 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   }
 
   const feedTypeColor = t => t==='drill'?P:t==='science'?'#6b9fff':'#4ade80'
+
+  if (activeMode === 'schemes_offense' || activeMode === 'schemes_defense') return (
+    <>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} {activeMode==='schemes_offense'?'Offensive':'Defensive'} Schemes</span>
+      </div>
+      <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={{Football:{},Basketball:{},Baseball:{}}} setPlaybook={()=>{}} genHistory={{Football:[],Basketball:[],Baseball:[]}} setGenHistory={()=>{}} iq={iq} setIQ={setIQ} defaultOpenOff={activeMode==='schemes_offense'} defaultOpenDef={activeMode==='schemes_defense'} />
+    </>
+  )
 
   if (activeMode === 'gauntlet') return (
     <>
@@ -2036,26 +2055,38 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
         <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — AI Coaching Intelligence · Generate schemes · Scout opponents · Build your playbook`}</div></div>
       </div>
 
-      {/* Scheme Generator Card — interactive preview */}
+      {/* Team Manager Card */}
+      <TeamManagerCard
+        sport={sport}
+        teams={teams}
+        setTeams={setTeams}
+        activeTeam={activeTeam}
+        setActiveTeam={setActiveTeam}
+        P={P}
+        al={al}
+        setCfg={setCfg}
+      />
+
+            {/* Scheme Generator Card — interactive preview */}
       <div style={{ marginTop:14 }}>
-        <div style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', position:'relative', overflow:'hidden' }}>
+        <div onClick={()=>setActiveMode('schemes_offense')} style={{ background:'linear-gradient(135deg,#180303,#220606)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:'16px', position:'relative', overflow:'hidden', cursor:'pointer' }}>
           <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:10 }}>
             <div>
               <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:20, color:'#dde1f0', lineHeight:1, marginBottom:4 }}>Scheme Generator</div>
               <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:200 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> — animated diagrams and coaching cues built in.</div>
             </div>
             <div style={{ display:'flex', gap:6, flexDirection:'column', alignItems:'flex-end' }}>
-              <div style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN →</span></div>
+              <div onClick={()=>setActiveMode('schemes_offense')} style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)', cursor:'pointer' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN →</span></div>
             </div>
           </div>
-          {/* Interactive mini diagrams */}
+          {/* Interactive mini diagrams — click to navigate */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-            <div style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative' }}>
-              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE</div>
+            <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_offense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative', cursor:'pointer' }}>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE ›</div>
               <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="offense" P={P} /></div>
             </div>
-            <div style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative' }}>
-              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE</div>
+            <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_defense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative', cursor:'pointer' }}>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE ›</div>
               <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="defense" P={P} /></div>
             </div>
           </div>
@@ -2108,30 +2139,27 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   )
 }
 
-function SplashScreen({ onDone, alreadyAuthed }) {
+function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
   const [phase, setPhase] = useState('logo')
 
   useEffect(() => {
     const t = setTimeout(() => {
       if (alreadyAuthed) { onDone(true) } else { setPhase('cta') }
-    }, 1800)
+    }, 1600)
     return () => clearTimeout(t)
   }, [])
 
-  const ballStyle = (anim, left, top, right, bottom) => ({
-    position:'absolute',
-    ...(left!==undefined?{left}:{}),
-    ...(top!==undefined?{top}:{}),
-    ...(right!==undefined?{right}:{}),
-    ...(bottom!==undefined?{bottom}:{}),
-    animation:`${anim} ease-in-out infinite`,
-    opacity:0.11,
-    zIndex:0,
-    pointerEvents:'none',
-  })
+  const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red — C+IQ colored']
+  const CIQ = p.accentOn === 'CIQ'
+  const cC   = CIQ ? p.accent : '#f2f4f8'
+  const cOach = CIQ ? '#f2f4f8' : p.accent
+  const cIQ  = CIQ ? p.accent : '#f2f4f8'
+  const accent = p.accent
+
+  const bs = (anim, pos) => ({ position:'absolute', ...pos, animation:`${anim} ease-in-out infinite`, opacity:0.28, zIndex:0, pointerEvents:'none' })
 
   return (
-    <div style={{ minHeight:'100vh', maxWidth:480, margin:'0 auto', background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 28px', position:'relative', overflow:'hidden' }}>
+    <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 32px', overflow:'hidden', zIndex:999 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&display=swap');
         * { box-sizing:border-box; margin:0; padding:0; }
@@ -2142,53 +2170,40 @@ function SplashScreen({ onDone, alreadyAuthed }) {
         @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} }
         @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} }
         @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
-        @keyframes logoReveal { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
-        @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes logoReveal { 0%{opacity:0;transform:translateY(16px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes ctaReveal { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
       `}</style>
 
-      <div style={ballStyle('float1 7s',-16,undefined,undefined,'42%')}><svg width="78" height="50" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
-      <div style={ballStyle('float2 9s',undefined,undefined,8,'38%')}><svg width="64" height="64" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg></div>
-      <div style={ballStyle('float3 8s',14,undefined,undefined,'25%')}><svg width="52" height="52" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="20" x2="19" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="27" x2="16" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="20" x2="37" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="27" x2="40" y2="29" stroke="#C0392B" strokeWidth="1.2"/></svg></div>
-      <div style={ballStyle('float4 11s',undefined,8,undefined,undefined)}><svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg></div>
-      <div style={ballStyle('float5 6.5s',undefined,undefined,20,'18%')}><svg width="38" height="38" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg></div>
-      <div style={ballStyle('float6 10s',undefined,undefined,10,'58%')}><svg width="46" height="46" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg></div>
-      <div style={ballStyle('float7 12s',20,undefined,undefined,'68%')}><svg width="50" height="50" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/></svg></div>
+      {/* Floating balls - full screen coverage */}
+      <div style={bs('float1 7s',{left:'5%',top:'10%'})}><svg width="88" height="56" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
+      <div style={bs('float2 9s',{right:'6%',top:'15%'})}><svg width="74" height="74" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg></div>
+      <div style={bs('float3 8s',{left:'8%',bottom:'22%'})}><svg width="64" height="64" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="20" x2="19" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="27" x2="16" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="20" x2="37" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="27" x2="40" y2="29" stroke="#C0392B" strokeWidth="1.2"/></svg></div>
+      <div style={bs('float4 11s',{right:'10%',top:'5%'})}><svg width="56" height="56" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg></div>
+      <div style={bs('float5 6.5s',{left:'50%',top:'8%'})}><svg width="48" height="48" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg></div>
+      <div style={bs('float6 10s',{right:'5%',bottom:'30%'})}><svg width="58" height="58" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg></div>
+      <div style={bs('float7 12s',{left:'12%',top:'50%'})}><svg width="62" height="62" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/></svg></div>
+      <div style={bs('float2 8s',{left:'30%',bottom:'8%'})}><svg width="52" height="52" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
 
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:'35%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'35%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
+      {/* Gradient overlays for depth */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:'30%', background:'linear-gradient(180deg,rgba(7,9,13,0.7),transparent)', zIndex:1, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'30%', background:'linear-gradient(0deg,rgba(7,9,13,0.7),transparent)', zIndex:1, pointerEvents:'none' }} />
 
-      <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-58%) rotate(-8deg)', zIndex:1, opacity:0.06, pointerEvents:'none' }}>
-        <svg width="160" height="200" viewBox="0 0 220 280" fill="none">
-          <rect x="10" y="24" width="200" height="240" rx="6" fill="#c8b89a"/>
-          <rect x="80" y="10" width="60" height="30" rx="7" fill="#888880"/>
-          <rect x="90" y="4" width="40" height="18" rx="9" fill="#777770"/>
-          <line x1="30" y1="70" x2="190" y2="70" stroke="#5a4a3a" strokeWidth="2"/>
-          <line x1="30" y1="90" x2="190" y2="90" stroke="#5a4a3a" strokeWidth="2"/>
-          <line x1="30" y1="110" x2="160" y2="110" stroke="#5a4a3a" strokeWidth="2"/>
-          <rect x="30" y="130" width="160" height="110" rx="4" fill="none" stroke="#5a4a3a" strokeWidth="2"/>
-          <line x1="110" y1="130" x2="110" y2="240" stroke="#5a4a3a" strokeWidth="1.5"/>
-          <circle cx="65" cy="158" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
-          <circle cx="90" cy="172" r="9" fill="none" stroke="#C0392B" strokeWidth="2.5"/>
-          <circle cx="148" cy="158" r="9" fill="#5a4a3a"/>
-          <circle cx="162" cy="175" r="9" fill="#5a4a3a"/>
-          <path d="M74 149 L88 140" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
-          <path d="M99 163 L115 158" stroke="#C0392B" strokeWidth="2" strokeDasharray="4,2"/>
-        </svg>
-      </div>
-
-      <div style={{ position:'relative', zIndex:2, textAlign:'center', animation:'logoReveal 0.7s ease forwards' }}>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:58, lineHeight:1, letterSpacing:'-0.5px', marginBottom:10 }}>
-          <span style={{ color:'#C0392B' }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
+      {/* Logo */}
+      <div style={{ position:'relative', zIndex:2, textAlign:'center', animation:'logoReveal 0.7s ease forwards', marginBottom: phase === 'cta' ? 40 : 0 }}>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:64, lineHeight:1, letterSpacing:'-1px', marginBottom:10 }}>
+          <span style={{ color:cC }}>C</span>
+          <span style={{ color:cOach }}>oach</span>
+          <span style={{ color:cIQ }}>IQ</span>
         </div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>AI Coaching Intelligence</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'5px', color:'#3a4260', textTransform:'uppercase' }}>AI Coaching Intelligence</div>
       </div>
 
       {phase === 'cta' && (
-        <div style={{ position:'relative', zIndex:2, width:'100%', display:'flex', flexDirection:'column', gap:10, marginTop:48, animation:'ctaReveal 0.4s ease forwards' }}>
-          <button onClick={() => onDone(false)} style={{ width:'100%', background:'#C0392B', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Get Started — Free</button>
-          <button onClick={() => onDone(false)} style={{ width:'100%', background:'transparent', border:'1px solid #1c2235', borderRadius:4, padding:'13px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}>Sign In</button>
+        <div style={{ position:'relative', zIndex:2, width:'100%', maxWidth:380, display:'flex', flexDirection:'column', gap:10, animation:'ctaReveal 0.4s ease forwards' }}>
+          <button onClick={() => onDone(false)} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'15px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Get Started — Free</button>
+          <button onClick={() => onDone(false)} style={{ width:'100%', background:'transparent', border:'1px solid #1c2235', borderRadius:4, padding:'14px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}>Sign In</button>
           <div style={{ textAlign:'center', paddingTop:4 }}>
-            <span onClick={() => onDone(true)} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:'#C0392B', fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span>
+            <span onClick={() => onDone(true)} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:accent, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span>
           </div>
         </div>
       )}
@@ -2196,200 +2211,69 @@ function SplashScreen({ onDone, alreadyAuthed }) {
   )
 }
 
-function Onboarding({ onLaunch }) {
-  const [screen, setScreen] = useState('signin')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+function Onboarding({ onLaunch, brand='Red — C+IQ colored' }) {
   const [coachName, setCoachName] = useState('')
-  const [teamSport, setTeamSport] = useState('Football')
-  const [teamName, setTeamName] = useState('')
-  const [teamPrimary, setTeamPrimary] = useState('#C0392B')
-  const [teamSecondary, setTeamSecondary] = useState('#002868')
-  const [teams, setTeams] = useState([
-    { sport: 'Football', name: 'Tolland Youth Football', primary: '#C0392B', secondary: '#002868', coach: 'Coach Regisford', iq: 847, packages: 3 }
-  ])
+  const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red — C+IQ colored']
+  const accent = p.accent
+  const CIQ = p.accentOn === 'CIQ'
+  const cC = CIQ ? p.accent : '#f2f4f8'
+  const cOach = CIQ ? '#f2f4f8' : p.accent
+  const cIQ = CIQ ? p.accent : '#f2f4f8'
 
-  const sportMeta = {
-    Football: { emoji: '🏈', grad: ['#6b0000','#C0392B'], label: 'Football' },
-    Basketball: { emoji: '🏀', grad: ['#7a3000','#D4600A'], label: 'Basketball' },
-    Baseball: { emoji: '⚾', grad: ['#0a2a0a','#1B5E20'], label: 'Baseball' },
+  function handleStart() {
+    onLaunch({ coach: coachName.trim() || 'Coach', team:'', primary:'#C0392B', secondary:'#002868', sport:'Football' })
   }
-
-  const colorOptions = {
-    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
-    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010'],
-  }
-
-  function handleSignIn() { setScreen('teams') }
-
-  function handleCreateTeam() {
-    if (!teamName.trim()) return
-    const newTeam = { sport: teamSport, name: teamName, primary: teamPrimary, secondary: teamSecondary, coach: coachName || 'Coach', iq: 500, packages: 0 }
-    setTeams(prev => [...prev, newTeam])
-    setScreen('teams')
-    setTeamName('')
-  }
-
-  function enterTeam(team) {
-    onLaunch({ coach: team.coach || 'Coach Regisford', team: team.name, primary: team.primary, secondary: team.secondary, sport: team.sport })
-  }
-
-  const S = { bg:'#07090d', surface:'#0d1117', card:'#0f1219', border:'#1e2330', text:'#f2f4f8', muted:'#6b7a96', dim:'#3d4559', red:'#C0392B' }
-  const Logo = ({ size=42, primary='#C0392B' }) => (
-    <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:size, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap', flexShrink:0 }}>
-      <span style={{ color:primary }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span>
-    </div>
-  )
-  const BtnRed = { width:'100%', background:S.red, border:'none', borderRadius:4, padding:'13px', fontSize:13, fontWeight:700, color:'white', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'2px', textTransform:'uppercase', clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }
-  const BtnGhost = { width:'100%', background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'12px', fontSize:12, color:S.text, cursor:'pointer', fontFamily:"'DM Sans',sans-serif" }
-
-  if (screen === 'signin') return (
-    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif", position:'relative', overflow:'hidden' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; } @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} } @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} } @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} } @keyframes float4 { 0%,100%{transform:translate(0,0) rotate(10deg)} 50%{transform:translate(-10px,-16px) rotate(18deg)} } @keyframes float5 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(8px,12px)} 70%{transform:translate(-12px,-6px)} } @keyframes float6 { 0%,100%{transform:translate(0,0)} 45%{transform:translate(14px,8px)} } @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }`}</style>
-      <div style={{ position:'absolute', left:'-5%', top:'8%', animation:'float1 7s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="88" height="56" viewBox="0 0 88 56"><path d="M4 28 Q22 4 44 4 Q66 4 84 28 Q66 52 44 52 Q22 52 4 28Z" fill="#8B4513"/><path d="M4 28 Q22 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 6 44 4" stroke="white" strokeWidth="1.5" fill="none"/><path d="M4 28 Q22 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><path d="M84 28 Q66 50 44 52" stroke="white" strokeWidth="1.5" fill="none"/><line x1="38" y1="19" x2="50" y2="19" stroke="white" strokeWidth="2"/><line x1="38" y1="24" x2="50" y2="24" stroke="white" strokeWidth="2"/><line x1="38" y1="28" x2="50" y2="28" stroke="white" strokeWidth="2"/><line x1="38" y1="33" x2="50" y2="33" stroke="white" strokeWidth="2"/><line x1="44" y1="17" x2="44" y2="39" stroke="white" strokeWidth="1.5"/></svg></div>
-      <div style={{ position:'absolute', right:'5%', top:'18%', animation:'float2 9s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="32" fill="#C85A00"/><line x1="3" y1="35" x2="67" y2="35" stroke="#1a0a00" strokeWidth="2"/><line x1="35" y1="3" x2="35" y2="67" stroke="#1a0a00" strokeWidth="2"/><path d="M35 3 Q18 14 12 35 Q18 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/><path d="M35 3 Q52 14 58 35 Q52 56 35 67" stroke="#1a0a00" strokeWidth="2" fill="none"/></svg></div>
-      <div style={{ position:'absolute', left:'12%', bottom:'22%', animation:'float3 8s ease-in-out infinite', opacity:0.11, zIndex:0 }}><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" fill="#f8f4e8"/><path d="M13 9 Q5 28 13 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><path d="M43 9 Q51 28 43 47" stroke="#C0392B" strokeWidth="1.8" fill="none"/><line x1="13" y1="13" x2="19" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="20" x2="16" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="8" y1="27" x2="14" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="10" y1="34" x2="16" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="13" y1="41" x2="19" y2="43" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="13" x2="37" y2="15" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="20" x2="40" y2="22" stroke="#C0392B" strokeWidth="1.2"/><line x1="48" y1="27" x2="42" y2="29" stroke="#C0392B" strokeWidth="1.2"/><line x1="46" y1="34" x2="40" y2="36" stroke="#C0392B" strokeWidth="1.2"/><line x1="43" y1="41" x2="37" y2="43" stroke="#C0392B" strokeWidth="1.2"/></svg></div>
-      <div style={{ position:'absolute', right:'15%', top:'5%', animation:'float4 11s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0f0f0"/><polygon points="26,5 31,16 21,16" fill="#222"/><polygon points="9,17 19,15 17,25 8,27" fill="#222"/><polygon points="43,17 33,15 35,25 44,27" fill="#222"/><polygon points="12,40 17,30 25,34 25,44" fill="#222"/><polygon points="40,40 35,30 27,34 27,44" fill="#222"/></svg></div>
-      <div style={{ position:'absolute', left:'50%', top:'12%', animation:'float5 6.5s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="#c8d400"/><path d="M3 14 Q21 21 3 30" stroke="white" strokeWidth="2" fill="none"/><path d="M39 14 Q21 21 39 30" stroke="white" strokeWidth="2" fill="none"/></svg></div>
-      <div style={{ position:'absolute', right:'8%', bottom:'28%', animation:'float6 10s ease-in-out infinite', opacity:0.09, zIndex:0 }}><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#f0e8d0"/><path d="M3 19 Q26 26 3 35" stroke="#3a6ad4" strokeWidth="2" fill="none"/><path d="M49 19 Q26 26 49 35" stroke="#C0392B" strokeWidth="2" fill="none"/><path d="M10 5 Q26 14 42 5" stroke="#2a8a2a" strokeWidth="2" fill="none"/><line x1="3" y1="26" x2="49" y2="26" stroke="#888" strokeWidth="1.2"/></svg></div>
-      <div style={{ position:'absolute', left:'8%', top:'52%', animation:'float7 12s ease-in-out infinite', opacity:0.1, zIndex:0 }}><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#f0f0e8"/><circle cx="19" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="13" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="15" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="20" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="22" r="1.8" fill="#d0d0c8"/><circle cx="13" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="29" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="37" cy="27" r="1.8" fill="#d0d0c8"/><circle cx="41" cy="29" r="1.8" fill="#d0d0c8"/><circle cx="15" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="23" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="31" cy="34" r="1.8" fill="#d0d0c8"/><circle cx="39" cy="36" r="1.8" fill="#d0d0c8"/><circle cx="19" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="27" cy="43" r="1.8" fill="#d0d0c8"/><circle cx="35" cy="41" r="1.8" fill="#d0d0c8"/><circle cx="21" cy="20" r="4" fill="rgba(255,255,255,0.25)"/></svg></div>
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:'30%', background:'linear-gradient(180deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'30%', background:'linear-gradient(0deg,#07090d,transparent)', zIndex:1, pointerEvents:'none' }} />
-      <div style={{ textAlign:'center', marginBottom:40, position:'relative', zIndex:2 }}><Logo size={66} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', marginTop:6, textTransform:'uppercase' }}>AI Coaching Intelligence</div></div>
-      <div style={{ width:'100%', maxWidth:360, display:'flex', flexDirection:'column', gap:10, position:'relative', zIndex:2 }}>
-        <button onClick={handleSignIn} style={BtnRed}>Get Started — Free</button>
-        <button onClick={handleSignIn} style={BtnGhost}>Sign In</button>
-        <div style={{ textAlign:'center', paddingTop:4 }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:S.red, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span></div>
-      </div>
-    </div>
-  )
-
-  if (screen === 'signup') return (
-    <div style={{ minHeight:'100vh', background:S.bg, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 20px', fontFamily:"'DM Sans',sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
-      <div style={{ textAlign:'center', marginBottom:28 }}><Logo size={42} /></div>
-      <div style={{ width:'100%', maxWidth:380, background:S.surface, border:`1px solid ${S.border}`, borderRadius:4, overflow:'hidden' }}>
-        <div style={{ height:3, background:`linear-gradient(90deg,${S.red},transparent)` }} />
-        <div style={{ padding:'28px 28px 24px' }}>
-          <div style={{ fontSize:20, fontWeight:600, color:S.text, marginBottom:6 }}>Create your account</div>
-          <div style={{ fontSize:13, color:S.muted, marginBottom:24 }}>Free to start. No credit card required.</div>
-          {[['Your name','text',coachName,setCoachName,'Coach Regisford'],['Email','email',email,setEmail,'coach@yourteam.com'],['Password','password',password,setPassword,'Min 8 characters']].map(([lbl,type,val,set,ph]) => (
-            <div key={lbl} style={{ marginBottom:14 }}>
-              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:S.muted, marginBottom:6 }}>{lbl}</div>
-              <input type={type} value={val} onChange={e=>set(e.target.value)} placeholder={ph} style={{ width:'100%', background:S.card, border:`1px solid ${S.border}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit' }} />
-            </div>
-          ))}
-          <div style={{ marginBottom:22 }} />
-          <button onClick={() => { setScreen('createTeam') }} style={{ ...BtnRed, borderRadius:4 }}>Create Account</button>
-        </div>
-        <div style={{ borderTop:`1px solid ${S.border}`, padding:'14px 28px', textAlign:'center', fontSize:12, color:S.muted }}>Already have an account? <span onClick={() => setScreen('signin')} style={{ color:S.red, cursor:'pointer', fontWeight:500 }}>Sign in</span></div>
-      </div>
-    </div>
-  )
-
-  if (screen === 'createTeam') return (
-    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'24px 20px 40px' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=Big+Shoulders+Display:wght@900&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
-      <div style={{ maxWidth:440, margin:'0 auto' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28, paddingTop:16 }}>
-          <button onClick={() => setScreen('teams')} style={{ background:'transparent', border:`1px solid ${S.border}`, borderRadius:4, padding:'5px 12px', color:S.muted, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
-          <Logo size={22} />
-        </div>
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Sport</div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:22 }}>
-          {Object.entries(sportMeta).map(([s,m]) => (
-            <div key={s} onClick={() => setTeamSport(s)} style={{ borderRadius:4, overflow:'hidden', cursor:'pointer', border:`2px solid ${teamSport===s?m.grad[1]:'transparent'}` }}>
-              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 8px', textAlign:'center' }}>
-                <div style={{ fontSize:28, lineHeight:1.2 }}>{m.emoji}</div>
-                <div style={{ fontSize:10, fontWeight:700, color:'white', marginTop:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>{m.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Team name</div>
-        <input value={teamName} onChange={e=>setTeamName(e.target.value)} placeholder={`e.g. Tolland Youth ${teamSport}`} style={{ width:'100%', background:S.card, border:`1px solid ${teamPrimary}`, borderRadius:4, padding:'11px 14px', fontSize:13, color:S.text, outline:'none', fontFamily:'inherit', marginBottom:22 }} />
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Primary color <span style={{ color:S.red }}>*</span></div>
-        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:20 }}>
-          {colorOptions.primary.map(c => (<div key={c} onClick={() => setTeamPrimary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamPrimary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-        </div>
-        <div style={{ fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:S.muted, marginBottom:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Secondary color <span style={{ color:S.dim }}>optional</span></div>
-        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:28 }}>
-          {colorOptions.secondary.map(c => (<div key={c} onClick={() => setTeamSecondary(c)} style={{ width:32, height:32, borderRadius:4, background:c, border:`3px solid ${teamSecondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
-        </div>
-        <div style={{ marginBottom:20, borderRadius:4, overflow:'hidden' }}>
-          <div style={{ height:6, background:`linear-gradient(90deg,${teamPrimary} 55%,${teamSecondary} 55%)` }} />
-          <div style={{ background:`linear-gradient(135deg,${teamPrimary}33,#07090d)`, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
-            <svg viewBox="0 0 88 24" style={{ width:88, height:24, overflow:'visible' }}><text y="19" fontFamily="Kalam, cursive" fontSize="20" letterSpacing="-0.5"><tspan fill={teamPrimary}>Coach</tspan><tspan fill="#dde1f0">IQ</tspan></text></svg>
-            <div style={{ marginLeft:'auto', display:'flex', gap:6 }}>
-              {[['3','PKG'],['0','IQ']].map(([v,l]) => (<div key={l} style={{ background:'rgba(0,0,0,0.3)', padding:'4px 8px', clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:'white', lineHeight:1 }}>{v}</div><div style={{ fontSize:7, color:'rgba(255,255,255,0.4)', textTransform:'uppercase' }}>{l}</div></div>))}
-            </div>
-          </div>
-        </div>
-        <button onClick={handleCreateTeam} disabled={!teamName.trim()} style={{ width:'100%', background:teamName.trim()?teamPrimary:'#1e2330', border:'none', borderRadius:4, padding:'14px', fontSize:14, color:'white', cursor:teamName.trim()?'pointer':'not-allowed', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'2px', clipPath:'polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)' }}>Create Team</button>
-      </div>
-    </div>
-  )
 
   return (
-    <div style={{ minHeight:'100vh', background:S.bg, fontFamily:"'DM Sans',sans-serif", padding:'0 0 40px' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
-      <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${S.border}`, display:'flex', alignItems:'center', gap:10 }}>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, letterSpacing:'-0.5px', lineHeight:1, whiteSpace:'nowrap' }}><span style={{ color:S.red }}>Coach</span><span style={{ color:'#dde1f0' }}>IQ</span></div>
-        <div style={{ fontSize:12, color:S.muted, marginLeft:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'1px' }}>Your locker room</div>
+    <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'32px 28px', fontFamily:"'DM Sans',sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+      <div style={{ textAlign:'center', marginBottom:36 }}>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:44, lineHeight:1, marginBottom:8 }}>
+          <span style={{ color:cC }}>C</span>
+          <span style={{ color:cOach }}>oach</span>
+          <span style={{ color:cIQ }}>IQ</span>
+        </div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>Set up your profile</div>
       </div>
-      <div style={{ padding:'20px 20px 0', maxWidth:440, margin:'0 auto' }}>
-        <div style={{ fontSize:9, color:S.dim, letterSpacing:'2px', textTransform:'uppercase', marginBottom:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Your teams</div>
-        {teams.map((team, i) => {
-          const m = sportMeta[team.sport] || sportMeta.Football
-          return (
-            <div key={i} onClick={() => enterTeam(team)} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', border:`1px solid rgba(255,255,255,0.07)` }}>
-              <div style={{ background:`linear-gradient(135deg,${m.grad[0]} 0%,${team.primary} 100%)`, padding:'16px 18px', display:'flex', alignItems:'center', gap:14, position:'relative', overflow:'hidden' }}>
-                <div style={{ position:'absolute', bottom:-4, right:-4, height:6, background:`linear-gradient(90deg,${team.primary} 55%,${team.secondary||'#002868'} 55%)`, left:0 }} />
-                <div style={{ fontSize:32, lineHeight:1, flexShrink:0 }}>{m.emoji}</div>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontFamily:"'Kalam',cursive", fontSize:18, color:'white', letterSpacing:'-0.5px' }}>{team.name}</div>
-                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.6)', marginTop:2 }}>IQ {team.iq} · {team.packages} package{team.packages!==1?'s':''} · {team.coach}</div>
-                </div>
-                <div style={{ fontSize:20, color:'rgba(255,255,255,0.5)' }}>›</div>
-              </div>
-            </div>
-          )
-        })}
-        {['Football','Basketball','Baseball'].filter(s => !teams.find(t=>t.sport===s)).map(s => {
-          const m = sportMeta[s]
-          return (
-            <div key={s} onClick={() => { setTeamSport(s); setScreen('createTeam') }} style={{ borderRadius:4, overflow:'hidden', marginBottom:10, cursor:'pointer', opacity:0.5 }}>
-              <div style={{ background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`, padding:'14px 18px', display:'flex', alignItems:'center', gap:14 }}>
-                <div style={{ fontSize:26, lineHeight:1, flexShrink:0, opacity:0.6 }}>{m.emoji}</div>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.7)', fontFamily:"'Barlow Condensed',sans-serif" }}>Add {m.label} team</div>
-                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)' }}>Tap to set up</div>
-                </div>
-                <div style={{ fontSize:20, color:'rgba(255,255,255,0.3)' }}>+</div>
-              </div>
-            </div>
-          )
-        })}
+      <div style={{ width:'100%', maxWidth:380, display:'flex', flexDirection:'column', gap:12 }}>
+        <div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', marginBottom:6 }}>Your name</div>
+          <input
+            value={coachName}
+            onChange={e=>setCoachName(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&handleStart()}
+            placeholder="e.g. Coach Regisford"
+            style={{ width:'100%', background:'#161922', border:`1px solid ${accent}`, borderRadius:4, padding:'13px 14px', fontSize:14, color:'#f2f4f8', outline:'none', fontFamily:'inherit' }}
+          />
+        </div>
+        <button onClick={handleStart} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase', marginTop:6 }}>Enter CoachIQ</button>
+        <div style={{ textAlign:'center' }}>
+          <span style={{ fontSize:11, color:'#3d4559' }}>You can create and manage teams from the home screen</span>
+        </div>
       </div>
     </div>
   )
 }
 
+
 export default function CoachIQ() {
   const [launched, setLaunched] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
   const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
-  const [brand, setBrand] = useState('Red & White')
+  const [brand, setBrand] = useState('Red — C+IQ colored')
   const [page, setPage] = useState('home')
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(847)
   const [gauntlets, setGauntlets] = useState(0)
   const [playbook, setPlaybook] = useState({ Football:{}, Basketball:{}, Baseball:{} })
   const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[] })
+  const [teams, setTeams] = useState({ Football:[], Basketball:[], Baseball:[] })
+  const [activeTeam, setActiveTeam] = useState({ Football:null, Basketball:null, Baseball:null })
 
   const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
-  const P = sportColors.primary
-  const S = sportColors.secondary
+  const currentTeam = activeTeam[sport]
+  const P = currentTeam?.primary || sportColors.primary
+  const S = currentTeam?.secondary || sportColors.secondary
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
   async function callAI(prompt, imageData) {
@@ -2410,10 +2294,10 @@ export default function CoachIQ() {
   }
 
   if (showSplash) return (
-    <SplashScreen onDone={(skipToApp) => { setShowSplash(false); if (skipToApp) setLaunched(true) }} alreadyAuthed={launched} />
+    <SplashScreen onDone={(skipToApp) => { setShowSplash(false); if (skipToApp) setLaunched(true) }} alreadyAuthed={launched} brand={brand} />
   )
   if (!launched) return (
-    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} />
+    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} brand={brand} />
   )
 
   const NAV_ITEMS = [
@@ -2468,7 +2352,7 @@ export default function CoachIQ() {
 
         {/* PAGE CONTENT */}
         <div style={{ flex:1, maxWidth:640, margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
-          {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} />}
+          {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} />}
           {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
           {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
@@ -2487,5 +2371,157 @@ export default function CoachIQ() {
         </div>
       </div>
     </>
+  )
+}
+
+// ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
+function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg }) {
+  const [mode, setMode] = useState('view') // view | create
+  const [expanded, setExpanded] = useState(false)
+  const [form, setForm] = useState({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
+  const [error, setError] = useState('')
+
+  const sportTeams = teams[sport] || []
+  const current = activeTeam[sport]
+  const MAX_TEAMS = 5
+
+  const colorOptions = {
+    primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F','#00838F','#E91E63','#FF6F00'],
+    secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010','#0d2137','#3e0a1e','#1a1200'],
+  }
+
+  const seasons = ['Fall 2025','Winter 2025','Spring 2026','Summer 2026','Fall 2026','Winter 2026','Spring 2027','Summer 2027','Year Round']
+  const sportEmoji = { Football:'🏈', Basketball:'🏀', Baseball:'⚾' }
+
+  function createTeam() {
+    if (!form.name.trim()) { setError('Team name is required'); return }
+    if (sportTeams.length >= MAX_TEAMS) { setError(`Max ${MAX_TEAMS} teams per sport`); return }
+    const newTeam = { id: Date.now(), name: form.name.trim(), season: form.season || 'Season N/A', primary: form.primary, secondary: form.secondary, sport, createdAt: Date.now() }
+    const updated = { ...teams, [sport]: [...sportTeams, newTeam] }
+    setTeams(updated)
+    setActiveTeam(prev => ({ ...prev, [sport]: newTeam }))
+    setCfg(prev => ({ ...prev, primary: newTeam.primary, secondary: newTeam.secondary }))
+    setForm({ name:'', season:'', primary:'#C0392B', secondary:'#002868' })
+    setMode('view')
+    setError('')
+  }
+
+  function selectTeam(team) {
+    setActiveTeam(prev => ({ ...prev, [sport]: team }))
+    setCfg(prev => ({ ...prev, primary: team.primary, secondary: team.secondary }))
+    setExpanded(false)
+  }
+
+  function deleteTeam(id) {
+    const updated = sportTeams.filter(t => t.id !== id)
+    setTeams(prev => ({ ...prev, [sport]: updated }))
+    if (current?.id === id) {
+      const next = updated[0] || null
+      setActiveTeam(prev => ({ ...prev, [sport]: next }))
+      if (next) setCfg(prev => ({ ...prev, primary: next.primary, secondary: next.secondary }))
+    }
+  }
+
+  const hasTeams = sportTeams.length > 0
+
+  return (
+    <div style={{ marginTop:14 }}>
+      {/* Header bar */}
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${hasTeams ? al(P,0.3) : '#1e2330'}`, borderRadius: expanded ? '4px 4px 0 0' : 4, cursor:'pointer', borderLeft:`3px solid ${P}` }}
+      >
+        <span style={{ fontSize:16 }}>{sportEmoji[sport] || '🏆'}</span>
+        <div style={{ flex:1 }}>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'0.5px', color:'#f2f4f8', textTransform:'uppercase' }}>
+            {current ? current.name : `No ${sport} Team Selected`}
+          </div>
+          {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
+          {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
+        </div>
+        {current && (
+          <div style={{ display:'flex', gap:4 }}>
+            <div style={{ width:12, height:12, borderRadius:2, background:current.primary }} />
+            <div style={{ width:12, height:12, borderRadius:2, background:current.secondary }} />
+          </div>
+        )}
+        <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded ? '▲' : '▼'}</span>
+      </div>
+
+      {expanded && (
+        <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
+
+          {/* Existing teams list */}
+          {hasTeams && mode === 'view' && (
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
+              {sportTeams.map(team => (
+                <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background: current?.id===team.id ? al(P,0.1) : '#161922', border:`1px solid ${current?.id===team.id ? al(P,0.4) : '#1e2330'}`, borderRadius:6, marginBottom:6 }}>
+                  <div style={{ display:'flex', gap:3, flexShrink:0 }}>
+                    <div style={{ width:14, height:14, borderRadius:2, background:team.primary }} />
+                    <div style={{ width:14, height:14, borderRadius:2, background:team.secondary }} />
+                  </div>
+                  <div style={{ flex:1, cursor:'pointer' }} onClick={() => selectTeam(team)}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{team.name}</div>
+                    <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}</div>
+                  </div>
+                  {current?.id === team.id && <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>ACTIVE</span>}
+                  <button onClick={() => deleteTeam(team.id)} style={{ background:'transparent', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.6)', fontSize:10, padding:'3px 7px', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Create team form */}
+          {mode === 'create' && (
+            <div style={{ animation:'fadeIn 0.2s ease' }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:10 }}>Create New Team</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                <div style={{ gridColumn:'1/-1' }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
+                  <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={`e.g. Tolland Youth ${sport}`} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                </div>
+                <div style={{ gridColumn:'1/-1' }}>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Season</label>
+                  <select value={form.season} onChange={e=>setForm(f=>({...f,season:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:form.season?'#f2f4f8':'#6b7a96', fontFamily:'inherit', fontSize:13, outline:'none', appearance:'none' }}>
+                    <option value="">Select season...</option>
+                    {seasons.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ marginBottom:10 }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Primary Color</label>
+                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                  {colorOptions.primary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,primary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.primary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+                </div>
+              </div>
+              <div style={{ marginBottom:12 }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Secondary Color</label>
+                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                  {colorOptions.secondary.map(c => (<div key={c} onClick={()=>setForm(f=>({...f,secondary:c}))} style={{ width:28, height:28, borderRadius:3, background:c, border:`3px solid ${form.secondary===c?'white':'transparent'}`, cursor:'pointer' }} />))}
+                </div>
+              </div>
+              {/* Color preview strip */}
+              <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 55%,${form.secondary} 55%)`, marginBottom:12 }} />
+              {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={() => { setMode('view'); setError('') }} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CANCEL</button>
+                <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
+              </div>
+            </div>
+          )}
+
+          {/* Add team button */}
+          {mode === 'view' && sportTeams.length < MAX_TEAMS && (
+            <button onClick={() => setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+              <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
+            </button>
+          )}
+          {mode === 'view' && sportTeams.length >= MAX_TEAMS && (
+            <div style={{ fontSize:11, color:'#3d4559', textAlign:'center', padding:'8px 0' }}>Max {MAX_TEAMS} teams reached for {sport}</div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
