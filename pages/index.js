@@ -2949,7 +2949,7 @@ function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
 // ─── MORE PAGE (restructured) ─────────────────────────────────────────────────
 // ─── TEAM QUICK SWITCHER (top bar) ────────────────────────────────────────────
 function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, setPage, P, al, iq }) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
   const sportTeams = teams[sport] || []
   const current = activeTeam[sport]
 
@@ -6198,7 +6198,7 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, a
     ) : (
       <div key="noloc" onClick={onSetLocation} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2, cursor:'pointer' }}>
         <div style={{ fontSize:16 }}>🌤️</div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#6b7a96', fontWeight:700, textAlign:'center', lineHeight:1.3 }}>Add location{String.fromCharCode(10)}for weather</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#6b7a96', fontWeight:700, textAlign:'center', lineHeight:1.3 }}>Add location for weather</div>
       </div>
     ),
 
