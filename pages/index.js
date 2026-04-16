@@ -12,363 +12,317 @@ const BRAND_PALETTES = {
 
 
 // ─── MASCOTS ──────────────────────────────────────────────────────────────────
-// ─── SVG MASCOT LIBRARY ───────────────────────────────────────────────────────
-// First 10 = free. 11-50 = premium (shown grayed with lock)
-// SVGs are head/bust style — fierce, accurate to real sports logos
+// ─── SVG MASCOT LIBRARY v2 ────────────────────────────────────────────────────
+// Fierce, angular, sports-logo quality. Sharp lines, bold shapes, no cartoon softness.
+// Style reference: NHL/NFL/MLB logos — geometric, high contrast, aggressive.
 
 const MASCOT_SVGS = {
+
+  // ── EAGLES — sharp angular head, hooked beak, fierce eye ─────────────────
   eagles: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Eagle head facing right, fierce expression -->
-    <ellipse cx="32" cy="28" rx="14" ry="12" fill="${col}"/>
-    <!-- Beak -->
-    <path d="M44 26 L52 24 L50 28 L44 28Z" fill="#f59e0b"/>
-    <!-- Eye -->
-    <circle cx="40" cy="22" r="3.5" fill="white"/>
-    <circle cx="41" cy="22" r="2" fill="#1a1a1a"/>
-    <circle cx="41.5" cy="21.5" r="0.6" fill="white"/>
-    <!-- Fierce brow -->
-    <path d="M36 18 L44 20" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-    <!-- White head patch -->
-    <ellipse cx="33" cy="24" rx="8" ry="6" fill="white" opacity="0.9"/>
-    <!-- Wing suggestion -->
-    <path d="M20 32 Q14 40 18 48 Q24 44 28 36" fill="${col}" opacity="0.9"/>
-    <path d="M18 34 Q10 42 15 50 Q22 46 26 38" fill="${col}" opacity="0.7"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M38 14 L46 10 L50 18 L44 20 L48 26 L40 24 L36 30 L28 26 L24 20 L30 16Z" fill="${col}"/>
+    <path d="M36 30 L44 32 L50 40 L46 44 L38 42 L32 48 L26 44 L20 36 L24 30 L28 26Z" fill="${col}" opacity="0.9"/>
+    <path d="M36 30 L44 32 L50 40 L38 38 L34 44 L30 40 L26 44 L22 38 L24 30Z" fill="#c8a020" opacity="0.85"/>
+    <path d="M44 20 L52 16 L56 24 L50 26 L54 32 L46 28" fill="#c8a020"/>
+    <ellipse cx="38" cy="22" rx="4" ry="3" fill="white" transform="rotate(-15 38 22)"/>
+    <ellipse cx="38" cy="22" rx="2.5" ry="2" fill="#1a1a1a" transform="rotate(-15 38 22)"/>
+    <circle cx="38.5" cy="21" r="0.7" fill="white"/>
+    <path d="M34 16 L38 14 L40 18 L36 20Z" fill="${col}"/>
+    <path d="M42 26 L52 22 L54 28 L46 30Z" fill="#c8a020"/>
   </svg>`,
 
+  // ── HAWKS — angular predator, sharp talons implied, hooded eyes ───────────
   hawks: (col='#D4600A') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <ellipse cx="31" cy="27" rx="13" ry="11" fill="${col}"/>
-    <path d="M43 25 L51 22 L49 27 L43 27Z" fill="#f59e0b"/>
-    <circle cx="39" cy="21" r="3.5" fill="white"/>
-    <circle cx="40" cy="21" r="2" fill="#1a1a1a"/>
-    <circle cx="40.5" cy="20.5" r="0.6" fill="white"/>
-    <path d="M35 17 L43 19" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M22 32 Q12 38 16 48 Q24 44 28 34" fill="${col}" opacity="0.85"/>
-    <ellipse cx="32" cy="23" rx="7" ry="5" fill="#f59e0b" opacity="0.6"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M20 12 L36 10 L46 16 L50 28 L44 38 L34 44 L22 42 L14 34 L12 22Z" fill="${col}"/>
+    <path d="M14 22 L20 12 L16 8 L10 16Z" fill="${col}" opacity="0.8"/>
+    <path d="M36 10 L44 6 L48 14 L40 16Z" fill="${col}" opacity="0.8"/>
+    <path d="M22 28 L36 24 L44 30 L40 40 L28 42 L18 36Z" fill="#8B3800"/>
+    <ellipse cx="26" cy="24" rx="5" ry="4" fill="white" transform="rotate(10 26 24)"/>
+    <ellipse cx="26" cy="24" rx="3" ry="2.5" fill="#1a1a1a" transform="rotate(10 26 24)"/>
+    <circle cx="26.5" cy="23" r="0.8" fill="white"/>
+    <ellipse cx="38" cy="22" rx="4" ry="3.5" fill="white" transform="rotate(-10 38 22)"/>
+    <ellipse cx="38" cy="22" rx="2.5" ry="2.2" fill="#1a1a1a" transform="rotate(-10 38 22)"/>
+    <circle cx="38.5" cy="21" r="0.7" fill="white"/>
+    <path d="M22 18 L30 20" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M34 16 L42 18" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M24 32 L36 30 L42 36 L32 40 L22 38Z" fill="#c8a020" opacity="0.7"/>
+    <path d="M28 40 L32 44 L30 50 L26 48Z" fill="${col}"/>
+    <path d="M36 40 L40 44 L38 50 L34 48Z" fill="${col}"/>
   </svg>`,
 
+  // ── TIGERS — geometric stripes, fierce angular face ──────────────────────
   tigers: (col='#f59e0b') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Tiger head — round, fierce -->
-    <circle cx="30" cy="30" r="18" fill="${col}"/>
-    <!-- Stripes -->
-    <path d="M18 22 Q22 25 18 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round"/>
-    <path d="M42 22 Q38 25 42 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round"/>
-    <path d="M24 16 Q27 20 24 24" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-    <path d="M36 16 Q33 20 36 24" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-    <!-- White face mask -->
-    <ellipse cx="30" cy="33" rx="10" ry="9" fill="white" opacity="0.9"/>
-    <!-- Eyes -->
-    <ellipse cx="24" cy="26" rx="4" ry="3" fill="#1a6b1a"/>
-    <circle cx="24" cy="26" r="2" fill="#1a1a1a"/>
-    <circle cx="24.5" cy="25.5" r="0.6" fill="white"/>
-    <ellipse cx="36" cy="26" rx="4" ry="3" fill="#1a6b1a"/>
-    <circle cx="36" cy="26" r="2" fill="#1a1a1a"/>
-    <circle cx="36.5" cy="25.5" r="0.6" fill="white"/>
-    <!-- Nose -->
-    <ellipse cx="30" cy="32" rx="3" ry="2" fill="#e88b00"/>
-    <!-- Mouth -->
-    <path d="M27 35 Q30 38 33 35" stroke="#1a1a1a" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-    <path d="M30 35 L30 38" stroke="#1a1a1a" strokeWidth="1" strokeLinecap="round"/>
-    <!-- Ears -->
-    <path d="M17 18 L20 12 L25 18" fill="${col}"/>
-    <path d="M43 18 L40 12 L35 18" fill="${col}"/>
-    <path d="M18 18 L20 14 L24 18" fill="#d4600a"/>
-    <path d="M42 18 L40 14 L36 18" fill="#d4600a"/>
-    <!-- Whisker dots -->
-    <circle cx="22" cy="33" r="0.8" fill="#1a1a1a"/>
-    <circle cx="24" cy="34" r="0.8" fill="#1a1a1a"/>
-    <circle cx="38" cy="33" r="0.8" fill="#1a1a1a"/>
-    <circle cx="36" cy="34" r="0.8" fill="#1a1a1a"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M16 18 L22 12 L30 10 L38 12 L44 18 L46 28 L42 38 L30 44 L18 38 L14 28Z" fill="${col}"/>
+    <path d="M18 14 L22 8 L20 4 L16 10Z" fill="${col}"/>
+    <path d="M42 14 L38 8 L40 4 L44 10Z" fill="${col}"/>
+    <path d="M20 14 L22 8 L24 12Z" fill="#07090d"/>
+    <path d="M40 14 L38 8 L36 12Z" fill="#07090d"/>
+    <path d="M18 18 L22 16 L20 22Z" fill="#07090d" opacity="0.9"/>
+    <path d="M24 14 L28 12 L26 18Z" fill="#07090d" opacity="0.9"/>
+    <path d="M42 18 L38 16 L40 22Z" fill="#07090d" opacity="0.9"/>
+    <path d="M36 14 L32 12 L34 18Z" fill="#07090d" opacity="0.9"/>
+    <path d="M20 34 L16 30 L18 26Z" fill="#07090d" opacity="0.9"/>
+    <path d="M40 34 L44 30 L42 26Z" fill="#07090d" opacity="0.9"/>
+    <ellipse cx="30" cy="32" rx="12" ry="10" fill="white" opacity="0.92"/>
+    <ellipse cx="23" cy="26" rx="4.5" ry="4" fill="#1a6b1a"/>
+    <ellipse cx="23" cy="26" rx="2" ry="3.5" fill="#07090d"/>
+    <circle cx="23.6" cy="24.5" r="0.8" fill="white"/>
+    <ellipse cx="37" cy="26" rx="4.5" ry="4" fill="#1a6b1a"/>
+    <ellipse cx="37" cy="26" rx="2" ry="3.5" fill="#07090d"/>
+    <circle cx="37.6" cy="24.5" r="0.8" fill="white"/>
+    <path d="M21 21 L27 24" stroke="#07090d" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M39 21 L33 24" stroke="#07090d" strokeWidth="2.5" strokeLinecap="round"/>
+    <ellipse cx="30" cy="34" rx="5" ry="3.5" fill="#e88b00"/>
+    <path d="M26 38 Q30 42 34 38" stroke="#07090d" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <line x1="30" y1="37" x2="30" y2="41" stroke="#07090d" strokeWidth="1.2"/>
+    <circle cx="20" cy="36" r="0.9" fill="#07090d"/>
+    <circle cx="22" cy="37" r="0.9" fill="#07090d"/>
+    <circle cx="40" cy="36" r="0.9" fill="#07090d"/>
+    <circle cx="38" cy="37" r="0.9" fill="#07090d"/>
   </svg>`,
 
+  // ── LIONS — angular mane, regal but fierce ───────────────────────────────
   lions: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <circle cx="30" cy="30" r="20" fill="#8B4513"/>
-    <ellipse cx="48" cy="30" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="46" cy="19" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="39" cy="13" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="30" cy="10" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="21" cy="13" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="14" cy="19" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="12" cy="30" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="14" cy="41" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="21" cy="47" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="30" cy="50" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="39" cy="47" rx="5" ry="3" fill="#6B3410"/>
-    <ellipse cx="46" cy="41" rx="5" ry="3" fill="#6B3410"/>
-    <!-- Face -->
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M30 6 L36 10 L42 8 L44 14 L50 14 L48 20 L54 22 L50 28 L54 34 L48 34 L46 40 L40 38 L36 44 L30 42 L24 44 L20 38 L14 40 L12 34 L6 34 L10 28 L6 22 L12 20 L10 14 L16 14 L18 8 L24 10Z" fill="#8B4513"/>
+    <path d="M22 14 L28 12 L30 6 L32 12 L38 14 L34 18 L36 24 L30 22 L24 24 L26 18Z" fill="${col}" opacity="0.9"/>
+    <path d="M14 20 L18 16 L22 18 L20 24 L14 26Z" fill="${col}" opacity="0.7"/>
+    <path d="M46 20 L42 16 L38 18 L40 24 L46 26Z" fill="${col}" opacity="0.7"/>
+    <path d="M12 32 L14 26 L20 28 L18 34 L12 34Z" fill="${col}" opacity="0.6"/>
+    <path d="M48 32 L46 26 L40 28 L42 34 L48 34Z" fill="${col}" opacity="0.6"/>
     <circle cx="30" cy="30" r="14" fill="${col}"/>
-    <ellipse cx="30" cy="33" rx="10" ry="9" fill="#f59e0b" opacity="0.6"/>
-    <!-- Eyes -->
-    <ellipse cx="24" cy="26" rx="3.5" ry="3" fill="#f0c040"/>
-    <circle cx="24" cy="26" r="2" fill="#1a1a1a"/>
-    <circle cx="24.5" cy="25.5" r="0.6" fill="white"/>
-    <ellipse cx="36" cy="26" rx="3.5" ry="3" fill="#f0c040"/>
-    <circle cx="36" cy="26" r="2" fill="#1a1a1a"/>
-    <circle cx="36.5" cy="25.5" r="0.6" fill="white"/>
-    <!-- Brow -->
-    <path d="M21 22 L27 24" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M39 22 L33 24" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-    <!-- Nose -->
-    <ellipse cx="30" cy="32" rx="3.5" ry="2.5" fill="#8B3010"/>
-    <!-- Mouth -->
-    <path d="M26 36 Q30 40 34 36" stroke="#1a1a1a" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-    <path d="M30 35 L30 38" stroke="#1a1a1a" strokeWidth="1" strokeLinecap="round"/>
+    <ellipse cx="30" cy="33" rx="10" ry="9" fill="#f59e0b" opacity="0.55"/>
+    <ellipse cx="23" cy="26" rx="4" ry="3.5" fill="#f0c040"/>
+    <ellipse cx="23" cy="26" rx="1.8" ry="3" fill="#07090d"/>
+    <circle cx="23.6" cy="24.5" r="0.8" fill="white"/>
+    <ellipse cx="37" cy="26" rx="4" ry="3.5" fill="#f0c040"/>
+    <ellipse cx="37" cy="26" rx="1.8" ry="3" fill="#07090d"/>
+    <circle cx="37.6" cy="24.5" r="0.8" fill="white"/>
+    <path d="M19 22 L25 25" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <path d="M41 22 L35 25" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <ellipse cx="30" cy="33" rx="5" ry="3.5" fill="#8B3010"/>
+    <path d="M26 37 Q30 42 34 37" stroke="#07090d" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M30 36 L30 39" stroke="#07090d" strokeWidth="1.2"/>
   </svg>`,
 
+  // ── BEARS — massive, angular, intimidating ───────────────────────────────
   bears: (col='#8B4513') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <circle cx="30" cy="30" r="18" fill="${col}"/>
-    <!-- Ears -->
-    <circle cx="18" cy="16" r="7" fill="${col}"/>
-    <circle cx="42" cy="16" r="7" fill="${col}"/>
-    <circle cx="18" cy="16" r="4" fill="#5a2d0c"/>
-    <circle cx="42" cy="16" r="4" fill="#5a2d0c"/>
-    <!-- Face -->
-    <ellipse cx="30" cy="33" rx="11" ry="9" fill="#c08040"/>
-    <!-- Eyes -->
-    <circle cx="24" cy="26" r="4" fill="#1a1a1a"/>
-    <circle cx="36" cy="26" r="4" fill="#1a1a1a"/>
-    <circle cx="24.8" cy="25.2" r="1.2" fill="white"/>
-    <circle cx="36.8" cy="25.2" r="1.2" fill="white"/>
-    <!-- Brow - fierce -->
-    <path d="M20 21 L28 24" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M40 21 L32 24" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"/>
-    <!-- Snout -->
-    <ellipse cx="30" cy="33" rx="7" ry="5" fill="#a06030"/>
-    <ellipse cx="30" cy="31" rx="4" ry="2.5" fill="#1a1a1a"/>
-    <!-- Mouth -->
-    <path d="M26 36 Q30 40 34 36" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-    <path d="M30 35 L30 37" stroke="#1a1a1a" strokeWidth="1.2" strokeLinecap="round"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M16 30 L18 18 L26 12 L34 12 L42 18 L44 30 L40 42 L30 46 L20 42Z" fill="${col}"/>
+    <path d="M18 18 L14 12 L16 6 L22 10 L22 16Z" fill="${col}"/>
+    <path d="M42 18 L46 12 L44 6 L38 10 L38 16Z" fill="${col}"/>
+    <ellipse cx="17" cy="11" rx="7" ry="6" fill="${col}"/>
+    <ellipse cx="43" cy="11" rx="7" ry="6" fill="${col}"/>
+    <ellipse cx="17" cy="11" rx="4" ry="3.5" fill="#5a2d0c"/>
+    <ellipse cx="43" cy="11" rx="4" ry="3.5" fill="#5a2d0c"/>
+    <ellipse cx="30" cy="35" rx="12" ry="10" fill="#c08040"/>
+    <ellipse cx="22" cy="27" rx="5" ry="4.5" fill="#1a1a1a"/>
+    <ellipse cx="38" cy="27" rx="5" ry="4.5" fill="#1a1a1a"/>
+    <circle cx="22.8" cy="25.5" r="1.5" fill="white"/>
+    <circle cx="38.8" cy="25.5" r="1.5" fill="white"/>
+    <path d="M18 22 L26 26" stroke="#07090d" strokeWidth="2.8" strokeLinecap="round"/>
+    <path d="M42 22 L34 26" stroke="#07090d" strokeWidth="2.8" strokeLinecap="round"/>
+    <ellipse cx="30" cy="36" rx="7" ry="5" fill="#a06030"/>
+    <ellipse cx="30" cy="33" rx="4.5" ry="3" fill="#1a1a1a"/>
+    <path d="M26 40 Q30 44 34 40" stroke="#07090d" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M30 39 L30 41" stroke="#07090d" strokeWidth="1.2"/>
   </svg>`,
 
+  // ── WOLVES — sharp snout, angular ears, fierce snarl ────────────────────
   wolves: (col='#607080') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Wolf head — elongated snout -->
-    <ellipse cx="30" cy="28" rx="16" ry="14" fill="${col}"/>
-    <!-- Ears pointy -->
-    <path d="M17 20 L14 8 L22 16" fill="${col}"/>
-    <path d="M43 20 L46 8 L38 16" fill="${col}"/>
-    <path d="M18 19 L15 10 L21 16" fill="#3a2a2a"/>
-    <path d="M42 19 L45 10 L39 16" fill="#3a2a2a"/>
-    <!-- Face -->
-    <ellipse cx="30" cy="32" rx="12" ry="10" fill="#9090a0"/>
-    <!-- Eyes - yellow, fierce -->
-    <ellipse cx="24" cy="25" rx="4" ry="3.5" fill="#c0a000"/>
-    <ellipse cx="24" cy="25" rx="2" ry="2.5" fill="#1a1a1a"/>
-    <circle cx="24.5" cy="24" r="0.8" fill="white"/>
-    <ellipse cx="36" cy="25" rx="4" ry="3.5" fill="#c0a000"/>
-    <ellipse cx="36" cy="25" rx="2" ry="2.5" fill="#1a1a1a"/>
-    <circle cx="36.5" cy="24" r="0.8" fill="white"/>
-    <!-- Brow -->
-    <path d="M20 20 L27 23" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
-    <path d="M40 20 L33 23" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
-    <!-- Snout elongated -->
-    <ellipse cx="30" cy="34" rx="8" ry="6" fill="#b0b0c0"/>
-    <ellipse cx="30" cy="30" rx="4.5" ry="3" fill="#1a1a1a"/>
-    <!-- Teeth showing -->
-    <path d="M25 38 Q30 42 35 38" stroke="#1a1a1a" strokeWidth="1" fill="none"/>
-    <rect x="27" y="37" width="2.5" height="3" rx="0.5" fill="white"/>
-    <rect x="30.5" y="37" width="2.5" height="3" rx="0.5" fill="white"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M14 22 L16 10 L24 14 L30 10 L36 14 L44 10 L46 22 L50 34 L44 42 L30 48 L16 42 L10 34Z" fill="${col}"/>
+    <path d="M16 10 L14 4 L20 6 L22 12Z" fill="${col}"/>
+    <path d="M44 10 L46 4 L40 6 L38 12Z" fill="${col}"/>
+    <path d="M16 10 L14 4 L20 6Z" fill="#2a1a1a"/>
+    <path d="M44 10 L46 4 L40 6Z" fill="#2a1a1a"/>
+    <path d="M16 26 L22 22 L30 20 L38 22 L44 26 L44 36 L38 42 L30 44 L22 42 L16 36Z" fill="#9090a0"/>
+    <ellipse cx="23" cy="25" rx="5" ry="4" fill="#c0a000"/>
+    <ellipse cx="23" cy="25" rx="2" ry="3.2" fill="#07090d"/>
+    <circle cx="23.6" cy="23.5" r="0.9" fill="white"/>
+    <ellipse cx="37" cy="25" rx="5" ry="4" fill="#c0a000"/>
+    <ellipse cx="37" cy="25" rx="2" ry="3.2" fill="#07090d"/>
+    <circle cx="37.6" cy="23.5" r="0.9" fill="white"/>
+    <path d="M18 20 L24 24" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <path d="M42 20 L36 24" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <path d="M18 34 L24 32 L30 34 L36 32 L42 34 L36 38 L30 40 L24 38Z" fill="#b0b0c0"/>
+    <path d="M24 36 Q30 42 36 36" stroke="#07090d" strokeWidth="1.2" fill="none"/>
+    <rect x="25.5" y="36" width="3.5" height="4" rx="0.5" fill="white"/>
+    <rect x="31" y="36" width="3.5" height="4" rx="0.5" fill="white"/>
+    <rect x="20" y="36" width="2.5" height="3" rx="0.4" fill="white" opacity="0.8"/>
+    <rect x="37.5" y="36" width="2.5" height="3" rx="0.4" fill="white" opacity="0.8"/>
   </svg>`,
 
+  // ── SHARKS — sleek angular silhouette, dead-eye, jagged teeth ────────────
   sharks: (col='#1565C0') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Shark head facing right -->
-    <ellipse cx="32" cy="30" rx="18" ry="11" fill="${col}"/>
-    <!-- Dorsal fin -->
-    <path d="M28 19 L32 6 L38 19" fill="${col}"/>
-    <!-- White belly -->
-    <ellipse cx="32" cy="34" rx="14" ry="7" fill="white" opacity="0.85"/>
-    <!-- Eye black small -->
-    <circle cx="38" cy="26" r="3" fill="#1a1a1a"/>
-    <circle cx="38.5" cy="25.5" r="0.8" fill="white"/>
-    <!-- Mouth with teeth -->
-    <path d="M44 28 Q50 30 44 34" fill="white" opacity="0.9"/>
-    <path d="M44 28 L50 30 L44 34" fill="${col}"/>
-    <!-- Teeth -->
-    <path d="M44 28 L47 31 L44 32" fill="white"/>
-    <path d="M47 29 L50 30 L47 33" fill="white"/>
-    <!-- Gills -->
-    <path d="M22 24 Q20 30 22 36" stroke="#0d4a8b" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-    <path d="M25 23 Q23 30 25 37" stroke="#0d4a8b" strokeWidth="1" fill="none" strokeLinecap="round"/>
-    <!-- Pectoral fin -->
-    <path d="M20 32 Q10 38 14 46 Q22 42 24 36" fill="${col}" opacity="0.85"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M6 32 L16 22 L28 18 L44 20 L54 28 L50 36 L40 42 L24 40 L12 36Z" fill="${col}"/>
+    <path d="M30 10 L36 18 L34 22 L28 20 L26 16Z" fill="${col}"/>
+    <path d="M22 20 L18 14 L24 16Z" fill="${col}" opacity="0.7"/>
+    <path d="M14 34 L8 38 L10 44 L18 40Z" fill="${col}" opacity="0.8"/>
+    <path d="M40 38 L44 44 L50 40 L46 36Z" fill="${col}" opacity="0.7"/>
+    <path d="M14 30 L22 26 L38 26 L50 32 L38 36 L22 36Z" fill="white" opacity="0.12"/>
+    <ellipse cx="40" cy="26" rx="4" ry="3" fill="#1a1a1a"/>
+    <circle cx="40.8" cy="25" r="1" fill="white"/>
+    <path d="M46 24 L58 20 L56 28 L46 30Z" fill="white" opacity="0.9"/>
+    <path d="M48 24 L55 21 L54 26 L48 28Z" fill="${col}"/>
+    <path d="M48 24 L52 22 L51 25Z" fill="white"/>
+    <path d="M51 24 L55 22 L54 26Z" fill="white"/>
+    <path d="M22 26 L22 22 L16 24Z" fill="${col}" opacity="0.6"/>
+    <path d="M28 24 L28 20 L34 22Z" fill="${col}" opacity="0.5"/>
   </svg>`,
 
+  // ── DRAGONS — angular scales, sharp horns, glowing eyes ─────────────────
   dragons: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Dragon head -->
-    <ellipse cx="31" cy="28" rx="16" ry="12" fill="${col}"/>
-    <!-- Horns -->
-    <path d="M22 18 L18 8 L25 15" fill="#8B1a1a"/>
-    <path d="M38 18 L42 8 L35 15" fill="#8B1a1a"/>
-    <!-- Spiky ridge -->
-    <path d="M20 16 L23 10 L26 16 L29 10 L32 16 L35 10 L38 16" fill="#8B1a1a" stroke="none"/>
-    <!-- Face -->
-    <ellipse cx="31" cy="31" rx="12" ry="9" fill="#a02020"/>
-    <!-- Eyes - glowing green -->
-    <ellipse cx="24" cy="25" rx="4" ry="3.5" fill="#00c040"/>
-    <ellipse cx="24" cy="25" rx="2" ry="2.8" fill="#1a1a1a"/>
-    <circle cx="24.5" cy="24" r="0.8" fill="white"/>
-    <ellipse cx="38" cy="25" rx="4" ry="3.5" fill="#00c040"/>
-    <ellipse cx="38" cy="25" rx="2" ry="2.8" fill="#1a1a1a"/>
-    <circle cx="38.5" cy="24" r="0.8" fill="white"/>
-    <!-- Snout -->
-    <ellipse cx="31" cy="33" rx="9" ry="6" fill="#b02828"/>
-    <path d="M26 30 L24 28" stroke="#8B1a1a" strokeWidth="1" strokeLinecap="round"/>
-    <path d="M36 30 L38 28" stroke="#8B1a1a" strokeWidth="1" strokeLinecap="round"/>
-    <!-- Nostrils with fire hint -->
-    <circle cx="28" cy="32" r="1.5" fill="#1a1a1a"/>
-    <circle cx="34" cy="32" r="1.5" fill="#1a1a1a"/>
-    <!-- Fire breath -->
-    <path d="M31 36 Q34 40 32 44 Q36 42 36 38 Q40 43 38 48" stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.8"/>
-    <path d="M31 36 Q28 40 30 44 Q26 42 26 38" stroke="#ef4444" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.7"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M18 28 L22 16 L30 12 L38 16 L42 28 L38 40 L30 46 L22 40Z" fill="${col}"/>
+    <path d="M22 16 L18 10 L22 6 L26 12Z" fill="#8B1a1a"/>
+    <path d="M38 16 L42 10 L38 6 L34 12Z" fill="#8B1a1a"/>
+    <path d="M24 10 L26 6 L28 10 L30 6 L32 10 L34 6 L36 10" fill="none" stroke="#8B1a1a" strokeWidth="2.5" strokeLinejoin="round"/>
+    <path d="M18 28 L22 24 L38 24 L42 28 L38 34 L30 38 L22 34Z" fill="#a02020"/>
+    <ellipse cx="23" cy="24" rx="5" ry="4.5" fill="#00c040"/>
+    <ellipse cx="23" cy="24" rx="2" ry="3.8" fill="#07090d"/>
+    <circle cx="23.6" cy="22.5" r="0.9" fill="white"/>
+    <ellipse cx="37" cy="24" rx="5" ry="4.5" fill="#00c040"/>
+    <ellipse cx="37" cy="24" rx="2" ry="3.8" fill="#07090d"/>
+    <circle cx="37.6" cy="22.5" r="0.9" fill="white"/>
+    <path d="M20 20 L24 23" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M40 20 L36 23" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M24 30 L22 28 L20 30" stroke="#8B1a1a" strokeWidth="1.2"/>
+    <path d="M36 30 L38 28 L40 30" stroke="#8B1a1a" strokeWidth="1.2"/>
+    <ellipse cx="30" cy="34" rx="5" ry="3.5" fill="#8B2020"/>
+    <path d="M28 32 L30 30 L32 32" stroke="${col}" strokeWidth="1" fill="none"/>
+    <path d="M30 38 Q34 44 33 50" stroke="#f59e0b" strokeWidth="1.5" fill="none" opacity="0.9"/>
+    <path d="M30 38 Q26 44 27 50" stroke="#ef4444" strokeWidth="1.2" fill="none" opacity="0.8"/>
+    <path d="M30 38 Q31 46 30 50" stroke="#f59e0b" strokeWidth="1" fill="none" opacity="0.7"/>
   </svg>`,
 
+  // ── BULLS — massive head, sharp horns, ring through nose, rage ───────────
   bulls: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Bull head — wide, powerful -->
-    <ellipse cx="30" cy="32" rx="18" ry="14" fill="#2a1a0a"/>
-    <!-- Horns -->
-    <path d="M14 24 Q8 14 16 12 Q20 18 20 22" fill="#c8a040" stroke="#a08020" strokeWidth="0.5"/>
-    <path d="M46 24 Q52 14 44 12 Q40 18 40 22" fill="#c8a040" stroke="#a08020" strokeWidth="0.5"/>
-    <!-- Face -->
-    <ellipse cx="30" cy="33" rx="14" ry="12" fill="#3a2010"/>
-    <!-- Eyes red/angry -->
-    <ellipse cx="23" cy="27" rx="4" ry="3.5" fill="#c00000"/>
-    <circle cx="23" cy="27" r="2.2" fill="#1a1a1a"/>
-    <circle cx="23.6" cy="26.4" r="0.7" fill="white"/>
-    <ellipse cx="37" cy="27" rx="4" ry="3.5" fill="#c00000"/>
-    <circle cx="37" cy="27" r="2.2" fill="#1a1a1a"/>
-    <circle cx="37.6" cy="26.4" r="0.7" fill="white"/>
-    <!-- Fierce brow -->
-    <path d="M19 22 L27 25" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M41 22 L33 25" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-    <!-- Nose ring -->
-    <ellipse cx="30" cy="36" rx="7" ry="5" fill="#4a2818"/>
-    <ellipse cx="30" cy="34" rx="5" ry="3" fill="#1a1a1a"/>
-    <path d="M26 36 Q30 39 34 36" stroke="#c0c0c0" strokeWidth="2" fill="none" strokeLinecap="round"/>
-    <!-- Snort lines -->
-    <path d="M18 30 Q14 28 12 32" stroke="#c0c0c0" strokeWidth="0.8" fill="none" opacity="0.4"/>
-    <path d="M42 30 Q46 28 48 32" stroke="#c0c0c0" strokeWidth="0.8" fill="none" opacity="0.4"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M10 26 L6 16 L12 12 L16 18 L18 24Z" fill="#c8a040"/>
+    <path d="M50 26 L54 16 L48 12 L44 18 L42 24Z" fill="#c8a040"/>
+    <path d="M8 26 L14 22 L30 20 L46 22 L52 26 L48 38 L38 46 L30 48 L22 46 L12 38Z" fill="#1a0800"/>
+    <path d="M16 32 L22 26 L30 24 L38 26 L44 32 L40 42 L30 46 L20 42Z" fill="#3a1810"/>
+    <ellipse cx="22" cy="28" rx="5.5" ry="5" fill="#c00000"/>
+    <ellipse cx="22" cy="28" rx="3" ry="4.5" fill="#07090d"/>
+    <circle cx="22.8" cy="26.5" r="0.9" fill="white"/>
+    <ellipse cx="38" cy="28" rx="5.5" ry="5" fill="#c00000"/>
+    <ellipse cx="38" cy="28" rx="3" ry="4.5" fill="#07090d"/>
+    <circle cx="38.8" cy="26.5" r="0.9" fill="white"/>
+    <path d="M17 22 L25 27" stroke="#07090d" strokeWidth="3" strokeLinecap="round"/>
+    <path d="M43 22 L35 27" stroke="#07090d" strokeWidth="3" strokeLinecap="round"/>
+    <ellipse cx="30" cy="36" rx="8" ry="6" fill="#2a1008"/>
+    <ellipse cx="30" cy="34" rx="5.5" ry="3.5" fill="#07090d"/>
+    <path d="M24 38 Q30 42 36 38" stroke="#c0c0c0" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+    <ellipse cx="26" cy="38" rx="2" ry="1" fill="#c0c0c0" opacity="0.6"/>
+    <ellipse cx="34" cy="38" rx="2" ry="1" fill="#c0c0c0" opacity="0.6"/>
+    <path d="M16 28 L10 24 L8 30" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
+    <path d="M44 28 L50 24 L52 30" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
   </svg>`,
 
+  // ── KNIGHTS — angular helmet, visor slit with red eyes, imposing ─────────
   knights: (col='#607080') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Knight helmet -->
-    <rect x="16" y="12" width="28" height="32" rx="4" fill="${col}"/>
-    <!-- Visor slit -->
-    <rect x="18" y="26" width="24" height="4" rx="1" fill="#1a1a1a"/>
-    <!-- Helmet dome -->
-    <ellipse cx="30" cy="14" rx="14" ry="6" fill="${col}"/>
-    <!-- Crest/plume -->
-    <path d="M30 8 Q25 4 22 6 Q26 10 30 12 Q34 10 38 6 Q35 4 30 8Z" fill="${col}"/>
-    <path d="M30 6 Q26 2 23 4 Q27 8 30 10 Q33 8 37 4 Q34 2 30 6Z" fill="#8B0000"/>
-    <!-- Helmet details -->
-    <line x1="30" y1="12" x2="30" y2="44" stroke="#4a5a6a" strokeWidth="1.5"/>
-    <line x1="16" y1="28" x2="44" y2="28" stroke="#4a5a6a" strokeWidth="1"/>
-    <!-- Visor -->
-    <rect x="18" y="22" width="24" height="10" rx="2" fill="#2a3a4a"/>
-    <rect x="20" y="24" width="20" height="6" rx="1" fill="#1a1a1a"/>
-    <!-- Eye glow through visor -->
-    <rect x="22" y="25.5" width="6" height="3" rx="1" fill="#ef4444" opacity="0.7"/>
-    <rect x="32" y="25.5" width="6" height="3" rx="1" fill="#ef4444" opacity="0.7"/>
-    <!-- Chin guard -->
-    <rect x="20" y="38" width="20" height="6" rx="2" fill="#4a5a6a"/>
-    <!-- Rivets -->
-    <circle cx="20" cy="15" r="1.5" fill="#4a5a6a"/>
-    <circle cx="40" cy="15" r="1.5" fill="#4a5a6a"/>
-    <circle cx="18" cy="32" r="1.5" fill="#4a5a6a"/>
-    <circle cx="42" cy="32" r="1.5" fill="#4a5a6a"/>
+    <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
+    <path d="M18 48 L16 32 L14 22 L18 14 L30 10 L42 14 L46 22 L44 32 L42 48Z" fill="${col}"/>
+    <path d="M24 10 L30 4 L36 10" fill="${col}" opacity="0.9"/>
+    <path d="M26 8 L30 2 L34 8 L32 12 L28 12Z" fill="#8B0000"/>
+    <path d="M16 32 L44 32 L46 26 L14 26Z" fill="#2a3a4a"/>
+    <rect x="18" y="26" width="24" height="7" rx="1" fill="#07090d"/>
+    <rect x="20" y="27.5" width="8" height="4" rx="1" fill="#ef4444" opacity="0.8"/>
+    <rect x="32" y="27.5" width="8" height="4" rx="1" fill="#ef4444" opacity="0.8"/>
+    <line x1="30" y1="26" x2="30" y2="33" stroke="#3a4a5a" strokeWidth="1.5"/>
+    <path d="M18 14 L14 12 L12 16 L16 18Z" fill="${col}" opacity="0.7"/>
+    <path d="M42 14 L46 12 L48 16 L44 18Z" fill="${col}" opacity="0.7"/>
+    <rect x="20" y="38" width="20" height="8" rx="2" fill="#3a4a5a"/>
+    <line x1="22" y1="42" x2="38" y2="42" stroke="${col}" strokeWidth="1" opacity="0.4"/>
+    <path d="M18 48 L20 52 L40 52 L42 48Z" fill="#2a3a4a"/>
+    <circle cx="18" cy="16" r="2" fill="#3a4a5a"/>
+    <circle cx="42" cy="16" r="2" fill="#3a4a5a"/>
+    <circle cx="16" cy="34" r="2" fill="#3a4a5a"/>
+    <circle cx="44" cy="34" r="2" fill="#3a4a5a"/>
   </svg>`,
+
+  // ── BEARS (10th free mascot, renamed from hawks position) ─────────────────
+  // Already defined above — the 10th free mascot
 }
 
-// Generate placeholder SVG for mascots without full illustration
 function mascotPlaceholder(name, emoji, col='#C0392B') {
+  const firstLetter = name.charAt(0).toUpperCase()
   return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <text x="30" y="36" textAnchor="middle" fontSize="24">${emoji}</text>
+    <text x="30" y="36" textAnchor="middle" fontSize="22" fill="${col}" fontWeight="900" fontFamily="'Arial Black',sans-serif">${firstLetter}</text>
+    <text x="30" y="52" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.3)" fontFamily="'Arial',sans-serif">${name.toUpperCase()}</text>
   </svg>`
 }
 
-// Full mascot data with SVG
 const MASCOTS = [
-  // FREE TIER (1-10)
-  { id:'eagles',    name:'Eagles',     emoji:'🦅', tier:'free',    svg: MASCOT_SVGS.eagles },
-  { id:'tigers',    name:'Tigers',     emoji:'🐯', tier:'free',    svg: MASCOT_SVGS.tigers },
-  { id:'lions',     name:'Lions',      emoji:'🦁', tier:'free',    svg: MASCOT_SVGS.lions },
-  { id:'bears',     name:'Bears',      emoji:'🐻', tier:'free',    svg: MASCOT_SVGS.bears },
-  { id:'wolves',    name:'Wolves',     emoji:'🐺', tier:'free',    svg: MASCOT_SVGS.wolves },
-  { id:'sharks',    name:'Sharks',     emoji:'🦈', tier:'free',    svg: MASCOT_SVGS.sharks },
-  { id:'dragons',   name:'Dragons',    emoji:'🐉', tier:'free',    svg: MASCOT_SVGS.dragons },
-  { id:'bulls',     name:'Bulls',      emoji:'🐂', tier:'free',    svg: MASCOT_SVGS.bulls },
-  { id:'knights',   name:'Knights',    emoji:'🛡️', tier:'free',    svg: MASCOT_SVGS.knights },
-  { id:'hawks',     name:'Hawks',      emoji:'🪶', tier:'free',    svg: MASCOT_SVGS.hawks },
-  // PREMIUM TIER (11-50) — shown grayed with lock
-  { id:'falcons',   name:'Falcons',    emoji:'🦜', tier:'premium', svg: (c)=>mascotPlaceholder('Falcons','🦜',c) },
-  { id:'ravens',    name:'Ravens',     emoji:'🐦‍⬛', tier:'premium', svg: (c)=>mascotPlaceholder('Ravens','🐦‍⬛',c) },
-  { id:'cardinals', name:'Cardinals',  emoji:'🔴', tier:'premium', svg: (c)=>mascotPlaceholder('Cardinals','🔴',c) },
-  { id:'owls',      name:'Owls',       emoji:'🦉', tier:'premium', svg: (c)=>mascotPlaceholder('Owls','🦉',c) },
-  { id:'panthers',  name:'Panthers',   emoji:'🐆', tier:'premium', svg: (c)=>mascotPlaceholder('Panthers','🐆',c) },
-  { id:'cougars',   name:'Cougars',    emoji:'🐈‍⬛', tier:'premium', svg: (c)=>mascotPlaceholder('Cougars','🐈‍⬛',c) },
-  { id:'jaguars',   name:'Jaguars',    emoji:'🐱', tier:'premium', svg: (c)=>mascotPlaceholder('Jaguars','🐱',c) },
-  { id:'huskies',   name:'Huskies',    emoji:'🐕', tier:'premium', svg: (c)=>mascotPlaceholder('Huskies','🐕',c) },
-  { id:'bulldogs',  name:'Bulldogs',   emoji:'🦮', tier:'premium', svg: (c)=>mascotPlaceholder('Bulldogs','🦮',c) },
-  { id:'vipers',    name:'Vipers',     emoji:'🐍', tier:'premium', svg: (c)=>mascotPlaceholder('Vipers','🐍',c) },
-  { id:'cobras',    name:'Cobras',     emoji:'🪱', tier:'premium', svg: (c)=>mascotPlaceholder('Cobras','🪱',c) },
-  { id:'gators',    name:'Gators',     emoji:'🐊', tier:'premium', svg: (c)=>mascotPlaceholder('Gators','🐊',c) },
-  { id:'mustangs',  name:'Mustangs',   emoji:'🐎', tier:'premium', svg: (c)=>mascotPlaceholder('Mustangs','🐎',c) },
-  { id:'stallions', name:'Stallions',  emoji:'🏇', tier:'premium', svg: (c)=>mascotPlaceholder('Stallions','🏇',c) },
-  { id:'broncos',   name:'Broncos',    emoji:'🤠', tier:'premium', svg: (c)=>mascotPlaceholder('Broncos','🤠',c) },
-  { id:'rams',      name:'Rams',       emoji:'🐏', tier:'premium', svg: (c)=>mascotPlaceholder('Rams','🐏',c) },
-  { id:'bison',     name:'Bison',      emoji:'🦬', tier:'premium', svg: (c)=>mascotPlaceholder('Bison','🦬',c) },
-  { id:'warriors',  name:'Warriors',   emoji:'⚔️', tier:'premium', svg: (c)=>mascotPlaceholder('Warriors','⚔️',c) },
-  { id:'spartans',  name:'Spartans',   emoji:'🗡️', tier:'premium', svg: (c)=>mascotPlaceholder('Spartans','🗡️',c) },
-  { id:'titans',    name:'Titans',     emoji:'💪', tier:'premium', svg: (c)=>mascotPlaceholder('Titans','💪',c) },
-  { id:'giants',    name:'Giants',     emoji:'🏔️', tier:'premium', svg: (c)=>mascotPlaceholder('Giants','🏔️',c) },
-  { id:'rockets',   name:'Rockets',    emoji:'🚀', tier:'premium', svg: (c)=>mascotPlaceholder('Rockets','🚀',c) },
-  { id:'blazers',   name:'Blazers',    emoji:'🔥', tier:'premium', svg: (c)=>mascotPlaceholder('Blazers','🔥',c) },
-  { id:'thunder',   name:'Thunder',    emoji:'⛈️', tier:'premium', svg: (c)=>mascotPlaceholder('Thunder','⛈️',c) },
-  { id:'storm',     name:'Storm',      emoji:'🌩️', tier:'premium', svg: (c)=>mascotPlaceholder('Storm','🌩️',c) },
-  { id:'cyclones',  name:'Cyclones',   emoji:'🌀', tier:'premium', svg: (c)=>mascotPlaceholder('Cyclones','🌀',c) },
-  { id:'tornados',  name:'Tornados',   emoji:'💨', tier:'premium', svg: (c)=>mascotPlaceholder('Tornados','💨',c) },
-  { id:'comets',    name:'Comets',     emoji:'☄️', tier:'premium', svg: (c)=>mascotPlaceholder('Comets','☄️',c) },
-  { id:'jets',      name:'Jets',       emoji:'✈️', tier:'premium', svg: (c)=>mascotPlaceholder('Jets','✈️',c) },
-  { id:'phantoms',  name:'Phantoms',   emoji:'👻', tier:'premium', svg: (c)=>mascotPlaceholder('Phantoms','👻',c) },
-  { id:'chargers',  name:'Chargers',   emoji:'🔋', tier:'premium', svg: (c)=>mascotPlaceholder('Chargers','🔋',c) },
-  { id:'patriots',  name:'Patriots',   emoji:'🎖️', tier:'premium', svg: (c)=>mascotPlaceholder('Patriots','🎖️',c) },
-  { id:'rebels',    name:'Rebels',     emoji:'🏴', tier:'premium', svg: (c)=>mascotPlaceholder('Rebels','🏴',c) },
-  { id:'trojans',   name:'Trojans',    emoji:'🏛️', tier:'premium', svg: (c)=>mascotPlaceholder('Trojans','🏛️',c) },
-  { id:'vikings',   name:'Vikings',    emoji:'🪓', tier:'premium', svg: (c)=>mascotPlaceholder('Vikings','🪓',c) },
-  { id:'pirates',   name:'Pirates',    emoji:'☠️', tier:'premium', svg: (c)=>mascotPlaceholder('Pirates','☠️',c) },
-  { id:'raiders',   name:'Raiders',    emoji:'💀', tier:'premium', svg: (c)=>mascotPlaceholder('Raiders','💀',c) },
-  { id:'colts',     name:'Colts',      emoji:'🐴', tier:'premium', svg: (c)=>mascotPlaceholder('Colts','🐴',c) },
-  { id:'lightning', name:'Lightning',  emoji:'🌪️', tier:'premium', svg: (c)=>mascotPlaceholder('Lightning','🌪️',c) },
+  { id:'eagles',   name:'Eagles',    emoji:'🦅', tier:'free',    svg: MASCOT_SVGS.eagles },
+  { id:'tigers',   name:'Tigers',    emoji:'🐯', tier:'free',    svg: MASCOT_SVGS.tigers },
+  { id:'lions',    name:'Lions',     emoji:'🦁', tier:'free',    svg: MASCOT_SVGS.lions },
+  { id:'bears',    name:'Bears',     emoji:'🐻', tier:'free',    svg: MASCOT_SVGS.bears },
+  { id:'wolves',   name:'Wolves',    emoji:'🐺', tier:'free',    svg: MASCOT_SVGS.wolves },
+  { id:'sharks',   name:'Sharks',    emoji:'🦈', tier:'free',    svg: MASCOT_SVGS.sharks },
+  { id:'dragons',  name:'Dragons',   emoji:'🐉', tier:'free',    svg: MASCOT_SVGS.dragons },
+  { id:'bulls',    name:'Bulls',     emoji:'🐂', tier:'free',    svg: MASCOT_SVGS.bulls },
+  { id:'knights',  name:'Knights',   emoji:'🛡️', tier:'free',    svg: MASCOT_SVGS.knights },
+  { id:'hawks',    name:'Hawks',     emoji:'🪶', tier:'free',    svg: MASCOT_SVGS.hawks },
+  { id:'falcons',  name:'Falcons',   emoji:'🦜', tier:'premium', svg: (c)=>mascotPlaceholder('Falcons','F',c) },
+  { id:'ravens',   name:'Ravens',    emoji:'🐦', tier:'premium', svg: (c)=>mascotPlaceholder('Ravens','R',c) },
+  { id:'cardinals',name:'Cardinals', emoji:'🔴', tier:'premium', svg: (c)=>mascotPlaceholder('Cardinals','C',c) },
+  { id:'owls',     name:'Owls',      emoji:'🦉', tier:'premium', svg: (c)=>mascotPlaceholder('Owls','O',c) },
+  { id:'panthers', name:'Panthers',  emoji:'🐆', tier:'premium', svg: (c)=>mascotPlaceholder('Panthers','P',c) },
+  { id:'cougars',  name:'Cougars',   emoji:'🐈', tier:'premium', svg: (c)=>mascotPlaceholder('Cougars','C',c) },
+  { id:'jaguars',  name:'Jaguars',   emoji:'🐱', tier:'premium', svg: (c)=>mascotPlaceholder('Jaguars','J',c) },
+  { id:'huskies',  name:'Huskies',   emoji:'🐕', tier:'premium', svg: (c)=>mascotPlaceholder('Huskies','H',c) },
+  { id:'bulldogs', name:'Bulldogs',  emoji:'🦮', tier:'premium', svg: (c)=>mascotPlaceholder('Bulldogs','B',c) },
+  { id:'vipers',   name:'Vipers',    emoji:'🐍', tier:'premium', svg: (c)=>mascotPlaceholder('Vipers','V',c) },
+  { id:'cobras',   name:'Cobras',    emoji:'🐍', tier:'premium', svg: (c)=>mascotPlaceholder('Cobras','C',c) },
+  { id:'gators',   name:'Gators',    emoji:'🐊', tier:'premium', svg: (c)=>mascotPlaceholder('Gators','G',c) },
+  { id:'mustangs', name:'Mustangs',  emoji:'🐎', tier:'premium', svg: (c)=>mascotPlaceholder('Mustangs','M',c) },
+  { id:'stallions',name:'Stallions', emoji:'🏇', tier:'premium', svg: (c)=>mascotPlaceholder('Stallions','S',c) },
+  { id:'broncos',  name:'Broncos',   emoji:'🤠', tier:'premium', svg: (c)=>mascotPlaceholder('Broncos','B',c) },
+  { id:'rams',     name:'Rams',      emoji:'🐏', tier:'premium', svg: (c)=>mascotPlaceholder('Rams','R',c) },
+  { id:'bison',    name:'Bison',     emoji:'🦬', tier:'premium', svg: (c)=>mascotPlaceholder('Bison','B',c) },
+  { id:'warriors', name:'Warriors',  emoji:'⚔️', tier:'premium', svg: (c)=>mascotPlaceholder('Warriors','W',c) },
+  { id:'spartans', name:'Spartans',  emoji:'🗡️', tier:'premium', svg: (c)=>mascotPlaceholder('Spartans','S',c) },
+  { id:'titans',   name:'Titans',    emoji:'💪', tier:'premium', svg: (c)=>mascotPlaceholder('Titans','T',c) },
+  { id:'giants',   name:'Giants',    emoji:'🏔️', tier:'premium', svg: (c)=>mascotPlaceholder('Giants','G',c) },
+  { id:'rockets',  name:'Rockets',   emoji:'🚀', tier:'premium', svg: (c)=>mascotPlaceholder('Rockets','R',c) },
+  { id:'blazers',  name:'Blazers',   emoji:'🔥', tier:'premium', svg: (c)=>mascotPlaceholder('Blazers','B',c) },
+  { id:'thunder',  name:'Thunder',   emoji:'⛈️', tier:'premium', svg: (c)=>mascotPlaceholder('Thunder','T',c) },
+  { id:'storm',    name:'Storm',     emoji:'🌩️', tier:'premium', svg: (c)=>mascotPlaceholder('Storm','S',c) },
+  { id:'cyclones', name:'Cyclones',  emoji:'🌀', tier:'premium', svg: (c)=>mascotPlaceholder('Cyclones','C',c) },
+  { id:'tornados', name:'Tornados',  emoji:'💨', tier:'premium', svg: (c)=>mascotPlaceholder('Tornados','T',c) },
+  { id:'comets',   name:'Comets',    emoji:'☄️', tier:'premium', svg: (c)=>mascotPlaceholder('Comets','C',c) },
+  { id:'jets',     name:'Jets',      emoji:'✈️', tier:'premium', svg: (c)=>mascotPlaceholder('Jets','J',c) },
+  { id:'phantoms', name:'Phantoms',  emoji:'👻', tier:'premium', svg: (c)=>mascotPlaceholder('Phantoms','P',c) },
+  { id:'chargers', name:'Chargers',  emoji:'🔋', tier:'premium', svg: (c)=>mascotPlaceholder('Chargers','C',c) },
+  { id:'patriots', name:'Patriots',  emoji:'🎖️', tier:'premium', svg: (c)=>mascotPlaceholder('Patriots','P',c) },
+  { id:'rebels',   name:'Rebels',    emoji:'🏴', tier:'premium', svg: (c)=>mascotPlaceholder('Rebels','R',c) },
+  { id:'trojans',  name:'Trojans',   emoji:'🏛️', tier:'premium', svg: (c)=>mascotPlaceholder('Trojans','T',c) },
+  { id:'vikings',  name:'Vikings',   emoji:'🪓', tier:'premium', svg: (c)=>mascotPlaceholder('Vikings','V',c) },
+  { id:'pirates',  name:'Pirates',   emoji:'☠️', tier:'premium', svg: (c)=>mascotPlaceholder('Pirates','P',c) },
+  { id:'raiders',  name:'Raiders',   emoji:'💀', tier:'premium', svg: (c)=>mascotPlaceholder('Raiders','R',c) },
+  { id:'colts',    name:'Colts',     emoji:'🐴', tier:'premium', svg: (c)=>mascotPlaceholder('Colts','C',c) },
+  { id:'lightning',name:'Lightning', emoji:'🌪️', tier:'premium', svg: (c)=>mascotPlaceholder('Lightning','L',c) },
 ]
 
-// ─── MASCOT AVATAR (renders the SVG) ─────────────────────────────────────────
 function MascotAvatar({ mascotId, color='#C0392B', size=40, locked=false }) {
   const mascot = MASCOTS.find(m => m.id === mascotId)
-  if (!mascot) return <div style={{ width:size, height:size, borderRadius:'50%', background:'#1e2330', display:'flex', alignItems:'center', justifyContent:'center', fontSize:size*0.45 }}>🏆</div>
-
+  if (!mascot) return <div style={{ width:size, height:size, borderRadius:'50%', background:'#1e2330', display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ fontSize:size*0.35, opacity:0.4 }}>🏆</span></div>
   const svgStr = mascot.svg(color)
   return (
     <div style={{ position:'relative', width:size, height:size, flexShrink:0 }}>
-      <div
-        style={{ width:size, height:size, filter: locked ? 'grayscale(100%) brightness(0.4)' : 'none', transition:'filter 0.2s' }}
-        dangerouslySetInnerHTML={{ __html: svgStr }}
-      />
-      {locked && (
-        <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <span style={{ fontSize:size*0.3, lineHeight:1 }}>🔒</span>
-        </div>
-      )}
+      <div style={{ width:size, height:size, filter:locked?'grayscale(100%) brightness(0.35)':'none', transition:'filter 0.2s' }} dangerouslySetInnerHTML={{ __html: svgStr }}/>
+      {locked && <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ fontSize:size*0.28, lineHeight:1 }}>🔒</span></div>}
     </div>
   )
 }
+
 
 
 const TEAM_FONTS = [
@@ -1391,10 +1345,10 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   function replay() { if (animRef.current) cancelAnimationFrame(animRef.current); setProgress(0); setPlaying(true) }
 
   return (
-    <div style={{ marginTop:10, background:'#f0f0ec', borderRadius:10, border:`1px solid rgba(${pr},${pg},${pb},0.3)`, overflow:'hidden' }}>
-      <div style={{ padding:'9px 13px', borderBottom:'1px solid rgba(0,0,0,0.1)', display:'flex', alignItems:'center', gap:8, background:'white' }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, color:'#222', flex:1 }}>{play.name}</span>
-        <span style={{ fontSize:10, color:'#888', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
+    <div style={{ marginTop:10, background:'#0f1219', borderRadius:10, border:`1px solid rgba(${pr},${pg},${pb},0.3)`, overflow:'hidden' }}>
+      <div style={{ padding:'9px 13px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:8, background:'#161922' }}>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{play.name}</span>
+        <span style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
         {!parsed && !loading && !autoLoad && (<button onClick={generateAnim} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:1 }}>ANIMATE</button>)}
         {parsed && (<button onClick={replay} disabled={playing} style={{ padding:'4px 12px', background:playing?'#ccc':P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:playing?'not-allowed':'pointer', fontFamily:'inherit', letterSpacing:1 }}>{playing?'PLAYING':'REPLAY'}</button>)}
       </div>
@@ -2431,12 +2385,7 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
         {offOpen && (
           <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-              {cfg.fields.map(f => {
-              const skillVal = offFields['skill'] || offFields['teamSkill'] || (cfg.fields.find(x=>x.id==='skill'||x.id==='teamSkill')?.opts[0]||'')
-              const isBeginner = skillVal.includes('First Year') || skillVal.includes('Beginner') || skillVal.includes('Recreational')
-              if (f.id==='oppTendency' && isBeginner) return null  // hide tendency for beginners
-              return <Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />
-            })}
+              {(() => { const skillVal = offFields['skill'] || offFields['teamSkill'] || (cfg.fields.find(x=>x.id==='skill'||x.id==='teamSkill')?.opts[0]||''); const isBeginner = skillVal.includes('First Year') || skillVal.includes('Beginner') || skillVal.includes('Recreational'); return cfg.fields.filter(f => !(f.id==='oppTendency' && isBeginner)).map(f => <Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />) })()} 
             </div>
             <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
             {offLoading && <Shimmer />}
@@ -2904,14 +2853,26 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
   return (
     <div style={{ position:'relative' }}>
       <div
-        onClick={() => { if (current) setPage('team'); else setOpen(o => !o) }}
+        onClick={() => { if (current) { setPage('team') } else if (sportTeams.length === 0) { setPage('team') } else { setOpen(o => !o) } }}
         style={{ display:'flex', alignItems:'center', gap:5, background: current ? al(P,0.12) : `rgba(${parseInt(P.slice(1,3),16)||192},${parseInt(P.slice(3,5),16)||57},${parseInt(P.slice(5,7),16)||43},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none' }}
       >
         {current ? (
           <>
-            <span style={{ fontSize:13 }}>{mascotObj?.emoji||'🏆'}</span>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:75, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{current.name}</span>
-            <span style={{ fontSize:8, color:al(P,0.6), marginLeft:1 }}>▾</span>
+            {!current && sportTeams.length === 0 ? (
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', display:'flex', alignItems:'center', gap:4 }}>
+                <span style={{ fontSize:11 }}>➕</span> Create Team
+              </span>
+            ) : !current ? (
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b7a96', fontWeight:700, letterSpacing:'0.5px', display:'flex', alignItems:'center', gap:4 }}>
+                <span style={{ fontSize:11 }}>🏆</span> Select Team <span style={{ fontSize:8 }}>▾</span>
+              </span>
+            ) : (
+              <>
+                <MascotAvatar mascotId={current.mascot} color={P} size={22} />
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{current.name}</span>
+                <span style={{ fontSize:8, color:'#6b7a96' }}>▾</span>
+              </>
+            )}
           </>
         ) : (
           <>
@@ -3501,9 +3462,16 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* TE if tight modifier */}
         {choices.modifier==='Tight'&&<rect x={112} y={49} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
         {/* WRs */}
-        {fmt.wr.map(([cx,cy],i)=>(
-          <circle key={i} cx={cx} cy={cy} r={5} fill={choices.xRoute&&i===0?'#f59e0b':P} opacity={0.85}/>
-        ))}
+        {fmt.wr.map(([cx,cy],i)=>{
+          const labels = ['X','Z','H','Y','W']
+          const isHighlighted = (choices.xRoute && i===0) || (choices.yzRoute && i===1)
+          return (
+            <g key={i}>
+              <circle cx={cx} cy={cy} r={5.5} fill={isHighlighted?'#f59e0b':P} opacity={0.9}/>
+              <text x={cx} y={cy+2} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">{labels[i]||'WR'}</text>
+            </g>
+          )
+        })}
         {/* QB — BEHIND the LOS */}
         <circle cx={fmt.qb[0]} cy={fmt.qb[1]} r={5.5} fill={P} opacity={0.95}/>
         <text x={fmt.qb[0]} y={fmt.qb[1]+2} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">QB</text>
@@ -3836,98 +3804,199 @@ function RulebookPage({ sport, P, al, callAI }) {
 }
 // ─── NEWS PAGE ────────────────────────────────────────────────────────────────
 function NewsPage({ P, S, al, sport, callAI }) {
-  const [feed, setFeed] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [activeCategory, setActiveCategory] = useState('all')
-  const [refreshKey, setRefreshKey] = useState(0)
+  // Each channel has its own state so they load independently
+  const [activeChannel, setActiveChannel] = useState('all')
+  const [channels, setChannels] = useState({
+    sport:     { items:[], loading:false, loaded:false },
+    youth:     { items:[], loading:false, loaded:false },
+    sportNews: { items:[], loading:false, loaded:false },
+    allNews:   { items:[], loading:false, loaded:false },
+  })
 
-  const categories = [
-    { id:'all',      label:'All',          icon:'📰' },
-    { id:'news',     label:'Sports News',  icon:'⚡' },
-    { id:'drill',    label:'Drills',       icon:'🏃' },
-    { id:'science',  label:'Science',      icon:'🔬' },
-    { id:'concept',  label:'Concepts',     icon:'💡' },
+  const CHANNELS = [
+    { id:'all',       label:'All',              icon:'📰', desc:'Everything mixed' },
+    { id:'sport',     label:sport+' Coaching',  icon:'📋', desc:'Drills, schemes, science for '+sport },
+    { id:'youth',     label:'Youth Coaching',   icon:'🧒', desc:'General youth coaching theory' },
+    { id:'sportNews', label:sport+' News',      icon:'⚡', desc:'Pro + college '+sport+' news' },
+    { id:'allNews',   label:'All Sports News',  icon:'🌐', desc:'Headlines across all sports' },
   ]
 
-  useEffect(() => { loadFeed() }, [sport, refreshKey])
+  const PROMPTS = {
+    sport: (s) => `You are an expert ${s} coaching knowledge curator. Generate 5 coaching items for youth ${s} coaches. Include: 1 drill with step-by-step instructions, 1 scheme tip, 1 coaching science item (with research basis), 1 motivational/culture concept, 1 safety or player development tip. Every item must be 100% specific to ${s}. Return ONLY valid JSON: {"items":[{"type":"drill","title":"...","body":"2-3 sentences","source":"source name","searchQuery":"specific google search","ytSearch":"youtube search term"},{"type":"concept","title":"...","body":"...","source":"...","searchQuery":"...","ytSearch":"..."},...]}`,
 
-  async function loadFeed() {
-    setLoading(true)
-    setFeed(null)
-    try {
-      const raw = await callAI(
-        'You are an expert '+sport+' coaching knowledge curator with access to current sports news. Generate a comprehensive coaching and news feed for youth '+sport+' coaches. Include: 2 current sports news items relevant to '+sport+' (recent signings, draft news, coaching hires, rule changes, notable games — be specific with real names and teams when possible), 2 drills of the day with step-by-step instructions, 1 coaching science item with research backing, 2 coaching concept spotlights. Every item must be specific to '+sport+'. For each item include a Google search query and YouTube search term. Return ONLY valid JSON: {"items":[{"type":"news","title":"title","body":"2-3 sentences","source":"source name","searchQuery":"specific search","ytSearch":"youtube search"},{"type":"news","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":""},{"type":"drill","title":"Drill: name","body":"step-by-step drill description","source":"source","searchQuery":"search","ytSearch":"youtube search"},{"type":"drill","title":"Drill: name","body":"drill description","source":"source","searchQuery":"search","ytSearch":"youtube search"},{"type":"science","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":""},{"type":"concept","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":"youtube search"},{"type":"concept","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":"youtube search"}]}'
-      )
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      const parsed = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1))
-      setFeed(parsed)
-    } catch(e) { setFeed({ items:[] }) }
-    setLoading(false)
+    youth: () => `You are a youth sports coaching expert. Generate 5 items about youth coaching (any sport): child development, age-appropriate coaching, communication with parents, player motivation, mental health in youth sports, creating a positive culture, working with different skill levels. Be specific, practical, evidence-based. Return ONLY valid JSON: {"items":[{"type":"science","title":"...","body":"2-3 sentences","source":"research or org name","searchQuery":"google search","ytSearch":"youtube search"},...]}.`,
+
+    sportNews: (s) => `You are a sports news expert covering ${s}. Generate 4 current news items about professional and college ${s}: recent signings, trades, draft news, coaching hires, notable games, rule changes, injury updates, record-breaking performances. Use real team names, player names, and leagues (${s==='Football'?'NFL, college football':s==='Basketball'?'NBA, NCAA':s==='Baseball'?'MLB, minor leagues':s==='Soccer'?'MLS, EPL, Champions League, USMNT':'NPF, college softball'}). Be specific and current. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences with specific names and details","source":"ESPN/AP/team source","searchQuery":"specific google search to find this story","ytSearch":"youtube search for highlights or analysis"},...]}.`,
+
+    allNews: () => `You are a sports news editor. Generate 5 current general sports news items across all sports: football, basketball, baseball, soccer, and other sports. Cover pro and college sports. Include: trades, signings, coaching moves, playoff/championship updates, record performances. Use real names, teams, and leagues. Make each item a different sport. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences","source":"ESPN/AP/etc","searchQuery":"google search","ytSearch":"youtube highlights search"},...]}.`,
   }
 
-  const typeColors = { news:'#ef4444', drill:P, science:'#4ade80', concept:'#6b9fff' }
-  const typeLabels = { news:'SPORTS NEWS', drill:'DRILL OF THE DAY', science:'COACHING SCIENCE', concept:'CONCEPT SPOTLIGHT' }
-  const typeIcons = { news:'⚡', drill:'🏃', science:'🔬', concept:'💡' }
+  const TYPE_COLORS = { news:'#ef4444', drill:P, science:'#4ade80', concept:'#6b9fff', tip:'#c084fc' }
+  const TYPE_LABELS = { news:'SPORTS NEWS', drill:'DRILL', science:'COACHING SCIENCE', concept:'CONCEPT', tip:'TIP' }
+  const TYPE_ICONS  = { news:'⚡', drill:'🏃', science:'🔬', concept:'💡', tip:'✅' }
 
-  const filtered = feed?.items?.filter(i => activeCategory==='all' || i.type===activeCategory) || []
+  async function loadChannel(channelId) {
+    if (channels[channelId]?.loaded) return
+    const cacheKey = `coachiq_feed_${channelId}_${sport}`
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) {
+        setChannels(c => ({ ...c, [channelId]: { items: JSON.parse(cached), loading:false, loaded:true } }))
+        return
+      }
+    } catch(e) {}
+
+    setChannels(c => ({ ...c, [channelId]: { ...c[channelId], loading:true } }))
+    try {
+      const prompt = channelId==='sport'     ? PROMPTS.sport(sport)
+                   : channelId==='youth'     ? PROMPTS.youth()
+                   : channelId==='sportNews' ? PROMPTS.sportNews(sport)
+                   : PROMPTS.allNews()
+      const raw = await callAI(prompt)
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      const parsed = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1))
+      const items = parsed.items || []
+      sessionStorage.setItem(cacheKey, JSON.stringify(items))
+      setChannels(c => ({ ...c, [channelId]: { items, loading:false, loaded:true } }))
+    } catch(e) {
+      setChannels(c => ({ ...c, [channelId]: { items:[], loading:false, loaded:true } }))
+    }
+  }
+
+  function loadAll() {
+    ['sport','youth','sportNews','allNews'].forEach(id => loadChannel(id))
+  }
+
+  useEffect(() => {
+    // Load active channel immediately, others in background
+    loadChannel(activeChannel === 'all' ? 'sport' : activeChannel)
+    if (activeChannel === 'all') {
+      setTimeout(() => loadChannel('youth'), 400)
+      setTimeout(() => loadChannel('sportNews'), 800)
+      setTimeout(() => loadChannel('allNews'), 1200)
+    }
+  }, [sport])
+
+  useEffect(() => {
+    if (activeChannel !== 'all') loadChannel(activeChannel)
+    else loadAll()
+  }, [activeChannel])
+
+  function refreshChannel(channelId) {
+    const idsToRefresh = channelId === 'all' ? ['sport','youth','sportNews','allNews'] : [channelId]
+    idsToRefresh.forEach(id => {
+      try { sessionStorage.removeItem(`coachiq_feed_${id}_${sport}`) } catch(e) {}
+      setChannels(c => ({ ...c, [id]: { items:[], loading:false, loaded:false } }))
+    })
+    setTimeout(() => {
+      if (channelId === 'all') loadAll()
+      else loadChannel(channelId)
+    }, 50)
+  }
+
+  // Combine items for "All" channel
+  function getAllItems() {
+    const all = []
+    ;['sport','youth','sportNews','allNews'].forEach(id => {
+      (channels[id]?.items || []).forEach(item => all.push({ ...item, _channel: id }))
+    })
+    // interleave: sort so news and coaching alternate
+    const news = all.filter(i => i.type === 'news')
+    const coaching = all.filter(i => i.type !== 'news')
+    const result = []
+    const max = Math.max(news.length, coaching.length)
+    for (let i = 0; i < max; i++) {
+      if (coaching[i]) result.push(coaching[i])
+      if (news[i]) result.push(news[i])
+    }
+    return result
+  }
+
+  const activeChData = activeChannel === 'all'
+    ? { items: getAllItems(), loading: ['sport','youth','sportNews','allNews'].some(id => channels[id]?.loading) }
+    : channels[activeChannel] || { items:[], loading:false }
+
+  function FeedItem({ item, i }) {
+    const tc = TYPE_COLORS[item.type] || P
+    return (
+      <div style={{ background:'#0f1219', border:`0.5px solid ${al(tc,0.18)}`, borderRadius:6, padding:'12px 14px', marginBottom:10, borderLeft:`3px solid ${tc}` }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
+          <span style={{ fontSize:13 }}>{TYPE_ICONS[item.type]||'📰'}</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:tc, textTransform:'uppercase', letterSpacing:'1px' }}>{TYPE_LABELS[item.type]||item.type}</span>
+          {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
+        </div>
+        <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:5, lineHeight:1.4 }}>{item.title}</div>
+        <div style={{ fontSize:12, color:'#9aa0b0', lineHeight:1.7, marginBottom: (item.searchQuery||item.ytSearch) ? 8 : 0 }}>{item.body}</div>
+        {(item.searchQuery || item.ytSearch) && (
+          <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+            {item.searchQuery && (
+              <a href={'https://www.google.com/search?q='+encodeURIComponent(item.searchQuery)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(107,154,255,0.1)', borderRadius:4, border:'1px solid rgba(107,154,255,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>🔍 Read more</a>
+            )}
+            {item.ytSearch && (
+              <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(item.ytSearch)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(239,68,68,0.1)', borderRadius:4, border:'1px solid rgba(239,68,68,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>▶ Watch</a>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <>
-      <div style={{ padding:'16px 0 8px' }}>
+      <div style={{ padding:'14px 0 8px' }}>
         <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} coaching intelligence</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>News + Feed</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#dde1f0', lineHeight:1 }}>News + Feed</div>
       </div>
 
-      {/* Category tabs */}
-      <div style={{ display:'flex', gap:5, overflowX:'auto', paddingBottom:4, marginBottom:10 }}>
-        {categories.map(cat => (
-          <button key={cat.id} onClick={()=>setActiveCategory(cat.id)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:20, fontSize:11, border:`1px solid ${activeCategory===cat.id?P:'#1e2330'}`, background:activeCategory===cat.id?al(P,0.15):'transparent', color:activeCategory===cat.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, display:'flex', alignItems:'center', gap:4 }}>
-            <span>{cat.icon}</span> {cat.label}
-          </button>
-        ))}
-        <button onClick={()=>setRefreshKey(k=>k+1)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:20, fontSize:11, border:'1px solid #1e2330', background:'transparent', color:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginLeft:'auto' }}>↻ Refresh</button>
+      {/* Channel tabs */}
+      <div style={{ display:'flex', gap:5, overflowX:'auto', paddingBottom:6, marginBottom:10, WebkitOverflowScrolling:'touch' }}>
+        {CHANNELS.map(ch => {
+          const chData = ch.id === 'all' ? { loading: Object.values(channels).some(c=>c.loading) } : channels[ch.id]
+          const isLoading = chData?.loading
+          return (
+            <button key={ch.id} onClick={()=>setActiveChannel(ch.id)} style={{ flexShrink:0, padding:'7px 12px', borderRadius:20, fontSize:11, border:`1px solid ${activeChannel===ch.id?P:'#1e2330'}`, background:activeChannel===ch.id?al(P,0.15):'#0f1219', color:activeChannel===ch.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, display:'flex', alignItems:'center', gap:4, transition:'all 0.15s' }}>
+              <span style={{ fontSize:12 }}>{isLoading ? '⏳' : ch.icon}</span>
+              <span>{ch.label}</span>
+            </button>
+          )
+        })}
+        <button onClick={()=>refreshChannel(activeChannel)} style={{ flexShrink:0, padding:'7px 12px', borderRadius:20, fontSize:11, border:'1px solid #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginLeft:4 }}>↻</button>
       </div>
 
-      {loading && (
+      {/* Active channel description */}
+      <div style={{ fontSize:10, color:'#3d4559', marginBottom:10, fontStyle:'italic' }}>
+        {CHANNELS.find(c=>c.id===activeChannel)?.desc}
+      </div>
+
+      {/* Loading state */}
+      {activeChData.loading && activeChData.items.length === 0 && (
         <div style={{ padding:'40px 0', textAlign:'center' }}>
-          <div style={{ width:24, height:24, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
-          <div style={{ fontSize:12, color:'#6b7a96' }}>Loading {sport} news and coaching content...</div>
+          <div style={{ width:22, height:22, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
+          <div style={{ fontSize:12, color:'#6b7a96' }}>Loading {CHANNELS.find(c=>c.id===activeChannel)?.label}...</div>
         </div>
       )}
 
-      {!loading && filtered.map((item, i) => {
-        const tc = typeColors[item.type] || P
-        return (
-          <div key={i} style={{ background:'#0f1219', border:`0.5px solid ${al(tc,0.2)}`, borderRadius:6, padding:'12px 14px', marginBottom:10, borderLeft:`3px solid ${tc}` }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
-              <span style={{ fontSize:14 }}>{typeIcons[item.type]||'📰'}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:tc, textTransform:'uppercase', letterSpacing:'1px' }}>{typeLabels[item.type]||item.type}</span>
-              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
-            </div>
-            <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:6, lineHeight:1.4 }}>{item.title}</div>
-            <div style={{ fontSize:12, color:'#9aa0b0', lineHeight:1.7, marginBottom:item.searchQuery?8:0 }}>{item.body}</div>
-            {(item.searchQuery || item.ytSearch) && (
-              <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginTop:4 }}>
-                {item.searchQuery && (
-                  <a href={'https://www.google.com/search?q='+encodeURIComponent(item.searchQuery)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(107,154,255,0.1)', borderRadius:4, border:'1px solid rgba(107,154,255,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>🔍 Read more</a>
-                )}
-                {item.ytSearch && (
-                  <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(item.ytSearch+' '+sport)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(239,68,68,0.1)', borderRadius:4, border:'1px solid rgba(239,68,68,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>▶ Watch</a>
-                )}
-              </div>
-            )}
-          </div>
-        )
-      })}
+      {/* Feed items */}
+      {activeChData.items.map((item, i) => <FeedItem key={i} item={item} i={i} />)}
 
-      {!loading && filtered.length === 0 && feed && (
-        <div style={{ textAlign:'center', padding:'40px 20px', color:'#3d4559', fontSize:12 }}>
-          No items in this category. Try refreshing or switching categories.
+      {/* Loading more indicator for All channel */}
+      {activeChannel === 'all' && activeChData.loading && activeChData.items.length > 0 && (
+        <div style={{ textAlign:'center', padding:'10px', color:'#3d4559', fontSize:11 }}>Loading more...</div>
+      )}
+
+      {/* Empty state */}
+      {!activeChData.loading && activeChData.items.length === 0 && (
+        <div style={{ textAlign:'center', padding:'40px 20px' }}>
+          <div style={{ fontSize:32, marginBottom:8 }}>📰</div>
+          <div style={{ fontSize:13, color:'#3d4559', marginBottom:12 }}>No content loaded yet</div>
+          <button onClick={()=>refreshChannel(activeChannel)} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>LOAD FEED</button>
         </div>
       )}
     </>
   )
 }
+
+
 
 // ─── LEARN PAGE ───────────────────────────────────────────────────────────────
 function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage }) {
@@ -4161,6 +4230,9 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   useEffect(() => { if (!feed && !feedLoading) loadFeed() }, [sport])
 
   async function loadFeed() {
+    const cacheKey = 'coachiq_homefeed_'+sport
+    const cached = typeof sessionStorage !== 'undefined' && sessionStorage.getItem(cacheKey)
+    if (cached) { try { setFeed(JSON.parse(cached)); return } catch(e){} }
     setFeedLoading(true)
     try {
       const raw = await callAI('You are an expert '+sport+' coaching knowledge curator. Generate a daily coaching feed SPECIFICALLY for youth '+sport+' coaches. Every item must be specific to '+sport+'. Include a searchQuery (Google search terms) and ytSearch (YouTube terms) for each item. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
@@ -4669,6 +4741,8 @@ export default function CoachIQ() {
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
           {page==='team'     && <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} />}
           {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
+          {page==='news'  && <NewsPage  P={P} S={S} al={al} sport={sport} callAI={callAI} />}
+          {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} />}
           {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} />}
         </div>
 
@@ -4693,10 +4767,10 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
   const [posOpen, setPosOpen] = useState(false)
 
   const positions = {
-    Football:   ['QB','RB','FB','WR','TE','OL','LT','LG','C','RG','RT','DL','DE','DT','NT','LB','MLB','OLB','CB','S','FS','SS','K','P','LS'],
-    Basketball: ['PG','SG','SF','PF','C','6th Man'],
-    Baseball:   ['P','C','1B','2B','3B','SS','LF','CF','RF','DH','Utility'],
-    Soccer:     ['GK','CB','LB','RB','LWB','RWB','CDM','CM','CAM','LM','RM','LW','RW','SS','ST','CF'],
+    Football:   ['QB','RB','FB','WR','TE','OL','LT','LG','C','RG','RT','DL','DE','DT','NT','LB','MLB','OLB','CB','S','FS','SS','K','P','LS','H','KR','PR','Gunner','Upback','Personal Protector'],
+    Basketball: ['PG','SG','SF','PF','C','6th Man','Shooting Specialist','Defensive Specialist'],
+    Baseball:   ['P','C','1B','2B','3B','SS','LF','CF','RF','DH','Utility','Pinch Hitter','Pinch Runner','Closer','Setup','Long Relief'],
+    Soccer:     ['GK','CB','LB','RB','LWB','RWB','CDM','CM','CAM','LM','RM','LW','RW','CF','ST','SS','Sweeper'],
     Softball:   ['P','C','1B','2B','3B','SS','LF','CF','RF','DP','FLEX','Utility'],
   }
 
