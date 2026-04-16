@@ -85,10 +85,19 @@ const MASCOT_SVGS = {
 
   lions: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
-    <!-- Mane -->
     <circle cx="30" cy="30" r="20" fill="#8B4513"/>
-    <!-- Mane detail -->
-    ${Array.from({length:12},(_,i)=>`<ellipse cx="${30+18*Math.cos(i*30*Math.PI/180)}" cy="${30+18*Math.sin(i*30*Math.PI/180)}" rx="5" ry="3" fill="#6B3410" transform="rotate(${i*30} ${30+18*Math.cos(i*30*Math.PI/180)} ${30+18*Math.sin(i*30*Math.PI/180)})"/>`).join('')}
+    <ellipse cx="48" cy="30" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="46" cy="19" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="39" cy="13" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="30" cy="10" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="21" cy="13" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="14" cy="19" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="12" cy="30" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="14" cy="41" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="21" cy="47" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="30" cy="50" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="39" cy="47" rx="5" ry="3" fill="#6B3410"/>
+    <ellipse cx="46" cy="41" rx="5" ry="3" fill="#6B3410"/>
     <!-- Face -->
     <circle cx="30" cy="30" r="14" fill="${col}"/>
     <ellipse cx="30" cy="33" rx="10" ry="9" fill="#f59e0b" opacity="0.6"/>
@@ -3611,6 +3620,36 @@ function PlayNameBuilder({ P, S, al, sport }) {
 }
 
 
+// ─── RULEBOOK LINKS ───────────────────────────────────────────────────────────
+const RULEBOOK_LINKS = {
+  Football: [
+    { name:'NFHS Football Rules',   org:'National Federation of State High School Associations', url:'https://www.nfhs.org',       search:'NFHS football rules official',                  level:'High School' },
+    { name:'Pop Warner Official',   org:'Pop Warner Little Scholars',                            url:'https://www.popwarner.com', search:'Pop Warner football rules youth',                level:'Youth' },
+    { name:'USA Football',          org:'USA Football — NFL Development Partner',                url:'https://usafootball.com',   search:'USA Football rules youth tackle flag',           level:'Youth / All Levels' },
+  ],
+  Basketball: [
+    { name:'NFHS Basketball Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org',       search:'NFHS basketball rules official',                 level:'High School' },
+    { name:'NBA Official Rules',    org:'National Basketball Association',                       url:'https://www.nba.com',        search:'NBA official rulebook basketball',               level:'Professional Reference' },
+    { name:'USA Basketball',        org:'USA Basketball',                                        url:'https://www.usab.com',       search:'USA Basketball youth rules regulations',         level:'Youth / All Levels' },
+  ],
+  Baseball: [
+    { name:'Official Baseball Rules',org:'Major League Baseball',                               url:'https://www.mlb.com',        search:'MLB official baseball rules rulebook',           level:'Official Rules' },
+    { name:'Little League Rulebook', org:'Little League International',                          url:'https://www.littleleague.org',search:'Little League baseball playing rules official', level:'Youth' },
+    { name:'NFHS Baseball Rules',   org:'National Federation of State High School Associations', url:'https://www.nfhs.org',       search:'NFHS baseball rules high school official',       level:'High School' },
+  ],
+  Soccer: [
+    { name:'Laws of the Game (IFAB)',org:'FIFA / International Football Association Board',     url:'https://www.theifab.com',    search:'IFAB Laws of the Game soccer official rules',    level:'Official Rules' },
+    { name:'US Youth Soccer',        org:'US Youth Soccer',                                      url:'https://www.usyouthsoccer.org',search:'US Youth Soccer rules regulations official',  level:'Youth' },
+    { name:'AYSO Official Site',    org:'American Youth Soccer Organization',                   url:'https://www.ayso.org',       search:'AYSO soccer rules recreational youth official',  level:'Recreational Youth' },
+  ],
+  Softball: [
+    { name:'USA Softball Official',  org:'USA Softball / ASA',                                  url:'https://www.usasoftball.com',search:'USA Softball ASA official rulebook',             level:'Official Rules' },
+    { name:'Little League Softball', org:'Little League International',                          url:'https://www.littleleague.org',search:'Little League softball playing rules official', level:'Youth' },
+    { name:'NFHS Softball Rules',   org:'National Federation of State High School Associations', url:'https://www.nfhs.org',       search:'NFHS softball rules high school official',       level:'High School' },
+  ],
+}
+
+
 function RulebookPage({ sport, P, al, callAI }) {
   const [leagueSearch, setLeagueSearch] = useState('')
   const [leagueResult, setLeagueResult] = useState(null)
@@ -4721,8 +4760,8 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
   const [expanded, setExpanded] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
-  const [error, setError] = useState('')
-
+    const [error, setError] = useState('')
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const sportTeams = teams[sport] || []
   const current = activeTeam[sport]
   const MAX_TEAMS = 5
