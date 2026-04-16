@@ -3397,15 +3397,15 @@ function PlayNameBuilder({ P, S, al, sport }) {
 
     // ── FOOTBALL DIAGRAM ─────────────────────────────────────────────────────
     const fmtPositions = {
-      'Ace Right':          { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Ace Left':           { wr:[[14,48],[14,38],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'I-Formation Right':  { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
-      'I-Formation Left':   { wr:[[14,48],[148,48]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
-      'Shotgun Right':      { wr:[[12,48],[148,48],[132,48],[36,48]], qb:[84,64], rb:[[110,64]], fb:[] },
-      'Pistol Right':       { wr:[[12,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Right':          { wr:[[14,48],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Left':           { wr:[[14,48],[14,38],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'I-Formation Right':  { wr:[[14,48],[148,50]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
+      'I-Formation Left':   { wr:[[14,48],[148,50]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
+      'Shotgun Right':      { wr:[[12,50],[148,50],[132,48],[36,50]], qb:[84,64], rb:[[110,64]], fb:[] },
+      'Pistol Right':       { wr:[[12,48],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
       'Trips Right':        { wr:[[12,38],[130,38],[144,30],[156,38]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Pro Set Right':      { wr:[[12,48],[148,48]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
+      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Pro Set Right':      { wr:[[12,48],[148,50]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
     }
     const personnelDefaultFmt = {
       '11':'Ace Right', '12':'I-Formation Right', '21':'I-Formation Right',
@@ -3445,8 +3445,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         <rect x="0" y="0" width="200" height="100" fill="#0a1a0a" rx="3"/>
         {[50,100,150].map((x,i)=><line key={i} x1={x} y1="4" x2={x} y2="96" stroke="rgba(255,255,255,0.04)" strokeWidth="0.6" strokeDasharray="3,3"/>)}
         {/* LOS */}
-        <line x1="4" y1="52" x2="196" y2="52" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2"/>
-        <text x="8" y="50" fill="rgba(255,255,255,0.3)" fontSize="5" fontFamily="monospace">LOS</text>
+        <line x1="4" y1="50" x2="196" y2="50" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
+        <text x="7" y="48" fill="rgba(255,255,255,0.35)" fontSize="5" fontFamily="monospace">LOS</text>
         {/* Strength indicator */}
         {choices.formation && (
           <text x={choices.formation.includes('Left')?20:176} y="15" textAnchor="middle" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace">STR{choices.formation.includes('Left')?'◄':'►'}</text>
@@ -3454,14 +3454,14 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* OL — 5 linemen always on LOS */}
         {[60,72,84,96,108].map((x,i)=>(
           <g key={i}>
-            <rect x={x-6} y={49} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
+            <rect x={x-6} y={50} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
               stroke={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?'#f59e0b':'none'}
               strokeWidth={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1.5:0}/>
             <text x={x} y={47} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">{['LT','LG','C','RG','RT'][i]}</text>
           </g>
         ))}
         {/* TE if tight modifier */}
-        {choices.modifier==='Tight'&&<rect x={112} y={49} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
+        {choices.modifier==='Tight'&&<rect x={112} y={50} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
         {/* WRs */}
         {fmt.wr.map(([cx,cy],i)=>{
           const labels = ['X','Z','H','Y','W']
@@ -3492,8 +3492,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* Gap arrow */}
         {gap && !isPassPlay && (
           <g>
-            <rect x={gap.x-5} y={44} width={10} height={10} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
-            <path d={`M${gap.x} 52 L${gap.x} 36`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
+            <rect x={gap.x-5} y={47} width={10} height={12} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
+            <path d={`M${gap.x} 50 L${gap.x} 34`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
             <text x={gap.x} y={35} textAnchor="middle" fill="#f59e0b" fontSize="5" fontWeight="700" fontFamily="monospace">{gap.label}</text>
           </g>
         )}
@@ -3829,9 +3829,9 @@ function NewsPage({ P, S, al, sport, callAI }) {
 
     youth: () => `You are a youth sports coaching expert. Generate 5 items about youth coaching (any sport): child development, age-appropriate coaching, communication with parents, player motivation, mental health in youth sports, creating a positive culture, working with different skill levels. Be specific, practical, evidence-based. Return ONLY valid JSON: {"items":[{"type":"science","title":"...","body":"2-3 sentences","source":"research or org name","searchQuery":"google search","ytSearch":"youtube search"},...]}.`,
 
-    sportNews: (s) => `You are a sports news expert covering ${s}. Generate 4 current news items about professional and college ${s}: recent signings, trades, draft news, coaching hires, notable games, rule changes, injury updates, record-breaking performances. Use real team names, player names, and leagues (${s==='Football'?'NFL, college football':s==='Basketball'?'NBA, NCAA':s==='Baseball'?'MLB, minor leagues':s==='Soccer'?'MLS, EPL, Champions League, USMNT':'NPF, college softball'}). Be specific and current. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences with specific names and details","source":"ESPN/AP/team source","searchQuery":"specific google search to find this story","ytSearch":"youtube search for highlights or analysis"},...]}.`,
+    sportNews: (s) => `You are a sports news expert. Today is 2025. Generate 4 VERY RECENT ${s} news items from the last 7-10 days (or last 30 days max). REAL current player and team names only. No stories older than 30 days. Cover: signings, trades, draft picks, injuries, game results. Leagues: ${ s==='Football'?'NFL, CFB':s==='Basketball'?'NBA, NCAA':s==='Baseball'?'MLB':s==='Soccer'?'MLS, EPL':'NPF' } (${s==='Football'?'NFL, college football':s==='Basketball'?'NBA, NCAA':s==='Baseball'?'MLB, minor leagues':s==='Soccer'?'MLS, EPL, Champions League, USMNT':'NPF, college softball'}). Be specific and current. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences with specific names and details","source":"ESPN/AP/team source","searchQuery":"specific google search to find this story","ytSearch":"youtube search for highlights or analysis"},...]}.`,
 
-    allNews: () => `You are a sports news editor. Generate 5 current general sports news items across all sports: football, basketball, baseball, soccer, and other sports. Cover pro and college sports. Include: trades, signings, coaching moves, playoff/championship updates, record performances. Use real names, teams, and leagues. Make each item a different sport. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences","source":"ESPN/AP/etc","searchQuery":"google search","ytSearch":"youtube highlights search"},...]}.`,
+    allNews: () => `You are a sports news editor. Today is 2025. Generate 5 VERY RECENT sports news items from the last 7-10 days across NFL, NBA, MLB, MLS/soccer, and one other sport. Real names and teams only. No stories older than 30 days: football, basketball, baseball, soccer, and other sports. Cover pro and college sports. Include: trades, signings, coaching moves, playoff/championship updates, record performances. Use real names, teams, and leagues. Make each item a different sport. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences","source":"ESPN/AP/etc","searchQuery":"google search","ytSearch":"youtube highlights search"},...]}.`,
   }
 
   const TYPE_COLORS = { news:'#ef4444', drill:P, science:'#4ade80', concept:'#6b9fff', tip:'#c084fc' }
@@ -3871,12 +3871,18 @@ function NewsPage({ P, S, al, sport, callAI }) {
   }
 
   useEffect(() => {
+    // Clear sport-specific cache when sport changes so news refreshes
+    try {
+      sessionStorage.removeItem('coachiq_feed_sport_'+sport)
+      sessionStorage.removeItem('coachiq_feed_sportNews_'+sport)
+    } catch(e) {}
+    setChannels(c => ({ ...c, sport: { items:[], loading:false, loaded:false }, sportNews: { items:[], loading:false, loaded:false } }))
     // Load active channel immediately, others in background
-    loadChannel(activeChannel === 'all' ? 'sport' : activeChannel)
+    setTimeout(() => loadChannel(activeChannel === 'all' ? 'sport' : activeChannel), 50)
     if (activeChannel === 'all') {
-      setTimeout(() => loadChannel('youth'), 400)
-      setTimeout(() => loadChannel('sportNews'), 800)
-      setTimeout(() => loadChannel('allNews'), 1200)
+      setTimeout(() => loadChannel('youth'), 500)
+      setTimeout(() => loadChannel('sportNews'), 900)
+      setTimeout(() => loadChannel('allNews'), 1300)
     }
   }, [sport])
 
@@ -4002,75 +4008,147 @@ function NewsPage({ P, S, al, sport, callAI }) {
 
 
 // ─── LEARN PAGE ───────────────────────────────────────────────────────────────
-function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage }) {
-  const [activeMode, setActiveMode] = useState(null)
+// ─── HELP PAGE ────────────────────────────────────────────────────────────────
+function HelpPage({ P, al, setPage, sport }) {
+  const [openSection, setOpenSection] = useState(null)
 
-  const tools = [
-    { id:'playnames',  icon:'✏️', title:'Play Name Builder',    desc:'Build professional play calls step by step with live diagrams', tag:sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'LEARN' },
-    { id:'gauntlet',   icon:'⚡', title:'Coaching Gauntlet',    desc:'Test your IQ with AI-generated scenarios. Current: '+iq+' IQ', tag:'IQ: '+iq },
-    { id:'rulebook',   icon:'📜', title:'Rulebook',             desc:'Official rules for '+sport+' plus your league search',          tag:'RULES' },
-    { id:'guide',      icon:'📖', title:'Feature Guide',        desc:'Learn every feature in CoachIQ — browse by section',            tag:'GUIDE' },
-    { id:'tour',       icon:'⚡', title:'Quick Tour',           desc:'6-step walkthrough of the entire app',                          tag:'TOUR' },
+  const sections = [
+    { id:'home',    icon:'🏠', title:'Home Screen',
+      content: `The home screen is your coaching dashboard. At the top right, tap "News" to go to the news feed, or tap your team name to go directly to your team page. The hero card shows your team name, colors, and a rotating widget (weather, countdown, date/time, coaching tip). Tap the weather widget's "Set Location" prompt to configure your location in Settings. The collapsible team card lets you switch teams or tap to go to the Team page. Below is your coaching feed — tap "Read more" or "Watch" on any item for more info.` },
+    { id:'schemes', icon:'📋', title:'Scheme Generator',
+      content: `The Scheme Generator creates custom plays and formations tailored to your team. Fill out the form (offensive system, personnel, age group, etc.) and tap Generate. Each play card has: tap "Show Play" for an animated diagram, "Educator Mode" for a step-by-step breakdown, "Pro Comparison" to see how NFL teams run the same play, "Variations" for adjustments. Save any play to your Playbook. The Defense Generator works the same way. Team Skill Level now adapts the form — beginners see fewer fields.` },
+    { id:'team',    icon:'🏆', title:'Team Management',
+      content: `Create up to 5 teams per sport. Each team has a name, mascot, colors, hometown, and season. The Roster tab lets you add players with positions (up to 3 per player) and jersey numbers. The Lineup Builder shows a field diagram for your sport — tap any position slot to assign a player. Create multiple named lineups and star one as Game Day. The Schedule tab manages events with address search. Practice Plans generate AI-powered session outlines.` },
+    { id:'news',    icon:'📰', title:'News + Feed',
+      content: `The News tab has 5 channels: All (everything mixed), [Sport] Coaching (drills, schemes, science for your sport), Youth Coaching (general coaching theory), [Sport] News (pro + college headlines), All Sports News. Each channel loads independently and caches so switching is instant. Tap "Read more" to search Google for the full story. Tap "Watch" to find YouTube videos. Hit ↻ to refresh a channel.` },
+    { id:'learn',   icon:'🎓', title:'Learn + Tools',
+      content: `Play Name Builder walks you through constructing a real play call step by step — each choice updates the live field diagram. Football has 8 steps covering personnel, formation, motion, play number, and routes. Baseball/Softball has the Signal Creator which generates a real third-base coach touch sequence. The Coaching Gauntlet tests your IQ with scenario-based questions. Your IQ score starts at 500 and goes up or down based on difficulty and streaks.` },
+    { id:'playnb',  icon:'✏️', title:'Play Name Builder Tips',
+      content: `Step 1 (Personnel): Sets the base formation. 11 = spread, 22 = power. Step 2 (Formation): Adds the alignment and strength. Step 3 (Modifier): Optional TE/line adjustment. Step 4 (Motion): Optional pre-snap movement — always behind the LOS. Step 5 (Play Number): The core call — tens digit = gap, ones digit = ball carrier. Steps 6-8 are route tags for pass plays. Skip optional steps for shorter calls. Short calls like "22 Power Right" are completely valid.` },
+    { id:'scout',   icon:'🔍', title:'Scout + Film',
+      content: `The Scout page has two sections. Opponent Scout: build a scouting report on an upcoming opponent — describe their tendencies and get AI-generated defensive game plan suggestions. Film Room: log your team footage notes and tag plays by category. Individual player film analysis is on the roadmap as AthleteIQ.` },
+    { id:'settings',icon:'⚙️', title:'Settings + Customization',
+      content: `More → Settings has: CoachIQ Logo Style (choose your brand color palette), Home Location (for weather), Team Colors (adjust primary/secondary/accent colors), and Home Widget Settings (choose which widgets rotate, or pin one permanently). Your name is set during onboarding and shows in the welcome greeting.` },
+    { id:'iq',      icon:'🧠', title:'Coach IQ Score',
+      content: `Your Coach IQ starts at 500 (average). Answer Gauntlet questions correctly to earn points: Rookie = +8, Varsity = +15, Elite = +25. Wrong answers cost: Rookie = -4, Varsity = -7, Elite = -12. Every 3 correct answers in a row earns a +10 streak bonus. Score is capped at 1000 and floored at 100. Battle Mode in the Gauntlet lets you chain scenarios — your score updates live.` },
   ]
 
-  if (activeMode === 'gauntlet') return (
-    <>
-      <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
-      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
-    </>
-  )
-  if (activeMode === 'playnames') return (
-    <>
-      <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
-      <PlayNameBuilder P={P} S={S} al={al} sport={sport} />
-    </>
-  )
-  if (activeMode === 'rulebook') return (
-    <>
-      <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
-      <RulebookPage sport={sport} P={P} al={al} callAI={callAI} />
-    </>
-  )
-  if (activeMode === 'guide') return (
-    <>
-      <FeatureGuide P={P} al={al} onClose={()=>setActiveMode(null)} />
-    </>
-  )
-  if (activeMode === 'tour') return (
-    <>
-      <QuickTourModal onDone={()=>setActiveMode(null)} P={P} al={al} setPage={setPage} />
-    </>
-  )
-
   return (
-    <>
-      <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>coaching education</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Learn</div>
+    <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+      <div style={{ padding:'14px 0 12px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>documentation</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#dde1f0', lineHeight:1 }}>Help + Features</div>
+        <div style={{ fontSize:11, color:'#3d4559', marginTop:6 }}>Tap any section to expand. Every feature explained.</div>
       </div>
-      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-        {tools.map(tool => (
-          <div key={tool.id} onClick={()=>setActiveMode(tool.id)} style={{ padding:'14px 16px', background:'#0f1219', border:`1px solid ${al(P,0.2)}`, borderRadius:6, cursor:'pointer', display:'flex', alignItems:'center', gap:12, borderLeft:`3px solid ${P}` }}
-            onMouseEnter={e=>e.currentTarget.style.background=al(P,0.06)}
-            onMouseLeave={e=>e.currentTarget.style.background='#0f1219'}
-          >
-            <span style={{ fontSize:24, flexShrink:0 }}>{tool.icon}</span>
-            <div style={{ flex:1 }}>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, color:'#f2f4f8', marginBottom:3 }}>{tool.title}</div>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>{tool.desc}</div>
-            </div>
-            <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
-              <span style={{ fontSize:8, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, color:P, padding:'2px 6px', background:al(P,0.1), borderRadius:3 }}>{tool.tag}</span>
-              <span style={{ fontSize:12, color:'#3d4559' }}>→</span>
-            </div>
+      {sections.map((sec, i) => (
+        <div key={sec.id} style={{ borderBottom:'1px solid #1e2330' }}>
+          <div onClick={()=>setOpenSection(openSection===sec.id?null:sec.id)} style={{ display:'flex', alignItems:'center', gap:10, padding:'14px 4px', cursor:'pointer' }}>
+            <span style={{ fontSize:18, flexShrink:0 }}>{sec.icon}</span>
+            <span style={{ flex:1, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:openSection===sec.id?P:'#f2f4f8', textTransform:'uppercase', letterSpacing:'0.5px' }}>{sec.title}</span>
+            <span style={{ fontSize:12, color:'#3d4559', transition:'transform 0.2s', transform:openSection===sec.id?'rotate(180deg)':'rotate(0deg)', display:'inline-block' }}>▼</span>
           </div>
-        ))}
-      </div>
-    </>
+          {openSection === sec.id && (
+            <div style={{ padding:'0 4px 16px 32px', animation:'fadeIn 0.2s ease' }}>
+              <div style={{ fontSize:12, color:'#9aa0b0', lineHeight:1.8 }}>{sec.content}</div>
+              {sec.id === 'home' && <button onClick={()=>setPage('home')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Go to Home</button>}
+              {sec.id === 'schemes' && <button onClick={()=>setPage('schemes')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Schemes</button>}
+              {sec.id === 'team' && <button onClick={()=>setPage('team')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Team</button>}
+              {sec.id === 'news' && <button onClick={()=>setPage('news')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open News</button>}
+              {sec.id === 'learn' && <button onClick={()=>setPage('learn')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Learn</button>}
+              {sec.id === 'settings' && <button onClick={()=>setPage('more')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Settings</button>}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
   )
 }
 
 
+function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage }) {
+  const [activeMode, setActiveMode] = useState(null)
+
+  const categories = [
+    {
+      id: 'interactive',
+      label: '⚡ Interactive Tools',
+      desc: 'Learn by doing — hands-on coaching simulators',
+      color: P,
+      tools: [
+        { id:'playnames', icon:'✏️', title: sport==='Baseball'||sport==='Softball' ? 'Signal Creator' : 'Play Name Builder', desc:'Build pro-level play calls step by step with live diagrams', tag: sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'INTERACTIVE' },
+        { id:'gauntlet',  icon:'⚡', title:'Coaching Gauntlet',   desc:'AI-powered scenario challenges. Test your IQ every session', tag:'IQ: '+iq },
+      ]
+    },
+    {
+      id: 'reference',
+      label: '📚 Reference & Rules',
+      desc: 'Official rules, guides, and app resources',
+      color: '#6b9fff',
+      tools: [
+        { id:'rulebook', icon:'📜', title:'Rulebook',       desc:'Official rules for '+sport+' with league search', tag:'RULES' },
+        { id:'guide',    icon:'📖', title:'Feature Guide',  desc:'Complete walkthrough of every feature in CoachIQ', tag:'GUIDE' },
+        { id:'tour',     icon:'🗺️', title:'App Tour',       desc:'Interactive tour of the entire app — great for new coaches', tag:'TOUR' },
+        { id:'help',     icon:'❓', title:'Help + FAQ',     desc:'Answers to common questions and detailed feature explanations', tag:'HELP' },
+      ]
+    },
+  ]
+
+  if (activeMode === 'gauntlet') return (
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} /> </>
+  )
+  if (activeMode === 'playnames') return (
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <PlayNameBuilder P={P} S={S} al={al} sport={sport} /> </>
+  )
+  if (activeMode === 'rulebook') return (
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <RulebookPage sport={sport} P={P} al={al} callAI={callAI} /> </>
+  )
+  if (activeMode === 'guide') return ( <FeatureGuide P={P} al={al} onClose={()=>setActiveMode(null)} /> )
+  if (activeMode === 'tour')  return ( <QuickTourModal onDone={()=>setActiveMode(null)} P={P} al={al} setPage={setPage} /> )
+  if (activeMode === 'help')  return (
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <HelpPage P={P} al={al} setPage={setPage} sport={sport} /> </>
+  )
+
+  return (
+    <>
+      <div style={{ padding:'14px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>coaching education</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#dde1f0', lineHeight:1 }}>Learn</div>
+      </div>
+      {categories.map(cat => (
+        <div key={cat.id} style={{ marginBottom:16 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, color:cat.color, textTransform:'uppercase', letterSpacing:'1px' }}>{cat.label}</div>
+            <div style={{ flex:1, height:1, background:`${cat.color}22` }}/>
+          </div>
+          <div style={{ fontSize:10, color:'#3d4559', marginBottom:8 }}>{cat.desc}</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {cat.tools.map(tool => (
+              <div key={tool.id} onClick={()=>setActiveMode(tool.id)}
+                style={{ padding:'14px 16px', background:'#0f1219', border:`1px solid ${al(cat.color,0.2)}`, borderRadius:6, cursor:'pointer', display:'flex', alignItems:'center', gap:12, borderLeft:`3px solid ${cat.color}` }}
+                onMouseEnter={e=>e.currentTarget.style.background=al(cat.color,0.06)}
+                onMouseLeave={e=>e.currentTarget.style.background='#0f1219'}
+              >
+                <span style={{ fontSize:22, flexShrink:0 }}>{tool.icon}</span>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#f2f4f8', marginBottom:2 }}>{tool.title}</div>
+                  <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{tool.desc}</div>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0 }}>
+                  <span style={{ fontSize:8, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, color:cat.color, padding:'2px 6px', background:al(cat.color,0.1), borderRadius:3 }}>{tool.tag}</span>
+                  <span style={{ fontSize:13, color:'#3d4559' }}>→</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  )
+}
 function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI }) {
   const [activeSection, setActiveSection] = useState('features')
   const [helpMode, setHelpMode] = useState(null)
@@ -4182,6 +4260,44 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
                     </div>
                   )
                 })}
+              </div>
+            </div>
+          </Card>
+
+          {/* Team Colors */}
+          <Card>
+            <CardHead icon="🎨" title="Team Colors" accent={P} />
+            <div style={{ padding:14 }}>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:12, lineHeight:1.5 }}>
+                Customize your team's color scheme. These colors apply across the entire app when this team is active.
+              </div>
+              {cfg.teamId ? (
+                <div style={{ fontSize:11, color:'#3d4559' }}>Select a team first to edit its colors. Go to the Team tab.</div>
+              ) : (
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                  {[
+                    { key:'primary',   label:'Primary Color' },
+                    { key:'secondary', label:'Secondary Color' },
+                    { key:'accent1',   label:'Accent 1' },
+                    { key:'accent2',   label:'Accent 2' },
+                  ].map(({ key, label }) => (
+                    <div key={key} style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
+                      <input
+                        type="color"
+                        value={cfg[key] || '#C0392B'}
+                        onChange={e => setCfg(c => ({ ...c, [key]: e.target.value }))}
+                        style={{ width:34, height:34, border:'none', borderRadius:4, cursor:'pointer', padding:0, flexShrink:0 }}
+                      />
+                      <div>
+                        <div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600 }}>{label}</div>
+                        <div style={{ fontSize:9, color:'#6b7a96', fontFamily:'monospace' }}>{cfg[key] || '#C0392B'}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ fontSize:10, color:'#3d4559', marginTop:10, lineHeight:1.5 }}>
+                💡 To edit a specific team's colors, go to the Team tab → tap the team → Edit.
               </div>
             </div>
           </Card>
@@ -5110,10 +5226,6 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
 
 function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
   const [mode, setMode] = useState('view')
-  // Auto-open create form when no teams exist
-  useEffect(() => {
-    if ((teams[sport]||[]).length === 0) { setMode('create'); setExpanded(true) }
-  }, [sport, teams])
   const [expanded, setExpanded] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
@@ -5179,7 +5291,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
       )}
 
       <div style={{ marginTop:14 }}>
-        <div onClick={()=>{ if(!current && sportTeams.length===0 && onOpenTeamTab) { onOpenTeamTab() } else { setExpanded(e=>!e) } }} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
+        <div onClick={()=>{ if(current && onOpenTeamTab) { onOpenTeamTab() } else if(!current && sportTeams.length===0 && onOpenTeamTab) { onOpenTeamTab() } else { setExpanded(e=>!e) } }} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
           <MascotAvatar mascotId={current?.mascot} color={P} size={32} />
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:current?15:13, color:'#f2f4f8', textTransform:'uppercase' }}>
@@ -5187,6 +5299,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
             </div>
             {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season}{current.hometown?' · '+current.hometown:''} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
             {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
+            {current && <div style={{ fontSize:10, color:P, marginTop:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>TAP TO GO TO TEAM PAGE →</div>}
           </div>
           {current && <div style={{ display:'flex', gap:3 }}>{[current.primary,current.secondary,current.accent1,current.accent2].filter(Boolean).map((c,i)=><div key={i} style={{ width:10,height:10,borderRadius:2,background:c }} />)}</div>}
           <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded?'▲':'▼'}</span>
@@ -5328,13 +5441,13 @@ function CitySearch({ value, onChange, placeholder, P, al }) {
     timerRef.current = setTimeout(async () => {
       setLoading(true)
       try {
-        const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q='+encodeURIComponent(q)+'+city&countrycodes=us', { headers:{'Accept-Language':'en'} })
+        const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=8&q='+encodeURIComponent(q)+'+city&countrycodes=us', { headers:{'Accept-Language':'en'} })
         const data = await res.json()
         setResults(data || [])
         setOpen((data||[]).length > 0)
       } catch(e) { setResults([]) }
       setLoading(false)
-    }, 380)
+    }, 100)
   }
 
   function select(item) {
