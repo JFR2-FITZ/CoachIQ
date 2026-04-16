@@ -2109,79 +2109,120 @@ function SchemePreviewMini({ type='offense', P, sport='Football' }) {
   const isOff = type === 'offense'
   const col = isOff ? P : '#6b9fff'
 
+  // ── BASKETBALL — full court LANDSCAPE, numbered positions ─────────────────
   if (sport === 'Basketball') {
     return (
-      <svg viewBox="0 0 160 90" style={{ width:'100%', height:'100%' }}>
-        <rect x="0" y="0" width="160" height="90" fill="#0a0a1f" rx="2"/>
-        <rect x="3" y="3" width="154" height="84" rx="2" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"/>
-        <path d="M3 22 A50 50 0 0 1 3 68" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8"/>
-        <rect x="3" y="32" width="36" height="26" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7"/>
-        <circle cx="39" cy="45" r="11" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
-        <circle cx="6" cy="45" r="3" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
-        <line x1="3" y1="45" x2="12" y2="45" stroke="rgba(255,255,255,0.12)" strokeWidth="0.7"/>
-        <line x1="80" y1="3" x2="80" y2="87" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5"/>
+      <svg viewBox="0 0 200 100" style={{ width:'100%', height:'100%' }}>
+        <rect x="0" y="0" width="200" height="100" fill="#0a0a1f" rx="2"/>
+        {/* Full court outline */}
+        <rect x="3" y="4" width="194" height="92" rx="2" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+        {/* Half court line */}
+        <line x1="100" y1="4" x2="100" y2="96" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+        {/* Centre circle */}
+        <circle cx="100" cy="50" r="13" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7"/>
+        {/* Left key */}
+        <rect x="3" y="32" width="32" height="36" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7"/>
+        <circle cx="35" cy="50" r="11" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6"/>
+        <circle cx="7" cy="50" r="2.5" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8"/>
+        {/* Right key */}
+        <rect x="165" y="32" width="32" height="36" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7"/>
+        <circle cx="165" cy="50" r="11" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6"/>
+        <circle cx="193" cy="50" r="2.5" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8"/>
+        {/* 3-point arcs */}
+        <path d="M3 18 A46 46 0 0 1 3 82" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7"/>
+        <path d="M197 18 A46 46 0 0 0 197 82" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7"/>
         {isOff ? (
           <>
-            <circle cx={108} cy={45} r={5} fill={col} opacity={0.9}/>
-            <text x={108} y={47} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">PG</text>
-            <circle cx={84} cy={20} r={5} fill={col} opacity={0.85}/>
-            <text x={84} y={22} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">SG</text>
-            <circle cx={84} cy={70} r={5} fill={col} opacity={0.85}/>
-            <text x={84} y={72} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">SF</text>
-            <circle cx={58} cy={30} r={5} fill={col} opacity={0.8}/>
-            <text x={58} y={32} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">PF</text>
-            <circle cx={58} cy={60} r={5} fill={col} opacity={0.8}/>
-            <text x={58} y={62} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">C</text>
-            <path d="M103 43 L88 24" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
-            <path d="M81 20 L63 28" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
+            {/* 5-out motion offense — right half */}
+            <circle cx={155} cy={50} r={6} fill={col} opacity={0.9}/>
+            <text x={155} y={52.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">1</text>
+            <circle cx={132} cy={22} r={6} fill={col} opacity={0.85}/>
+            <text x={132} y={24.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">2</text>
+            <circle cx={132} cy={78} r={6} fill={col} opacity={0.85}/>
+            <text x={132} y={80.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">3</text>
+            <circle cx={115} cy={32} r={6} fill={col} opacity={0.8}/>
+            <text x={115} y={34.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">4</text>
+            <circle cx={115} cy={68} r={6} fill={col} opacity={0.8}/>
+            <text x={115} y={70.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">5</text>
+            {/* Movement arrows */}
+            <path d="M150 47 L136 26" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+            <path d="M128 24 L118 30" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+            {/* Labels */}
+            <text x="136" y="14" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4">SG</text>
+            <text x="136" y="90" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4">SF</text>
+            <text x="161" y="50" textAnchor="start" fill="rgba(255,255,255,0.2)" fontSize="4">PG</text>
+            <text x="107" y="32" textAnchor="end" fill="rgba(255,255,255,0.2)" fontSize="4">PF</text>
+            <text x="107" y="70" textAnchor="end" fill="rgba(255,255,255,0.2)" fontSize="4">C</text>
           </>
         ) : (
           <>
-            <rect x={93} y={18} width={10} height={10} rx="1.5" fill={col} opacity={0.9}/>
-            <text x={98} y={25} textAnchor="middle" fill="white" fontSize="4">2</text>
-            <rect x={113} y={18} width={10} height={10} rx="1.5" fill={col} opacity={0.9}/>
-            <text x={118} y={25} textAnchor="middle" fill="white" fontSize="4">1</text>
-            <circle cx={78} cy={46} r={5} fill={col} opacity={0.8}/>
-            <text x={78} y={48} textAnchor="middle" fill="white" fontSize="4">3</text>
-            <circle cx={54} cy={36} r={5} fill={col} opacity={0.75}/>
-            <text x={54} y={38} textAnchor="middle" fill="white" fontSize="4">4</text>
-            <circle cx={54} cy={57} r={5} fill={col} opacity={0.75}/>
-            <text x={54} y={59} textAnchor="middle" fill="white" fontSize="4">5</text>
+            {/* 2-3 zone — right half defending */}
+            <rect x={165} y={22} width={12} height={12} rx="2" fill={col} opacity={0.9}/>
+            <text x={171} y={30} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">1</text>
+            <rect x={182} y={22} width={12} height={12} rx="2" fill={col} opacity={0.9}/>
+            <text x={188} y={30} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">2</text>
+            <circle cx={170} cy={52} r={6} fill={col} opacity={0.85}/>
+            <text x={170} y={54.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">3</text>
+            <circle cx={150} cy={42} r={6} fill={col} opacity={0.8}/>
+            <text x={150} y={44.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">4</text>
+            <circle cx={150} cy={62} r={6} fill={col} opacity={0.8}/>
+            <text x={150} y={64.5} textAnchor="middle" fill="white" fontSize="5.5" fontWeight="700">5</text>
+            {/* Zone coverage lines */}
+            <line x1="144" y1="52" x2="196" y2="52" stroke={col} strokeWidth="0.6" opacity="0.25" strokeDasharray="2,2"/>
           </>
         )}
       </svg>
     )
   }
 
+  // ── BASEBALL / SOFTBALL — top-down diamond, home at bottom ─────────────────
   if (sport === 'Baseball' || sport === 'Softball') {
     return (
-      <svg viewBox="0 0 130 130" style={{ width:'100%', height:'100%' }}>
-        <rect x="0" y="0" width="130" height="130" fill="#0a1a0a" rx="2"/>
-        <path d="M10 120 Q65 15 120 120 Z" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
-        <path d="M65 110 L105 70 L65 30 L25 70 Z" fill="rgba(180,140,80,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-        <line x1="65" y1="110" x2="10" y2="20" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" strokeDasharray="4,3"/>
-        <line x1="65" y1="110" x2="120" y2="20" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" strokeDasharray="4,3"/>
-        <rect x="61" y="106" width="8" height="8" rx="1" fill="white" opacity="0.85"/>
-        <rect x="101" y="66" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 105 70)"/>
-        <rect x="61" y="26" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 65 30)"/>
-        <rect x="21" y="66" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 25 70)"/>
-        <circle cx="65" cy="70" r="4" fill="rgba(180,140,80,0.15)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
-        <text x="65" y="125" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="4.5">HOME</text>
-        <text x="115" y="69" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4.5">1B</text>
-        <text x="65" y="24" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4.5">2B</text>
-        <text x="15" y="69" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4.5">3B</text>
+      <svg viewBox="0 0 160 150" style={{ width:'100%', height:'100%' }}>
+        <rect x="0" y="0" width="160" height="150" fill="#0a1a0a" rx="2"/>
+        {/* Outfield grass wedge */}
+        <path d="M80 128 Q144 30 148 20 Q80 10 12 20 Q16 30 80 128Z" fill="rgba(74,120,50,0.12)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8"/>
+        {/* Warning track suggestion */}
+        <path d="M80 128 Q148 25 148 20 Q80 8 12 20 Q12 25 80 128Z" fill="none" stroke="rgba(180,140,80,0.1)" strokeWidth="3"/>
+        {/* Infield dirt */}
+        <path d="M80 128 L116 88 L80 48 L44 88 Z" fill="rgba(180,140,80,0.1)" stroke="rgba(255,255,255,0.13)" strokeWidth="1"/>
+        {/* Foul lines */}
+        <line x1="80" y1="128" x2="12" y2="20" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" strokeDasharray="5,3"/>
+        <line x1="80" y1="128" x2="148" y2="20" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" strokeDasharray="5,3"/>
+        {/* Bases */}
+        <rect x="76" y="124" width="8" height="8" rx="1" fill="white" opacity="0.9"/>
+        <rect x="112" y="84" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 116 88)"/>
+        <rect x="76" y="44" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 80 48)"/>
+        <rect x="40" y="84" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 44 88)"/>
+        {/* Pitcher mound */}
+        <circle cx="80" cy="88" r="5" fill="rgba(180,140,80,0.15)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.6"/>
+        {/* Base labels */}
+        <text x="80" y="146" textAnchor="middle" fill="rgba(255,255,255,0.22)" fontSize="5">HOME</text>
+        <text x="126" y="88" textAnchor="start" fill="rgba(255,255,255,0.18)" fontSize="5">1B</text>
+        <text x="80" y="43" textAnchor="middle" fill="rgba(255,255,255,0.18)" fontSize="5">2B</text>
+        <text x="34" y="88" textAnchor="end" fill="rgba(255,255,255,0.18)" fontSize="5">3B</text>
         {isOff ? (
           <>
-            <circle cx={65} cy={110} r={5} fill={col} opacity={0.9}/>
-            <circle cx={105} cy={70} r={4} fill="#f59e0b" opacity={0.8}/>
-            <circle cx={65} cy={70} r={4} fill={col} opacity={0.7}/>
-            <path d="M65 105 L38 52" stroke={col} strokeWidth="1.5" fill="none" strokeDasharray="3,2" opacity="0.7"/>
-            <path d="M107 65 L70 33" stroke="#f59e0b" strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.8"/>
+            {/* Batter at home, runner on 1B */}
+            <circle cx={80} cy={128} r={5} fill={col} opacity={0.9}/>
+            <text x={80} y={130.5} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">2</text>
+            <circle cx={116} cy={88} r={5} fill="#f59e0b" opacity={0.9}/>
+            <text x={116} y={90.5} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">R</text>
+            <circle cx={80} cy={88} r={4} fill={col} opacity={0.7}/>
+            <text x={80} y={90} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">1</text>
+            {/* Hit ball arrow */}
+            <path d="M80 123 L44 55" stroke={col} strokeWidth="1.5" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+            {/* Base running arrow */}
+            <path d="M116 83 L83 52" stroke="#f59e0b" strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.8"/>
           </>
         ) : (
           <>
-            {[[65,110],[105,70],[65,30],[25,70],[65,70],[18,52],[112,52],[65,18],[42,52],[88,52]].map(([cx,cy],i)=>(
-              <circle key={i} cx={cx} cy={cy} r={i===0?5:4} fill={col} opacity={i<4?0.85:0.7}/>
+            {/* All 9 fielders with position numbers */}
+            {[[80,128,'2'],[80,88,'1'],[116,88,'3'],[100,100,'4'],[44,88,'5'],[60,100,'6'],[36,42,'7'],[80,28,'8'],[124,42,'9']].map(([cx,cy,num],i) => (
+              <g key={i}>
+                <circle cx={cx} cy={cy} r={5} fill={col} opacity={i<2?0.85:0.8}/>
+                <text x={cx} y={cy+2} textAnchor="middle" fill="white" fontSize="5" fontWeight="700">{num}</text>
+              </g>
             ))}
           </>
         )}
@@ -2189,84 +2230,143 @@ function SchemePreviewMini({ type='offense', P, sport='Football' }) {
     )
   }
 
+  // ── SOCCER — LANDSCAPE full field (like reference image) ──────────────────
   if (sport === 'Soccer') {
     return (
-      <svg viewBox="0 0 80 130" style={{ width:'100%', height:'100%' }}>
-        <rect x="0" y="0" width="80" height="130" fill="#0d1a0d" rx="2"/>
-        <rect x="3" y="3" width="74" height="124" rx="2" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
-        <line x1="3" y1="65" x2="77" y2="65" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7"/>
-        <circle cx="40" cy="65" r="12" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6"/>
-        <rect x="22" y="3" width="36" height="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
-        <rect x="30" y="1" width="20" height="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.6"/>
-        <rect x="22" y="109" width="36" height="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
-        <rect x="30" y="124" width="20" height="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.6"/>
+      <svg viewBox="0 0 200 120" style={{ width:'100%', height:'100%' }}>
+        <rect x="0" y="0" width="200" height="120" fill="#0d1a0d" rx="2"/>
+        {/* Field outline */}
+        <rect x="4" y="4" width="192" height="112" rx="2" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+        {/* Halfway line */}
+        <line x1="100" y1="4" x2="100" y2="116" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+        {/* Centre circle */}
+        <circle cx="100" cy="60" r="16" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7"/>
+        <circle cx="100" cy="60" r="1.5" fill="rgba(255,255,255,0.2)"/>
+        {/* Left penalty area */}
+        <rect x="4" y="28" width="36" height="64" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+        {/* Left goal box */}
+        <rect x="4" y="44" width="14" height="32" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.6"/>
+        {/* Left goal */}
+        <rect x="1" y="48" width="5" height="24" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" strokeWidth="0.7"/>
+        {/* Right penalty area */}
+        <rect x="160" y="28" width="36" height="64" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+        {/* Right goal box */}
+        <rect x="182" y="44" width="14" height="32" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.6"/>
+        {/* Right goal */}
+        <rect x="194" y="48" width="5" height="24" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" strokeWidth="0.7"/>
+        {/* Corner arcs */}
+        <path d="M4 8 A5 5 0 0 1 9 4" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
+        <path d="M196 8 A5 5 0 0 0 191 4" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
+        <path d="M4 112 A5 5 0 0 0 9 116" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
+        <path d="M196 112 A5 5 0 0 1 191 116" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
         {isOff ? (
           <>
-            <circle cx={40} cy={122} r={4} fill={col} opacity={0.55}/>
-            {[14,30,50,66].map((x,i)=><circle key={i} cx={x} cy={106} r={4} fill={col} opacity={0.8}/>)}
-            {[22,40,58].map((x,i)=><circle key={i} cx={x} cy={88} r={4} fill={col} opacity={0.85}/>)}
-            {[14,40,66].map((x,i)=><circle key={i} cx={x} cy={68} r={4} fill={col} opacity={0.9}/>)}
-            <path d="M38 68 L18 50" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
-            <path d="M42 68 L62 50" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
-            <path d="M40 64 L40 30" stroke={col} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.6"/>
+            {/* 4-3-3 attacking right to left (our team attacking left goal) */}
+            <circle cx={175} cy={60} r={5} fill={col} opacity={0.5}/> {/* GK */}
+            {[160,148,152,160].map((_,i) => null)}
+            {/* 4 defenders */}
+            {[20,34,46,34].map((y,i) => <circle key={i} cx={[148,148,152,148][i]+0} cy={[28,44,76,92][i]} r={5} fill={col} opacity={0.78}/>)}
+            {/* 3 midfielders */}
+            {[[120,22],[118,60],[120,98]].map(([cx,cy],i) => <circle key={i} cx={cx} cy={cy} r={5} fill={col} opacity={0.85}/>)}
+            {/* 3 forwards */}
+            {[[88,18],[85,60],[88,102]].map(([cx,cy],i) => <circle key={i} cx={cx} cy={cy} r={5} fill={col} opacity={0.92}/>)}
+            {/* Attack arrows */}
+            <path d="M85 58 L60 58" stroke={col} strokeWidth="1.3" fill="none" strokeDasharray="3,2" opacity="0.6"/>
+            <path d="M85 18 L58 30" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+            <path d="M85 102 L58 90" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
           </>
         ) : (
           <>
-            <circle cx={40} cy={8} r={4} fill={col} opacity={0.55}/>
-            {[14,30,50,66].map((x,i)=><rect key={i} x={x-4} y={22} width={8} height={8} rx="1" fill={col} opacity={0.9}/>)}
-            {[14,30,50,66].map((x,i)=><circle key={i} cx={x} cy={44} r={4} fill={col} opacity={0.8}/>)}
-            {[28,52].map((x,i)=><circle key={i} cx={x} cy={58} r={4} fill={col} opacity={0.75}/>)}
-            <line x1="10" y1="44" x2="70" y2="44" stroke={col} strokeWidth="0.7" opacity="0.3" strokeDasharray="2,2"/>
+            {/* 4-4-2 defensive block — compact, defending right goal */}
+            <circle cx={25} cy={60} r={5} fill={col} opacity={0.5}/> {/* GK */}
+            {/* 4 defenders */}
+            {[[52,22],[52,44],[52,76],[52,98]].map(([cx,cy],i) => <rect key={i} x={cx-5} y={cy-5} width={10} height={10} rx="1.5" fill={col} opacity={0.9}/>)}
+            {/* 4 midfielders */}
+            {[[82,22],[82,46],[82,74],[82,98]].map(([cx,cy],i) => <circle key={i} cx={cx} cy={cy} r={5} fill={col} opacity={0.82}/>)}
+            {/* 2 forwards high */}
+            {[[105,42],[105,78]].map(([cx,cy],i) => <circle key={i} cx={cx} cy={cy} r={5} fill={col} opacity={0.75}/>)}
+            {/* Compactness lines */}
+            <line x1="47" y1="22" x2="47" y2="98" stroke={col} strokeWidth="0.6" opacity="0.2" strokeDasharray="2,3"/>
+            <line x1="77" y1="22" x2="77" y2="98" stroke={col} strokeWidth="0.6" opacity="0.2" strokeDasharray="2,3"/>
           </>
         )}
       </svg>
     )
   }
 
-  // Football (landscape) — default
+  // ── FOOTBALL — landscape overhead, accurate formations ────────────────────
   return (
-    <svg viewBox="0 0 160 90" style={{ width:'100%', height:'100%' }}>
-      <rect x="0" y="0" width="160" height="90" fill="#0a1a0a" rx="2"/>
-      {[40,80,120].map((x,i)=><line key={i} x1={x} y1="4" x2={x} y2="86" stroke="rgba(255,255,255,0.05)" strokeWidth="0.6" strokeDasharray="3,3"/>)}
-      <line x1="4" y1="54" x2="156" y2="54" stroke="rgba(255,255,255,0.15)" strokeWidth="0.9"/>
-      <text x="7" y="51" fill="rgba(255,255,255,0.2)" fontSize="4.5" fontFamily="monospace">LOS</text>
+    <svg viewBox="0 0 200 110" style={{ width:'100%', height:'100%' }}>
+      <rect x="0" y="0" width="200" height="110" fill="#0a1a0a" rx="2"/>
+      {/* Hash marks */}
+      {[50,100,150].map((x,i)=><line key={i} x1={x} y1="5" x2={x} y2="105" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" strokeDasharray="3,4"/>)}
+      {/* LOS */}
+      <line x1="5" y1="60" x2="195" y2="60" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+      <text x="8" y="57" fill="rgba(255,255,255,0.2)" fontSize="4.5" fontFamily="monospace">LOS</text>
+      {/* Opponent territory label */}
+      <text x="100" y="20" textAnchor="middle" fill="rgba(255,255,255,0.06)" fontSize="8" fontFamily="monospace">OPPONENT</text>
       {isOff ? (
         <>
-          {[52,64,76,88,100].map((x,i)=><rect key={i} x={x-5} y={47} width={10} height={9} rx="1.5" fill={col} opacity={0.9}/>)}
-          <rect x={109} y={47} width={10} height={9} rx="1.5" fill={col} opacity={0.8}/>
-          <circle cx={24} cy={47} r={5} fill={col} opacity={0.8}/>
-          <circle cx={146} cy={47} r={5} fill={col} opacity={0.8}/>
-          <circle cx={76} cy={63} r={5} fill={col} opacity={0.9}/>
-          <text x={76} y={65} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">QB</text>
-          <circle cx={76} cy={75} r={4} fill={col} opacity={0.8}/>
-          <text x={76} y={77} textAnchor="middle" fill="white" fontSize="3.5">FB</text>
-          <circle cx={76} cy={84} r={5} fill={col} opacity={0.85}/>
-          <text x={76} y={86} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">HB</text>
-          <path d="M24 42 L24 28 L42 28" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
-          <path d="M146 42 L146 28 L128 28" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
-          <text x={58} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">LT</text>
-          <text x={70} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">LG</text>
-          <text x={82} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">C</text>
-          <text x={94} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">RG</text>
-          <text x={106} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">RT</text>
+          {/* I-Formation offense — ALL behind LOS (y > 60) */}
+          {[56,68,80,92,104].map((x,i)=>(
+            <g key={i}>
+              <rect x={x-6} y={60} width={12} height={9} rx="1.5" fill={col} opacity={0.9}/>
+              <text x={x} y={66.5} textAnchor="middle" fill="white" fontSize="3.5">
+                {['LT','LG','C','RG','RT'][i]}
+              </text>
+            </g>
+          ))}
+          {/* TE right */}
+          <rect x={110} y={60} width={12} height={9} rx="1.5" fill={col} opacity={0.8}/>
+          <text x={116} y={66.5} textAnchor="middle" fill="white" fontSize="3.5">TE</text>
+          {/* WRs on the line */}
+          <circle cx={18} cy={62} r={5.5} fill={col} opacity={0.85}/>
+          <text x={18} y={64} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">X</text>
+          <circle cx={150} cy={62} r={5.5} fill={col} opacity={0.85}/>
+          <text x={150} y={64} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">Z</text>
+          {/* QB behind LOS */}
+          <circle cx={80} cy={72} r={5.5} fill={col} opacity={0.95}/>
+          <text x={80} y={74} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">QB</text>
+          {/* FB */}
+          <circle cx={80} cy={82} r={4.5} fill={col} opacity={0.85}/>
+          <text x={80} y={84} textAnchor="middle" fill="white" fontSize="4">FB</text>
+          {/* HB */}
+          <circle cx={80} cy={93} r={5.5} fill={col} opacity={0.9}/>
+          <text x={80} y={95} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">HB</text>
+          {/* Route arrows going TOWARD opponent (lower y = upfield) */}
+          <path d="M18 56 L18 40 L38 40" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
+          <path d="M150 56 L150 40 L130 40" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
         </>
       ) : (
         <>
-          {[44,64,88,108].map((x,i)=><rect key={i} x={x-5} y={47} width={10} height={9} rx="1.5" fill={col} opacity={0.9}/>)}
-          {[50,76,102].map((x,i)=><circle key={i} cx={x} cy={36} r={5} fill={col} opacity={0.85}/>)}
-          <circle cx={20} cy={30} r={5} fill={col} opacity={0.8}/>
-          <circle cx={140} cy={30} r={5} fill={col} opacity={0.8}/>
-          <circle cx={56} cy={20} r={5} fill={col} opacity={0.75}/>
-          <circle cx={100} cy={20} r={5} fill={col} opacity={0.75}/>
-          <text x={50} y={38} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">OLB</text>
-          <text x={76} y={38} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">MLB</text>
-          <text x={102} y={38} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">OLB</text>
-          <text x={56} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DE</text>
-          <text x={70} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DT</text>
-          <text x={94} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DT</text>
-          <text x={114} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DE</text>
-          <text x={56} y={22} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">FS</text>
-          <text x={100} y={22} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">SS</text>
+          {/* 4-3 Defense — all IN FRONT of LOS (y < 60, opponent's side) */}
+          {[50,65,95,110].map((x,i)=>(
+            <g key={i}>
+              <rect x={x-6} y={51} width={12} height={9} rx="1.5" fill={col} opacity={0.9}/>
+              <text x={x} y={57.5} textAnchor="middle" fill="white" fontSize="3.5">
+                {['DE','DT','DT','DE'][i]}
+              </text>
+            </g>
+          ))}
+          {/* LBs */}
+          {[52,80,108].map((x,i)=>(
+            <g key={i}>
+              <circle cx={x} cy={41} r={5.5} fill={col} opacity={0.85}/>
+              <text x={x} y={43} textAnchor="middle" fill="white" fontSize="3.5">
+                {['OLB','MLB','OLB'][i]}
+              </text>
+            </g>
+          ))}
+          {/* CBs */}
+          <circle cx={16} cy={36} r={5.5} fill={col} opacity={0.8}/>
+          <text x={16} y={38} textAnchor="middle" fill="white" fontSize="3.5">CB</text>
+          <circle cx={148} cy={36} r={5.5} fill={col} opacity={0.8}/>
+          <text x={148} y={38} textAnchor="middle" fill="white" fontSize="3.5">CB</text>
+          {/* Safeties */}
+          <circle cx={56} cy={26} r={5.5} fill={col} opacity={0.75}/>
+          <text x={56} y={28} textAnchor="middle" fill="white" fontSize="3.5">FS</text>
+          <circle cx={104} cy={26} r={5.5} fill={col} opacity={0.75}/>
+          <text x={104} y={28} textAnchor="middle" fill="white" fontSize="3.5">SS</text>
         </>
       )}
     </svg>
@@ -2324,14 +2424,19 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
       <Card>
         <div style={{ padding:'11px 14px', borderBottom: offOpen ? '1px solid #1e2330' : 'none', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${P}`, cursor:'pointer' }} onClick={() => setOffOpen(o=>!o)}>
           <span style={{ fontSize:15 }}>📋</span>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>Offensive Scheme Generator</span>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(P,0.15), color:P, textTransform:'uppercase' }}>{cfg.emoji}</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{{ Football:'Offensive Scheme Generator', Basketball:'Offensive Scheme Generator', Baseball:'Game Plan Generator', Soccer:'Attacking Scheme Builder', Softball:'Game Plan Generator' }[sport] || 'Offensive Scheme Generator'}</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(P,0.15), color:P, textTransform:'uppercase' }}>{{ Football:'OFFENSE', Basketball:'OFFENSE', Baseball:'OFFENSE', Soccer:'ATTACK', Softball:'OFFENSE' }[sport]||'OFFENSE'}</span>
           <span style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{offOpen ? '▲' : '▼'}</span>
         </div>
         {offOpen && (
           <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-              {cfg.fields.map(f => (<Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
+              {cfg.fields.map(f => {
+              const skillVal = offFields['skill'] || offFields['teamSkill'] || (cfg.fields.find(x=>x.id==='skill'||x.id==='teamSkill')?.opts[0]||'')
+              const isBeginner = skillVal.includes('First Year') || skillVal.includes('Beginner') || skillVal.includes('Recreational')
+              if (f.id==='oppTendency' && isBeginner) return null  // hide tendency for beginners
+              return <Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />
+            })}
             </div>
             <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
             {offLoading && <Shimmer />}
@@ -2479,7 +2584,7 @@ function DefenseGenCollapsible({ sport, P, S, al, callAI, parseJSON, defaultOpen
     <Card>
       <div style={{ padding:'11px 14px', borderBottom: open ? '1px solid #1e2330' : 'none', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${S}`, cursor:'pointer' }} onClick={() => setOpen(o=>!o)}>
         <span style={{ fontSize:15 }}>🛡</span>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{isBSB ? 'Defensive Positioning' : 'Defensive Scheme Generator'}</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{{ Football:'Defensive Scheme Generator', Basketball:'Defensive Scheme Generator', Baseball:'Defensive Positioning', Soccer:'Defensive Shape Builder', Softball:'Defensive Positioning' }[sport] || 'Defensive Scheme Generator'}</span>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(S,0.15), color:S, textTransform:'uppercase' }}>DEFENSIVE</span>
         <span style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{open ? '▲' : '▼'}</span>
       </div>
@@ -2799,7 +2904,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
   return (
     <div style={{ position:'relative' }}>
       <div
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { if (current) setPage('team'); else setOpen(o => !o) }}
         style={{ display:'flex', alignItems:'center', gap:5, background: current ? al(P,0.12) : `rgba(${parseInt(P.slice(1,3),16)||192},${parseInt(P.slice(3,5),16)||57},${parseInt(P.slice(5,7),16)||43},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none' }}
       >
         {current ? (
@@ -3336,15 +3441,15 @@ function PlayNameBuilder({ P, S, al, sport }) {
 
     // ── FOOTBALL DIAGRAM ─────────────────────────────────────────────────────
     const fmtPositions = {
-      'Ace Right':          { wr:[[18,38],[148,38],[148,28]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'Ace Left':           { wr:[[18,38],[18,28],[148,38]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'I-Formation Right':  { wr:[[18,38],[148,38]], qb:[84,55], rb:[[84,68]], fb:[[84,62]] },
-      'I-Formation Left':   { wr:[[18,38],[148,38]], qb:[84,55], rb:[[84,68]], fb:[[84,62]] },
-      'Shotgun Right':      { wr:[[12,38],[148,38],[136,38],[34,38]], qb:[84,62], rb:[[110,62]], fb:[] },
-      'Pistol Right':       { wr:[[12,38],[148,38]], qb:[84,58], rb:[[84,68]], fb:[] },
+      'Ace Right':          { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Left':           { wr:[[14,48],[14,38],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'I-Formation Right':  { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
+      'I-Formation Left':   { wr:[[14,48],[148,48]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
+      'Shotgun Right':      { wr:[[12,48],[148,48],[132,48],[36,48]], qb:[84,64], rb:[[110,64]], fb:[] },
+      'Pistol Right':       { wr:[[12,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
       'Trips Right':        { wr:[[12,38],[130,38],[144,30],[156,38]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'Trips Left':         { wr:[[10,38],[24,30],[36,38],[148,38]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'Pro Set Right':      { wr:[[12,38],[148,38]], qb:[84,55], rb:[[100,65]], fb:[[68,62]] },
+      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Pro Set Right':      { wr:[[12,48],[148,48]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
     }
     const fmt = fmtPositions[choices.formation] || fmtPositions['Ace Right']
     const gapMap = {
@@ -3363,12 +3468,12 @@ function PlayNameBuilder({ P, S, al, sport }) {
     }
     const gap = gapMap[choices.playNum]
     const motionMap = {
-      'Z Jet':    {from:[148,38], to:[40,38], through:true},
-      'H Motion': {from:[84,68],  to:[130,62], through:false},
-      'Y Shift':  {from:[148,38], to:[18,38], through:false},
-      'H Orbit':  {from:[84,68],  to:[18,48], through:false},
-      'F Arc':    {from:[84,62],  to:[18,55], through:false},
-      'Fly':      {from:[148,38], to:[40,38], through:true},
+      'Z Jet':    {from:[148,48], to:[36,48], through:false},
+      'H Motion': {from:[84,72],  to:[130,66], through:false},
+      'Y Shift':  {from:[148,48], to:[18,48], through:false},
+      'H Orbit':  {from:[84,72],  to:[14,56], through:false},
+      'F Arc':    {from:[84,66],  to:[14,58], through:false},
+      'Fly':      {from:[148,48], to:[36,48], through:false},
     }
     const motionPath = motionMap[choices.motion]
     const isPassPlay = choices.playNum && (choices.playNum.startsWith('9') || choices.playNum==='999')
@@ -3378,8 +3483,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         <rect x="0" y="0" width="200" height="100" fill="#0a1a0a" rx="3"/>
         {[50,100,150].map((x,i)=><line key={i} x1={x} y1="4" x2={x} y2="96" stroke="rgba(255,255,255,0.04)" strokeWidth="0.6" strokeDasharray="3,3"/>)}
         {/* LOS */}
-        <line x1="4" y1="48" x2="196" y2="48" stroke="rgba(255,255,255,0.18)" strokeWidth="0.9"/>
-        <text x="7" y="45" fill="rgba(255,255,255,0.22)" fontSize="5" fontFamily="monospace">LOS</text>
+        <line x1="4" y1="52" x2="196" y2="52" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2"/>
+        <text x="8" y="50" fill="rgba(255,255,255,0.3)" fontSize="5" fontFamily="monospace">LOS</text>
         {/* Strength indicator */}
         {choices.formation && (
           <text x={choices.formation.includes('Left')?20:176} y="15" textAnchor="middle" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace">STR{choices.formation.includes('Left')?'◄':'►'}</text>
@@ -3387,14 +3492,14 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* OL — 5 linemen always on LOS */}
         {[60,72,84,96,108].map((x,i)=>(
           <g key={i}>
-            <rect x={x-6} y={40} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
+            <rect x={x-6} y={49} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
               stroke={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?'#f59e0b':'none'}
               strokeWidth={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1.5:0}/>
             <text x={x} y={47} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">{['LT','LG','C','RG','RT'][i]}</text>
           </g>
         ))}
         {/* TE if tight modifier */}
-        {choices.modifier==='Tight'&&<rect x={112} y={40} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
+        {choices.modifier==='Tight'&&<rect x={112} y={49} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
         {/* WRs */}
         {fmt.wr.map(([cx,cy],i)=>(
           <circle key={i} cx={cx} cy={cy} r={5} fill={choices.xRoute&&i===0?'#f59e0b':P} opacity={0.85}/>
@@ -3416,8 +3521,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* Gap arrow */}
         {gap && !isPassPlay && (
           <g>
-            <rect x={gap.x-5} y={38} width={10} height={13} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
-            <path d={`M${gap.x} 50 L${gap.x} 65`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
+            <rect x={gap.x-5} y={44} width={10} height={10} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
+            <path d={`M${gap.x} 52 L${gap.x} 36`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
             <text x={gap.x} y={35} textAnchor="middle" fill="#f59e0b" fontSize="5" fontWeight="700" fontFamily="monospace">{gap.label}</text>
           </g>
         )}
@@ -3729,6 +3834,171 @@ function RulebookPage({ sport, P, al, callAI }) {
     </div>
   )
 }
+// ─── NEWS PAGE ────────────────────────────────────────────────────────────────
+function NewsPage({ P, S, al, sport, callAI }) {
+  const [feed, setFeed] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [activeCategory, setActiveCategory] = useState('all')
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  const categories = [
+    { id:'all',      label:'All',          icon:'📰' },
+    { id:'news',     label:'Sports News',  icon:'⚡' },
+    { id:'drill',    label:'Drills',       icon:'🏃' },
+    { id:'science',  label:'Science',      icon:'🔬' },
+    { id:'concept',  label:'Concepts',     icon:'💡' },
+  ]
+
+  useEffect(() => { loadFeed() }, [sport, refreshKey])
+
+  async function loadFeed() {
+    setLoading(true)
+    setFeed(null)
+    try {
+      const raw = await callAI(
+        'You are an expert '+sport+' coaching knowledge curator with access to current sports news. Generate a comprehensive coaching and news feed for youth '+sport+' coaches. Include: 2 current sports news items relevant to '+sport+' (recent signings, draft news, coaching hires, rule changes, notable games — be specific with real names and teams when possible), 2 drills of the day with step-by-step instructions, 1 coaching science item with research backing, 2 coaching concept spotlights. Every item must be specific to '+sport+'. For each item include a Google search query and YouTube search term. Return ONLY valid JSON: {"items":[{"type":"news","title":"title","body":"2-3 sentences","source":"source name","searchQuery":"specific search","ytSearch":"youtube search"},{"type":"news","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":""},{"type":"drill","title":"Drill: name","body":"step-by-step drill description","source":"source","searchQuery":"search","ytSearch":"youtube search"},{"type":"drill","title":"Drill: name","body":"drill description","source":"source","searchQuery":"search","ytSearch":"youtube search"},{"type":"science","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":""},{"type":"concept","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":"youtube search"},{"type":"concept","title":"title","body":"2-3 sentences","source":"source","searchQuery":"search","ytSearch":"youtube search"}]}'
+      )
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      const parsed = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1))
+      setFeed(parsed)
+    } catch(e) { setFeed({ items:[] }) }
+    setLoading(false)
+  }
+
+  const typeColors = { news:'#ef4444', drill:P, science:'#4ade80', concept:'#6b9fff' }
+  const typeLabels = { news:'SPORTS NEWS', drill:'DRILL OF THE DAY', science:'COACHING SCIENCE', concept:'CONCEPT SPOTLIGHT' }
+  const typeIcons = { news:'⚡', drill:'🏃', science:'🔬', concept:'💡' }
+
+  const filtered = feed?.items?.filter(i => activeCategory==='all' || i.type===activeCategory) || []
+
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} coaching intelligence</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>News + Feed</div>
+      </div>
+
+      {/* Category tabs */}
+      <div style={{ display:'flex', gap:5, overflowX:'auto', paddingBottom:4, marginBottom:10 }}>
+        {categories.map(cat => (
+          <button key={cat.id} onClick={()=>setActiveCategory(cat.id)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:20, fontSize:11, border:`1px solid ${activeCategory===cat.id?P:'#1e2330'}`, background:activeCategory===cat.id?al(P,0.15):'transparent', color:activeCategory===cat.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, display:'flex', alignItems:'center', gap:4 }}>
+            <span>{cat.icon}</span> {cat.label}
+          </button>
+        ))}
+        <button onClick={()=>setRefreshKey(k=>k+1)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:20, fontSize:11, border:'1px solid #1e2330', background:'transparent', color:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginLeft:'auto' }}>↻ Refresh</button>
+      </div>
+
+      {loading && (
+        <div style={{ padding:'40px 0', textAlign:'center' }}>
+          <div style={{ width:24, height:24, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
+          <div style={{ fontSize:12, color:'#6b7a96' }}>Loading {sport} news and coaching content...</div>
+        </div>
+      )}
+
+      {!loading && filtered.map((item, i) => {
+        const tc = typeColors[item.type] || P
+        return (
+          <div key={i} style={{ background:'#0f1219', border:`0.5px solid ${al(tc,0.2)}`, borderRadius:6, padding:'12px 14px', marginBottom:10, borderLeft:`3px solid ${tc}` }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
+              <span style={{ fontSize:14 }}>{typeIcons[item.type]||'📰'}</span>
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:tc, textTransform:'uppercase', letterSpacing:'1px' }}>{typeLabels[item.type]||item.type}</span>
+              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
+            </div>
+            <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:6, lineHeight:1.4 }}>{item.title}</div>
+            <div style={{ fontSize:12, color:'#9aa0b0', lineHeight:1.7, marginBottom:item.searchQuery?8:0 }}>{item.body}</div>
+            {(item.searchQuery || item.ytSearch) && (
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginTop:4 }}>
+                {item.searchQuery && (
+                  <a href={'https://www.google.com/search?q='+encodeURIComponent(item.searchQuery)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(107,154,255,0.1)', borderRadius:4, border:'1px solid rgba(107,154,255,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>🔍 Read more</a>
+                )}
+                {item.ytSearch && (
+                  <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(item.ytSearch+' '+sport)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(239,68,68,0.1)', borderRadius:4, border:'1px solid rgba(239,68,68,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>▶ Watch</a>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
+
+      {!loading && filtered.length === 0 && feed && (
+        <div style={{ textAlign:'center', padding:'40px 20px', color:'#3d4559', fontSize:12 }}>
+          No items in this category. Try refreshing or switching categories.
+        </div>
+      )}
+    </>
+  )
+}
+
+// ─── LEARN PAGE ───────────────────────────────────────────────────────────────
+function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage }) {
+  const [activeMode, setActiveMode] = useState(null)
+
+  const tools = [
+    { id:'playnames',  icon:'✏️', title:'Play Name Builder',    desc:'Build professional play calls step by step with live diagrams', tag:sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'LEARN' },
+    { id:'gauntlet',   icon:'⚡', title:'Coaching Gauntlet',    desc:'Test your IQ with AI-generated scenarios. Current: '+iq+' IQ', tag:'IQ: '+iq },
+    { id:'rulebook',   icon:'📜', title:'Rulebook',             desc:'Official rules for '+sport+' plus your league search',          tag:'RULES' },
+    { id:'guide',      icon:'📖', title:'Feature Guide',        desc:'Learn every feature in CoachIQ — browse by section',            tag:'GUIDE' },
+    { id:'tour',       icon:'⚡', title:'Quick Tour',           desc:'6-step walkthrough of the entire app',                          tag:'TOUR' },
+  ]
+
+  if (activeMode === 'gauntlet') return (
+    <>
+      <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
+    </>
+  )
+  if (activeMode === 'playnames') return (
+    <>
+      <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+      <PlayNameBuilder P={P} S={S} al={al} sport={sport} />
+    </>
+  )
+  if (activeMode === 'rulebook') return (
+    <>
+      <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+      <RulebookPage sport={sport} P={P} al={al} callAI={callAI} />
+    </>
+  )
+  if (activeMode === 'guide') return (
+    <>
+      <FeatureGuide P={P} al={al} onClose={()=>setActiveMode(null)} />
+    </>
+  )
+  if (activeMode === 'tour') return (
+    <>
+      <QuickTourModal onDone={()=>setActiveMode(null)} P={P} al={al} setPage={setPage} />
+    </>
+  )
+
+  return (
+    <>
+      <div style={{ padding:'16px 0 8px' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>coaching education</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Learn</div>
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        {tools.map(tool => (
+          <div key={tool.id} onClick={()=>setActiveMode(tool.id)} style={{ padding:'14px 16px', background:'#0f1219', border:`1px solid ${al(P,0.2)}`, borderRadius:6, cursor:'pointer', display:'flex', alignItems:'center', gap:12, borderLeft:`3px solid ${P}` }}
+            onMouseEnter={e=>e.currentTarget.style.background=al(P,0.06)}
+            onMouseLeave={e=>e.currentTarget.style.background='#0f1219'}
+          >
+            <span style={{ fontSize:24, flexShrink:0 }}>{tool.icon}</span>
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, color:'#f2f4f8', marginBottom:3 }}>{tool.title}</div>
+              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>{tool.desc}</div>
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
+              <span style={{ fontSize:8, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, color:P, padding:'2px 6px', background:al(P,0.1), borderRadius:3 }}>{tool.tag}</span>
+              <span style={{ fontSize:12, color:'#3d4559' }}>→</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+
 function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI }) {
   const [activeSection, setActiveSection] = useState('features')
   const [helpMode, setHelpMode] = useState(null)
@@ -4312,12 +4582,12 @@ export default function CoachIQ() {
   )
 
   const NAV_ITEMS = [
-    { id:'home',   icon:'🏠', label:'HOME' },
-    { id:'schemes',icon:'📋', label:'SCHEMES' },
-    { id:'team',   icon:'🏆', label:'TEAM'    },
-    { id:'scout',  icon:'🔍', label:'SCOUT' },
-    { id:'playbook',icon:'📖',label:'PLAYBOOK' },
-    { id:'more',   icon:'⋯',  label:'MORE' },
+    { id:'home',     icon:'🏠', label:'HOME',    submenu:[{label:'Dashboard'},{label:'Gauntlet'},{label:'Situational'}] },
+    { id:'schemes',  icon:'📋', label:'SCHEMES', submenu:[{label:'Offense Generator'},{label:'Defense Generator'},{label:'Playbook'}] },
+    { id:'team',     icon:'🏆', label:'TEAM',    submenu:[{label:'Roster'},{label:'Lineup Builder'},{label:'Schedule'},{label:'Practice'}] },
+    { id:'news',     icon:'📰', label:'NEWS',    submenu:[{label:'Sports News'},{label:'Coaching Tips'},{label:'Drills Feed'}] },
+    { id:'learn',    icon:'🎓', label:'LEARN',   submenu:[{label:'Play Name Builder'},{label:'Rulebook'},{label:'Feature Guide'},{label:'Quick Tour'}] },
+    { id:'more',     icon:'⋯',  label:'MORE',    submenu:[{label:'Scout'},{label:'Film Room'},{label:'Settings'}] },
   ]
 
   return (
@@ -4374,7 +4644,8 @@ export default function CoachIQ() {
             </select>
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
-          <div onClick={()=>setPage('home')} style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none', marginLeft:4 }}>
+          <div style={{ flex:1 }} />
+          <div onClick={()=>setPage('home')} style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none' }}>
             <span style={{ fontSize:11 }}>📰</span>
             <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b9fff', fontWeight:700, letterSpacing:'0.5px' }}>Feed</span>
           </div>
@@ -5130,7 +5401,23 @@ const FIELD_POSITIONS = {
       {id:'OLB2', x:80, y:38, label:'OLB'},{id:'CB1', x:8,  y:30, label:'CB'},
       {id:'CB2',  x:92, y:30, label:'CB'}, {id:'FS',  x:36, y:24, label:'FS'},
       {id:'SS',   x:64, y:24, label:'SS'},
-    ]
+    ],
+    'special teams': [
+      {id:'K',    x:50, y:68, label:'K'},   {id:'LS',  x:50, y:52, label:'LS'},
+      {id:'H',    x:50, y:60, label:'H'},
+      {id:'KR1',  x:50, y:88, label:'KR'},  {id:'KR2', x:35, y:82, label:'KR'},
+      {id:'G1',   x:28, y:52, label:'G'},   {id:'G2',  x:38, y:52, label:'G'},
+      {id:'G3',   x:62, y:52, label:'G'},   {id:'G4',  x:72, y:52, label:'G'},
+      {id:'WU1',  x:8,  y:52, label:'WU'},  {id:'WU2', x:92, y:52, label:'WU'},
+    ],
+    punting: [
+      {id:'P',    x:50, y:72, label:'P'},   {id:'LS2', x:50, y:52, label:'LS'},
+      {id:'PG1',  x:28, y:52, label:'G'},   {id:'PG2', x:38, y:52, label:'G'},
+      {id:'PG3',  x:62, y:52, label:'G'},   {id:'PG4', x:72, y:52, label:'G'},
+      {id:'PW1',  x:8,  y:52, label:'W'},   {id:'PW2', x:92, y:52, label:'W'},
+      {id:'PR1',  x:50, y:88, label:'PR'},  {id:'PR2', x:35, y:82, label:'PR'},
+      {id:'PGL',  x:16, y:52, label:'GL'},  {id:'PGR', x:84, y:52, label:'GL'},
+    ],
   },
   Basketball: {
     offense: [
