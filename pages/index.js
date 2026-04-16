@@ -1804,28 +1804,42 @@ function SchemePreviewMini({ type='offense', P, sport='Football' }) {
 
   if (sport === 'Basketball') {
     return (
-      <svg viewBox="0 0 120 70" style={{ width:'100%', height:'100%' }}>
-        <path d="M10 65 Q60 5 110 65" stroke="rgba(255,255,255,0.08)" strokeWidth="1" fill="none"/>
-        <line x1="10" y1="65" x2="110" y2="65" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
-        <rect x="40" y="40" width="40" height="25" rx="2" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
-        <circle cx="60" cy="40" r="6" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none"/>
+      <svg viewBox="0 0 160 90" style={{ width:'100%', height:'100%' }}>
+        <rect x="0" y="0" width="160" height="90" fill="#0a0a1f" rx="2"/>
+        <rect x="3" y="3" width="154" height="84" rx="2" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"/>
+        <path d="M3 22 A50 50 0 0 1 3 68" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8"/>
+        <rect x="3" y="32" width="36" height="26" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7"/>
+        <circle cx="39" cy="45" r="11" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
+        <circle cx="6" cy="45" r="3" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
+        <line x1="3" y1="45" x2="12" y2="45" stroke="rgba(255,255,255,0.12)" strokeWidth="0.7"/>
+        <line x1="80" y1="3" x2="80" y2="87" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5"/>
         {isOff ? (
           <>
-            <circle cx={60} cy={55} r={4} fill={col} opacity={0.9}/>
-            <circle cx={30} cy={35} r={4} fill={col} opacity={0.8}/>
-            <circle cx={90} cy={35} r={4} fill={col} opacity={0.8}/>
-            <circle cx={45} cy={18} r={4} fill={col} opacity={0.7}/>
-            <circle cx={75} cy={18} r={4} fill={col} opacity={0.7}/>
-            <path d="M60 55 L45 35" stroke={col} strokeWidth={1} fill="none" opacity={0.45} strokeDasharray="3,2"/>
-            <path d="M45 35 L60 18" stroke={col} strokeWidth={1} fill="none" opacity={0.45} strokeDasharray="3,2"/>
+            <circle cx={108} cy={45} r={5} fill={col} opacity={0.9}/>
+            <text x={108} y={47} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">PG</text>
+            <circle cx={84} cy={20} r={5} fill={col} opacity={0.85}/>
+            <text x={84} y={22} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">SG</text>
+            <circle cx={84} cy={70} r={5} fill={col} opacity={0.85}/>
+            <text x={84} y={72} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">SF</text>
+            <circle cx={58} cy={30} r={5} fill={col} opacity={0.8}/>
+            <text x={58} y={32} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">PF</text>
+            <circle cx={58} cy={60} r={5} fill={col} opacity={0.8}/>
+            <text x={58} y={62} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">C</text>
+            <path d="M103 43 L88 24" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
+            <path d="M81 20 L63 28" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
           </>
         ) : (
           <>
-            <rect x={40} y={30} width={8} height={8} rx={1} fill={col} opacity={0.85}/>
-            <rect x={72} y={30} width={8} height={8} rx={1} fill={col} opacity={0.85}/>
-            <circle cx={50} cy={18} r={4} fill={col} opacity={0.7}/>
-            <circle cx={70} cy={18} r={4} fill={col} opacity={0.7}/>
-            <circle cx={60} cy={55} r={4} fill={col} opacity={0.6}/>
+            <rect x={93} y={18} width={10} height={10} rx="1.5" fill={col} opacity={0.9}/>
+            <text x={98} y={25} textAnchor="middle" fill="white" fontSize="4">2</text>
+            <rect x={113} y={18} width={10} height={10} rx="1.5" fill={col} opacity={0.9}/>
+            <text x={118} y={25} textAnchor="middle" fill="white" fontSize="4">1</text>
+            <circle cx={78} cy={46} r={5} fill={col} opacity={0.8}/>
+            <text x={78} y={48} textAnchor="middle" fill="white" fontSize="4">3</text>
+            <circle cx={54} cy={36} r={5} fill={col} opacity={0.75}/>
+            <text x={54} y={38} textAnchor="middle" fill="white" fontSize="4">4</text>
+            <circle cx={54} cy={57} r={5} fill={col} opacity={0.75}/>
+            <text x={54} y={59} textAnchor="middle" fill="white" fontSize="4">5</text>
           </>
         )}
       </svg>
@@ -1834,21 +1848,33 @@ function SchemePreviewMini({ type='offense', P, sport='Football' }) {
 
   if (sport === 'Baseball' || sport === 'Softball') {
     return (
-      <svg viewBox="0 0 120 75" style={{ width:'100%', height:'100%' }}>
-        <path d="M60 65 L95 35 L60 5 L25 35 Z" stroke="rgba(255,255,255,0.12)" strokeWidth="1" fill="rgba(255,255,255,0.02)"/>
+      <svg viewBox="0 0 130 130" style={{ width:'100%', height:'100%' }}>
+        <rect x="0" y="0" width="130" height="130" fill="#0a1a0a" rx="2"/>
+        <path d="M10 120 Q65 15 120 120 Z" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
+        <path d="M65 110 L105 70 L65 30 L25 70 Z" fill="rgba(180,140,80,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
+        <line x1="65" y1="110" x2="10" y2="20" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" strokeDasharray="4,3"/>
+        <line x1="65" y1="110" x2="120" y2="20" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" strokeDasharray="4,3"/>
+        <rect x="61" y="106" width="8" height="8" rx="1" fill="white" opacity="0.85"/>
+        <rect x="101" y="66" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 105 70)"/>
+        <rect x="61" y="26" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 65 30)"/>
+        <rect x="21" y="66" width="8" height="8" rx="1" fill="white" opacity="0.75" transform="rotate(45 25 70)"/>
+        <circle cx="65" cy="70" r="4" fill="rgba(180,140,80,0.15)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
+        <text x="65" y="125" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="4.5">HOME</text>
+        <text x="115" y="69" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4.5">1B</text>
+        <text x="65" y="24" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4.5">2B</text>
+        <text x="15" y="69" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="4.5">3B</text>
         {isOff ? (
           <>
-            <circle cx={60} cy={65} r={3} fill={col} opacity={0.9}/>
-            <circle cx={95} cy={35} r={3} fill={col} opacity={0.8}/>
-            <circle cx={60} cy={5}  r={3} fill={col} opacity={0.8}/>
-            <circle cx={25} cy={35} r={3} fill={col} opacity={0.8}/>
-            <circle cx={60} cy={38} r={3} fill={col} opacity={0.7}/>
-            <path d="M60 65 L95 35" stroke={col} strokeWidth={1} fill="none" opacity={0.4} strokeDasharray="3,2"/>
+            <circle cx={65} cy={110} r={5} fill={col} opacity={0.9}/>
+            <circle cx={105} cy={70} r={4} fill="#f59e0b" opacity={0.8}/>
+            <circle cx={65} cy={70} r={4} fill={col} opacity={0.7}/>
+            <path d="M65 105 L38 52" stroke={col} strokeWidth="1.5" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+            <path d="M107 65 L70 33" stroke="#f59e0b" strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.8"/>
           </>
         ) : (
           <>
-            {[[60,65],[95,35],[60,5],[25,35],[60,38],[15,60],[105,60],[60,-2],[40,60],[80,60]].slice(0,9).map(([cx,cy],i)=>(
-              <circle key={i} cx={cx} cy={cy} r={3} fill={col} opacity={0.75}/>
+            {[[65,110],[105,70],[65,30],[25,70],[65,70],[18,52],[112,52],[65,18],[42,52],[88,52]].map(([cx,cy],i)=>(
+              <circle key={i} cx={cx} cy={cy} r={i===0?5:4} fill={col} opacity={i<4?0.85:0.7}/>
             ))}
           </>
         )}
@@ -1858,50 +1884,82 @@ function SchemePreviewMini({ type='offense', P, sport='Football' }) {
 
   if (sport === 'Soccer') {
     return (
-      <svg viewBox="0 0 120 70" style={{ width:'100%', height:'100%' }}>
-        <rect x="5" y="3" width="110" height="64" rx="2" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
-        <line x1="60" y1="3" x2="60" y2="67" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-        <circle cx="60" cy="35" r="12" stroke="rgba(255,255,255,0.05)" strokeWidth="1" fill="none"/>
+      <svg viewBox="0 0 80 130" style={{ width:'100%', height:'100%' }}>
+        <rect x="0" y="0" width="80" height="130" fill="#0d1a0d" rx="2"/>
+        <rect x="3" y="3" width="74" height="124" rx="2" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+        <line x1="3" y1="65" x2="77" y2="65" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7"/>
+        <circle cx="40" cy="65" r="12" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6"/>
+        <rect x="22" y="3" width="36" height="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
+        <rect x="30" y="1" width="20" height="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.6"/>
+        <rect x="22" y="109" width="36" height="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
+        <rect x="30" y="124" width="20" height="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.6"/>
         {isOff ? (
           <>
-            {[25,60,95].map((x,i)=><circle key={i} cx={x} cy={12} r={3} fill={col} opacity={0.9}/>)}
-            {[35,55,75].map((x,i)=><circle key={i} cx={x} cy={28} r={3} fill={col} opacity={0.8}/>)}
-            {[20,45,75,100].map((x,i)=><circle key={i} cx={x} cy={46} r={3} fill={col} opacity={0.75}/>)}
-            <circle cx={60} cy={60} r={3} fill={col} opacity={0.6}/>
-            <path d="M55 28 L25 12" stroke={col} strokeWidth={1} fill="none" opacity={0.4} strokeDasharray="3,2"/>
-            <path d="M65 28 L95 12" stroke={col} strokeWidth={1} fill="none" opacity={0.4} strokeDasharray="3,2"/>
+            <circle cx={40} cy={122} r={4} fill={col} opacity={0.55}/>
+            {[14,30,50,66].map((x,i)=><circle key={i} cx={x} cy={106} r={4} fill={col} opacity={0.8}/>)}
+            {[22,40,58].map((x,i)=><circle key={i} cx={x} cy={88} r={4} fill={col} opacity={0.85}/>)}
+            {[14,40,66].map((x,i)=><circle key={i} cx={x} cy={68} r={4} fill={col} opacity={0.9}/>)}
+            <path d="M38 68 L18 50" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
+            <path d="M42 68 L62 50" stroke={col} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
+            <path d="M40 64 L40 30" stroke={col} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.6"/>
           </>
         ) : (
           <>
-            {[20,45,75,100].map((x,i)=><rect key={i} x={x-4} y={15} width={8} height={8} rx={1} fill={col} opacity={0.85}/>)}
-            {[25,45,75,95].map((x,i)=><circle key={i} cx={x} cy={38} r={3} fill={col} opacity={0.75}/>)}
-            {[42,78].map((x,i)=><circle key={i} cx={x} cy={55} r={3} fill={col} opacity={0.7}/>)}
+            <circle cx={40} cy={8} r={4} fill={col} opacity={0.55}/>
+            {[14,30,50,66].map((x,i)=><rect key={i} x={x-4} y={22} width={8} height={8} rx="1" fill={col} opacity={0.9}/>)}
+            {[14,30,50,66].map((x,i)=><circle key={i} cx={x} cy={44} r={4} fill={col} opacity={0.8}/>)}
+            {[28,52].map((x,i)=><circle key={i} cx={x} cy={58} r={4} fill={col} opacity={0.75}/>)}
+            <line x1="10" y1="44" x2="70" y2="44" stroke={col} strokeWidth="0.7" opacity="0.3" strokeDasharray="2,2"/>
           </>
         )}
       </svg>
     )
   }
 
-  // Football (default)
+  // Football (landscape) — default
   return (
-    <svg viewBox="0 0 120 60" style={{ width:'100%', height:'100%' }}>
+    <svg viewBox="0 0 160 90" style={{ width:'100%', height:'100%' }}>
+      <rect x="0" y="0" width="160" height="90" fill="#0a1a0a" rx="2"/>
+      {[40,80,120].map((x,i)=><line key={i} x1={x} y1="4" x2={x} y2="86" stroke="rgba(255,255,255,0.05)" strokeWidth="0.6" strokeDasharray="3,3"/>)}
+      <line x1="4" y1="54" x2="156" y2="54" stroke="rgba(255,255,255,0.15)" strokeWidth="0.9"/>
+      <text x="7" y="51" fill="rgba(255,255,255,0.2)" fontSize="4.5" fontFamily="monospace">LOS</text>
       {isOff ? (
         <>
-          {[-20,-10,0,10,20].map((x,i) => <rect key={i} x={60+x-4} y={28} width={8} height={8} rx={1} fill={col} opacity={0.9}/>)}
-          <circle cx={60} cy={42} r={4} fill={col} opacity={0.7}/>
-          <circle cx={20} cy={30} r={3} fill={col} opacity={0.6}/>
-          <circle cx={100} cy={30} r={3} fill={col} opacity={0.6}/>
-          <circle cx={60} cy={20} r={3} fill={col} opacity={0.6}/>
-          <path d="M20 30 L20 15 L35 15" stroke={col} strokeWidth={1} fill="none" opacity={0.5}/>
-          <path d="M100 30 L100 15 L85 15" stroke={col} strokeWidth={1} fill="none" opacity={0.5}/>
+          {[52,64,76,88,100].map((x,i)=><rect key={i} x={x-5} y={47} width={10} height={9} rx="1.5" fill={col} opacity={0.9}/>)}
+          <rect x={109} y={47} width={10} height={9} rx="1.5" fill={col} opacity={0.8}/>
+          <circle cx={24} cy={47} r={5} fill={col} opacity={0.8}/>
+          <circle cx={146} cy={47} r={5} fill={col} opacity={0.8}/>
+          <circle cx={76} cy={63} r={5} fill={col} opacity={0.9}/>
+          <text x={76} y={65} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">QB</text>
+          <circle cx={76} cy={75} r={4} fill={col} opacity={0.8}/>
+          <text x={76} y={77} textAnchor="middle" fill="white" fontSize="3.5">FB</text>
+          <circle cx={76} cy={84} r={5} fill={col} opacity={0.85}/>
+          <text x={76} y={86} textAnchor="middle" fill="white" fontSize="4" fontWeight="700">HB</text>
+          <path d="M24 42 L24 28 L42 28" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
+          <path d="M146 42 L146 28 L128 28" stroke={col} strokeWidth="1.1" fill="none" strokeDasharray="3,2" opacity="0.55"/>
+          <text x={58} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">LT</text>
+          <text x={70} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">LG</text>
+          <text x={82} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">C</text>
+          <text x={94} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">RG</text>
+          <text x={106} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">RT</text>
         </>
       ) : (
         <>
-          {[-30,-10,10,30].map((x,i) => <rect key={i} x={60+x-4} y={32} width={8} height={8} rx={1} fill={col} opacity={0.85}/>)}
-          {[-20,0,20].map((x,i) => <circle key={i} cx={60+x} cy={22} r={4} fill={col} opacity={0.7}/>)}
-          <circle cx={60} cy={14} r={3} fill={col} opacity={0.6}/>
-          <circle cx={20} cy={22} r={3} fill={col} opacity={0.6}/>
-          <circle cx={100} cy={22} r={3} fill={col} opacity={0.6}/>
+          {[44,64,88,108].map((x,i)=><rect key={i} x={x-5} y={47} width={10} height={9} rx="1.5" fill={col} opacity={0.9}/>)}
+          {[50,76,102].map((x,i)=><circle key={i} cx={x} cy={36} r={5} fill={col} opacity={0.85}/>)}
+          <circle cx={20} cy={30} r={5} fill={col} opacity={0.8}/>
+          <circle cx={140} cy={30} r={5} fill={col} opacity={0.8}/>
+          <circle cx={56} cy={20} r={5} fill={col} opacity={0.75}/>
+          <circle cx={100} cy={20} r={5} fill={col} opacity={0.75}/>
+          <text x={50} y={38} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">OLB</text>
+          <text x={76} y={38} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">MLB</text>
+          <text x={102} y={38} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">OLB</text>
+          <text x={56} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DE</text>
+          <text x={70} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DT</text>
+          <text x={94} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DT</text>
+          <text x={114} y={53} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">DE</text>
+          <text x={56} y={22} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">FS</text>
+          <text x={100} y={22} textAnchor="middle" fill="white" fontSize="3" opacity="0.7">SS</text>
         </>
       )}
     </svg>
@@ -2425,7 +2483,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
   }
 
   return (
-    <div style={{ marginLeft:'auto', position:'relative' }}>
+    <div style={{ position:'relative' }}>
       <div
         onClick={() => setOpen(o => !o)}
         style={{ display:'flex', alignItems:'center', gap:5, background: current ? al(P,0.12) : `rgba(${parseInt(P.slice(1,3),16)||192},${parseInt(P.slice(3,5),16)||57},${parseInt(P.slice(5,7),16)||43},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none' }}
@@ -2707,80 +2765,74 @@ function RulebookPage({ sport, P, al, callAI }) {
   const [leagueSearch, setLeagueSearch] = useState('')
   const [leagueResult, setLeagueResult] = useState(null)
   const [searching, setSearching] = useState(false)
-  const links = RULEBOOK_LINKS[sport] || RULEBOOK_LINKS.Football
+  const safeLinks = (typeof RULEBOOK_LINKS !== 'undefined' && RULEBOOK_LINKS[sport]) ? RULEBOOK_LINKS[sport] : []
 
   async function searchLeague() {
-    if (!leagueSearch.trim()) return
+    if (!leagueSearch.trim() || !callAI) return
     setSearching(true)
     setLeagueResult(null)
     try {
-      const raw = await callAI('A youth '+sport+' coach is looking for the official rules for their local league: "'+leagueSearch+'". Provide: 1) The most likely governing body for this league, 2) Their official rulebook link if known, 3) The most common youth-level rule modifications for '+sport+' at this level, 4) Any safety rules specific to youth '+sport+'. Be accurate and honest if you are not certain about specific details. Return ONLY valid JSON: {"governingBody":"name","officialUrl":"url or unknown","commonModifications":["rule 1","rule 2","rule 3","rule 4"],"safetyRules":["rule 1","rule 2"],"note":"any important caveat"}')
+      const raw = await callAI('A youth '+sport+' coach is looking for rules for their league: "'+leagueSearch+'". Give the governing body, 4 common youth rule modifications for '+sport+', and 2 safety rules. Return ONLY valid JSON: {"governingBody":"name","commonModifications":["mod 1","mod 2","mod 3","mod 4"],"safetyRules":["rule 1","rule 2"],"note":"caveat if uncertain"}')
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setLeagueResult(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
-    } catch(e) { setLeagueResult({ governingBody:'Search failed', note:'Try searching directly on your league website.' }) }
+    } catch(e) {
+      setLeagueResult({ governingBody:'Search failed', commonModifications:[], safetyRules:[], note:'Try searching your league website directly.' })
+    }
     setSearching(false)
   }
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
       <Card>
-        <CardHead icon="📜" title={sport+' Rulebook'} tag="OFFICIAL RULES" tagColor={P} accent={P} />
+        <CardHead icon="📜" title={sport+' Official Resources'} tag="RULES" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
-          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, marginBottom:12 }}>Official rules and governing body resources for {sport}. Always verify rules with your specific league before each season.</div>
-          <div style={{ fontSize:10, color:'#6b7a96', marginBottom:10, lineHeight:1.5, padding:'7px 10px', background:'rgba(245,158,11,0.06)', borderRadius:4, border:'1px solid rgba(245,158,11,0.15)' }}>⚠️ Links open official organization homepages only. Use Search to find specific rule documents.</div>
-          {links.map((link,i) => (
+          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:12, padding:'8px 10px', background:'rgba(245,158,11,0.06)', borderRadius:4, border:'1px solid rgba(245,158,11,0.15)' }}>⚠️ Links open official org homepages. Use Search for specific documents.</div>
+          {safeLinks.map((link,i) => (
             <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', border:`1px solid ${al(P,0.2)}`, borderRadius:6, marginBottom:8, borderLeft:`3px solid ${P}` }}>
-              <span style={{ fontSize:18, flexShrink:0, marginTop:1 }}>📋</span>
-              <div style={{ flex:1 }}>
+              <span style={{ fontSize:16, flexShrink:0 }}>📋</span>
+              <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:2 }}>{link.name}</div>
                 <div style={{ fontSize:10, color:'#6b7a96' }}>{link.org}</div>
                 <div style={{ fontSize:9, color:P, marginTop:2, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{link.level}</div>
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:4, flexShrink:0 }}>
-                <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:`1px solid ${al(P,0.4)}`, borderRadius:3, textDecoration:'none', whiteSpace:'nowrap', display:'block', textAlign:'center' }}>VISIT →</a>
-                <a href={'https://www.google.com/search?q='+encodeURIComponent(link.search)} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:'1px solid #1e2330', borderRadius:3, textDecoration:'none', whiteSpace:'nowrap', display:'block', textAlign:'center' }}>SEARCH</a>
+                <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:`1px solid ${al(P,0.4)}`, borderRadius:3, textDecoration:'none', textAlign:'center' }}>VISIT →</a>
+                <a href={'https://www.google.com/search?q='+encodeURIComponent(link.search)} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:'1px solid #1e2330', borderRadius:3, textDecoration:'none', textAlign:'center' }}>SEARCH</a>
               </div>
             </div>
           ))}
         </div>
       </Card>
-
       <Card>
         <CardHead icon="🔍" title="Find Your League Rules" tag="AI SEARCH" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
-          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, marginBottom:10 }}>Enter your league name to find specific rule modifications and governing body information.</div>
+          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Enter your league name to find rule modifications and governing body info.</div>
           <div style={{ display:'flex', gap:8, marginBottom:12 }}>
-            <input value={leagueSearch} onChange={e=>setLeagueSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchLeague()} placeholder={'e.g. Tolland Youth '+sport+' Association'} style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
-            <button onClick={searchLeague} disabled={searching||!leagueSearch.trim()} style={{ padding:'9px 14px', background:leagueSearch.trim()?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:leagueSearch.trim()?'pointer':'not-allowed', whiteSpace:'nowrap' }}>{searching?'..':'SEARCH'}</button>
+            <input value={leagueSearch} onChange={e=>setLeagueSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchLeague()} placeholder={'e.g. Tolland Youth '+sport} style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+            <button onClick={searchLeague} disabled={searching||!leagueSearch.trim()} style={{ padding:'9px 14px', background:leagueSearch.trim()&&!searching?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:leagueSearch.trim()&&!searching?'pointer':'not-allowed', whiteSpace:'nowrap' }}>{searching?'..':'SEARCH'}</button>
           </div>
-          {searching && <div style={{ textAlign:'center', padding:'16px', color:'#6b7a96', fontSize:12 }}>Searching for league rules...</div>}
-          {leagueResult && (
+          {searching && <div style={{ textAlign:'center', padding:'14px', color:'#6b7a96', fontSize:12 }}>Searching for {leagueSearch} rules...</div>}
+          {leagueResult && !searching && (
             <div style={{ animation:'fadeIn 0.3s ease' }}>
               <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:6, marginBottom:8 }}>
                 <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Governing Body</div>
-                <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{leagueResult.governingBody}</div>
-                <a href={'https://www.google.com/search?q='+encodeURIComponent(leagueResult.governingBody+' '+sport+' official rules')} target="_blank" rel="noopener noreferrer" style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:11, color:P, marginTop:6, padding:'4px 10px', background:al(P,0.1), borderRadius:3, textDecoration:'none' }}>🔍 Search for official rules →</a>
-                <div style={{ fontSize:9, color:'#3d4559', marginTop:3, fontStyle:'italic' }}>Opens Google. CoachIQ is not responsible for third-party search results.</div>
+                <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600, marginBottom:6 }}>{leagueResult.governingBody}</div>
+                <a href={'https://www.google.com/search?q='+encodeURIComponent((leagueResult.governingBody||'')+(sport ? ' '+sport : '')+' official rules')} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:P, display:'inline-block', padding:'4px 10px', background:al(P,0.1), borderRadius:3, textDecoration:'none' }}>🔍 Search official rules →</a>
+                <div style={{ fontSize:9, color:'#3d4559', marginTop:4, fontStyle:'italic' }}>Opens Google. CoachIQ is not responsible for third-party results.</div>
               </div>
               {leagueResult.commonModifications && leagueResult.commonModifications.length > 0 && (
                 <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Common Youth Rule Modifications</div>
-                  {leagueResult.commonModifications.map((m,i) => (
-                    <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'4px 0', borderBottom:i<leagueResult.commonModifications.length-1?'1px solid #1e2330':'none' }}>• {m}</div>
-                  ))}
+                  {leagueResult.commonModifications.map((m,i) => <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'3px 0', borderBottom:i<leagueResult.commonModifications.length-1?'1px solid #1e2330':'none' }}>• {m}</div>)}
                 </div>
               )}
               {leagueResult.safetyRules && leagueResult.safetyRules.length > 0 && (
-                <div style={{ padding:'10px 12px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6, marginBottom:8 }}>
+                <div style={{ padding:'10px 12px', background:'rgba(74,222,128,0.05)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:1.5, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Safety Rules</div>
-                  {leagueResult.safetyRules.map((r,i) => (
-                    <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'4px 0' }}>✓ {r}</div>
-                  ))}
+                  {leagueResult.safetyRules.map((r,i) => <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'3px 0' }}>✓ {r}</div>)}
                 </div>
               )}
-              {leagueResult.note && (
-                <div style={{ fontSize:10, color:'#6b7a96', fontStyle:'italic', lineHeight:1.5, padding:'8px 10px', background:'#161922', borderRadius:4 }}>Note: {leagueResult.note}</div>
-              )}
+              {leagueResult.note && <div style={{ fontSize:10, color:'#6b7a96', fontStyle:'italic', lineHeight:1.5, padding:'8px 10px', background:'#161922', borderRadius:4 }}>Note: {leagueResult.note}</div>}
             </div>
           )}
         </div>
@@ -2788,8 +2840,6 @@ function RulebookPage({ sport, P, al, callAI }) {
     </div>
   )
 }
-
-
 function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI }) {
   const [activeSection, setActiveSection] = useState('features')
   const [helpMode, setHelpMode] = useState(null)
@@ -3433,6 +3483,10 @@ export default function CoachIQ() {
             </select>
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
+          <div onClick={()=>setPage('home')} style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none', marginLeft:4 }}>
+            <span style={{ fontSize:11 }}>📰</span>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b9fff', fontWeight:700, letterSpacing:'0.5px' }}>Feed</span>
+          </div>
           <TeamQuickSwitcher
             sport={sport}
             teams={teams}
@@ -3924,7 +3978,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                   <Sel label="Season" value={form.season||seasons[0]} onChange={v=>setForm(f=>({...f,season:v}))} options={seasons} />
                   <div>
                     <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Hometown</label>
-                    <input value={form.hometown} onChange={e=>setForm(f=>({...f,hometown:e.target.value}))} placeholder="e.g. Tolland, CT" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                    <CitySearch value={form.hometown} onChange={v=>setForm(f=>({...f,hometown:v}))} placeholder="e.g. Tolland, CT" P={P} al={al} />
                   </div>
                 </div>
                 <div style={{ marginBottom:12 }}>
@@ -3982,6 +4036,73 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
         )}
       </div>
     </>
+  )
+}
+
+
+// ─── CITY SEARCH ─────────────────────────────────────────────────────────────
+function CitySearch({ value, onChange, placeholder, P, al }) {
+  const [query, setQuery] = useState(value || '')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const timerRef = useRef(null)
+  const wrapRef = useRef(null)
+
+  useEffect(() => {
+    function h(e) { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+
+  useEffect(() => { if (value !== query) setQuery(value || '') }, [value])
+
+  function search(q) {
+    setQuery(q)
+    onChange(q)
+    if (!q || q.length < 2) { setResults([]); setOpen(false); return }
+    clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q='+encodeURIComponent(q)+'+city&countrycodes=us', { headers:{'Accept-Language':'en'} })
+        const data = await res.json()
+        setResults(data || [])
+        setOpen((data||[]).length > 0)
+      } catch(e) { setResults([]) }
+      setLoading(false)
+    }, 380)
+  }
+
+  function select(item) {
+    const a = item.address || {}
+    const city = a.city||a.town||a.village||a.suburb||item.name||''
+    const state = a.state||''
+    const val = [city,state].filter(Boolean).join(', ')
+    setQuery(val); onChange(val); setResults([]); setOpen(false)
+  }
+
+  return (
+    <div ref={wrapRef} style={{ position:'relative' }}>
+      <div style={{ position:'relative' }}>
+        <input value={query} onChange={e=>search(e.target.value)} onFocus={()=>results.length>0&&setOpen(true)} placeholder={placeholder||'Search city or town...'} style={{ width:'100%', background:'#161922', border:`1px solid ${query?al(P,0.4):'#1e2330'}`, borderRadius:4, padding:'9px 32px 9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+        {loading ? <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', width:12, height:12, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.7s linear infinite' }}/> : <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:12, opacity:0.4 }}>🏙️</span>}
+      </div>
+      {open && results.length > 0 && (
+        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:'0 0 6px 6px', zIndex:100, maxHeight:180, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.6)' }}>
+          {results.map((item,i) => {
+            const a = item.address||{}
+            const city = a.city||a.town||a.village||item.name||''
+            const state = a.state||''
+            return (
+              <div key={i} onMouseDown={()=>select(item)} style={{ padding:'8px 12px', borderBottom:i<results.length-1?'1px solid #1e2330':'none', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                <div style={{ fontSize:12, color:'#f2f4f8' }}>{city}{state?', '+state:''}</div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 
