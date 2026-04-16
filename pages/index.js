@@ -454,12 +454,39 @@ function getRandomTip(sport) {
 
 // ─── TUTORIAL DATA ────────────────────────────────────────────────────────────
 const TUTORIAL_STEPS = [
-  { tab:'home',     icon:'🏠', title:'Home',             desc:'Your coaching dashboard. See the live coaching feed, quick-access Gauntlet and Situational modes, and your active team card. Everything starts here.' },
-  { tab:'schemes',  icon:'📋', title:'Scheme Generator', desc:'Build AI-powered schemes for Football, Basketball, Baseball, Soccer, or Softball. Get 6 plays with animated diagrams, step-by-step breakdowns, huddle cards, pro comparisons, and variations. Everything is sport-specific.' },
-  { tab:'team',     icon:'🏆', title:'Team',             desc:'Create and manage your teams. Add players with positions, build your schedule, generate practice plans, view analytics, and print coach sheets and wristbands.' },
-  { tab:'playbook', icon:'📖', title:'Playbook',         desc:'Your saved plays organized in folders. Browse schemes you have saved, create individual plays with the same full feature set as the scheme generator, and copy plays across teams.' },
-  { tab:'scout',    icon:'🔍', title:'Scout',            desc:'Two modes: Opponent Scouting builds a full AI scouting report with key threats and a game plan. Self Scout (Film Room) lets you describe or upload a clip and get AI coaching feedback.' },
-  { tab:'more',     icon:'⋯',  title:'More',             desc:'Settings for your logo style, team colors, home location for weather, and account preferences. The Help section explains every feature in detail.' },
+  { tab:'home', icon:'\u{1F3E0}', title:'Welcome to CoachIQ', action:null, actionLabel:null,
+    desc:'Your AI coaching assistant. This tour walks you through every feature. Tap Next to continue or Exit Tour anytime.',
+    tip:'CoachIQ works for Football, Basketball, Baseball, Soccer, and Softball. Switch sports with the dropdown at the top left.' },
+  { tab:'team', icon:'\u{1F3C6}', title:'Step 1 - Create Your Team', action:'team', actionLabel:'Go to Team Tab',
+    desc:'Everything in CoachIQ is built around your team. Open the Team tab, fill in your team name, pick a mascot, choose your colors, and add your hometown.',
+    tip:'You can create up to 5 teams per sport. Your team colors apply throughout the entire app.' },
+  { tab:'team', icon:'\u{1F465}', title:'Step 2 - Build Your Roster', action:'team', actionLabel:'Open Team Tab',
+    desc:'In the Team tab, tap Roster to add players. Enter first name, last name, jersey number, and up to 3 positions per player. Special teams positions like K, P, and LS are included.',
+    tip:'Once your roster is built, assign players to field positions using the Lineup Builder tab.' },
+  { tab:'schemes', icon:'\u{1F4CB}', title:'Step 3 - Generate a Scheme', action:'schemes', actionLabel:'Open Scheme Generator',
+    desc:'Open the Scheme Generator. Fill out your offensive system, personnel, age group, and opponent defense, then hit Generate. You get 6 tailored plays with animated diagrams.',
+    tip:'Each play comes with a step-by-step breakdown, huddle card, pro comparison, and variations. Everything is sport-specific.' },
+  { tab:'schemes', icon:'\u{1F4D6}', title:'Step 4 - Save to Playbook', action:'schemes', actionLabel:'Open Scheme Generator',
+    desc:'After generating a scheme, tap Save to Playbook on any play you like. Saved plays go into your Playbook where you can organize, review, and print wristbands.',
+    tip:'You can generate both offense AND defense schemes. The Defense Generator creates a full game plan against a specific opponent look.' },
+  { tab:'playbook', icon:'\u{1F4D4}', title:'Step 5 - Your Playbook', action:'playbook', actionLabel:'Open Playbook',
+    desc:'Your saved plays live here. Tap any play to see its full diagram and breakdown. Use the Print tab to generate a printable wristband organized by situation.',
+    tip:'Plays are organized into folders. You can move plays between folders and mark your most important ones.' },
+  { tab:'learn', icon:'\u270F\uFE0F', title:'Step 6 - Play Name Builder', action:'learn', actionLabel:'Open Learn Tab',
+    desc:'Want to understand how play calls work? Go to Learn and open the Play Name Builder. Walk through 8 steps to build a real NFL-style call with a live field diagram.',
+    tip:'For Baseball and Softball, this becomes the Signal Creator. It generates real third-base coach touch sequences with an indicator system.' },
+  { tab:'learn', icon:'\u26A1', title:'Step 7 - Coaching Gauntlet', action:'learn', actionLabel:'Open Learn Tab',
+    desc:'Test your coaching IQ with the Gauntlet. Face AI-generated scenario questions at Rookie, Varsity, or Elite difficulty. Correct answers raise your IQ score.',
+    tip:'Your IQ score starts at 500 and maxes at 1000. Streak bonuses apply: 3 correct in a row earns an extra +10 points.' },
+  { tab:'news', icon:'\u{1F4F0}', title:'Step 8 - News and Feed', action:'news', actionLabel:'Open News Tab',
+    desc:'The News tab has 5 channels: All, Sport Coaching, Youth Coaching Theory, Current Sports News, and All Sports News. Channels load independently and cache between sessions.',
+    tip:'Tap Read more on any item to search Google. Tap Watch to find YouTube videos. Hit the refresh button for fresh content.' },
+  { tab:'more', icon:'\u2699\uFE0F', title:'Step 9 - Settings', action:'more', actionLabel:'Open Settings',
+    desc:'In More, then Settings, you can customize your CoachIQ logo color, set your home location for weather, adjust team colors, and control which widgets rotate on the home screen.',
+    tip:'Set your Home Location to see live weather and game likelihood predictions on the home screen widget.' },
+  { tab:'home', icon:'\u{1F389}', title:'You Are Ready to Coach!', action:null, actionLabel:null,
+    desc:'That is the full tour. You have seen every major feature. Start by creating your team, generating your first scheme, and saving plays to your playbook.',
+    tip:'Need help anytime? Go to Learn, then Help for a full feature guide with navigation links to every part of the app.' },
 ]
 
 const FEATURE_GUIDE = [
@@ -529,7 +556,6 @@ const SPORTS = {
       {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
     buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -545,7 +571,6 @@ const SPORTS = {
       {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -561,7 +586,6 @@ const SPORTS = {
       {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
       {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -578,7 +602,6 @@ const SPORTS = {
       {id:'focus',     label:'Training Focus',     opts:['Attacking Patterns','Defensive Shape','Set Pieces','Transitions','Pressing','Restarts','Goalkeeping']},
       {id:'formation', label:'Your Formation',     opts:['4-3-3','4-4-2','3-5-2','4-2-3-1','5-3-2','3-4-3','4-1-4-1']},
       {id:'oppShape',  label:'Opponent Shape',     opts:['Unknown / Balanced','4-4-2 Block','5-4-1 Defensive','4-3-3 High Press','4-2-3-1','3-5-2 Wings','Long Ball Direct']},
-      {id:'experience',label:'Player Experience',  opts:['First Year / Never Played','Beginner 1 Season','Average 2-3 Seasons','Experienced 4+ Seasons','Mixed Levels']},
     ],
     positions:['Goalkeeper','Center Back','Full Back','Defensive Mid','Central Mid','Attacking Mid','Winger','Striker','Wing Back'],
     buildPrompt:(f)=>`You are an elite youth soccer coach. Generate a tactical session plan. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Format: ${f.format||'11v11'}. Return 6 tactical patterns/set pieces. Use types: ATTACKING PATTERN, DEFENSIVE SHAPE, SET PIECE ATTACK, SET PIECE DEFENSE, TRANSITION, PRESSING TRIGGER. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explain this tactical concept in simple terms for a youth coach"},{"number":2,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -594,7 +617,6 @@ const SPORTS = {
       {id:'focus',     label:'Defensive Focus',     opts:['Fundamentals First','Circle Defense','Outfield Reads','Bunt Defense','Slap Defense']},
       {id:'pitching',  label:'Pitching Style',      opts:['Rise Ball Dominant','Drop Ball Dominant','Change-Up Artist','Location Pitcher','Power Pitcher','Mixed Repertoire']},
       {id:'oppTendency',label:'Opponent Tendency',  opts:['Unknown / Balanced','Slap Hitters Heavy','Power Lineup','Bunt Every Opportunity','Free Swingers','Patient Takes Pitches','Aggressive First Pitch','Pull Hitters Only','Spray Hitters','Speed Team Steals Often']},
-      {id:'experience',label:'Player Experience',   opts:['First Year / Never Played','Beginner 1 Season','Average 2-3 Seasons','Experienced 4+ Seasons','Mixed Levels']},
     ],
     positions:['Pitcher','Catcher','First Base','Second Base','Third Base','Shortstop','Left Field','Center Field','Right Field'],
     buildPrompt:(f)=>`You are an elite youth softball coach with expertise in ASA/USA Softball rules. Generate a game plan. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Key softball rules: underhand pitching, no leading off until pitch release, double first base safety bag. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, SLAP/BUNT GAME, PITCHING STRATEGY, CIRCLE DEFENSE, OUTFIELD COVERAGE, BASERUNNING RULE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explain this softball concept simply"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -671,38 +693,64 @@ function QuickTourModal({ onDone, P, al, setPage }) {
   const [step, setStep] = useState(0)
   const current = TUTORIAL_STEPS[step]
   const isLast = step === TUTORIAL_STEPS.length - 1
+  const progress = ((step) / (TUTORIAL_STEPS.length - 1)) * 100
+
+  function goTo(tabId) {
+    if (tabId && setPage) setPage(tabId)
+    if (!isLast) setStep(s => s + 1)
+    else onDone()
+  }
 
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:500, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-      <div style={{ background:'#0f1219', border:`1px solid ${al(P,0.4)}`, borderRadius:8, padding:24, width:'100%', maxWidth:380, animation:'fadeIn 0.2s ease' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-          <div style={{ width:40, height:40, borderRadius:'50%', background:al(P,0.15), border:`2px solid ${P}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>{current.icon}</div>
-          <div>
-            <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:2 }}>Step {step+1} of {TUTORIAL_STEPS.length}</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:18, color:'#f2f4f8' }}>{current.title}</div>
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', zIndex:500, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+      <div style={{ background:'#0f1219', border:`1px solid ${al(P,0.4)}`, borderRadius:10, padding:24, width:'100%', maxWidth:400, animation:'fadeIn 0.2s ease' }}>
+        {/* Header */}
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
+          <div style={{ width:44, height:44, borderRadius:'50%', background:al(P,0.15), border:`2px solid ${P}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>{current.icon}</div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Step {step + 1} of {TUTORIAL_STEPS.length}</div>
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:'#f2f4f8', lineHeight:1.1 }}>{current.title}</div>
           </div>
+          <button onClick={onDone} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:18, padding:4, flexShrink:0 }}>✕</button>
         </div>
-        <p style={{ fontSize:13, color:'#dde1f0', lineHeight:1.7, marginBottom:20 }}>{current.desc}</p>
-        {/* Progress dots */}
-        <div style={{ display:'flex', gap:6, justifyContent:'center', marginBottom:20 }}>
-          {TUTORIAL_STEPS.map((_,i) => (
-            <div key={i} onClick={()=>setStep(i)} style={{ width:i===step?20:7, height:7, borderRadius:4, background:i===step?P:'#1e2330', cursor:'pointer', transition:'all 0.2s' }} />
-          ))}
+
+        {/* Progress bar */}
+        <div style={{ height:3, background:'#1e2330', borderRadius:2, marginBottom:16, overflow:'hidden' }}>
+          <div style={{ height:'100%', width:`${progress}%`, background:P, borderRadius:2, transition:'width 0.3s ease' }}/>
         </div>
-        <div style={{ display:'flex', gap:8 }}>
-          {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
-          {!isLast && <button onClick={()=>setStep(s=>s+1)} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>NEXT →</button>}
-          {isLast && (
-            <button onClick={()=>{ if(setPage) setPage(current.tab); onDone() }} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>GET STARTED →</button>
+
+        {/* Description */}
+        <div style={{ fontSize:13, color:'#dde1f0', lineHeight:1.7, marginBottom:14 }}>{current.desc}</div>
+
+        {/* Tip */}
+        {current.tip && (
+          <div style={{ padding:'8px 12px', background:al(P,0.07), borderRadius:6, borderLeft:`3px solid ${al(P,0.4)}`, marginBottom:16 }}>
+            <div style={{ fontSize:9, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, color:P, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>💡 Coach Tip</div>
+            <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.6 }}>{current.tip}</div>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          {current.action && (
+            <button onClick={()=>goTo(current.action)} style={{ width:'100%', padding:'11px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px' }}>
+              {current.actionLabel || 'Go There →'}
+            </button>
           )}
-          <button onClick={onDone} style={{ padding:'10px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>SKIP</button>
+          <div style={{ display:'flex', gap:8 }}>
+            {step > 0 && (
+              <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← Back</button>
+            )}
+            <button onClick={()=>{ if(isLast) onDone(); else setStep(s=>s+1) }} style={{ flex:2, padding:'9px', background:current.action?'transparent':P, border:current.action?'1px solid #1e2330':'none', borderRadius:5, color:current.action?'#6b7a96':'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
+              {isLast ? 'Start Coaching! 🏈' : current.action ? 'Skip this step →' : 'Next →'}
+            </button>
+          </div>
+          <button onClick={onDone} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:11, fontFamily:"'Barlow Condensed',sans-serif", padding:'4px', textAlign:'center' }}>Exit tour</button>
         </div>
       </div>
     </div>
   )
 }
-
-// ─── FEATURE GUIDE ────────────────────────────────────────────────────────────
 function FeatureGuide({ P, al, onClose }) {
   const [activeSection, setActiveSection] = useState(0)
 
@@ -3305,6 +3353,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
 
   // ── INCREMENTAL DIAGRAM ────────────────────────────────────────────────────
   function LiveDiagram() {
+    // Ensure player color is visible on dark field background
+    const diagColor = P === '#ffffff' || P === '#fff' || P === 'white' ? '#c0c0c0' : P
     if (sport === 'Baseball' || sport === 'Softball') {
       // Signal visual instead of field diagram
       if (!choices.indicator || !choices.call) {
@@ -3397,15 +3447,15 @@ function PlayNameBuilder({ P, S, al, sport }) {
 
     // ── FOOTBALL DIAGRAM ─────────────────────────────────────────────────────
     const fmtPositions = {
-      'Ace Right':          { wr:[[14,48],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Ace Left':           { wr:[[14,48],[14,38],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'I-Formation Right':  { wr:[[14,48],[148,50]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
-      'I-Formation Left':   { wr:[[14,48],[148,50]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
-      'Shotgun Right':      { wr:[[12,50],[148,50],[132,48],[36,50]], qb:[84,64], rb:[[110,64]], fb:[] },
-      'Pistol Right':       { wr:[[12,48],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Trips Right':        { wr:[[12,38],[130,38],[144,30],[156,38]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Pro Set Right':      { wr:[[12,48],[148,50]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
+      'Ace Right':          { wr:[[14,50],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Left':           { wr:[[14,50],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'I-Formation Right':  { wr:[[14,50],[148,50]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
+      'I-Formation Left':   { wr:[[14,50],[148,50]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
+      'Shotgun Right':      { wr:[[12,50],[148,50],[132,50],[36,50]], qb:[84,64], rb:[[110,64]], fb:[] },
+      'Pistol Right':       { wr:[[12,50],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Trips Right':        { wr:[[12,50],[130,50],[146,50],[160,50]], qb:[84,58], rb:[[84,70]], fb:[] },
+      'Trips Left':         { wr:[[10,50],[24,50],[38,50],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Pro Set Right':      { wr:[[12,50],[148,50]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
     }
     const personnelDefaultFmt = {
       '11':'Ace Right', '12':'I-Formation Right', '21':'I-Formation Right',
@@ -3454,10 +3504,10 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* OL — 5 linemen always on LOS */}
         {[60,72,84,96,108].map((x,i)=>(
           <g key={i}>
-            <rect x={x-6} y={50} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
-              stroke={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?'#f59e0b':'none'}
+            <rect x={x-6} y={50} width={12} height={9} rx="1.5" fill={diagColor} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
+              stroke={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?'#f59e0b':'rgba(255,255,255,0.4)'}
               strokeWidth={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1.5:0}/>
-            <text x={x} y={47} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">{['LT','LG','C','RG','RT'][i]}</text>
+            <text x={x} y={56} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">{['LT','LG','C','RG','RT'][i]}</text>
           </g>
         ))}
         {/* TE if tight modifier */}
@@ -3468,13 +3518,13 @@ function PlayNameBuilder({ P, S, al, sport }) {
           const isHighlighted = (choices.xRoute && i===0) || (choices.yzRoute && i===1)
           return (
             <g key={i}>
-              <circle cx={cx} cy={cy} r={5.5} fill={isHighlighted?'#f59e0b':P} opacity={0.9}/>
+              <circle cx={cx} cy={cy} r={5.5} fill={isHighlighted?'#f59e0b':diagColor} opacity={0.9} stroke="rgba(0,0,0,0.3)" strokeWidth="0.5"/>
               <text x={cx} y={cy+2} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">{labels[i]||'WR'}</text>
             </g>
           )
         })}
         {/* QB — BEHIND the LOS */}
-        <circle cx={fmt.qb[0]} cy={fmt.qb[1]} r={5.5} fill={P} opacity={0.95}/>
+        <circle cx={fmt.qb[0]} cy={fmt.qb[1]} r={5.5} fill={diagColor} opacity={0.95} stroke="rgba(0,0,0,0.3)" strokeWidth="0.5"/>
         <text x={fmt.qb[0]} y={fmt.qb[1]+2} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">QB</text>
         {/* Personnel label */}
         {choices.personnel && <text x="8" y="95" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace" opacity="0.7">{choices.personnel}</text>}
@@ -4781,12 +4831,12 @@ export default function CoachIQ() {
   )
 
   const NAV_ITEMS = [
-    { id:'home',     icon:'🏠', label:'HOME',    submenu:[{label:'Dashboard'},{label:'Gauntlet'},{label:'Situational'}] },
-    { id:'schemes',  icon:'📋', label:'SCHEMES', submenu:[{label:'Offense Generator'},{label:'Defense Generator'},{label:'Playbook'}] },
-    { id:'team',     icon:'🏆', label:'TEAM',    submenu:[{label:'Roster'},{label:'Lineup Builder'},{label:'Schedule'},{label:'Practice'}] },
-    { id:'news',     icon:'📰', label:'NEWS',    submenu:[{label:'Sports News'},{label:'Coaching Tips'},{label:'Drills Feed'}] },
-    { id:'learn',    icon:'🎓', label:'LEARN',   submenu:[{label:'Play Name Builder'},{label:'Rulebook'},{label:'Feature Guide'},{label:'Quick Tour'}] },
-    { id:'more',     icon:'⋯',  label:'MORE',    submenu:[{label:'Scout'},{label:'Film Room'},{label:'Settings'}] },
+    { id:'home',     icon:'🏠', label:'HOME',     submenu:[{label:'Dashboard'},{label:'Gauntlet'},{label:'Situational'}] },
+    { id:'schemes',  icon:'📋', label:'SCHEMES',  submenu:[{label:'Offense Generator'},{label:'Defense Generator'},{label:'Playbook'}] },
+    { id:'team',     icon:'🏆', label:'TEAM',     submenu:[{label:'Roster'},{label:'Lineup Builder'},{label:'Schedule'},{label:'Practice'}] },
+    { id:'playbook', icon:'📖', label:'PLAYBOOK', submenu:[{label:'Saved Plays'},{label:'Print Wristband'},{label:'New Play'}] },
+    { id:'learn',    icon:'🎓', label:'LEARN',    submenu:[{label:'Play Name Builder'},{label:'Gauntlet'},{label:'Rulebook'},{label:'Help'}] },
+    { id:'more',     icon:'⋯',  label:'MORE',     submenu:[{label:'Scout'},{label:'News'},{label:'Settings'}] },
   ]
 
   return (
@@ -5299,7 +5349,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
             </div>
             {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season}{current.hometown?' · '+current.hometown:''} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
             {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
-            {current && <div style={{ fontSize:10, color:P, marginTop:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>TAP TO GO TO TEAM PAGE →</div>}
+            {current && <div style={{ fontSize:10, color:al(P,0.6), marginTop:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600 }}>Tap to open team page →</div>}
           </div>
           {current && <div style={{ display:'flex', gap:3 }}>{[current.primary,current.secondary,current.accent1,current.accent2].filter(Boolean).map((c,i)=><div key={i} style={{ width:10,height:10,borderRadius:2,background:c }} />)}</div>}
           <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded?'▲':'▼'}</span>
@@ -5321,7 +5371,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                         <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
                       </div>
                       {current?.id===team.id && <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>DESELECT</button>}
-                      {current?.id===team.id && onOpenTeamTab && <button onClick={onOpenTeamTab} style={{ padding:'3px 7px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>OPEN →</button>}
+                      {onOpenTeamTab && <button onClick={()=>{ switchTeam(team); onOpenTeamTab() }} style={{ padding:'3px 7px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>OPEN →</button>}
                       <button onClick={()=>setDeleteConfirm(team)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.7)', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
                     </div>
                   )
