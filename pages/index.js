@@ -529,7 +529,6 @@ const SPORTS = {
       {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
     buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -541,11 +540,10 @@ const SPORTS = {
       {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
       {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
       {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
+      {id:'skill',label:'Team Experience',opts:['First Year','Developing','Intermediate','Competitive']},
       {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -557,11 +555,10 @@ const SPORTS = {
       {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
       {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
       {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
+      {id:'skill',label:'Team Experience',opts:['First Year','Developing','Intermediate','Competitive']},
       {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
       {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
-      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -574,7 +571,7 @@ const SPORTS = {
       {id:'format',    label:'Game Format',       opts:['11v11 Standard','9v9 Youth','7v7 Youth','5v5 Futsal']},
       {id:'system',    label:'Playing Style',      opts:['Possession / Tiki-Taka','Direct / Counter','High Press','Park the Bus / Defensive','4-3-3 Attack','4-4-2 Classic','3-5-2 Wing Play']},
       {id:'age',       label:'Age Group',          opts:['U6-U8','U9-U10','U11-U12','U13-U14','U15-U16','High School']},
-      {id:'skill',     label:'Skill Level',        opts:['Beginner','Average','Competitive','Elite']},
+      {id:'skill',     label:'Team Experience',    opts:['First Year','Developing','Intermediate','Competitive','Elite']},
       {id:'focus',     label:'Training Focus',     opts:['Attacking Patterns','Defensive Shape','Set Pieces','Transitions','Pressing','Restarts','Goalkeeping']},
       {id:'formation', label:'Your Formation',     opts:['4-3-3','4-4-2','3-5-2','4-2-3-1','5-3-2','3-4-3','4-1-4-1']},
       {id:'oppShape',  label:'Opponent Shape',     opts:['Unknown / Balanced','4-4-2 Block','5-4-1 Defensive','4-3-3 High Press','4-2-3-1','3-5-2 Wings','Long Ball Direct']},
@@ -1797,7 +1794,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
   const [battleLoading, setBattleLoading] = useState(false)
   const [battleStarted, setBattleStarted] = useState(false)
 
-  const diffMap = { Rookie: { label: 'Rookie', color: '#4ade80', pts: 5 }, Varsity: { label: 'Varsity', color: '#f59e0b', pts: 10 }, Elite: { label: 'Elite', color: P, pts: 20 } }
+  const diffMap = { Rookie: { label: 'Rookie', color: '#4ade80', pts: 8, penalty: 4 }, Varsity: { label: 'Varsity', color: '#f59e0b', pts: 15, penalty: 7 }, Elite: { label: 'Elite', color: P, pts: 25, penalty: 12 } }
 
   const coordinatorTitle = sport === 'Basketball' ? 'Head Coach' : sport === 'Baseball' ? 'Manager' : 'Offensive Coordinator'
   const oppTitle = sport === 'Basketball' ? 'Opposing Coach' : sport === 'Baseball' ? 'Opposing Manager' : 'Defensive Coordinator'
@@ -1821,10 +1818,11 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
     setScore(s => ({ correct: s.correct + (correct?1:0), total: s.total + 1 }))
     if (correct) {
       const pts = diffMap[difficulty]?.pts || 10
-      setIQ(q => q + pts)
+      setIQ(q => Math.min(1000, q + pts + (streak > 0 && (streak+1) % 3 === 0 ? 10 : 0)))
       setGauntlets(g => g + 1)
     } else {
-      setIQ(q => Math.max(0, q - 5))
+      const penalty = diffMap[difficulty]?.penalty || 5
+      setIQ(q => Math.max(100, q - penalty))
     }
   }
 
@@ -3397,15 +3395,15 @@ function PlayNameBuilder({ P, S, al, sport }) {
 
     // ── FOOTBALL DIAGRAM ─────────────────────────────────────────────────────
     const fmtPositions = {
-      'Ace Right':          { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Ace Left':           { wr:[[14,48],[14,38],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'I-Formation Right':  { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
-      'I-Formation Left':   { wr:[[14,48],[148,48]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
-      'Shotgun Right':      { wr:[[12,48],[148,48],[132,48],[36,48]], qb:[84,64], rb:[[110,64]], fb:[] },
-      'Pistol Right':       { wr:[[12,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Right':          { wr:[[14,48],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Left':           { wr:[[14,48],[14,38],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'I-Formation Right':  { wr:[[14,48],[148,46]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
+      'I-Formation Left':   { wr:[[14,48],[148,46]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
+      'Shotgun Right':      { wr:[[12,48],[148,48],[132,48],[36,46]], qb:[84,64], rb:[[110,64]], fb:[] },
+      'Pistol Right':       { wr:[[12,48],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
       'Trips Right':        { wr:[[12,38],[130,38],[144,30],[156,38]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Pro Set Right':      { wr:[[12,48],[148,48]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
+      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Pro Set Right':      { wr:[[12,48],[148,46]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
     }
     const personnelDefaultFmt = {
       '11':'Ace Right', '12':'I-Formation Right', '21':'I-Formation Right',
@@ -3445,8 +3443,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         <rect x="0" y="0" width="200" height="100" fill="#0a1a0a" rx="3"/>
         {[50,100,150].map((x,i)=><line key={i} x1={x} y1="4" x2={x} y2="96" stroke="rgba(255,255,255,0.04)" strokeWidth="0.6" strokeDasharray="3,3"/>)}
         {/* LOS */}
-        <line x1="4" y1="52" x2="196" y2="52" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2"/>
-        <text x="8" y="50" fill="rgba(255,255,255,0.3)" fontSize="5" fontFamily="monospace">LOS</text>
+        <line x1="4" y1="46" x2="196" y2="46" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+        <text x="8" y="44" fill="rgba(255,255,255,0.35)" fontSize="5" fontFamily="monospace">LOS</text>
         {/* Strength indicator */}
         {choices.formation && (
           <text x={choices.formation.includes('Left')?20:176} y="15" textAnchor="middle" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace">STR{choices.formation.includes('Left')?'◄':'►'}</text>
@@ -3454,14 +3452,14 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* OL — 5 linemen always on LOS */}
         {[60,72,84,96,108].map((x,i)=>(
           <g key={i}>
-            <rect x={x-6} y={49} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
+            <rect x={x-6} y={46} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
               stroke={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?'#f59e0b':'none'}
               strokeWidth={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1.5:0}/>
-            <text x={x} y={47} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">{['LT','LG','C','RG','RT'][i]}</text>
+            <text x={x} y={52} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace" fontWeight="700">{['LT','LG','C','RG','RT'][i]}</text>
           </g>
         ))}
         {/* TE if tight modifier */}
-        {choices.modifier==='Tight'&&<rect x={112} y={49} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
+        {choices.modifier==='Tight'&&<rect x={112} y={46} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
         {/* WRs */}
         {fmt.wr.map(([cx,cy],i)=>{
           const labels = ['X','Z','H','Y','W']
@@ -3492,8 +3490,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* Gap arrow */}
         {gap && !isPassPlay && (
           <g>
-            <rect x={gap.x-5} y={44} width={10} height={10} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
-            <path d={`M${gap.x} 52 L${gap.x} 36`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
+            <rect x={gap.x-5} y={43} width={10} height={11} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
+            <path d={`M${gap.x} 44 L${gap.x} 30`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
             <text x={gap.x} y={35} textAnchor="middle" fill="#f59e0b" fontSize="5" fontWeight="700" fontFamily="monospace">{gap.label}</text>
           </g>
         )}
@@ -4320,7 +4318,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
               </div>
               <RotatingInfoWidget
                 sport={sport}
-                homeLocation={ct ? ct.hometown : homeLocation}
+                homeLocation={ct?.hometown || homeLocation || ''}
                 awayLocation={awayLoc}
                 nextEvent={nextEvt}
                 P={P}
@@ -4708,7 +4706,7 @@ export default function CoachIQ() {
         `}</style>
 
         {/* TOP BAR */}
-        <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
+        <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'8px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
           <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
           <CoachIQLogo size={22} brand={brand} />
           <div style={{ position:'relative', marginLeft:4 }}>
@@ -4716,10 +4714,17 @@ export default function CoachIQ() {
               {['Football','Basketball','Baseball','Soccer','Softball'].map(s=>(
                 <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾', Soccer:'⚽', Softball:'🥎' }[s]} {s}</option>
               ))}
+              <option disabled style={{ color:'#3d4559' }}>── More sports soon</option>
             </select>
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
           <div style={{ flex:1 }} />
+          {/* News Feed button — always visible */}
+          <button onClick={()=>setPage('news')} style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'4px 10px', cursor:'pointer', userSelect:'none', flexShrink:0 }}>
+            <span style={{ fontSize:11 }}>📰</span>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b9fff', fontWeight:700, letterSpacing:'0.5px' }}>News</span>
+          </button>
+          {/* Team button — always visible, separate from News */}
           <TeamQuickSwitcher
             sport={sport}
             teams={teams}
@@ -5958,7 +5963,13 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, a
           <div style={{ fontSize:8, color: likelihood > 70 ? '#4ade80' : likelihood > 40 ? '#f59e0b' : '#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:1 }}>{likelihood}% on</div>
         )}
       </div>
-    ) : null,
+    ) : (
+      <div key="noloc" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2, cursor:'pointer' }}>
+        <div style={{ fontSize:16 }}>📍</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#6b7a96', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', textAlign:'center' }}>Set Location</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:6, color:'#3d4559', textAlign:'center' }}>More → Settings</div>
+      </div>
+    ),
 
     awayWeather && awayLocation && awayLocation !== homeLocation ? (
       <div key="aw" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
