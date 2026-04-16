@@ -545,6 +545,7 @@ function FootballHoleDiagram({ P }) {
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
   const [expanded, setExpanded] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
   const [showAnim, setShowAnim] = useState(false)
   const [steps, setSteps] = useState(null)
   const [stepsLoading, setStepsLoading] = useState(false)
@@ -646,7 +647,10 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
               )}
             </div>
           )}
-          <div style={{ fontSize:10, color:P, marginTop:4 }}>{expanded ? '▲ Tap to collapse' : '▼ Tap to expand breakdown + diagram'}</div>
+          <div style={{ display:'flex', gap:10, marginTop:5, flexWrap:'wrap' }}>
+            <span style={{ fontSize:10, color:P, cursor:'pointer' }} onClick={()=>setExpanded(e=>!e)}>{expanded?'▲ Collapse':'▼ Show diagram'}</span>
+            {expanded && <span style={{ fontSize:10, color:'#6b9fff', cursor:'pointer' }} onClick={e=>{e.stopPropagation();const nb=!showBreakdown;setShowBreakdown(nb);if(nb&&!steps)loadSteps()}}>{showBreakdown?'▲ Hide breakdown':'▼ Show breakdown'}</span>}
+          </div>
         </div>
         <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
           {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
@@ -659,9 +663,9 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
         <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
           {showAnim && <div style={{ marginBottom:12 }}><PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={showAnim} key={showAnim?'shown':'hidden'} /></div>}
 
-          {stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Generating step-by-step breakdown...</div></div>}
+          {showBreakdown && stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Generating step-by-step breakdown...</div></div>}
 
-          {steps && steps.huddleCard && steps.huddleCard.length > 0 && (
+          {showBreakdown && steps && steps.huddleCard && steps.huddleCard.length > 0 && (
             <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:10, padding:12, marginBottom:12 }}>
               <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}><span style={{ fontSize:14 }}>📋</span><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card — Read This in the Huddle</div></div>
               {steps.huddleCard.map((item, i) => (
@@ -732,7 +736,16 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
                 </div>
                 {nflComp.gapExplanation && (<div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.07)', borderRadius:8, border:'1px solid rgba(239,68,68,0.2)', marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f87171', fontWeight:700, marginBottom:4 }}>The Gap — What Needs to Change</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.gapExplanation}</div></div>)}
                 {nflComp.proTip && (<div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)', marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:4 }}>One Thing to Work Toward</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.proTip}</div></div>)}
-                {nflComp.watchFor && (<div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.3)', borderRadius:8, display:'flex', alignItems:'center', gap:8 }}><span style={{ fontSize:16 }}>▶</span><div><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:2 }}>Search on YouTube</div><div style={{ fontSize:12, color:'#f59e0b', fontWeight:600 }}>{nflComp.watchFor}</div></div></div>)}
+                {nflComp.watchFor && (
+                  <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(nflComp.watchFor)} target="_blank" rel="noopener noreferrer" style={{ padding:'8px 10px', background:'rgba(239,68,68,0.08)', borderRadius:8, display:'flex', alignItems:'center', gap:8, textDecoration:'none', border:'1px solid rgba(239,68,68,0.2)', marginBottom:8 }}>
+                    <span style={{ fontSize:16 }}>▶</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#ef4444', fontWeight:700, marginBottom:2 }}>Watch on YouTube</div>
+                      <div style={{ fontSize:12, color:'#f59e0b', fontWeight:600 }}>{nflComp.watchFor}</div>
+                    </div>
+                    <span style={{ fontSize:11, color:'#ef4444' }}>→</span>
+                  </a>
+                )}
               </div>
             )}
           </div>
@@ -2425,8 +2438,8 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
           </>
         ) : (
           <>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:1, textTransform:'uppercase' }}>IQ</span>
-            <span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:P, letterSpacing:1, lineHeight:1 }}>{iq}</span>
+            <span style={{ fontSize:12 }}>📰</span>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px' }}>Feed</span>
           </>
         )}
       </div>
@@ -2474,132 +2487,220 @@ function PlayNameBuilder({ P, S, al, sport }) {
   const [result, setResult] = useState(null)
 
   const fbSteps = [
-    { id:'formation', label:'Formation', desc:'Where does the ball start?', opts:['I', 'Pro', 'Shotgun', 'Pistol', 'Wildcat', 'Empty'] },
-    { id:'backfield', label:'Backfield Action', desc:'What does the backfield do?', opts:['Dive', 'Off-Tackle', 'Sweep', 'Counter', 'Reverse', 'Toss', 'Draw', 'Trap'] },
-    { id:'hole', label:'Hole Number', desc:'Which gap? (Odd=left, Even=right)', opts:['1', '2', '3', '4', '5', '6', '7', '8'] },
-    { id:'ballCarrier', label:'Ball Carrier', desc:'Who gets the ball?', opts:['QB', 'FB', 'HB', 'WR', 'TE'] },
-    { id:'tag', label:'Tag / Modifier', desc:'Any special instruction? (optional)', opts:['None', 'Keep', 'Naked', 'Play Action', 'Boot', 'Waggle', 'Option'] },
+    { id:'formation', label:'Formation', desc:'The pre-snap alignment. This is the foundation every other call is built on.', opts:['I-Formation','Pro Set','Shotgun','Pistol','Wildcat','Empty Set','Single Back','Full House'] },
+    { id:'motion', label:'Pre-Snap Motion', desc:'A player moves before the snap to shift the defense or create a numbers advantage.', opts:['None','Jet Motion','H-Back Shift','WR Crack','Orbit Motion','Zip Motion','FB Kick Out'] },
+    { id:'strength', label:'Formation Strength', desc:'The heavy side of the formation. Tells the OL and blocking backs which way to set.', opts:['Right','Left','Over (TE right)','Under (TE left)','Twin Right','Twin Left'] },
+    { id:'playType', label:'Play Type', desc:'The core action. Every other word in the call tells players how to execute this.', opts:['Inside Run','Outside Run','Counter / Trap','Draw','Play Action Pass','Quick Pass','Dropback Pass','Screen Pass','Option / Read'] },
+    { id:'hole', label:'Hole / Gap Number', desc:'For runs — the specific gap between linemen. Odd numbers go LEFT. Even numbers go RIGHT.', opts:['0 (QB Sneak Center)','1 (LT/LG Gap — Left)','2 (RT/RG Gap — Right)','3 (LG/C Gap — Left)','4 (RG/C Gap — Right)','5 (LT Outside — Left)','6 (RT Outside — Right)','7 (TE/LT Gap — Left)','8 (TE/RT Gap — Right)'] },
+    { id:'carrier', label:'Ball Carrier / Target', desc:'Who executes the play — who carries the ball or who the QB is targeting.', opts:['QB Keep','HB Dive','FB Lead','WR Reverse','TE Drag','HB Sweep','Slot Cross','X Post Route','Z Corner Route','Y Seam Route'] },
+    { id:'tag', label:'Tag / Modifier', desc:'A tag adjusts the play at the last moment. This is what separates simple plays from professional-depth calls.', opts:['None','Naked (QB Boot)','Pass (Play Action)','Counter (Fake Opposite)','Keep (QB Run Option)','Alert (Audible Available)','Check (Line Change)','Swap (RB/WR Exchange)'] },
   ]
   const bbSteps = [
-    { id:'number', label:'Play Number', desc:'Plays are often numbered by alignment', opts:['1', '2', '3', '4', '5', 'Horns', 'Box', 'Floppy'] },
-    { id:'action', label:'Primary Action', desc:'What is the main movement?', opts:['Cut', 'Screen', 'Flare', 'Cross', 'Post', 'Curl', 'Drive', 'Clear'] },
-    { id:'ballHandler', label:'Ball Handler Role', desc:'Who initiates?', opts:['Point Guard', 'Wing', 'Big', 'Any'] },
-    { id:'tag', label:'Finish', desc:'How does it end?', opts:['Layup', 'Mid-Range', 'Three', 'Lob', 'Kick-Out'] },
+    { id:'series', label:'Play Series', desc:'The numbered series tells every player which set of cuts and screens to run.', opts:['1 Series (Guard Initiates)','2 Series (Wing Entry)','3 Series (Small Forward)','4 Series (Power Forward Elbow)','5 Series (Center Post)','Horns (Two Bigs at Elbows)','Floppy (Baseline Screens)','Box (Four Corners)'] },
+    { id:'action', label:'Primary Action', desc:'The first movement that triggers the play for all five players.', opts:['Dribble Hand-Off (DHO)','Pick and Roll','Pick and Pop','Pin-Down Screen','Flare Screen','Cross Screen','Back Screen','Elevator Screens','Motion Weak (Reverse)','Swing Action'] },
+    { id:'entry', label:'Ball Entry', desc:'How the ball moves from the guard into the scoring action.', opts:['High Post Entry','Wing Entry','Low Post Feed','Skip Pass Wide','Swing Reversal','Drag Screen Pass','Push Pass Ahead','Attack and Kick Out'] },
+    { id:'finish', label:'Finish / Counter', desc:'The scoring action — the shot or the counter when the defense takes away the first option.', opts:['Lay-Up Finish','Mid-Range Pull-Up','Catch and Shoot Three','Lob Over Top','Dump Off Low Post','Kick Out Corner Three','Re-Screen Counter','Counter Opposite Side'] },
+  ]
+  const soccerSteps = [
+    { id:'phase', label:'Phase of Play', desc:'Where your team is on the field and what moment you are in.', opts:['Build-Up from Goalkeeper','Midfield Possession','Final Third Attack','Set Piece Corner','Set Piece Free Kick','Counter-Attack Transition','High Press Trigger','Defensive Compactness'] },
+    { id:'pattern', label:'Attacking Pattern', desc:'The specific movement your players make together to create a chance.', opts:['Overlapping Run Wide','Underlapping Inside Run','Third Man Run','Wall Pass (One-Two)','Switch of Play (Long)','False Nine Drop','Striker Link Play','Overload Half-Space'] },
+    { id:'finish', label:'Finish / Decision', desc:'What the player with the ball does at the end of the pattern.', opts:['Low Cross to Near Post','High Cross Back Post','Cut Inside and Shoot','Through Ball In Behind','Pull-Back to Edge','Recycle and Switch','Hold and Combine','Long Shot Trigger'] },
   ]
   const bsbSteps = [
-    { id:'type', label:'Play Type', desc:'What kind of play?', opts:['Hit and Run', 'Squeeze', 'Double Steal', 'First and Third', 'Delayed Steal', 'Straight Steal'] },
-    { id:'count', label:'Count Trigger', desc:'When is this called?', opts:['Any Count', 'First Pitch', '2-0 or 3-0', '0-2', 'Full Count'] },
-    { id:'runners', label:'Runner Situation', desc:'Who is on base?', opts:['Runner on 1st', 'Runner on 2nd', '1st and 2nd', '1st and 3rd', 'Bases Loaded'] },
+    { id:'situation', label:'Game Situation', desc:'Situation is everything in baseball. Define it precisely before deciding anything.', opts:['Lead-Off No Outs','Runner on 1st 0 Outs','Runner on 2nd 0 Outs','1st and 3rd Any Outs','Bases Loaded','2 Outs Runners On','Must Score Immediately','Double Play Situation'] },
+    { id:'strategy', label:'Offensive Strategy', desc:'The overarching decision — how aggressive are you being at the plate and on the bases?', opts:['Work the Count (Take)','Swing at Strike One','Hit and Run On','Bunt for Base Hit','Sacrifice Bunt','Safety Squeeze','Suicide Squeeze','Delayed Steal','First to Third Double Steal'] },
+    { id:'pitcher', label:'Pitching Approach', desc:'What does your pitcher need to execute in this moment?', opts:['Throw Strikes Early','Work Corners Away','Change Speeds Often','Pitch to Contact','Power Pitch Strikeout','Intentional Walk Setup','Pitch Around (Base Open)'] },
+  ]
+  const sbSteps = [
+    { id:'situation', label:'Game Situation', desc:'Define the at-bat precisely — situation drives every decision in softball.', opts:['Lead-Off 0-0 Count','Runner on 1st 0 Outs','Runner on 2nd 0 Outs','1st and 3rd','Bases Loaded','2 Outs Runners On','Must Score Now','Pitcher in Circle'] },
+    { id:'approach', label:'Offensive Approach', desc:'The hitter and runner strategy for this at-bat.', opts:['Slap Hit for Speed','Full Swing Pull','Contact Opposite Field','Bunt for Base Hit','Sacrifice Bunt','Safety Squeeze','Drag Bunt Left Side','Fake Bunt then Slap'] },
+    { id:'baserunning', label:'Baserunning Rule', desc:'What do your runners do on this pitch? Runners must know their assignment before the pitch.', opts:['Read and React','Steal on First Move','Delayed Steal','Hold on Hit Only','Tag on Any Fly Ball','First and Third Go','Advance on Wild Pitch','Run on Contact'] },
   ]
 
-  const steps = sport === 'Basketball' ? bbSteps : sport === 'Baseball' ? bsbSteps : fbSteps
+  const steps = sport==='Basketball'?bbSteps:sport==='Baseball'?bsbSteps:sport==='Soccer'?soccerSteps:sport==='Softball'?sbSteps:fbSteps
+
+  // Live SVG diagram that builds incrementally
+  function LiveDiagram() {
+    const fmt = choices.formation
+    const holeNum = parseInt((choices.hole||'').split(' ')[0])
+    const holeX = [60,42,78,50,70,34,86,26,94][holeNum] || 60
+    const holeSide = holeNum===0?'C':holeNum%2===0?'R':'L'
+    const fmtPositions = {
+      'I-Formation':   { rb:[[60,60]], fb:[[60,56]], wr:[[18,32],[102,32]] },
+      'Pro Set':        { rb:[[50,58],[70,58]], fb:[], wr:[[15,32],[105,32]] },
+      'Shotgun':        { rb:[[78,56]], fb:[], wr:[[10,30],[38,30],[82,30],[110,30]] },
+      'Pistol':         { rb:[[60,60]], fb:[], wr:[[15,32],[105,32]] },
+      'Empty Set':      { rb:[], fb:[], wr:[[10,30],[30,32],[60,32],[90,32],[110,30]] },
+      'Single Back':    { rb:[[60,60]], fb:[], wr:[[12,30],[38,32],[102,30]] },
+      'Wildcat':        { rb:[[60,52]], fb:[], wr:[[10,30],[105,30]] },
+      'Full House':     { rb:[[48,60],[72,60]], fb:[[60,57]], wr:[[15,32],[105,32]] },
+    }
+    const pos = fmtPositions[fmt] || fmtPositions['I-Formation']
+    const qbX = fmt==='Shotgun'?60:fmt==='Wildcat'?78:60
+    const qbY = fmt==='Shotgun'||fmt==='Pistol'?56:52
+    const strColor = choices.strength?.includes('Right')||choices.strength?.includes('Twin Right') ? '#4ade80' : choices.strength?.includes('Left')||choices.strength?.includes('Twin Left') ? '#6b9fff' : P
+    const carrierColor = '#f59e0b'
+    const isCarrierHB = choices.carrier?.includes('HB')||choices.carrier?.includes('RB')
+    const isCarrierFB = choices.carrier?.includes('FB')
+    const isCarrierWR = choices.carrier?.includes('WR')||choices.carrier?.includes('Slot')||choices.carrier?.includes(' X ')||choices.carrier?.includes(' Z ')||choices.carrier?.includes(' Y ')
+    const isCarrierQB = choices.carrier?.includes('QB')||choices.carrier?.includes('Option')
+
+    if (sport === 'Football') return (
+      <svg viewBox="0 0 120 72" style={{ width:'100%', height:150 }}>
+        <rect width="120" height="72" fill="#071a07" rx="3"/>
+        <line x1="5" y1="36" x2="115" y2="36" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+        <text x="7" y="34.5" fill="rgba(255,255,255,0.18)" fontSize="4" fontFamily="monospace">LOS</text>
+        {/* OL */}
+        {[-20,-10,0,10,20].map((x,i)=>(
+          <rect key={i} x={60+x-5} y={29.5} width={10} height={8} rx={1} fill={i===2?'#e2e8f0':strColor} opacity={0.9}/>
+        ))}
+        {/* Hole indicator */}
+        {choices.hole && holeNum>=0 && (
+          <>
+            <rect x={holeX-5} y={27} width={10} height={14} rx={1} fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth={0.8}/>
+            <path d={`M${holeX} 41 L${holeX} 52`} stroke="#f59e0b" strokeWidth={2} markerEnd="url(#ah)"/>
+            <text x={holeX} y={24} textAnchor="middle" fill="#f59e0b" fontSize="5" fontWeight="900" fontFamily="monospace">{choices.hole.split(' ')[0]}</text>
+            <text x={holeX} y={19} textAnchor="middle" fill="#f59e0b" fontSize="3.5" fontFamily="monospace">{holeSide==='C'?'CENTER':holeSide==='L'?'←LEFT':'RIGHT→'}</text>
+          </>
+        )}
+        {/* QB */}
+        {choices.formation && <><circle cx={qbX} cy={qbY} r={4.5} fill={isCarrierQB?carrierColor:P} opacity={0.9}/><text x={qbX} y={qbY+1.6} textAnchor="middle" fill="white" fontSize="4" fontWeight="700" fontFamily="monospace">QB</text></>}
+        {/* FB */}
+        {choices.formation && (pos.fb||[]).map((p,i)=><g key={i}><circle cx={p[0]} cy={p[1]} r={4} fill={isCarrierFB?carrierColor:P} opacity={0.8}/><text x={p[0]} y={p[1]+1.5} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">FB</text></g>)}
+        {/* RBs */}
+        {choices.formation && (pos.rb||[]).map((p,i)=><g key={i}><circle cx={p[0]} cy={p[1]} r={4} fill={isCarrierHB?carrierColor:P} opacity={0.85}/><text x={p[0]} y={p[1]+1.5} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">HB</text></g>)}
+        {/* WRs */}
+        {choices.formation && (pos.wr||[]).map((p,i)=><circle key={i} cx={p[0]} cy={p[1]} r={3.5} fill={isCarrierWR?carrierColor:P} opacity={0.75}/>)}
+        {/* Motion arc */}
+        {choices.motion && choices.motion!=='None' && <path d="M102 32 Q80 22 60 30" stroke="#c084fc" strokeWidth={1.2} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
+        {/* Strength label */}
+        {choices.strength && <text x={choices.strength.includes('Right')?98:22} y={17} textAnchor="middle" fill={strColor} fontSize="4" fontWeight="700" fontFamily="monospace">STR▶</text>}
+        {/* Tag label */}
+        {choices.tag && choices.tag!=='None' && <text x={60} y={68} textAnchor="middle" fill="#c084fc" fontSize="5" fontWeight="700" fontFamily="monospace">{choices.tag.split(' ')[0].toUpperCase()}</text>}
+        <defs><marker id="ah" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#f59e0b"/></marker></defs>
+      </svg>
+    )
+
+    if (sport === 'Basketball') return (
+      <svg viewBox="0 0 120 80" style={{ width:'100%', height:150 }}>
+        <rect width="120" height="80" fill="#07070f" rx="3"/>
+        <path d="M10 75 Q60 8 110 75" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
+        <line x1="10" y1="75" x2="110" y2="75" stroke="rgba(255,255,255,0.09)" strokeWidth="1"/>
+        <rect x="42" y="52" width="36" height="23" rx="2" stroke="rgba(255,255,255,0.08)" strokeWidth="1" fill="none"/>
+        <circle cx="60" cy="52" r="8" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none"/>
+        {[[60,68,'PG'],[28,40,'SG'],[92,40,'SF'],[42,22,'PF'],[78,22,'C']].map(([x,y,lbl],i)=>(
+          <g key={i}><circle cx={x} cy={y} r={5} fill={P} opacity={0.85}/><text x={x} y={y+1.8} textAnchor="middle" fill="white" fontSize="4" fontWeight="700" fontFamily="monospace">{lbl}</text></g>
+        ))}
+        {choices.action?.includes('Roll') && <path d="M60 68 L60 48 L42 30" stroke="#f59e0b" strokeWidth={1.5} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
+        {choices.action?.includes('Screen') && <><line x1="42" y1="28" x2="42" y2="45" stroke="#4ade80" strokeWidth={2.5} strokeLinecap="round"/><line x1="78" y1="28" x2="78" y2="45" stroke="#4ade80" strokeWidth={2.5} strokeLinecap="round"/></>}
+        {choices.series && <text x="60" y="11" textAnchor="middle" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace">{choices.series.split(' ')[0]} SERIES</text>}
+      </svg>
+    )
+
+    if (sport === 'Baseball' || sport === 'Softball') return (
+      <svg viewBox="0 0 120 85" style={{ width:'100%', height:150 }}>
+        <rect width="120" height="85" fill="#07100a" rx="3"/>
+        <path d="M60 75 L98 45 L60 15 L22 45 Z" stroke="rgba(255,255,255,0.12)" strokeWidth="1" fill="rgba(255,255,255,0.02)"/>
+        {[[60,75],[98,45],[60,15],[22,45]].map(([x,y],i)=><rect key={i} x={x-4} y={y-4} width={8} height={8} rx={1} fill={i===0?'#f2f4f8':'#3d4559'} opacity={0.8}/>)}
+        {[[60,42],[15,65],[105,65],[60,10],[36,62],[84,62]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={3.5} fill={P} opacity={0.7}/>)}
+        {(choices.strategy?.includes('Steal')||choices.strategy?.includes('Run')||choices.approach?.includes('Steal')) && <path d="M98 45 Q78 28 60 15" stroke="#f59e0b" strokeWidth={2} fill="none" strokeDasharray="4,3" opacity={0.9}/>}
+        {(choices.strategy?.includes('Bunt')||choices.approach?.includes('Bunt')) && <line x1="60" y1="75" x2="35" y2="68" stroke="#4ade80" strokeWidth={2} opacity={0.8}/>}
+        {choices.situation && <text x="60" y="82" textAnchor="middle" fill={P} fontSize="4" fontWeight="700" fontFamily="monospace">{choices.situation.split(' ').slice(0,4).join(' ')}</text>}
+      </svg>
+    )
+
+    return (
+      <svg viewBox="0 0 120 75" style={{ width:'100%', height:150 }}>
+        <rect width="120" height="75" fill="#07100a" rx="3"/>
+        <rect x="5" y="3" width="110" height="69" rx="2" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
+        <line x1="60" y1="3" x2="60" y2="72" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+        <circle cx="60" cy="37" r="12" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none"/>
+        {[[60,10],[25,18],[60,18],[95,18],[20,35],[60,30],[100,35],[12,52],[38,52],[82,52],[108,52]].map(([x,y],i)=>(
+          <circle key={i} cx={x} cy={y} r={4} fill={P} opacity={i===0?0.6:0.85}/>
+        ))}
+        {choices.pattern?.includes('Overlap') && <path d="M12 52 L12 26 L25 18" stroke="#f59e0b" strokeWidth={1.5} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
+        {choices.pattern?.includes('Switch') && <path d="M12 52 Q60 40 108 52" stroke="#4ade80" strokeWidth={1.5} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
+        {choices.phase && <text x="60" y="71" textAnchor="middle" fill={P} fontSize="4" fontWeight="700" fontFamily="monospace">{choices.phase.split(' ').slice(0,3).join(' ')}</text>}
+      </svg>
+    )
+  }
 
   function buildName() {
-    if (sport === 'Football') {
-      const parts = []
-      if (choices.formation && choices.formation !== 'I') parts.push(choices.formation)
-      if (choices.backfield) parts.push(choices.backfield)
-      if (choices.hole) parts.push(choices.hole)
-      if (choices.ballCarrier && choices.ballCarrier !== 'HB') parts.push(choices.ballCarrier)
-      if (choices.tag && choices.tag !== 'None') parts.push(choices.tag)
-      const name = parts.join(' ')
-      const holeNum = parseInt(choices.hole)
-      const side = holeNum % 2 === 0 ? 'right' : 'left'
-      setResult({
-        name,
-        explanation: `"${choices.formation || 'I'}" = formation. "${choices.backfield}" = blocking scheme and backfield action. "${choices.hole}" = the gap between linemen (odd numbers go left, even go right — so this hits the ${side} side). ${choices.ballCarrier !== 'HB' ? '"'+choices.ballCarrier+'" = the ball carrier.' : ''} ${choices.tag !== 'None' && choices.tag ? '"'+choices.tag+'" = the QB or ball carrier tag.' : ''}`.trim()
-      })
-    } else if (sport === 'Basketball') {
-      const name = [choices.number, choices.action, choices.tag].filter(Boolean).join(' ')
-      setResult({ name, explanation: `"${choices.number}" = play series number (tells players which set). "${choices.action}" = the primary cut or action. "${choices.tag}" = how the play finishes.` })
+    if (sport==='Football') {
+      const parts=[choices.formation?.split(' ')[0],choices.strength&&choices.strength!=='Right'?choices.strength:null,choices.motion&&choices.motion!=='None'?choices.motion.split(' ')[0]:null,choices.playType?.split(' ').slice(0,2).join(' '),choices.hole?.split(' ')[0],choices.carrier,choices.tag&&choices.tag!=='None'?choices.tag.split('(')[0].trim():null].filter(Boolean)
+      const hN=parseInt((choices.hole||'0').split(' ')[0])
+      const side=hN===0?'center':hN%2===0?'right':'left'
+      setResult({ name:parts.join(' '), explanation:`"${choices.formation}" sets your alignment. "${choices.strength}" tells the OL their strong side. Play type "${choices.playType}" is the core action. Hole ${choices.hole} sends the ball ${side}. "${choices.carrier}" is the primary player. ${choices.tag!=='None'?'"'+choices.tag+'" modifies the play at execution.':''}`.trim(), ytSearch:choices.playType+' '+choices.formation+' football drill tutorial' })
+    } else if (sport==='Basketball') {
+      const name=[choices.series?.split(' ')[0],choices.action?.split(' ').slice(0,2).join(' '),choices.finish?.split(' ').slice(0,2).join(' ')].filter(Boolean).join(' ')
+      setResult({ name, explanation:`Series "${choices.series}" calls the set. Action "${choices.action}" is the trigger. Entry "${choices.entry}" moves the ball. Finish "${choices.finish}" is the scoring action.`, ytSearch:choices.action+' basketball play drill' })
+    } else if (sport==='Soccer') {
+      const name=[choices.phase?.split(' ').slice(0,2).join(' '),choices.pattern?.split(' ').slice(0,2).join(' ')].filter(Boolean).join(' — ')
+      setResult({ name, explanation:`Phase "${choices.phase}" — where on the field. Pattern "${choices.pattern}" — how players move. Finish "${choices.finish}" — the final decision.`, ytSearch:choices.pattern+' soccer coaching drill' })
     } else {
-      const name = choices.type || 'Play'
-      setResult({ name, explanation: `"${choices.type}" = the strategic action. Called when: ${choices.count||'any count'} with ${choices.runners||'runner on base'}.` })
+      const name=[(choices.strategy||choices.approach)?.split(' ').slice(0,3).join(' '),choices.situation?.split(' ').slice(0,3).join(' ')].filter(Boolean).join(' / ')
+      setResult({ name, explanation:`Situation: "${choices.situation}." Approach: "${choices.approach||choices.strategy}." Baserunning / Pitching: "${choices.baserunning||choices.pitcher}."`, ytSearch:(choices.strategy||choices.approach||'')+' '+sport.toLowerCase()+' coaching' })
     }
   }
 
   function reset() { setStep(0); setChoices({}); setResult(null) }
-
-  const currentStep = steps[step]
+  const cur = steps[step]
 
   return (
     <Card>
       <CardHead icon="✏️" title="Play Name Builder" tag="LEARN" tagColor={P} accent={P} />
       <div style={{ padding:14 }}>
-        <p style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6, marginBottom:12 }}>Build a play name step by step — learn exactly how coaching terminology is constructed.</p>
-
+        <p style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, marginBottom:10 }}>Build a professional play call step by step. The diagram updates with every choice you make.</p>
         {!result ? (
           <>
-            <div style={{ display:'flex', gap:4, marginBottom:12 }}>
-              {steps.map((_,i) => <div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<=step?P:'#1e2330' }} />)}
+            <div style={{ display:'flex', gap:4, marginBottom:8 }}>
+              {steps.map((_,i)=><div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<=step?P:'#1e2330', transition:'background 0.2s' }}/>)}
+            </div>
+            <div style={{ background:'#0a140a', borderRadius:6, border:'1px solid #1e2330', overflow:'hidden', marginBottom:10 }}>
+              <div style={{ fontSize:8, letterSpacing:1.5, color:'#3d4559', textTransform:'uppercase', fontWeight:700, padding:'4px 10px', borderBottom:'1px solid #1e2330' }}>Live Diagram — updates with each selection</div>
+              <LiveDiagram />
             </div>
             <div style={{ marginBottom:10 }}>
-              <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Step {step+1} of {steps.length} — {currentStep.label}</div>
-              <div style={{ fontSize:12, color:'#6b7a96', marginBottom:10 }}>{currentStep.desc}</div>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-                {currentStep.opts.map(opt => (
-                  <button key={opt} onClick={()=>setChoices(c=>({...c,[currentStep.id]:opt}))} style={{ padding:'7px 14px', borderRadius:4, fontSize:12, border:`1px solid ${choices[currentStep.id]===opt?P:'#1e2330'}`, background:choices[currentStep.id]===opt?al(P,0.15):'#161922', color:choices[currentStep.id]===opt?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{opt}</button>
+              <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Step {step+1} of {steps.length} — {cur.label}</div>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{cur.desc}</div>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+                {cur.opts.map(opt=>(
+                  <button key={opt} onClick={()=>setChoices(c=>({...c,[cur.id]:opt}))} style={{ padding:'7px 11px', borderRadius:4, fontSize:11, border:`1px solid ${choices[cur.id]===opt?P:'#1e2330'}`, background:choices[cur.id]===opt?al(P,0.15):'#161922', color:choices[cur.id]===opt?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, transition:'all 0.15s' }}>{opt}</button>
                 ))}
               </div>
             </div>
-            {choices[currentStep.id] && (
-              <div style={{ marginTop:8, padding:'6px 10px', background:al(P,0.08), borderRadius:4, fontSize:11, color:P, fontFamily:"'Barlow Condensed',sans-serif" }}>
-                Selected: <strong>{choices[currentStep.id]}</strong>
-                {step > 0 && <span style={{ marginLeft:8, color:'#6b7a96' }}>Play so far: {steps.slice(0,step+1).map(s=>choices[s.id]).filter(Boolean).join(' ')}</span>}
+            {choices[cur.id] && (
+              <div style={{ padding:'6px 10px', background:al(P,0.08), borderRadius:4, fontSize:11, color:P, marginBottom:8 }}>
+                {step>0&&<span style={{ color:'#6b7a96' }}>Built: </span>}
+                <strong>{steps.slice(0,step+1).map(s=>choices[s.id]).filter(Boolean).join(' · ')}</strong>
               </div>
             )}
-            <div style={{ display:'flex', gap:8, marginTop:12 }}>
-              {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
-              {step < steps.length-1 && <button onClick={()=>choices[currentStep.id]&&setStep(s=>s+1)} disabled={!choices[currentStep.id]} style={{ flex:2, padding:'9px', background:choices[currentStep.id]?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:choices[currentStep.id]?'pointer':'not-allowed', letterSpacing:'1px' }}>NEXT →</button>}
-              {step === steps.length-1 && <button onClick={buildName} disabled={!choices[currentStep.id]} style={{ flex:2, padding:'9px', background:choices[currentStep.id]?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:choices[currentStep.id]?'pointer':'not-allowed', letterSpacing:'1px' }}>BUILD NAME →</button>}
+            <div style={{ display:'flex', gap:8 }}>
+              {step>0&&<button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
+              {step<steps.length-1&&<button onClick={()=>choices[cur.id]&&setStep(s=>s+1)} disabled={!choices[cur.id]} style={{ flex:2, padding:'9px', background:choices[cur.id]?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:choices[cur.id]?'pointer':'not-allowed', letterSpacing:'1px' }}>NEXT →</button>}
+              {step===steps.length-1&&<button onClick={buildName} disabled={!choices[cur.id]} style={{ flex:2, padding:'9px', background:choices[cur.id]?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:choices[cur.id]?'pointer':'not-allowed', letterSpacing:'1px' }}>BUILD CALL →</button>}
             </div>
           </>
         ) : (
           <div style={{ animation:'fadeIn 0.3s ease' }}>
-            <div style={{ padding:'14px', background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:8, marginBottom:12, textAlign:'center' }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Your Play Name</div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:900, fontSize:26, color:'#f2f4f8', letterSpacing:1 }}>{result.name}</div>
+            <div style={{ background:'#0a140a', borderRadius:6, border:'1px solid #1e2330', overflow:'hidden', marginBottom:10 }}>
+              <LiveDiagram/>
             </div>
-            <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:12 }}>
-              <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Why it is called this</div>
+            <div style={{ padding:'12px', background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:8, marginBottom:10, textAlign:'center' }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:5 }}>Your Play Call</div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:900, fontSize:20, color:'#f2f4f8', letterSpacing:1, lineHeight:1.3 }}>{result.name}</div>
+            </div>
+            <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:10 }}>
+              <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:5 }}>Why it is called this</div>
               <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.7 }}>{result.explanation}</div>
             </div>
-            <button onClick={reset} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>BUILD ANOTHER PLAY NAME</button>
+            {result.ytSearch&&<a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(result.ytSearch)} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 12px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:6, textDecoration:'none', marginBottom:10 }}><span style={{ fontSize:16 }}>▶</span><div><div style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WATCH ON YOUTUBE</div><div style={{ fontSize:11, color:'#6b7a96' }}>{result.ytSearch}</div></div><span style={{ marginLeft:'auto', fontSize:11, color:'#ef4444' }}>→</span></a>}
+            <button onClick={reset} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>BUILD ANOTHER →</button>
           </div>
         )}
       </div>
     </Card>
   )
-}
-
-
-// ─── RULEBOOK COMPONENT ───────────────────────────────────────────────────────
-const RULEBOOK_LINKS = {
-  Football: [
-    { name:'NFHS Football Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/football/', level:'High School' },
-    { name:'Pop Warner Rulebook', org:'Pop Warner Little Scholars', url:'https://www.popwarner.com/Default.aspx?tabid=1441239', level:'Youth' },
-    { name:'USA Football Rules', org:'USA Football', url:'https://usafootball.com/programs/heads-up-football/', level:'Youth / All Levels' },
-  ],
-  Basketball: [
-    { name:'NFHS Basketball Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/basketball/', level:'High School' },
-    { name:'NBA Official Rules', org:'National Basketball Association', url:'https://official.nba.com/rulebook/', level:'Professional Reference' },
-    { name:'USA Basketball', org:'USA Basketball', url:'https://www.usab.com/youth/resources.aspx', level:'Youth / All Levels' },
-  ],
-  Baseball: [
-    { name:'Official Baseball Rules', org:'Major League Baseball', url:'https://www.mlb.com/official-information/umpires/rule-book', level:'Official Rules' },
-    { name:'Little League Rulebook', org:'Little League International', url:'https://www.littleleague.org/playing-rules/', level:'Youth' },
-    { name:'NFHS Baseball Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/baseball/', level:'High School' },
-  ],
-  Soccer: [
-    { name:'Laws of the Game', org:'FIFA / IFAB', url:'https://www.theifab.com/laws-of-the-game/overview/', level:'Official Rules' },
-    { name:'US Youth Soccer', org:'US Youth Soccer', url:'https://www.usyouthsoccer.org/resources/rules/', level:'Youth' },
-    { name:'AYSO Rules', org:'American Youth Soccer Organization', url:'https://www.ayso.org/resources/rules-regulations/', level:'Recreational Youth' },
-  ],
-  Softball: [
-    { name:'USA Softball Official Rules', org:'USA Softball / ASA', url:'https://www.usasoftball.com/rules/', level:'Official Rules' },
-    { name:'Little League Softball', org:'Little League International', url:'https://www.littleleague.org/playing-rules/softball/', level:'Youth' },
-    { name:'NFHS Softball Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/softball/', level:'High School' },
-  ],
 }
 
 function RulebookPage({ sport, P, al, callAI }) {
@@ -2626,16 +2727,20 @@ function RulebookPage({ sport, P, al, callAI }) {
         <CardHead icon="📜" title={sport+' Rulebook'} tag="OFFICIAL RULES" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
           <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, marginBottom:12 }}>Official rules and governing body resources for {sport}. Always verify rules with your specific league before each season.</div>
+          <div style={{ fontSize:10, color:'#6b7a96', marginBottom:10, lineHeight:1.5, padding:'7px 10px', background:'rgba(245,158,11,0.06)', borderRadius:4, border:'1px solid rgba(245,158,11,0.15)' }}>⚠️ Links open official organization homepages only. Use Search to find specific rule documents.</div>
           {links.map((link,i) => (
-            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', border:`1px solid ${al(P,0.2)}`, borderRadius:6, marginBottom:8, textDecoration:'none', borderLeft:`3px solid ${P}` }}>
+            <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', border:`1px solid ${al(P,0.2)}`, borderRadius:6, marginBottom:8, borderLeft:`3px solid ${P}` }}>
               <span style={{ fontSize:18, flexShrink:0, marginTop:1 }}>📋</span>
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:2 }}>{link.name}</div>
                 <div style={{ fontSize:10, color:'#6b7a96' }}>{link.org}</div>
                 <div style={{ fontSize:9, color:P, marginTop:2, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{link.level}</div>
               </div>
-              <span style={{ fontSize:12, color:P, flexShrink:0 }}>→</span>
-            </a>
+              <div style={{ display:'flex', flexDirection:'column', gap:4, flexShrink:0 }}>
+                <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:`1px solid ${al(P,0.4)}`, borderRadius:3, textDecoration:'none', whiteSpace:'nowrap', display:'block', textAlign:'center' }}>VISIT →</a>
+                <a href={'https://www.google.com/search?q='+encodeURIComponent(link.search)} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:'1px solid #1e2330', borderRadius:3, textDecoration:'none', whiteSpace:'nowrap', display:'block', textAlign:'center' }}>SEARCH</a>
+              </div>
+            </div>
           ))}
         </div>
       </Card>
@@ -2654,9 +2759,8 @@ function RulebookPage({ sport, P, al, callAI }) {
               <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:6, marginBottom:8 }}>
                 <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Governing Body</div>
                 <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{leagueResult.governingBody}</div>
-                {leagueResult.officialUrl && leagueResult.officialUrl !== 'unknown' && (
-                  <a href={leagueResult.officialUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:P, display:'block', marginTop:4 }}>{leagueResult.officialUrl} →</a>
-                )}
+                <a href={'https://www.google.com/search?q='+encodeURIComponent(leagueResult.governingBody+' '+sport+' official rules')} target="_blank" rel="noopener noreferrer" style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:11, color:P, marginTop:6, padding:'4px 10px', background:al(P,0.1), borderRadius:3, textDecoration:'none' }}>🔍 Search for official rules →</a>
+                <div style={{ fontSize:9, color:'#3d4559', marginTop:3, fontStyle:'italic' }}>Opens Google. CoachIQ is not responsible for third-party search results.</div>
               </div>
               {leagueResult.commonModifications && leagueResult.commonModifications.length > 0 && (
                 <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:8 }}>
@@ -2850,7 +2954,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   async function loadFeed() {
     setFeedLoading(true)
     try {
-      const raw = await callAI('You are an expert '+sport+' coaching knowledge curator. Generate a daily coaching feed SPECIFICALLY for a youth '+sport+' coach. Every item must be specific to '+sport+', not generic sports advice. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
+      const raw = await callAI('You are an expert '+sport+' coaching knowledge curator. Generate a daily coaching feed SPECIFICALLY for youth '+sport+' coaches. Every item must be specific to '+sport+'. Include a searchQuery (Google search terms) and ytSearch (YouTube terms) for each item. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setFeed(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
     } catch(e) { setFeed({ items: [] }) }
@@ -3024,6 +3128,10 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
               {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
             </div>
             <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div>
+            <div style={{ display:'flex', gap:6, marginTop:6, flexWrap:'wrap' }}>
+              {item.searchQuery && <a href={'https://www.google.com/search?q='+encodeURIComponent(item.searchQuery+' coaching')} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'2px 7px', background:'rgba(107,154,255,0.1)', borderRadius:3, border:'1px solid rgba(107,154,255,0.2)', textDecoration:'none' }}>🔍 Read more</a>}
+              {item.ytSearch && <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(item.ytSearch+' '+sport)} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'2px 7px', background:'rgba(239,68,68,0.1)', borderRadius:3, border:'1px solid rgba(239,68,68,0.2)', textDecoration:'none' }}>▶ Watch</a>}
+            </div>
           </div>
         ))}
       </div>
@@ -3143,6 +3251,56 @@ function Onboarding({ onLaunch, brand='Red — C+IQ colored' }) {
           <span style={{ fontSize:11, color:'#3d4559' }}>You can create and manage teams from the home screen</span>
         </div>
       </div>
+    </div>
+  )
+}
+
+
+// ─── NAV BUTTON WITH LONG PRESS ──────────────────────────────────────────────
+function NavButton({ id, icon, label, submenu, isActive, P, al, setPage }) {
+  const [showSub, setShowSub] = useState(false)
+  const pressTimer = useRef(null)
+
+  function handlePressStart() {
+    if (!submenu || submenu.length === 0) return
+    pressTimer.current = setTimeout(() => setShowSub(true), 450)
+  }
+
+  function handlePressEnd() {
+    clearTimeout(pressTimer.current)
+  }
+
+  function handleClick() {
+    if (!showSub) setPage(id)
+  }
+
+  return (
+    <div style={{ flex:1, position:'relative' }}>
+      {showSub && (
+        <>
+          <div onClick={()=>setShowSub(false)} style={{ position:'fixed', inset:0, zIndex:90 }} />
+          <div style={{ position:'absolute', bottom:'100%', left:'50%', transform:'translateX(-50%)', background:'#0f1219', border:`1px solid ${al(P,0.35)}`, borderRadius:8, padding:6, zIndex:100, minWidth:110, boxShadow:'0 -8px 24px rgba(0,0,0,0.7)', animation:'fadeIn 0.15s ease', marginBottom:6 }}>
+            <div style={{ fontSize:8, letterSpacing:1.5, color:'#3d4559', textTransform:'uppercase', fontWeight:700, padding:'3px 8px 5px', borderBottom:'1px solid #1e2330', marginBottom:4 }}>{label}</div>
+            {(submenu||[]).map((item,i) => (
+              <div key={i} onClick={()=>{ setPage(id); setShowSub(false) }} style={{ padding:'7px 10px', cursor:'pointer', fontSize:12, color:'#f2f4f8', borderRadius:4, display:'flex', alignItems:'center', gap:6 }} onMouseEnter={e=>e.currentTarget.style.background=al(P,0.1)} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                {item.label}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      <button
+        onClick={handleClick}
+        onMouseDown={handlePressStart}
+        onMouseUp={handlePressEnd}
+        onTouchStart={handlePressStart}
+        onTouchEnd={handlePressEnd}
+        style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:50 }}
+      >
+        {isActive && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2, background:P }} />}
+        <span style={{ fontSize:14, color:isActive?P:'#3d4559' }}>{icon}</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:isActive?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
+      </button>
     </div>
   )
 }
@@ -3300,12 +3458,8 @@ export default function CoachIQ() {
 
         {/* BOTTOM NAV */}
         <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:'min(640px,100%)', background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
-          {NAV_ITEMS.map(({ id, icon, label }) => (
-            <button key={id} onClick={()=>setPage(id)} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative' }}>
-              {page===id && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2, background:P }} />}
-              <span style={{ fontSize:14, color:page===id?P:'#3d4559' }}>{icon}</span>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page===id?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
-            </button>
+          {NAV_ITEMS.map(({ id, icon, label, submenu }) => (
+            <NavButton key={id} id={id} icon={icon} label={label} submenu={submenu} isActive={page===id} P={P} al={al} setPage={setPage} />
           ))}
         </div>
       </div>
