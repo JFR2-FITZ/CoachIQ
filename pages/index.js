@@ -979,8 +979,11 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
       const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
       const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
       const raw = await callAI('You are a ' + sportName + ' coordinator. The base play is: "' + play.name + '" (' + play.type + '). ' + play.note + ' Generate exactly 3 play variations that use the same core concept but change one element each time. Return ONLY valid JSON: {"variations":[{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"},{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"},{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"}]}')
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      const data = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1))
+      let s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      s = s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/,\s*([\]}])/g,'$1')
+      const a2 = s.indexOf('{'), b2 = s.lastIndexOf('}')
+      if (a2 < 0 || b2 <= a2) throw new Error('No JSON')
+      const data = JSON.parse(s.slice(a2, b2+1))
       setVariations(data.variations || [])
       setShowVariations(true)
     } catch(e) { setVariations([]) }
@@ -3967,13 +3970,19 @@ function NewsPage({ P, S, al, sport, callAI }) {
                    : channelId==='sportNews' ? PROMPTS.sportNews(sport)
                    : PROMPTS.allNews()
       const raw = await callAI(prompt)
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      const parsed = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1))
-      const items = parsed.items || []
-      sessionStorage.setItem(cacheKey, JSON.stringify(items))
-      setChannels(c => ({ ...c, [channelId]: { items, loading:false, loaded:true } }))
+      if (!raw || raw.trim() === '') throw new Error('Empty response from AI')
+      let s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      s = s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/,\s*([\]}])/g,'$1')
+      const a = s.indexOf('{'), b = s.lastIndexOf('}')
+      if (a < 0 || b <= a) throw new Error('No JSON in response')
+      const parsed = JSON.parse(s.slice(a, b+1))
+      const items = (parsed.items || []).filter(i => i && i.title && i.body)
+      if (items.length === 0) throw new Error('No valid items in response')
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(items)) } catch(e2){}
+      setChannels(c => ({ ...c, [channelId]: { items, loading:false, loaded:true, error:null } }))
     } catch(e) {
-      setChannels(c => ({ ...c, [channelId]: { items:[], loading:false, loaded:true } }))
+      console.error('NewsPage loadChannel error:', channelId, e.message)
+      setChannels(c => ({ ...c, [channelId]: { items:[], loading:false, loaded:true, error:e.message } }))
     }
   }
 
@@ -4108,7 +4117,8 @@ function NewsPage({ P, S, al, sport, callAI }) {
       {!activeChData.loading && activeChData.items.length === 0 && (
         <div style={{ textAlign:'center', padding:'40px 20px' }}>
           <div style={{ fontSize:32, marginBottom:8 }}>📰</div>
-          <div style={{ fontSize:13, color:'#3d4559', marginBottom:12 }}>No content loaded yet</div>
+          <div style={{ fontSize:13, color:'#3d4559', marginBottom:4 }}>No content loaded yet</div>
+          {activeChData.error && <div style={{ fontSize:10, color:'#ef4444', marginBottom:8, maxWidth:280, textAlign:'center', lineHeight:1.4 }}>Error: {activeChData.error}</div>}
           <button onClick={()=>refreshChannel(activeChannel)} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>LOAD FEED</button>
         </div>
       )}
@@ -4921,6 +4931,12 @@ export default function CoachIQ() {
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="CoachIQ" />
+        <meta name="application-name" content="CoachIQ" />
+        <meta name="theme-color" content="#07090d" />
+        <meta name="description" content="AI-powered coaching intelligence for youth sports coaches" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
       </Head>
       <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
         <style>{`
@@ -5311,7 +5327,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
       </div>
 
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={null} startExpanded={true} />
+      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setSection('roster')} />
 
       {!currentTeam ? (
         <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
@@ -5566,6 +5582,8 @@ function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
 }
 
 
+// ─── MASCOT BUILDER ───────────────────────────────────────────────────────────
+
 function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab, startExpanded=false }) {
   const [mode, setMode] = useState('view')
   const [showMascotBuilder, setShowMascotBuilder] = useState(false)
@@ -5724,6 +5742,12 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                     ))}
                   </div>
                 </div>
+                {/* Create custom mascot button */}
+                <button onClick={()=>setShowMascotBuilder(true)} style={{ marginTop:6, width:'100%', padding:'6px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>
+                  ✏️ CREATE CUSTOM MASCOT
+                </button>
+                {/* Mascot Builder Modal */}
+                {showMascotBuilder && <MascotBuilder P={P} al={al} onClose={()=>setShowMascotBuilder(false)} onSave={(customMascot)=>{ setForm(f=>({...f, mascot:customMascot.id, _customMascotSvg:customMascot.customSvg})); setShowMascotBuilder(false) }} />}
                 {[['primary','Primary'],['secondary','Secondary'],['accent1','Accent 1'],['accent2','Accent 2']].map(([key,label])=>(
                   <div key={key} style={{ marginBottom:10 }}>
                     <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:5, display:'block' }}>{label} Color</label>
