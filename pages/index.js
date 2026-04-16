@@ -12,59 +12,356 @@ const BRAND_PALETTES = {
 
 
 // ─── MASCOTS ──────────────────────────────────────────────────────────────────
+// ─── SVG MASCOT LIBRARY ───────────────────────────────────────────────────────
+// First 10 = free. 11-50 = premium (shown grayed with lock)
+// SVGs are head/bust style — fierce, accurate to real sports logos
+
+const MASCOT_SVGS = {
+  eagles: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Eagle head facing right, fierce expression -->
+    <ellipse cx="32" cy="28" rx="14" ry="12" fill="${col}"/>
+    <!-- Beak -->
+    <path d="M44 26 L52 24 L50 28 L44 28Z" fill="#f59e0b"/>
+    <!-- Eye -->
+    <circle cx="40" cy="22" r="3.5" fill="white"/>
+    <circle cx="41" cy="22" r="2" fill="#1a1a1a"/>
+    <circle cx="41.5" cy="21.5" r="0.6" fill="white"/>
+    <!-- Fierce brow -->
+    <path d="M36 18 L44 20" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+    <!-- White head patch -->
+    <ellipse cx="33" cy="24" rx="8" ry="6" fill="white" opacity="0.9"/>
+    <!-- Wing suggestion -->
+    <path d="M20 32 Q14 40 18 48 Q24 44 28 36" fill="${col}" opacity="0.9"/>
+    <path d="M18 34 Q10 42 15 50 Q22 46 26 38" fill="${col}" opacity="0.7"/>
+  </svg>`,
+
+  hawks: (col='#D4600A') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <ellipse cx="31" cy="27" rx="13" ry="11" fill="${col}"/>
+    <path d="M43 25 L51 22 L49 27 L43 27Z" fill="#f59e0b"/>
+    <circle cx="39" cy="21" r="3.5" fill="white"/>
+    <circle cx="40" cy="21" r="2" fill="#1a1a1a"/>
+    <circle cx="40.5" cy="20.5" r="0.6" fill="white"/>
+    <path d="M35 17 L43 19" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M22 32 Q12 38 16 48 Q24 44 28 34" fill="${col}" opacity="0.85"/>
+    <ellipse cx="32" cy="23" rx="7" ry="5" fill="#f59e0b" opacity="0.6"/>
+  </svg>`,
+
+  tigers: (col='#f59e0b') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Tiger head — round, fierce -->
+    <circle cx="30" cy="30" r="18" fill="${col}"/>
+    <!-- Stripes -->
+    <path d="M18 22 Q22 25 18 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <path d="M42 22 Q38 25 42 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <path d="M24 16 Q27 20 24 24" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M36 16 Q33 20 36 24" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <!-- White face mask -->
+    <ellipse cx="30" cy="33" rx="10" ry="9" fill="white" opacity="0.9"/>
+    <!-- Eyes -->
+    <ellipse cx="24" cy="26" rx="4" ry="3" fill="#1a6b1a"/>
+    <circle cx="24" cy="26" r="2" fill="#1a1a1a"/>
+    <circle cx="24.5" cy="25.5" r="0.6" fill="white"/>
+    <ellipse cx="36" cy="26" rx="4" ry="3" fill="#1a6b1a"/>
+    <circle cx="36" cy="26" r="2" fill="#1a1a1a"/>
+    <circle cx="36.5" cy="25.5" r="0.6" fill="white"/>
+    <!-- Nose -->
+    <ellipse cx="30" cy="32" rx="3" ry="2" fill="#e88b00"/>
+    <!-- Mouth -->
+    <path d="M27 35 Q30 38 33 35" stroke="#1a1a1a" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    <path d="M30 35 L30 38" stroke="#1a1a1a" strokeWidth="1" strokeLinecap="round"/>
+    <!-- Ears -->
+    <path d="M17 18 L20 12 L25 18" fill="${col}"/>
+    <path d="M43 18 L40 12 L35 18" fill="${col}"/>
+    <path d="M18 18 L20 14 L24 18" fill="#d4600a"/>
+    <path d="M42 18 L40 14 L36 18" fill="#d4600a"/>
+    <!-- Whisker dots -->
+    <circle cx="22" cy="33" r="0.8" fill="#1a1a1a"/>
+    <circle cx="24" cy="34" r="0.8" fill="#1a1a1a"/>
+    <circle cx="38" cy="33" r="0.8" fill="#1a1a1a"/>
+    <circle cx="36" cy="34" r="0.8" fill="#1a1a1a"/>
+  </svg>`,
+
+  lions: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Mane -->
+    <circle cx="30" cy="30" r="20" fill="#8B4513"/>
+    <!-- Mane detail -->
+    ${Array.from({length:12},(_,i)=>`<ellipse cx="${30+18*Math.cos(i*30*Math.PI/180)}" cy="${30+18*Math.sin(i*30*Math.PI/180)}" rx="5" ry="3" fill="#6B3410" transform="rotate(${i*30} ${30+18*Math.cos(i*30*Math.PI/180)} ${30+18*Math.sin(i*30*Math.PI/180)})"/>`).join('')}
+    <!-- Face -->
+    <circle cx="30" cy="30" r="14" fill="${col}"/>
+    <ellipse cx="30" cy="33" rx="10" ry="9" fill="#f59e0b" opacity="0.6"/>
+    <!-- Eyes -->
+    <ellipse cx="24" cy="26" rx="3.5" ry="3" fill="#f0c040"/>
+    <circle cx="24" cy="26" r="2" fill="#1a1a1a"/>
+    <circle cx="24.5" cy="25.5" r="0.6" fill="white"/>
+    <ellipse cx="36" cy="26" rx="3.5" ry="3" fill="#f0c040"/>
+    <circle cx="36" cy="26" r="2" fill="#1a1a1a"/>
+    <circle cx="36.5" cy="25.5" r="0.6" fill="white"/>
+    <!-- Brow -->
+    <path d="M21 22 L27 24" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M39 22 L33 24" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+    <!-- Nose -->
+    <ellipse cx="30" cy="32" rx="3.5" ry="2.5" fill="#8B3010"/>
+    <!-- Mouth -->
+    <path d="M26 36 Q30 40 34 36" stroke="#1a1a1a" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    <path d="M30 35 L30 38" stroke="#1a1a1a" strokeWidth="1" strokeLinecap="round"/>
+  </svg>`,
+
+  bears: (col='#8B4513') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <circle cx="30" cy="30" r="18" fill="${col}"/>
+    <!-- Ears -->
+    <circle cx="18" cy="16" r="7" fill="${col}"/>
+    <circle cx="42" cy="16" r="7" fill="${col}"/>
+    <circle cx="18" cy="16" r="4" fill="#5a2d0c"/>
+    <circle cx="42" cy="16" r="4" fill="#5a2d0c"/>
+    <!-- Face -->
+    <ellipse cx="30" cy="33" rx="11" ry="9" fill="#c08040"/>
+    <!-- Eyes -->
+    <circle cx="24" cy="26" r="4" fill="#1a1a1a"/>
+    <circle cx="36" cy="26" r="4" fill="#1a1a1a"/>
+    <circle cx="24.8" cy="25.2" r="1.2" fill="white"/>
+    <circle cx="36.8" cy="25.2" r="1.2" fill="white"/>
+    <!-- Brow - fierce -->
+    <path d="M20 21 L28 24" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M40 21 L32 24" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"/>
+    <!-- Snout -->
+    <ellipse cx="30" cy="33" rx="7" ry="5" fill="#a06030"/>
+    <ellipse cx="30" cy="31" rx="4" ry="2.5" fill="#1a1a1a"/>
+    <!-- Mouth -->
+    <path d="M26 36 Q30 40 34 36" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M30 35 L30 37" stroke="#1a1a1a" strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>`,
+
+  wolves: (col='#607080') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Wolf head — elongated snout -->
+    <ellipse cx="30" cy="28" rx="16" ry="14" fill="${col}"/>
+    <!-- Ears pointy -->
+    <path d="M17 20 L14 8 L22 16" fill="${col}"/>
+    <path d="M43 20 L46 8 L38 16" fill="${col}"/>
+    <path d="M18 19 L15 10 L21 16" fill="#3a2a2a"/>
+    <path d="M42 19 L45 10 L39 16" fill="#3a2a2a"/>
+    <!-- Face -->
+    <ellipse cx="30" cy="32" rx="12" ry="10" fill="#9090a0"/>
+    <!-- Eyes - yellow, fierce -->
+    <ellipse cx="24" cy="25" rx="4" ry="3.5" fill="#c0a000"/>
+    <ellipse cx="24" cy="25" rx="2" ry="2.5" fill="#1a1a1a"/>
+    <circle cx="24.5" cy="24" r="0.8" fill="white"/>
+    <ellipse cx="36" cy="25" rx="4" ry="3.5" fill="#c0a000"/>
+    <ellipse cx="36" cy="25" rx="2" ry="2.5" fill="#1a1a1a"/>
+    <circle cx="36.5" cy="24" r="0.8" fill="white"/>
+    <!-- Brow -->
+    <path d="M20 20 L27 23" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
+    <path d="M40 20 L33 23" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
+    <!-- Snout elongated -->
+    <ellipse cx="30" cy="34" rx="8" ry="6" fill="#b0b0c0"/>
+    <ellipse cx="30" cy="30" rx="4.5" ry="3" fill="#1a1a1a"/>
+    <!-- Teeth showing -->
+    <path d="M25 38 Q30 42 35 38" stroke="#1a1a1a" strokeWidth="1" fill="none"/>
+    <rect x="27" y="37" width="2.5" height="3" rx="0.5" fill="white"/>
+    <rect x="30.5" y="37" width="2.5" height="3" rx="0.5" fill="white"/>
+  </svg>`,
+
+  sharks: (col='#1565C0') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Shark head facing right -->
+    <ellipse cx="32" cy="30" rx="18" ry="11" fill="${col}"/>
+    <!-- Dorsal fin -->
+    <path d="M28 19 L32 6 L38 19" fill="${col}"/>
+    <!-- White belly -->
+    <ellipse cx="32" cy="34" rx="14" ry="7" fill="white" opacity="0.85"/>
+    <!-- Eye black small -->
+    <circle cx="38" cy="26" r="3" fill="#1a1a1a"/>
+    <circle cx="38.5" cy="25.5" r="0.8" fill="white"/>
+    <!-- Mouth with teeth -->
+    <path d="M44 28 Q50 30 44 34" fill="white" opacity="0.9"/>
+    <path d="M44 28 L50 30 L44 34" fill="${col}"/>
+    <!-- Teeth -->
+    <path d="M44 28 L47 31 L44 32" fill="white"/>
+    <path d="M47 29 L50 30 L47 33" fill="white"/>
+    <!-- Gills -->
+    <path d="M22 24 Q20 30 22 36" stroke="#0d4a8b" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    <path d="M25 23 Q23 30 25 37" stroke="#0d4a8b" strokeWidth="1" fill="none" strokeLinecap="round"/>
+    <!-- Pectoral fin -->
+    <path d="M20 32 Q10 38 14 46 Q22 42 24 36" fill="${col}" opacity="0.85"/>
+  </svg>`,
+
+  dragons: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Dragon head -->
+    <ellipse cx="31" cy="28" rx="16" ry="12" fill="${col}"/>
+    <!-- Horns -->
+    <path d="M22 18 L18 8 L25 15" fill="#8B1a1a"/>
+    <path d="M38 18 L42 8 L35 15" fill="#8B1a1a"/>
+    <!-- Spiky ridge -->
+    <path d="M20 16 L23 10 L26 16 L29 10 L32 16 L35 10 L38 16" fill="#8B1a1a" stroke="none"/>
+    <!-- Face -->
+    <ellipse cx="31" cy="31" rx="12" ry="9" fill="#a02020"/>
+    <!-- Eyes - glowing green -->
+    <ellipse cx="24" cy="25" rx="4" ry="3.5" fill="#00c040"/>
+    <ellipse cx="24" cy="25" rx="2" ry="2.8" fill="#1a1a1a"/>
+    <circle cx="24.5" cy="24" r="0.8" fill="white"/>
+    <ellipse cx="38" cy="25" rx="4" ry="3.5" fill="#00c040"/>
+    <ellipse cx="38" cy="25" rx="2" ry="2.8" fill="#1a1a1a"/>
+    <circle cx="38.5" cy="24" r="0.8" fill="white"/>
+    <!-- Snout -->
+    <ellipse cx="31" cy="33" rx="9" ry="6" fill="#b02828"/>
+    <path d="M26 30 L24 28" stroke="#8B1a1a" strokeWidth="1" strokeLinecap="round"/>
+    <path d="M36 30 L38 28" stroke="#8B1a1a" strokeWidth="1" strokeLinecap="round"/>
+    <!-- Nostrils with fire hint -->
+    <circle cx="28" cy="32" r="1.5" fill="#1a1a1a"/>
+    <circle cx="34" cy="32" r="1.5" fill="#1a1a1a"/>
+    <!-- Fire breath -->
+    <path d="M31 36 Q34 40 32 44 Q36 42 36 38 Q40 43 38 48" stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <path d="M31 36 Q28 40 30 44 Q26 42 26 38" stroke="#ef4444" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.7"/>
+  </svg>`,
+
+  bulls: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Bull head — wide, powerful -->
+    <ellipse cx="30" cy="32" rx="18" ry="14" fill="#2a1a0a"/>
+    <!-- Horns -->
+    <path d="M14 24 Q8 14 16 12 Q20 18 20 22" fill="#c8a040" stroke="#a08020" strokeWidth="0.5"/>
+    <path d="M46 24 Q52 14 44 12 Q40 18 40 22" fill="#c8a040" stroke="#a08020" strokeWidth="0.5"/>
+    <!-- Face -->
+    <ellipse cx="30" cy="33" rx="14" ry="12" fill="#3a2010"/>
+    <!-- Eyes red/angry -->
+    <ellipse cx="23" cy="27" rx="4" ry="3.5" fill="#c00000"/>
+    <circle cx="23" cy="27" r="2.2" fill="#1a1a1a"/>
+    <circle cx="23.6" cy="26.4" r="0.7" fill="white"/>
+    <ellipse cx="37" cy="27" rx="4" ry="3.5" fill="#c00000"/>
+    <circle cx="37" cy="27" r="2.2" fill="#1a1a1a"/>
+    <circle cx="37.6" cy="26.4" r="0.7" fill="white"/>
+    <!-- Fierce brow -->
+    <path d="M19 22 L27 25" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M41 22 L33 25" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+    <!-- Nose ring -->
+    <ellipse cx="30" cy="36" rx="7" ry="5" fill="#4a2818"/>
+    <ellipse cx="30" cy="34" rx="5" ry="3" fill="#1a1a1a"/>
+    <path d="M26 36 Q30 39 34 36" stroke="#c0c0c0" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <!-- Snort lines -->
+    <path d="M18 30 Q14 28 12 32" stroke="#c0c0c0" strokeWidth="0.8" fill="none" opacity="0.4"/>
+    <path d="M42 30 Q46 28 48 32" stroke="#c0c0c0" strokeWidth="0.8" fill="none" opacity="0.4"/>
+  </svg>`,
+
+  knights: (col='#607080') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <!-- Knight helmet -->
+    <rect x="16" y="12" width="28" height="32" rx="4" fill="${col}"/>
+    <!-- Visor slit -->
+    <rect x="18" y="26" width="24" height="4" rx="1" fill="#1a1a1a"/>
+    <!-- Helmet dome -->
+    <ellipse cx="30" cy="14" rx="14" ry="6" fill="${col}"/>
+    <!-- Crest/plume -->
+    <path d="M30 8 Q25 4 22 6 Q26 10 30 12 Q34 10 38 6 Q35 4 30 8Z" fill="${col}"/>
+    <path d="M30 6 Q26 2 23 4 Q27 8 30 10 Q33 8 37 4 Q34 2 30 6Z" fill="#8B0000"/>
+    <!-- Helmet details -->
+    <line x1="30" y1="12" x2="30" y2="44" stroke="#4a5a6a" strokeWidth="1.5"/>
+    <line x1="16" y1="28" x2="44" y2="28" stroke="#4a5a6a" strokeWidth="1"/>
+    <!-- Visor -->
+    <rect x="18" y="22" width="24" height="10" rx="2" fill="#2a3a4a"/>
+    <rect x="20" y="24" width="20" height="6" rx="1" fill="#1a1a1a"/>
+    <!-- Eye glow through visor -->
+    <rect x="22" y="25.5" width="6" height="3" rx="1" fill="#ef4444" opacity="0.7"/>
+    <rect x="32" y="25.5" width="6" height="3" rx="1" fill="#ef4444" opacity="0.7"/>
+    <!-- Chin guard -->
+    <rect x="20" y="38" width="20" height="6" rx="2" fill="#4a5a6a"/>
+    <!-- Rivets -->
+    <circle cx="20" cy="15" r="1.5" fill="#4a5a6a"/>
+    <circle cx="40" cy="15" r="1.5" fill="#4a5a6a"/>
+    <circle cx="18" cy="32" r="1.5" fill="#4a5a6a"/>
+    <circle cx="42" cy="32" r="1.5" fill="#4a5a6a"/>
+  </svg>`,
+}
+
+// Generate placeholder SVG for mascots without full illustration
+function mascotPlaceholder(name, emoji, col='#C0392B') {
+  return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <text x="30" y="36" textAnchor="middle" fontSize="24">${emoji}</text>
+  </svg>`
+}
+
+// Full mascot data with SVG
 const MASCOTS = [
-  { id:'eagles',    name:'Eagles',     emoji:'🦅' },
-  { id:'hawks',     name:'Hawks',      emoji:'🪶' },
-  { id:'falcons',   name:'Falcons',    emoji:'🦜' },
-  { id:'ravens',    name:'Ravens',     emoji:'🐦‍⬛' },
-  { id:'cardinals', name:'Cardinals',  emoji:'🔴' },
-  { id:'owls',      name:'Owls',       emoji:'🦉' },
-  { id:'tigers',    name:'Tigers',     emoji:'🐯' },
-  { id:'lions',     name:'Lions',      emoji:'🦁' },
-  { id:'bears',     name:'Bears',      emoji:'🐻' },
-  { id:'panthers',  name:'Panthers',   emoji:'🐆' },
-  { id:'cougars',   name:'Cougars',    emoji:'🐈‍⬛' },
-  { id:'jaguars',   name:'Jaguars',    emoji:'🐱' },
-  { id:'wolves',    name:'Wolves',     emoji:'🐺' },
-  { id:'huskies',   name:'Huskies',    emoji:'🐕' },
-  { id:'bulldogs',  name:'Bulldogs',   emoji:'🦮' },
-  { id:'vipers',    name:'Vipers',     emoji:'🐍' },
-  { id:'cobras',    name:'Cobras',     emoji:'🪱' },
-  { id:'gators',    name:'Gators',     emoji:'🐊' },
-  { id:'dragons',   name:'Dragons',    emoji:'🐉' },
-  { id:'mustangs',  name:'Mustangs',   emoji:'🐎' },
-  { id:'stallions', name:'Stallions',  emoji:'🏇' },
-  { id:'broncos',   name:'Broncos',    emoji:'🤠' },
-  { id:'rams',      name:'Rams',       emoji:'🐏' },
-  { id:'bulls',     name:'Bulls',      emoji:'🐂' },
-  { id:'bison',     name:'Bison',      emoji:'🦬' },
-  { id:'sharks',    name:'Sharks',     emoji:'🦈' },
-  { id:'warriors',  name:'Warriors',   emoji:'⚔️' },
-  { id:'knights',   name:'Knights',    emoji:'🛡️' },
-  { id:'spartans',  name:'Spartans',   emoji:'🗡️' },
-  { id:'titans',    name:'Titans',     emoji:'💪' },
-  { id:'giants',    name:'Giants',     emoji:'🏔️' },
-  { id:'rockets',   name:'Rockets',    emoji:'🚀' },
-  { id:'blazers',   name:'Blazers',    emoji:'🔥' },
-  { id:'thunder',   name:'Thunder',    emoji:'⛈️' },
-  { id:'storm',     name:'Storm',      emoji:'🌩️' },
-  { id:'lightning', name:'Lightning',  emoji:'🌪️' },
-  { id:'cyclones',  name:'Cyclones',   emoji:'🌀' },
-  { id:'tornados',  name:'Tornados',   emoji:'💨' },
-  { id:'comets',    name:'Comets',     emoji:'☄️' },
-  { id:'jets',      name:'Jets',       emoji:'✈️' },
-  { id:'phantoms',  name:'Phantoms',   emoji:'👻' },
-  { id:'chargers',  name:'Chargers',   emoji:'🔋' },
-  { id:'patriots',  name:'Patriots',   emoji:'🎖️' },
-  { id:'rebels',    name:'Rebels',     emoji:'🏴' },
-  { id:'trojans',   name:'Trojans',    emoji:'🏛️' },
-  { id:'vikings',   name:'Vikings',    emoji:'🪓' },
-  { id:'pirates',   name:'Pirates',    emoji:'☠️' },
-  { id:'raiders',   name:'Raiders',    emoji:'💀' },
-  { id:'colts',     name:'Colts',      emoji:'🐴' },
+  // FREE TIER (1-10)
+  { id:'eagles',    name:'Eagles',     emoji:'🦅', tier:'free',    svg: MASCOT_SVGS.eagles },
+  { id:'tigers',    name:'Tigers',     emoji:'🐯', tier:'free',    svg: MASCOT_SVGS.tigers },
+  { id:'lions',     name:'Lions',      emoji:'🦁', tier:'free',    svg: MASCOT_SVGS.lions },
+  { id:'bears',     name:'Bears',      emoji:'🐻', tier:'free',    svg: MASCOT_SVGS.bears },
+  { id:'wolves',    name:'Wolves',     emoji:'🐺', tier:'free',    svg: MASCOT_SVGS.wolves },
+  { id:'sharks',    name:'Sharks',     emoji:'🦈', tier:'free',    svg: MASCOT_SVGS.sharks },
+  { id:'dragons',   name:'Dragons',    emoji:'🐉', tier:'free',    svg: MASCOT_SVGS.dragons },
+  { id:'bulls',     name:'Bulls',      emoji:'🐂', tier:'free',    svg: MASCOT_SVGS.bulls },
+  { id:'knights',   name:'Knights',    emoji:'🛡️', tier:'free',    svg: MASCOT_SVGS.knights },
+  { id:'hawks',     name:'Hawks',      emoji:'🪶', tier:'free',    svg: MASCOT_SVGS.hawks },
+  // PREMIUM TIER (11-50) — shown grayed with lock
+  { id:'falcons',   name:'Falcons',    emoji:'🦜', tier:'premium', svg: (c)=>mascotPlaceholder('Falcons','🦜',c) },
+  { id:'ravens',    name:'Ravens',     emoji:'🐦‍⬛', tier:'premium', svg: (c)=>mascotPlaceholder('Ravens','🐦‍⬛',c) },
+  { id:'cardinals', name:'Cardinals',  emoji:'🔴', tier:'premium', svg: (c)=>mascotPlaceholder('Cardinals','🔴',c) },
+  { id:'owls',      name:'Owls',       emoji:'🦉', tier:'premium', svg: (c)=>mascotPlaceholder('Owls','🦉',c) },
+  { id:'panthers',  name:'Panthers',   emoji:'🐆', tier:'premium', svg: (c)=>mascotPlaceholder('Panthers','🐆',c) },
+  { id:'cougars',   name:'Cougars',    emoji:'🐈‍⬛', tier:'premium', svg: (c)=>mascotPlaceholder('Cougars','🐈‍⬛',c) },
+  { id:'jaguars',   name:'Jaguars',    emoji:'🐱', tier:'premium', svg: (c)=>mascotPlaceholder('Jaguars','🐱',c) },
+  { id:'huskies',   name:'Huskies',    emoji:'🐕', tier:'premium', svg: (c)=>mascotPlaceholder('Huskies','🐕',c) },
+  { id:'bulldogs',  name:'Bulldogs',   emoji:'🦮', tier:'premium', svg: (c)=>mascotPlaceholder('Bulldogs','🦮',c) },
+  { id:'vipers',    name:'Vipers',     emoji:'🐍', tier:'premium', svg: (c)=>mascotPlaceholder('Vipers','🐍',c) },
+  { id:'cobras',    name:'Cobras',     emoji:'🪱', tier:'premium', svg: (c)=>mascotPlaceholder('Cobras','🪱',c) },
+  { id:'gators',    name:'Gators',     emoji:'🐊', tier:'premium', svg: (c)=>mascotPlaceholder('Gators','🐊',c) },
+  { id:'mustangs',  name:'Mustangs',   emoji:'🐎', tier:'premium', svg: (c)=>mascotPlaceholder('Mustangs','🐎',c) },
+  { id:'stallions', name:'Stallions',  emoji:'🏇', tier:'premium', svg: (c)=>mascotPlaceholder('Stallions','🏇',c) },
+  { id:'broncos',   name:'Broncos',    emoji:'🤠', tier:'premium', svg: (c)=>mascotPlaceholder('Broncos','🤠',c) },
+  { id:'rams',      name:'Rams',       emoji:'🐏', tier:'premium', svg: (c)=>mascotPlaceholder('Rams','🐏',c) },
+  { id:'bison',     name:'Bison',      emoji:'🦬', tier:'premium', svg: (c)=>mascotPlaceholder('Bison','🦬',c) },
+  { id:'warriors',  name:'Warriors',   emoji:'⚔️', tier:'premium', svg: (c)=>mascotPlaceholder('Warriors','⚔️',c) },
+  { id:'spartans',  name:'Spartans',   emoji:'🗡️', tier:'premium', svg: (c)=>mascotPlaceholder('Spartans','🗡️',c) },
+  { id:'titans',    name:'Titans',     emoji:'💪', tier:'premium', svg: (c)=>mascotPlaceholder('Titans','💪',c) },
+  { id:'giants',    name:'Giants',     emoji:'🏔️', tier:'premium', svg: (c)=>mascotPlaceholder('Giants','🏔️',c) },
+  { id:'rockets',   name:'Rockets',    emoji:'🚀', tier:'premium', svg: (c)=>mascotPlaceholder('Rockets','🚀',c) },
+  { id:'blazers',   name:'Blazers',    emoji:'🔥', tier:'premium', svg: (c)=>mascotPlaceholder('Blazers','🔥',c) },
+  { id:'thunder',   name:'Thunder',    emoji:'⛈️', tier:'premium', svg: (c)=>mascotPlaceholder('Thunder','⛈️',c) },
+  { id:'storm',     name:'Storm',      emoji:'🌩️', tier:'premium', svg: (c)=>mascotPlaceholder('Storm','🌩️',c) },
+  { id:'cyclones',  name:'Cyclones',   emoji:'🌀', tier:'premium', svg: (c)=>mascotPlaceholder('Cyclones','🌀',c) },
+  { id:'tornados',  name:'Tornados',   emoji:'💨', tier:'premium', svg: (c)=>mascotPlaceholder('Tornados','💨',c) },
+  { id:'comets',    name:'Comets',     emoji:'☄️', tier:'premium', svg: (c)=>mascotPlaceholder('Comets','☄️',c) },
+  { id:'jets',      name:'Jets',       emoji:'✈️', tier:'premium', svg: (c)=>mascotPlaceholder('Jets','✈️',c) },
+  { id:'phantoms',  name:'Phantoms',   emoji:'👻', tier:'premium', svg: (c)=>mascotPlaceholder('Phantoms','👻',c) },
+  { id:'chargers',  name:'Chargers',   emoji:'🔋', tier:'premium', svg: (c)=>mascotPlaceholder('Chargers','🔋',c) },
+  { id:'patriots',  name:'Patriots',   emoji:'🎖️', tier:'premium', svg: (c)=>mascotPlaceholder('Patriots','🎖️',c) },
+  { id:'rebels',    name:'Rebels',     emoji:'🏴', tier:'premium', svg: (c)=>mascotPlaceholder('Rebels','🏴',c) },
+  { id:'trojans',   name:'Trojans',    emoji:'🏛️', tier:'premium', svg: (c)=>mascotPlaceholder('Trojans','🏛️',c) },
+  { id:'vikings',   name:'Vikings',    emoji:'🪓', tier:'premium', svg: (c)=>mascotPlaceholder('Vikings','🪓',c) },
+  { id:'pirates',   name:'Pirates',    emoji:'☠️', tier:'premium', svg: (c)=>mascotPlaceholder('Pirates','☠️',c) },
+  { id:'raiders',   name:'Raiders',    emoji:'💀', tier:'premium', svg: (c)=>mascotPlaceholder('Raiders','💀',c) },
+  { id:'colts',     name:'Colts',      emoji:'🐴', tier:'premium', svg: (c)=>mascotPlaceholder('Colts','🐴',c) },
+  { id:'lightning', name:'Lightning',  emoji:'🌪️', tier:'premium', svg: (c)=>mascotPlaceholder('Lightning','🌪️',c) },
 ]
 
-// ─── TEAM NAME FONTS ──────────────────────────────────────────────────────────
+// ─── MASCOT AVATAR (renders the SVG) ─────────────────────────────────────────
+function MascotAvatar({ mascotId, color='#C0392B', size=40, locked=false }) {
+  const mascot = MASCOTS.find(m => m.id === mascotId)
+  if (!mascot) return <div style={{ width:size, height:size, borderRadius:'50%', background:'#1e2330', display:'flex', alignItems:'center', justifyContent:'center', fontSize:size*0.45 }}>🏆</div>
+
+  const svgStr = mascot.svg(color)
+  return (
+    <div style={{ position:'relative', width:size, height:size, flexShrink:0 }}>
+      <div
+        style={{ width:size, height:size, filter: locked ? 'grayscale(100%) brightness(0.4)' : 'none', transition:'filter 0.2s' }}
+        dangerouslySetInnerHTML={{ __html: svgStr }}
+      />
+      {locked && (
+        <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <span style={{ fontSize:size*0.3, lineHeight:1 }}>🔒</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 const TEAM_FONTS = [
   { id:'kalam',    name:'Kalam',           style:"'Kalam', cursive",                    preview:'Handwritten' },
   { id:'barlow',   name:'Barlow Condensed',style:"'Barlow Condensed', sans-serif",       preview:'Bold Athletic' },
@@ -774,6 +1071,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const [sportType, setSportType] = useState('football')
   const cacheKey = 'anim_' + (play.name||'').replace(/[^a-z0-9]/gi,'_').toLowerCase().slice(0,40)
 
@@ -2079,7 +2377,7 @@ function PlayCardWithSave({ play, P, S, al, callAI, parseJSON, sport, playbook, 
   }
 
   return (
-    <div style={{ position:'relative' }}>
+    <div ref={wrapRef} style={{ position:'relative' }}>
       <PlayCard play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} extraAction={
         <div style={{ position:'relative' }}>
           {saved ? (
@@ -2467,7 +2765,14 @@ function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
 // ─── TEAM QUICK SWITCHER (top bar) ────────────────────────────────────────────
 function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, setPage, P, al, iq }) {
   const [open, setOpen] = useState(false)
+  const wrapRef = useRef(null)
   const current = activeTeam[sport]
+
+  useEffect(() => {
+    function handleClick(e) { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
   const sportTeams = teams[sport] || []
   const mascotObj = current ? (MASCOTS||[]).find(m=>m.id===current.mascot) : null
 
@@ -2539,227 +2844,772 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
 }
 
 // ─── PLAY NAME BUILDER ────────────────────────────────────────────────────────
+// ─── PLAY NAME BUILDER ────────────────────────────────────────────────────────
 function PlayNameBuilder({ P, S, al, sport }) {
   const [step, setStep] = useState(0)
   const [choices, setChoices] = useState({})
   const [result, setResult] = useState(null)
 
   const fbSteps = [
-    { id:'formation', label:'Formation', desc:'The pre-snap alignment. This is the foundation every other call is built on.', opts:['I-Formation','Pro Set','Shotgun','Pistol','Wildcat','Empty Set','Single Back','Full House'] },
-    { id:'motion', label:'Pre-Snap Motion', desc:'A player moves before the snap to shift the defense or create a numbers advantage.', opts:['None','Jet Motion','H-Back Shift','WR Crack','Orbit Motion','Zip Motion','FB Kick Out'] },
-    { id:'strength', label:'Formation Strength', desc:'The heavy side of the formation. Tells the OL and blocking backs which way to set.', opts:['Right','Left','Over (TE right)','Under (TE left)','Twin Right','Twin Left'] },
-    { id:'playType', label:'Play Type', desc:'The core action. Every other word in the call tells players how to execute this.', opts:['Inside Run','Outside Run','Counter / Trap','Draw','Play Action Pass','Quick Pass','Dropback Pass','Screen Pass','Option / Read'] },
-    { id:'hole', label:'Hole / Gap Number', desc:'For runs — the specific gap between linemen. Odd numbers go LEFT. Even numbers go RIGHT.', opts:['0 (QB Sneak Center)','1 (LT/LG Gap — Left)','2 (RT/RG Gap — Right)','3 (LG/C Gap — Left)','4 (RG/C Gap — Right)','5 (LT Outside — Left)','6 (RT Outside — Right)','7 (TE/LT Gap — Left)','8 (TE/RT Gap — Right)'] },
-    { id:'carrier', label:'Ball Carrier / Target', desc:'Who executes the play — who carries the ball or who the QB is targeting.', opts:['QB Keep','HB Dive','FB Lead','WR Reverse','TE Drag','HB Sweep','Slot Cross','X Post Route','Z Corner Route','Y Seam Route'] },
-    { id:'tag', label:'Tag / Modifier', desc:'A tag adjusts the play at the last moment. This is what separates simple plays from professional-depth calls.', opts:['None','Naked (QB Boot)','Pass (Play Action)','Counter (Fake Opposite)','Keep (QB Run Option)','Alert (Audible Available)','Check (Line Change)','Swap (RB/WR Exchange)'] },
+    { id:'personnel', label:'Personnel Group', optional:false,
+      desc:'Who is on the field? Every defense identifies this first.',
+      note:'11=1RB 1TE (most common spread). 12=1RB 2TE (power). 21=2RB 1TE (I-Form base). 22=2RB 2TE (heavy). Empty=no RBs, pure pass.',
+      opts:[
+        {v:'11',     label:'11 Personnel',   ex:'Most spread offenses'},
+        {v:'12',     label:'12 Personnel',   ex:'Power run, misdirection'},
+        {v:'21',     label:'21 Personnel',   ex:'I-Formation standard'},
+        {v:'22',     label:'22 Personnel',   ex:'Heavy run, goal line'},
+        {v:'10',     label:'Trips / 10',     ex:'3 WR spread, no TE'},
+        {v:'00',     label:'Empty',          ex:'5 WR, pure pass only'},
+        {v:'Heavy',  label:'Heavy / Jumbo',  ex:'Goal line, extra blocker'},
+        {v:'Scatter',label:'Scatter',        ex:'No huddle chaos formation'},
+      ]
+    },
+    { id:'formation', label:'Formation + Strength', optional:false,
+      desc:'Where does everyone align? Strength tells the OL which side to favor.',
+      note:'The tight end always goes to the strong side. "Right" = strong right. A short run call might just be "22 Power Right" — personnel + formation + play. Done.',
+      opts:[
+        {v:'Ace Right',        label:'Ace Right',         ex:'Single back, TE right'},
+        {v:'Ace Left',         label:'Ace Left',          ex:'Single back, TE left'},
+        {v:'I-Formation Right',label:'I Right',           ex:'Power run, strong right'},
+        {v:'I-Formation Left', label:'I Left',            ex:'Power run, strong left'},
+        {v:'Pro Set Right',    label:'Pro Set Right',     ex:'HB offset, FB flanking'},
+        {v:'Shotgun Right',    label:'Shotgun Right',     ex:'QB 5 back, spread right'},
+        {v:'Pistol Right',     label:'Pistol Right',      ex:'QB 3 back, HB behind'},
+        {v:'Trips Right',      label:'Trips Right',       ex:'3 WRs bunched right'},
+        {v:'Trips Left',       label:'Trips Left',        ex:'3 WRs bunched left'},
+      ]
+    },
+    { id:'modifier', label:'Line or TE Modifier', optional:true,
+      desc:'Adjust the TE or receiver alignment. Many calls skip this — only add it if it changes something.',
+      note:'"Tight" = TE attached to OL for blocking. "Wing" = just outside tackle. "Flex" = split wide. Short calls like "22 Power Right" have no modifier.',
+      opts:[
+        {v:'',      label:'None — skip',    ex:'Base alignment, most calls'},
+        {v:'Tight', label:'Tight',          ex:'TE attached to OL — run block'},
+        {v:'Wing',  label:'Wing',           ex:'TE outside tackle — seal block'},
+        {v:'Flex',  label:'Flex',           ex:'TE split wide as receiver'},
+        {v:'Stack', label:'Stack',          ex:'Receivers stacked vertically'},
+        {v:'Bunch', label:'Bunch',          ex:'3 receivers within 3 yards'},
+        {v:'Nasty', label:'Nasty',          ex:'TE and WR in tight split'},
+        {v:'Open',  label:'Open',           ex:'Spread the OL — pass protection'},
+      ]
+    },
+    { id:'motion', label:'Pre-Snap Motion', optional:true,
+      desc:'Move a player before the snap to force the defense to react. Not every play has motion.',
+      note:'Player is named by letter (Z=slot WR, H=HB/FB, Y=TE, F=FB). Direction is where they go. Jet = full speed across formation, passes outside both tackles. Orbit = loops wide and back. H Motion = HB slides laterally.',
+      opts:[
+        {v:'',         label:'None — skip',   ex:'Static snap, no motion'},
+        {v:'Z Jet',    label:'Z Jet',         ex:'Slot WR full speed across — outside tackles'},
+        {v:'H Motion', label:'H Motion',      ex:'HB slides laterally across formation'},
+        {v:'Y Shift',  label:'Y Shift',       ex:'TE shifts to opposite side pre-snap'},
+        {v:'H Orbit',  label:'H Orbit',       ex:'HB wide arc then back inside'},
+        {v:'F Arc',    label:'F Arc',         ex:'FB arcs out to the flat'},
+        {v:'Fly',      label:'Fly Motion',    ex:'Any WR full speed across'},
+        {v:'Zip',      label:'Zip',           ex:'Quick short shift, not full motion'},
+      ]
+    },
+    { id:'playNum', label:'Play Number', optional:false,
+      desc:'The core of the call. 2 or 3 digits: TENS = which gap is attacked, ONES = who carries the ball.',
+      note:'Gap scheme (tens digit): 1=A-gap left, 2=A-gap right, 3=B-gap left, 4=B-gap right, 5=C-gap left, 6=C-gap right, 7=strong power, 8=counter/trap. Ball carrier (ones): 1=QB, 2=HB, 3=FB, 4=TE, 6=reverse. So "36" = off tackle left, HB. "47" = strong power, HB. "22" = dive A-gap right, HB.',
+      opts:[
+        {v:'22',  label:'22 — A-Gap Dive',     ex:'HB dives A-gap right — shortest run'},
+        {v:'23',  label:'23 — B-Gap Left',     ex:'HB hits B-gap left side'},
+        {v:'24',  label:'24 — B-Gap Right',    ex:'HB hits B-gap right side'},
+        {v:'26',  label:'26 — Off Tackle R',   ex:'HB off right tackle — classic'},
+        {v:'28',  label:'28 — Counter',        ex:'HB counter trap — misdirection'},
+        {v:'32',  label:'32 — QB Sneak',       ex:'QB sneaks A-gap right'},
+        {v:'36',  label:'36 — Off Tackle L',   ex:'HB off left tackle'},
+        {v:'44',  label:'44 — FB B-Gap',       ex:'FB lead into B-gap — power'},
+        {v:'47',  label:'47 — Power Right',    ex:'HB strong power block right'},
+        {v:'374', label:'374 — Pro Power',     ex:'Series 3, strong power, HB — NFL standard'},
+        {v:'96',  label:'96 — Pass Pattern',   ex:'9=pass series, 6=deep — e.g. six route'},
+        {v:'999', label:'999 — Hot Route',     ex:'Full pass, audible at line'},
+      ]
+    },
+    { id:'xRoute', label:'X Receiver Route', optional:true,
+      desc:'Name the split end (X) route. Skip this for run plays — the X is blocking.',
+      note:'Routes are named from the receiver\'s view. X = outside WR weak side. Call his route only when it matters — run plays skip this entirely.',
+      opts:[
+        {v:'',         label:'None — run play',  ex:'X is blocking'},
+        {v:'X Slant',  label:'X Slant',          ex:'3 steps, 45-degree inside cut'},
+        {v:'X Post',   label:'X Post',           ex:'Deep inside angle to goalpost'},
+        {v:'X Curl',   label:'X Curl',           ex:'8 yards, curl back to QB'},
+        {v:'X Hitch',  label:'X Hitch',          ex:'5 yards, stop and face'},
+        {v:'X Go',     label:'X Go / Fly',       ex:'Vertical beat the CB deep'},
+        {v:'X Cross',  label:'X Cross',          ex:'Deep cross over middle'},
+        {v:'X Fade',   label:'X Fade',           ex:'Fade to back corner end zone'},
+        {v:'X Whip',   label:'X Whip',           ex:'Double cut — elite separation'},
+      ]
+    },
+    { id:'yzRoute', label:'Y or Z Route Tag', optional:true,
+      desc:'Name the TE (Y) or slot/flanker (Z) route. This completes the route tree. Skip for runs.',
+      note:'This is the most important part of a passing play name — it tells your QB his reads in order. "Y Stick Z Spot" is two reads: TE stick first, Z flat second. Jon Gruden\'s famous call ends with exactly this.',
+      opts:[
+        {v:'',          label:'None — skip',    ex:'Run play or base routes'},
+        {v:'Y Stick',   label:'Y Stick',        ex:'TE: 6-yd hitch vs zone — QB read 1'},
+        {v:'Y Seam',    label:'Y Seam',         ex:'TE: vertical up the seam'},
+        {v:'Y Cross',   label:'Y Cross',        ex:'TE: crossing at 12 yards'},
+        {v:'Y Corner',  label:'Y Corner',       ex:'TE: corner to end zone'},
+        {v:'Z Spot',    label:'Z Spot',         ex:'Slot: spot route to flat — Gruden special'},
+        {v:'Z Out',     label:'Z Out',          ex:'Slot: out route 8-12 yards'},
+        {v:'Z In',      label:'Z In',           ex:'Slot: in cut over middle'},
+        {v:'H Flat',    label:'H Flat',         ex:'HB/FB: flat — safety valve'},
+        {v:'H Wheel',   label:'H Wheel',        ex:'HB: flat then vertical wheel'},
+      ]
+    },
+    { id:'tag', label:'Call Tag or Alert', optional:true,
+      desc:'One final word that modifies how the play is executed. Skip if the call is clean as-is.',
+      note:'"Naked" = QB bootleg with no lead blockers — he\'s on his own. "Pass" = play action, fake run then throw. "Keep" = QB reads at mesh point and decides. "Check With Me" = QB calls the actual play at the line. Not every call needs a tag — "22 Power Right" is complete without one.',
+      opts:[
+        {v:'',              label:'None — clean call',   ex:'Play exactly as called'},
+        {v:'Naked',         label:'Naked',               ex:'QB bootleg, no blockers — risky'},
+        {v:'Pass',          label:'Pass / Play Action',  ex:'Fake run, throw — action pass'},
+        {v:'Keep',          label:'Keep',                ex:'QB reads mesh — keep or hand off'},
+        {v:'Counter',       label:'Counter',             ex:'Fake one direction, attack other'},
+        {v:'Boot',          label:'Boot',                ex:'QB rolls out with lead blockers'},
+        {v:'Check With Me', label:'Check With Me',       ex:'QB audibles at line of scrimmage'},
+        {v:'Alert',         label:'Alert',               ex:'If defense shows X, switch to this route'},
+      ]
+    },
   ]
+
   const bbSteps = [
-    { id:'series', label:'Play Series', desc:'The numbered series tells every player which set of cuts and screens to run.', opts:['1 Series (Guard Initiates)','2 Series (Wing Entry)','3 Series (Small Forward)','4 Series (Power Forward Elbow)','5 Series (Center Post)','Horns (Two Bigs at Elbows)','Floppy (Baseline Screens)','Box (Four Corners)'] },
-    { id:'action', label:'Primary Action', desc:'The first movement that triggers the play for all five players.', opts:['Dribble Hand-Off (DHO)','Pick and Roll','Pick and Pop','Pin-Down Screen','Flare Screen','Cross Screen','Back Screen','Elevator Screens','Motion Weak (Reverse)','Swing Action'] },
-    { id:'entry', label:'Ball Entry', desc:'How the ball moves from the guard into the scoring action.', opts:['High Post Entry','Wing Entry','Low Post Feed','Skip Pass Wide','Swing Reversal','Drag Screen Pass','Push Pass Ahead','Attack and Kick Out'] },
-    { id:'finish', label:'Finish / Counter', desc:'The scoring action — the shot or the counter when the defense takes away the first option.', opts:['Lay-Up Finish','Mid-Range Pull-Up','Catch and Shoot Three','Lob Over Top','Dump Off Low Post','Kick Out Corner Three','Re-Screen Counter','Counter Opposite Side'] },
+    { id:'setName', label:'Set or Play Name', optional:false,
+      desc:'Real NBA play calls are named, not numbered. The name tells everyone which set to run.',
+      note:'Sets like "Horns" mean two bigs at the elbows. "Floppy" means baseline pin-downs for a shooter. "Chicago" is a specific Bulls action. Coaches adapt these and name their own versions.',
+      opts:[
+        {v:'Horns',    label:'Horns',      ex:'Two bigs at elbows — attacks 2-3 zone'},
+        {v:'Floppy',   label:'Floppy',     ex:'Baseline pin-downs — great for shooters'},
+        {v:'Chicago',  label:'Chicago',    ex:'DHO into pick-and-roll — NBA classic'},
+        {v:'Chin',     label:'Chin',       ex:'High ball screen into spread actions'},
+        {v:'Hammer',   label:'Hammer',     ex:'Back screen to corner 3 — Spurs action'},
+        {v:'Zipper',   label:'Zipper',     ex:'Wing cut to receive at top'},
+        {v:'BLOB',     label:'BLOB',       ex:'Baseline out-of-bounds set play'},
+        {v:'Transition',label:'Transition',ex:'Early offense — push pace'},
+        {v:'Early',    label:'Early Offense',ex:'Attack before defense sets'},
+        {v:'Box',      label:'Box',        ex:'4-corner box — inbound or half court'},
+      ]
+    },
+    { id:'action', label:'Primary Action', optional:false,
+      desc:'What is the first movement that triggers the play?',
+      note:'The action determines what the defense must guard. A pick-and-roll forces a switch or hedge. A back screen forces a switch or chase. Knowing the action tells every player their job.',
+      opts:[
+        {v:'Pick and Roll',   label:'Pick and Roll',    ex:'Ball screen, roll to basket'},
+        {v:'Pick and Pop',    label:'Pick and Pop',     ex:'Ball screen, pop to 3'},
+        {v:'Back Screen',     label:'Back Screen',      ex:'Screen away from ball — lob or drive'},
+        {v:'Pin Down',        label:'Pin Down',         ex:'Downscreen for shooter cutting up'},
+        {v:'Cross Screen',    label:'Cross Screen',     ex:'Screen across the lane — post entry'},
+        {v:'DHO',             label:'DHO',              ex:'Dribble hand-off — momentum play'},
+        {v:'Elevator',        label:'Elevator',         ex:'Two screeners let shooter through'},
+        {v:'Spain',           label:'Spain Pick and Roll',ex:'Back screen on the screener — NBA trending'},
+      ]
+    },
+    { id:'read', label:'Ball Handler Read', optional:false,
+      desc:'What does the ball handler do with the action?',
+      note:'"Attack middle" means go downhill. "Reject" means go opposite the screen. "Pop" feeds the screener popping out. The ball handler read is the decision that makes the play work.',
+      opts:[
+        {v:'Attack',   label:'Attack Middle',  ex:'Drive downhill off screen'},
+        {v:'Reject',   label:'Reject Screen',  ex:'Go opposite — catch defense cheating'},
+        {v:'Pop',      label:'Feed the Pop',   ex:'Pass to screener popping out for 3'},
+        {v:'Roll',     label:'Feed the Roll',  ex:'Pass to screener rolling to basket'},
+        {v:'Slip',     label:'Slip — early',   ex:'Screener slips before contact'},
+        {v:'Kick Out', label:'Kick Out',       ex:'Drive, kick to open corner'},
+      ]
+    },
+    { id:'finish', label:'Finish', optional:false,
+      desc:'How does the play end?',
+      opts:[
+        {v:'Lay-Up',         label:'Lay-Up Finish',      ex:'Get to the rim'},
+        {v:'Mid Pull-Up',    label:'Mid-Range Pull-Up',  ex:'Pull up off the dribble'},
+        {v:'Corner 3',       label:'Corner Three',       ex:'Kick to corner — highest % 3'},
+        {v:'Lob',            label:'Lob Pass',           ex:'Alley-oop over help'},
+        {v:'Dump Low',       label:'Dump to Post',       ex:'Feed the low post'},
+        {v:'Curl',           label:'Curl and Shoot',     ex:'Curl off screen for mid-range'},
+        {v:'Weak Side',      label:'Kick Weak Side',     ex:'Reverse to open wing'},
+      ]
+    },
+    { id:'tag', label:'Adjustment Tag', optional:true,
+      desc:'A word that flips or adjusts the play. Skip if the play is clean.',
+      opts:[
+        {v:'',        label:'None',    ex:'Play as called'},
+        {v:'Strong',  label:'Strong',  ex:'Run to the strong side'},
+        {v:'Weak',    label:'Weak',    ex:'Flip to weak side'},
+        {v:'High',    label:'High',    ex:'Ball screen high'},
+        {v:'Low',     label:'Low',     ex:'Ball screen low'},
+        {v:'Reverse', label:'Reverse', ex:'Run action in reverse order'},
+        {v:'Double',  label:'Double',  ex:'Double screen variation'},
+      ]
+    },
   ]
-  const soccerSteps = [
-    { id:'phase', label:'Phase of Play', desc:'Where your team is on the field and what moment you are in.', opts:['Build-Up from Goalkeeper','Midfield Possession','Final Third Attack','Set Piece Corner','Set Piece Free Kick','Counter-Attack Transition','High Press Trigger','Defensive Compactness'] },
-    { id:'pattern', label:'Attacking Pattern', desc:'The specific movement your players make together to create a chance.', opts:['Overlapping Run Wide','Underlapping Inside Run','Third Man Run','Wall Pass (One-Two)','Switch of Play (Long)','False Nine Drop','Striker Link Play','Overload Half-Space'] },
-    { id:'finish', label:'Finish / Decision', desc:'What the player with the ball does at the end of the pattern.', opts:['Low Cross to Near Post','High Cross Back Post','Cut Inside and Shoot','Through Ball In Behind','Pull-Back to Edge','Recycle and Switch','Hold and Combine','Long Shot Trigger'] },
-  ]
+
   const bsbSteps = [
-    { id:'situation', label:'Game Situation', desc:'Situation is everything in baseball. Define it precisely before deciding anything.', opts:['Lead-Off No Outs','Runner on 1st 0 Outs','Runner on 2nd 0 Outs','1st and 3rd Any Outs','Bases Loaded','2 Outs Runners On','Must Score Immediately','Double Play Situation'] },
-    { id:'strategy', label:'Offensive Strategy', desc:'The overarching decision — how aggressive are you being at the plate and on the bases?', opts:['Work the Count (Take)','Swing at Strike One','Hit and Run On','Bunt for Base Hit','Sacrifice Bunt','Safety Squeeze','Suicide Squeeze','Delayed Steal','First to Third Double Steal'] },
-    { id:'pitcher', label:'Pitching Approach', desc:'What does your pitcher need to execute in this moment?', opts:['Throw Strikes Early','Work Corners Away','Change Speeds Often','Pitch to Contact','Power Pitch Strikeout','Intentional Walk Setup','Pitch Around (Base Open)'] },
+    { id:'situation', label:'Game Situation', optional:false,
+      desc:'Define the moment. In baseball the situation is everything — the sign you give depends entirely on this.',
+      opts:[
+        {v:'Lead-off 0 outs',   label:'Lead-off, 0 outs',   ex:'First batter of inning'},
+        {v:'Runner 1st 0 outs', label:'Runner 1st, 0 outs',  ex:'Classic steal / H&R situation'},
+        {v:'Runner 2nd 0 outs', label:'Runner 2nd, 0 outs',  ex:'Scoring position — contact first'},
+        {v:'1st and 3rd',       label:'1st and 3rd',         ex:'Double steal or safety squeeze'},
+        {v:'Bases loaded',      label:'Bases loaded',        ex:'Squeeze, sac fly, force situation'},
+        {v:'2 outs any base',   label:'2 outs, runners on',  ex:'Run on contact — full go'},
+        {v:'Must score now',    label:'Must score now',      ex:'Late innings, tie or down 1'},
+        {v:'Big lead protect',  label:'Big lead, protect',   ex:'No mistakes mode'},
+      ]
+    },
+    { id:'call', label:'The Offensive Call', optional:false,
+      desc:'What play are you calling? This is what the signal will communicate.',
+      opts:[
+        {v:'Steal',          label:'Straight Steal',     ex:'Runner goes on first move of pitcher'},
+        {v:'Delayed Steal',  label:'Delayed Steal',      ex:'Runner goes on catcher throw-back'},
+        {v:'Hit and Run',    label:'Hit and Run',        ex:'Runner goes, batter swings through'},
+        {v:'Run and Hit',    label:'Run and Hit',        ex:'Runner goes, batter swings if pitch good'},
+        {v:'Safety Squeeze', label:'Safety Squeeze',     ex:'Bunt only if pitch is buntable, runner reads'},
+        {v:'Suicide Squeeze',label:'Suicide Squeeze',    ex:'Runner goes on pitch, batter must bunt'},
+        {v:'Take',           label:'Take a Strike',      ex:'Do not swing — work the count'},
+        {v:'Swing Away',     label:'Swing Away — Green Light',ex:'Batter free to swing at anything'},
+        {v:'Double Steal',   label:'Double Steal 1st+3rd',ex:'Both runners go simultaneously'},
+      ]
+    },
+    { id:'indicator', label:'Signal Indicator (Key)', optional:false,
+      desc:'The indicator is the touch that ACTIVATES the real sign. Everything before it is fake. This is the most important part of the signal system.',
+      note:'The sequence works like this: coach gives several touches. Only the touch AFTER the indicator counts. Example: if indicator is belt, coach touches cap → ear → BELT (activates) → arm (this is the real sign) → wipe off.',
+      opts:[
+        {v:'belt',   label:'Belt',    ex:'Touch belt = indicator is live'},
+        {v:'cap',    label:'Cap',     ex:'Touch cap = indicator is live'},
+        {v:'chin',   label:'Chin',    ex:'Touch chin = indicator is live'},
+        {v:'chest',  label:'Chest',   ex:'Touch chest = indicator is live'},
+        {v:'ear',    label:'Ear',     ex:'Touch ear = indicator is live'},
+        {v:'wrist',  label:'Wrist',   ex:'Touch wrist = indicator is live'},
+      ]
+    },
+    { id:'wipeoff', label:'Wipe-Off Signal', optional:false,
+      desc:'The wipe-off cancels ALL previous signs. If the coach gives the wipe-off, the play is OFF — go back to default.',
+      note:'The wipe-off must be easy to remember and distinct from everything else. Common wipe-offs: wiping both hands together, touching both hands to thighs simultaneously, swiping across the letters on the jersey.',
+      opts:[
+        {v:'swipe jersey',  label:'Swipe Across Jersey',   ex:'Both hands swipe across chest — classic'},
+        {v:'hands thighs',  label:'Both Hands to Thighs',  ex:'Simultaneous two-hand touch'},
+        {v:'clap',          label:'Clap Hands',            ex:'One clap cancels all'},
+        {v:'nose wipe',     label:'Wipe Nose',             ex:'Index finger across nose'},
+        {v:'arm swipe',     label:'Swipe Arm',             ex:'Opposite hand swipes forearm'},
+      ]
+    },
   ]
+
+  const soccerSteps = [
+    { id:'phase', label:'Phase of Play', optional:false,
+      desc:'Where on the field and what moment? Tactical calls are phase-specific.',
+      opts:[
+        {v:'Build-Up',      label:'Build-Up from Back',    ex:'GK or CBs starting the attack'},
+        {v:'Combination',   label:'Midfield Combination',  ex:'Third-man runs, one-twos'},
+        {v:'Final Third',   label:'Final Third Attack',    ex:'In or around the 18-yard box'},
+        {v:'Corner',        label:'Corner Kick',           ex:'In-swinger, out-swinger, short'},
+        {v:'Free Kick',     label:'Free Kick',             ex:'Direct, indirect, wall run'},
+        {v:'Counter',       label:'Counter Attack',        ex:'Win ball, attack immediately'},
+        {v:'Pressing',      label:'Pressing Trigger',      ex:'When to press as a unit'},
+      ]
+    },
+    { id:'pattern', label:'Attacking Pattern', optional:false,
+      desc:'The movement concept your team executes.',
+      note:'Pep Guardiola names patterns like "Inside Channel" or "Half Space Overload." Klopp uses "Gegenpressing" as a trigger word. Real tactical names communicate the principle, not just the action.',
+      opts:[
+        {v:'Overlap',         label:'Overlap Wide',          ex:'FB overlaps winger — 2v1 wide'},
+        {v:'Underlap',        label:'Underlap Inside',       ex:'FB cuts inside the winger'},
+        {v:'Third Man',       label:'Third Man Run',         ex:'Pass, pass, run — third player arrives late'},
+        {v:'Half Space',      label:'Half Space Overload',   ex:'Attack the channel between CB and FB'},
+        {v:'Switch',          label:'Switch of Play',        ex:'Ball across to opposite side quickly'},
+        {v:'False 9',         label:'False 9 Drop',          ex:'CF drops deep, creates space'},
+        {v:'Wall Pass',       label:'Wall Pass 1-2',         ex:'Give-and-go into space'},
+        {v:'Rotation',        label:'Positional Rotation',   ex:'Players swap positions to confuse defense'},
+      ]
+    },
+    { id:'trigger', label:'Trigger / Entry Pass', optional:false,
+      desc:'What action starts the pattern?',
+      opts:[
+        {v:'GK Long',     label:'GK Distribution',    ex:'Goalkeeper starts it'},
+        {v:'Pivot Pass',  label:'Pivot Pass',          ex:'Ball to pivot player facing away'},
+        {v:'Switch Ball', label:'Switch Ball',         ex:'Quick reversal triggers runs'},
+        {v:'Through Ball',label:'Through Ball',        ex:'Ball played in behind defense'},
+        {v:'Dummy Run',   label:'Dummy / Decoy Run',   ex:'Player runs to create space for others'},
+        {v:'Set Piece',   label:'Set Piece Routine',   ex:'Pre-designed movement from dead ball'},
+      ]
+    },
+    { id:'finish', label:'Final Action', optional:false,
+      desc:'How does the pattern end?',
+      opts:[
+        {v:'Low Cross',   label:'Low Cross',          ex:'Ground ball across goal — hardest to defend'},
+        {v:'High Cross',  label:'High Cross',         ex:'Aerial delivery for header'},
+        {v:'Cut Inside',  label:'Cut Inside Shoot',   ex:'Winger cuts in on strong foot'},
+        {v:'Recycle',     label:'Recycle and Reset',  ex:'Keep possession, find another angle'},
+        {v:'Through',     label:'Through Ball Final', ex:'Final pass in behind for one-on-one'},
+        {v:'Press',       label:'High Press Trigger', ex:'Immediately press after set trigger'},
+      ]
+    },
+  ]
+
   const sbSteps = [
-    { id:'situation', label:'Game Situation', desc:'Define the at-bat precisely — situation drives every decision in softball.', opts:['Lead-Off 0-0 Count','Runner on 1st 0 Outs','Runner on 2nd 0 Outs','1st and 3rd','Bases Loaded','2 Outs Runners On','Must Score Now','Pitcher in Circle'] },
-    { id:'approach', label:'Offensive Approach', desc:'The hitter and runner strategy for this at-bat.', opts:['Slap Hit for Speed','Full Swing Pull','Contact Opposite Field','Bunt for Base Hit','Sacrifice Bunt','Safety Squeeze','Drag Bunt Left Side','Fake Bunt then Slap'] },
-    { id:'baserunning', label:'Baserunning Rule', desc:'What do your runners do on this pitch? Runners must know their assignment before the pitch.', opts:['Read and React','Steal on First Move','Delayed Steal','Hold on Hit Only','Tag on Any Fly Ball','First and Third Go','Advance on Wild Pitch','Run on Contact'] },
+    { id:'situation', label:'Game Situation', optional:false,
+      desc:'The situation drives everything in softball — what count, what base, what score.',
+      opts:[
+        {v:'Lead-off 0 outs',    label:'Lead-off, 0 outs',   ex:'Set the tone at top of inning'},
+        {v:'Runner 1st 0 outs',  label:'Runner 1st, 0 outs', ex:'Steal or slap situation'},
+        {v:'Runner 2nd 0 outs',  label:'Runner 2nd, 0 outs', ex:'Scoring position — make contact'},
+        {v:'1st and 3rd',        label:'1st and 3rd',        ex:'Double steal or squeeze'},
+        {v:'Bases loaded',       label:'Bases loaded',       ex:'Squeeze or gap shot'},
+        {v:'2 outs runners on',  label:'2 outs, runners on', ex:'Run on contact'},
+        {v:'Must score now',     label:'Must score now',     ex:'Late, close game — take chances'},
+      ]
+    },
+    { id:'call', label:'Offensive Call', optional:false,
+      desc:'What are you calling? Softball has unique options — especially the slap game.',
+      opts:[
+        {v:'Steal',          label:'Straight Steal',       ex:'Go on pitcher first move'},
+        {v:'Slap Hit',       label:'Slap Hit (Left)',       ex:'Left-handed slapper, run-slap'},
+        {v:'Drag Bunt',      label:'Drag Bunt Left',       ex:'Surprise bunt toward 1B — speed play'},
+        {v:'Safety Squeeze', label:'Safety Squeeze',       ex:'Bunt only if buntable, runner reads'},
+        {v:'Suicide Squeeze',label:'Suicide Squeeze',      ex:'Runner goes, batter must bunt'},
+        {v:'Hit and Run',    label:'Hit and Run',          ex:'Runner goes, batter swings'},
+        {v:'Take',           label:'Take — Work Count',    ex:'Do not swing — get a pitch'},
+        {v:'Swing Away',     label:'Swing Away',           ex:'Green light — trust the hitter'},
+        {v:'Double Steal',   label:'Double Steal 1st+3rd', ex:'Both runners move on pitch'},
+      ]
+    },
+    { id:'indicator', label:'Signal Indicator (Key)', optional:false,
+      desc:'The touch after the indicator is the real sign. Everything before it is decoy.',
+      note:'This is how third base coaches communicate silently in real time. The indicator must be consistent and hidden in the sequence — same system as baseball.',
+      opts:[
+        {v:'belt',  label:'Belt',   ex:'Belt touch activates'},
+        {v:'cap',   label:'Cap',    ex:'Cap touch activates'},
+        {v:'chin',  label:'Chin',   ex:'Chin touch activates'},
+        {v:'chest', label:'Chest',  ex:'Chest touch activates'},
+        {v:'ear',   label:'Ear',    ex:'Ear touch activates'},
+        {v:'wrist', label:'Wrist',  ex:'Wrist touch activates'},
+      ]
+    },
+    { id:'wipeoff', label:'Wipe-Off Signal', optional:false,
+      desc:'Cancel the sign. If wipe-off is given, the play is dead — do nothing.',
+      opts:[
+        {v:'swipe jersey', label:'Swipe Jersey',        ex:'Classic — hands across chest'},
+        {v:'both thighs',  label:'Both Hands Thighs',   ex:'Two-hand simultaneous touch'},
+        {v:'clap',         label:'Clap',                ex:'One clap cancels all'},
+        {v:'nose',         label:'Wipe Nose',           ex:'Subtle, easy to hide'},
+        {v:'arm swipe',    label:'Swipe Arm',           ex:'Opposite hand on forearm'},
+      ]
+    },
   ]
 
-  const steps = sport==='Basketball'?bbSteps:sport==='Baseball'?bsbSteps:sport==='Soccer'?soccerSteps:sport==='Softball'?sbSteps:fbSteps
+  const steps = sport==='Basketball' ? bbSteps
+              : sport==='Baseball'   ? bsbSteps
+              : sport==='Soccer'     ? soccerSteps
+              : sport==='Softball'   ? sbSteps
+              : fbSteps
 
-  // Live SVG diagram that builds incrementally
-  function LiveDiagram() {
-    const fmt = choices.formation
-    const holeNum = parseInt((choices.hole||'').split(' ')[0])
-    const holeX = [60,42,78,50,70,34,86,26,94][holeNum] || 60
-    const holeSide = holeNum===0?'C':holeNum%2===0?'R':'L'
-    const fmtPositions = {
-      'I-Formation':   { rb:[[60,60]], fb:[[60,56]], wr:[[18,32],[102,32]] },
-      'Pro Set':        { rb:[[50,58],[70,58]], fb:[], wr:[[15,32],[105,32]] },
-      'Shotgun':        { rb:[[78,56]], fb:[], wr:[[10,30],[38,30],[82,30],[110,30]] },
-      'Pistol':         { rb:[[60,60]], fb:[], wr:[[15,32],[105,32]] },
-      'Empty Set':      { rb:[], fb:[], wr:[[10,30],[30,32],[60,32],[90,32],[110,30]] },
-      'Single Back':    { rb:[[60,60]], fb:[], wr:[[12,30],[38,32],[102,30]] },
-      'Wildcat':        { rb:[[60,52]], fb:[], wr:[[10,30],[105,30]] },
-      'Full House':     { rb:[[48,60],[72,60]], fb:[[60,57]], wr:[[15,32],[105,32]] },
+  // ── SIGNAL CREATOR VISUAL (Baseball / Softball) ────────────────────────────
+  function buildSignalSequence(indicator, call, wipeoff) {
+    const bodyParts = ['cap','chin','ear','belt','chest','arm','wrist','letters','sleeve']
+    const callToSign = {
+      'Steal':           'ear',
+      'Delayed Steal':   'wrist',
+      'Hit and Run':     'chest',
+      'Run and Hit':     'arm',
+      'Safety Squeeze':  'chin',
+      'Suicide Squeeze': 'cap',
+      'Take':            'sleeve',
+      'Swing Away':      'letters',
+      'Double Steal':    'shoulder',
+      'Slap Hit':        'ear',
+      'Drag Bunt':       'wrist',
+      'Double Steal 1st+3rd': 'shoulder',
     }
-    const pos = fmtPositions[fmt] || fmtPositions['I-Formation']
-    const qbX = fmt==='Shotgun'?60:fmt==='Wildcat'?78:60
-    const qbY = fmt==='Shotgun'||fmt==='Pistol'?56:52
-    const strColor = choices.strength?.includes('Right')||choices.strength?.includes('Twin Right') ? '#4ade80' : choices.strength?.includes('Left')||choices.strength?.includes('Twin Left') ? '#6b9fff' : P
-    const carrierColor = '#f59e0b'
-    const isCarrierHB = choices.carrier?.includes('HB')||choices.carrier?.includes('RB')
-    const isCarrierFB = choices.carrier?.includes('FB')
-    const isCarrierWR = choices.carrier?.includes('WR')||choices.carrier?.includes('Slot')||choices.carrier?.includes(' X ')||choices.carrier?.includes(' Z ')||choices.carrier?.includes(' Y ')
-    const isCarrierQB = choices.carrier?.includes('QB')||choices.carrier?.includes('Option')
+    const realSign = callToSign[call] || 'chest'
+    // Build sequence: 2-3 decoys, indicator, real sign, 1-2 more decoys
+    const decoys = bodyParts.filter(p => p !== realSign && p !== indicator && p !== wipeoff.split(' ')[0])
+    const seq = [
+      { touch: decoys[0], type: 'decoy', label: decoys[0] },
+      { touch: decoys[1], type: 'decoy', label: decoys[1] },
+      { touch: indicator, type: 'indicator', label: indicator + ' ← KEY' },
+      { touch: realSign,  type: 'live',      label: realSign + ' ← LIVE SIGN' },
+      { touch: decoys[2], type: 'decoy',     label: decoys[2] },
+    ]
+    return { sequence: seq, realSign, indicator, wipeoff, call }
+  }
 
-    if (sport === 'Football') return (
-      <svg viewBox="0 0 120 72" style={{ width:'100%', height:150 }}>
-        <rect width="120" height="72" fill="#071a07" rx="3"/>
-        <line x1="5" y1="36" x2="115" y2="36" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
-        <text x="7" y="34.5" fill="rgba(255,255,255,0.18)" fontSize="4" fontFamily="monospace">LOS</text>
-        {/* OL */}
-        {[-20,-10,0,10,20].map((x,i)=>(
-          <rect key={i} x={60+x-5} y={29.5} width={10} height={8} rx={1} fill={i===2?'#e2e8f0':strColor} opacity={0.9}/>
-        ))}
-        {/* Hole indicator */}
-        {choices.hole && holeNum>=0 && (
-          <>
-            <rect x={holeX-5} y={27} width={10} height={14} rx={1} fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth={0.8}/>
-            <path d={`M${holeX} 41 L${holeX} 52`} stroke="#f59e0b" strokeWidth={2} markerEnd="url(#ah)"/>
-            <text x={holeX} y={24} textAnchor="middle" fill="#f59e0b" fontSize="5" fontWeight="900" fontFamily="monospace">{choices.hole.split(' ')[0]}</text>
-            <text x={holeX} y={19} textAnchor="middle" fill="#f59e0b" fontSize="3.5" fontFamily="monospace">{holeSide==='C'?'CENTER':holeSide==='L'?'←LEFT':'RIGHT→'}</text>
-          </>
-        )}
-        {/* QB */}
-        {choices.formation && <><circle cx={qbX} cy={qbY} r={4.5} fill={isCarrierQB?carrierColor:P} opacity={0.9}/><text x={qbX} y={qbY+1.6} textAnchor="middle" fill="white" fontSize="4" fontWeight="700" fontFamily="monospace">QB</text></>}
-        {/* FB */}
-        {choices.formation && (pos.fb||[]).map((p,i)=><g key={i}><circle cx={p[0]} cy={p[1]} r={4} fill={isCarrierFB?carrierColor:P} opacity={0.8}/><text x={p[0]} y={p[1]+1.5} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">FB</text></g>)}
-        {/* RBs */}
-        {choices.formation && (pos.rb||[]).map((p,i)=><g key={i}><circle cx={p[0]} cy={p[1]} r={4} fill={isCarrierHB?carrierColor:P} opacity={0.85}/><text x={p[0]} y={p[1]+1.5} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">HB</text></g>)}
-        {/* WRs */}
-        {choices.formation && (pos.wr||[]).map((p,i)=><circle key={i} cx={p[0]} cy={p[1]} r={3.5} fill={isCarrierWR?carrierColor:P} opacity={0.75}/>)}
-        {/* Motion arc */}
-        {choices.motion && choices.motion!=='None' && <path d="M102 32 Q80 22 60 30" stroke="#c084fc" strokeWidth={1.2} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
-        {/* Strength label */}
-        {choices.strength && <text x={choices.strength.includes('Right')?98:22} y={17} textAnchor="middle" fill={strColor} fontSize="4" fontWeight="700" fontFamily="monospace">STR▶</text>}
-        {/* Tag label */}
-        {choices.tag && choices.tag!=='None' && <text x={60} y={68} textAnchor="middle" fill="#c084fc" fontSize="5" fontWeight="700" fontFamily="monospace">{choices.tag.split(' ')[0].toUpperCase()}</text>}
-        <defs><marker id="ah" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#f59e0b"/></marker></defs>
-      </svg>
-    )
+  // ── INCREMENTAL DIAGRAM ────────────────────────────────────────────────────
+  function LiveDiagram() {
+    if (sport === 'Baseball' || sport === 'Softball') {
+      // Signal visual instead of field diagram
+      if (!choices.indicator || !choices.call) {
+        return (
+          <svg viewBox="0 0 240 80" style={{ width:'100%', height:80 }}>
+            <rect x="0" y="0" width="240" height="80" fill="#0a1a0a" rx="3"/>
+            <text x="120" y="30" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="10">Signal sequence will appear here</text>
+            <text x="120" y="50" textAnchor="middle" fill="rgba(255,255,255,0.12)" fontSize="8">Complete steps to generate your signal</text>
+          </svg>
+        )
+      }
+      const sig = buildSignalSequence(choices.indicator, choices.call, choices.wipeoff || 'swipe jersey')
+      return (
+        <div style={{ padding:'8px 4px' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, flexWrap:'wrap' }}>
+            {sig.sequence.map((s,i) => (
+              <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2 }}>
+                <div style={{ width:44, height:44, borderRadius:'50%', background: s.type==='indicator'?'rgba(245,158,11,0.2)':s.type==='live'?al(P,0.2):'rgba(255,255,255,0.06)', border: s.type==='indicator'?'2px solid #f59e0b':s.type==='live'?`2px solid ${P}`:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column' }}>
+                  <span style={{ fontSize:9, color: s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', lineHeight:1.2 }}>{s.touch.toUpperCase()}</span>
+                </div>
+                <span style={{ fontSize:7, color: s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', maxWidth:44 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</span>
+                {i < sig.sequence.length-1 && <div style={{ position:'absolute', right:-8, top:14, color:'#3d4559', fontSize:10 }}>→</div>}
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign:'center', marginTop:6, fontSize:9, color:'#6b7a96' }}>
+            After <span style={{ color:'#f59e0b', fontWeight:700 }}>{choices.indicator?.toUpperCase()}</span> → next touch is live → wipe-off: <span style={{ color:'#ef4444', fontWeight:700 }}>{choices.wipeoff}</span>
+          </div>
+        </div>
+      )
+    }
 
-    if (sport === 'Basketball') return (
-      <svg viewBox="0 0 120 80" style={{ width:'100%', height:150 }}>
-        <rect width="120" height="80" fill="#07070f" rx="3"/>
-        <path d="M10 75 Q60 8 110 75" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
-        <line x1="10" y1="75" x2="110" y2="75" stroke="rgba(255,255,255,0.09)" strokeWidth="1"/>
-        <rect x="42" y="52" width="36" height="23" rx="2" stroke="rgba(255,255,255,0.08)" strokeWidth="1" fill="none"/>
-        <circle cx="60" cy="52" r="8" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none"/>
-        {[[60,68,'PG'],[28,40,'SG'],[92,40,'SF'],[42,22,'PF'],[78,22,'C']].map(([x,y,lbl],i)=>(
-          <g key={i}><circle cx={x} cy={y} r={5} fill={P} opacity={0.85}/><text x={x} y={y+1.8} textAnchor="middle" fill="white" fontSize="4" fontWeight="700" fontFamily="monospace">{lbl}</text></g>
-        ))}
-        {choices.action?.includes('Roll') && <path d="M60 68 L60 48 L42 30" stroke="#f59e0b" strokeWidth={1.5} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
-        {choices.action?.includes('Screen') && <><line x1="42" y1="28" x2="42" y2="45" stroke="#4ade80" strokeWidth={2.5} strokeLinecap="round"/><line x1="78" y1="28" x2="78" y2="45" stroke="#4ade80" strokeWidth={2.5} strokeLinecap="round"/></>}
-        {choices.series && <text x="60" y="11" textAnchor="middle" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace">{choices.series.split(' ')[0]} SERIES</text>}
-      </svg>
-    )
+    if (sport === 'Basketball') {
+      const hasAction = choices.action
+      const hasRead = choices.read
+      return (
+        <svg viewBox="0 0 200 110" style={{ width:'100%', height:110 }}>
+          <rect x="0" y="0" width="200" height="110" fill="#0a0a1f" rx="3"/>
+          <path d="M12 105 Q100 8 188 105" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8"/>
+          <line x1="12" y1="105" x2="188" y2="105" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"/>
+          <rect x="62" y="72" width="76" height="33" rx="2" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+          <circle cx="100" cy="72" r="15" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
+          <circle cx="104" cy="100" r="2.5" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
+          {/* 5 players */}
+          {[[100,90],[60,60],[140,60],[72,30],[128,30]].map(([cx,cy],i) => (
+            <g key={i}>
+              <circle cx={cx} cy={cy} r={6} fill={P} opacity={i===0?0.95:0.8}/>
+              <text x={cx} y={cy+2} textAnchor="middle" fill="white" fontSize="5" fontWeight="700">{['PG','SG','SF','PF','C'][i]}</text>
+            </g>
+          ))}
+          {hasAction && (choices.action==='Pick and Roll'||choices.action==='Pick and Pop') && (
+            <>
+              <line x1="72" y1="30" x2="94" y2="84" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" opacity="0.7"/>
+              <path d="M96 84 L72 55" stroke={P} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+            </>
+          )}
+          {hasAction && choices.action==='Back Screen' && (
+            <line x1="72" y1="30" x2="135" y2="58" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" opacity="0.7"/>
+          )}
+          {hasRead && choices.read==='Kick Out' && (
+            <path d="M100 84 L155 55" stroke={P} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+          )}
+          {choices.setName && <text x="100" y="10" textAnchor="middle" fill={P} fontSize="6" fontWeight="700" fontFamily="monospace">{choices.setName.toUpperCase()}</text>}
+        </svg>
+      )
+    }
 
-    if (sport === 'Baseball' || sport === 'Softball') return (
-      <svg viewBox="0 0 120 85" style={{ width:'100%', height:150 }}>
-        <rect width="120" height="85" fill="#07100a" rx="3"/>
-        <path d="M60 75 L98 45 L60 15 L22 45 Z" stroke="rgba(255,255,255,0.12)" strokeWidth="1" fill="rgba(255,255,255,0.02)"/>
-        {[[60,75],[98,45],[60,15],[22,45]].map(([x,y],i)=><rect key={i} x={x-4} y={y-4} width={8} height={8} rx={1} fill={i===0?'#f2f4f8':'#3d4559'} opacity={0.8}/>)}
-        {[[60,42],[15,65],[105,65],[60,10],[36,62],[84,62]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={3.5} fill={P} opacity={0.7}/>)}
-        {(choices.strategy?.includes('Steal')||choices.strategy?.includes('Run')||choices.approach?.includes('Steal')) && <path d="M98 45 Q78 28 60 15" stroke="#f59e0b" strokeWidth={2} fill="none" strokeDasharray="4,3" opacity={0.9}/>}
-        {(choices.strategy?.includes('Bunt')||choices.approach?.includes('Bunt')) && <line x1="60" y1="75" x2="35" y2="68" stroke="#4ade80" strokeWidth={2} opacity={0.8}/>}
-        {choices.situation && <text x="60" y="82" textAnchor="middle" fill={P} fontSize="4" fontWeight="700" fontFamily="monospace">{choices.situation.split(' ').slice(0,4).join(' ')}</text>}
-      </svg>
-    )
+    if (sport === 'Soccer') {
+      return (
+        <svg viewBox="0 0 120 160" style={{ width:'60%', height:140, display:'block', margin:'0 auto' }}>
+          <rect x="0" y="0" width="120" height="160" fill="#0d1a0d" rx="3"/>
+          <rect x="4" y="4" width="112" height="152" rx="2" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+          <line x1="4" y1="80" x2="116" y2="80" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7"/>
+          <circle cx="60" cy="80" r="14" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6"/>
+          <rect x="32" y="4" width="56" height="22" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
+          <rect x="32" y="134" width="56" height="22" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
+          {/* 4-3-3 */}
+          <circle cx={60} cy={150} r={5} fill={P} opacity={0.5}/>
+          {[18,40,80,102].map((x,i)=><circle key={i} cx={x} cy={128} r={5} fill={P} opacity={0.8}/>)}
+          {[30,60,90].map((x,i)=><circle key={i} cx={x} cy={104} r={5} fill={P} opacity={0.85}/>)}
+          {[18,60,102].map((x,i)=><circle key={i} cx={x} cy={78} r={5} fill={P} opacity={0.9}/>)}
+          {choices.pattern==='Overlap' && <path d="M18 128 L18 95 L30 78" stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeDasharray="3,2"/>}
+          {choices.pattern==='Switch' && <path d="M18 78 L102 78" stroke="#4ade80" strokeWidth="1.5" fill="none" strokeDasharray="3,2"/>}
+          {choices.pattern==='Third Man' && <path d="M30 104 L60 104 M60 104 L90 78" stroke={P} strokeWidth="1.2" fill="none" strokeDasharray="3,2"/>}
+          {choices.finish==='Through' && <path d="M60 72 L60 30" stroke={P} strokeWidth="1.5" fill="none" strokeDasharray="3,2"/>}
+          {choices.phase && <text x="60" y="17" textAnchor="middle" fill={P} fontSize="5" fontWeight="700">{choices.phase.split('-')[0].toUpperCase()}</text>}
+        </svg>
+      )
+    }
+
+    // ── FOOTBALL DIAGRAM ─────────────────────────────────────────────────────
+    const fmtPositions = {
+      'Ace Right':          { wr:[[18,38],[148,38],[148,28]], qb:[84,58], rb:[[84,68]], fb:[] },
+      'Ace Left':           { wr:[[18,38],[18,28],[148,38]], qb:[84,58], rb:[[84,68]], fb:[] },
+      'I-Formation Right':  { wr:[[18,38],[148,38]], qb:[84,55], rb:[[84,68]], fb:[[84,62]] },
+      'I-Formation Left':   { wr:[[18,38],[148,38]], qb:[84,55], rb:[[84,68]], fb:[[84,62]] },
+      'Shotgun Right':      { wr:[[12,38],[148,38],[136,38],[34,38]], qb:[84,62], rb:[[110,62]], fb:[] },
+      'Pistol Right':       { wr:[[12,38],[148,38]], qb:[84,58], rb:[[84,68]], fb:[] },
+      'Trips Right':        { wr:[[12,38],[130,38],[144,30],[156,38]], qb:[84,58], rb:[[84,68]], fb:[] },
+      'Trips Left':         { wr:[[10,38],[24,30],[36,38],[148,38]], qb:[84,58], rb:[[84,68]], fb:[] },
+      'Pro Set Right':      { wr:[[12,38],[148,38]], qb:[84,55], rb:[[100,65]], fb:[[68,62]] },
+    }
+    const fmt = fmtPositions[choices.formation] || fmtPositions['Ace Right']
+    const gapMap = {
+      '22':  {x:82,  side:'R', label:'A-Gap R'},
+      '23':  {x:68,  side:'L', label:'B-Gap L'},
+      '24':  {x:96,  side:'R', label:'B-Gap R'},
+      '26':  {x:106, side:'R', label:'C-Gap R'},
+      '28':  {x:96,  side:'R', label:'Counter R'},
+      '32':  {x:84,  side:'C', label:'Sneak'},
+      '36':  {x:62,  side:'L', label:'C-Gap L'},
+      '44':  {x:75,  side:'L', label:'B-Gap L'},
+      '47':  {x:100, side:'R', label:'Power R'},
+      '374': {x:100, side:'R', label:'Pro Power R'},
+      '96':  {x:148, side:'R', label:'Deep R'},
+      '999': {x:84,  side:'C', label:'Audible'},
+    }
+    const gap = gapMap[choices.playNum]
+    const motionMap = {
+      'Z Jet':    {from:[148,38], to:[40,38], through:true},
+      'H Motion': {from:[84,68],  to:[130,62], through:false},
+      'Y Shift':  {from:[148,38], to:[18,38], through:false},
+      'H Orbit':  {from:[84,68],  to:[18,48], through:false},
+      'F Arc':    {from:[84,62],  to:[18,55], through:false},
+      'Fly':      {from:[148,38], to:[40,38], through:true},
+    }
+    const motionPath = motionMap[choices.motion]
+    const isPassPlay = choices.playNum && (choices.playNum.startsWith('9') || choices.playNum==='999')
 
     return (
-      <svg viewBox="0 0 120 75" style={{ width:'100%', height:150 }}>
-        <rect width="120" height="75" fill="#07100a" rx="3"/>
-        <rect x="5" y="3" width="110" height="69" rx="2" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
-        <line x1="60" y1="3" x2="60" y2="72" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-        <circle cx="60" cy="37" r="12" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none"/>
-        {[[60,10],[25,18],[60,18],[95,18],[20,35],[60,30],[100,35],[12,52],[38,52],[82,52],[108,52]].map(([x,y],i)=>(
-          <circle key={i} cx={x} cy={y} r={4} fill={P} opacity={i===0?0.6:0.85}/>
+      <svg viewBox="0 0 200 100" style={{ width:'100%', height:120 }}>
+        <rect x="0" y="0" width="200" height="100" fill="#0a1a0a" rx="3"/>
+        {[50,100,150].map((x,i)=><line key={i} x1={x} y1="4" x2={x} y2="96" stroke="rgba(255,255,255,0.04)" strokeWidth="0.6" strokeDasharray="3,3"/>)}
+        {/* LOS */}
+        <line x1="4" y1="48" x2="196" y2="48" stroke="rgba(255,255,255,0.18)" strokeWidth="0.9"/>
+        <text x="7" y="45" fill="rgba(255,255,255,0.22)" fontSize="5" fontFamily="monospace">LOS</text>
+        {/* Strength indicator */}
+        {choices.formation && (
+          <text x={choices.formation.includes('Left')?20:176} y="15" textAnchor="middle" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace">STR{choices.formation.includes('Left')?'◄':'►'}</text>
+        )}
+        {/* OL — 5 linemen always on LOS */}
+        {[60,72,84,96,108].map((x,i)=>(
+          <g key={i}>
+            <rect x={x-6} y={40} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
+              stroke={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?'#f59e0b':'none'}
+              strokeWidth={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1.5:0}/>
+            <text x={x} y={47} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">{['LT','LG','C','RG','RT'][i]}</text>
+          </g>
         ))}
-        {choices.pattern?.includes('Overlap') && <path d="M12 52 L12 26 L25 18" stroke="#f59e0b" strokeWidth={1.5} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
-        {choices.pattern?.includes('Switch') && <path d="M12 52 Q60 40 108 52" stroke="#4ade80" strokeWidth={1.5} fill="none" strokeDasharray="3,2" opacity={0.8}/>}
-        {choices.phase && <text x="60" y="71" textAnchor="middle" fill={P} fontSize="4" fontWeight="700" fontFamily="monospace">{choices.phase.split(' ').slice(0,3).join(' ')}</text>}
+        {/* TE if tight modifier */}
+        {choices.modifier==='Tight'&&<rect x={112} y={40} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
+        {/* WRs */}
+        {fmt.wr.map(([cx,cy],i)=>(
+          <circle key={i} cx={cx} cy={cy} r={5} fill={choices.xRoute&&i===0?'#f59e0b':P} opacity={0.85}/>
+        ))}
+        {/* QB — BEHIND the LOS */}
+        <circle cx={fmt.qb[0]} cy={fmt.qb[1]} r={5.5} fill={P} opacity={0.95}/>
+        <text x={fmt.qb[0]} y={fmt.qb[1]+2} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">QB</text>
+        {/* FB */}
+        {fmt.fb.map(([cx,cy],i)=>(
+          <g key={i}><circle cx={cx} cy={cy} r={4} fill={P} opacity={0.8}/><text x={cx} y={cy+1.5} textAnchor="middle" fill="white" fontSize="3.5">FB</text></g>
+        ))}
+        {/* RBs */}
+        {fmt.rb.map(([cx,cy],i)=>(
+          <g key={i}>
+            <circle cx={cx} cy={cy} r={5} fill={gap?'#f59e0b':P} opacity={0.9}/>
+            <text x={cx} y={cy+2} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">HB</text>
+          </g>
+        ))}
+        {/* Gap arrow */}
+        {gap && !isPassPlay && (
+          <g>
+            <rect x={gap.x-5} y={38} width={10} height={13} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
+            <path d={`M${gap.x} 50 L${gap.x} 65`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
+            <text x={gap.x} y={35} textAnchor="middle" fill="#f59e0b" fontSize="5" fontWeight="700" fontFamily="monospace">{gap.label}</text>
+          </g>
+        )}
+        {/* Motion arc */}
+        {motionPath && choices.motion && choices.motion!=='' && (
+          <path d={`M${motionPath.from[0]} ${motionPath.from[1]} Q${(motionPath.from[0]+motionPath.to[0])/2} ${motionPath.through?motionPath.from[1]-12:motionPath.from[1]-8} ${motionPath.to[0]} ${motionPath.to[1]}`}
+            stroke="#c084fc" strokeWidth="1.2" fill="none" strokeDasharray="4,2" opacity="0.85"/>
+        )}
+        {/* Route arrows for pass plays */}
+        {isPassPlay && choices.xRoute && choices.xRoute!=='' && (
+          <path d={`M${fmt.wr[0][0]} ${fmt.wr[0][1]} L${fmt.wr[0][0]+30} ${fmt.wr[0][1]-18}`} stroke="#6b9fff" strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.8"/>
+        )}
+        {isPassPlay && choices.yzRoute && choices.yzRoute!=='' && (
+          <path d={`M${fmt.wr[fmt.wr.length-1][0]} ${fmt.wr[fmt.wr.length-1][1]} L${fmt.wr[fmt.wr.length-1][0]-20} ${fmt.wr[fmt.wr.length-1][1]-15}`} stroke="#4ade80" strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.8"/>
+        )}
+        {/* Modifier label */}
+        {choices.tag && choices.tag!=='' && (
+          <text x="100" y="95" textAnchor="middle" fill="#c084fc" fontSize="5.5" fontWeight="700" fontFamily="monospace">{choices.tag.toUpperCase()}</text>
+        )}
+        <defs>
+          <marker id="arr" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+            <path d="M0,0 L5,2.5 L0,5 Z" fill="#f59e0b"/>
+          </marker>
+        </defs>
       </svg>
     )
   }
 
-  function buildName() {
-    if (sport==='Football') {
-      const parts=[choices.formation?.split(' ')[0],choices.strength&&choices.strength!=='Right'?choices.strength:null,choices.motion&&choices.motion!=='None'?choices.motion.split(' ')[0]:null,choices.playType?.split(' ').slice(0,2).join(' '),choices.hole?.split(' ')[0],choices.carrier,choices.tag&&choices.tag!=='None'?choices.tag.split('(')[0].trim():null].filter(Boolean)
-      const hN=parseInt((choices.hole||'0').split(' ')[0])
-      const side=hN===0?'center':hN%2===0?'right':'left'
-      setResult({ name:parts.join(' '), explanation:`"${choices.formation}" sets your alignment. "${choices.strength}" tells the OL their strong side. Play type "${choices.playType}" is the core action. Hole ${choices.hole} sends the ball ${side}. "${choices.carrier}" is the primary player. ${choices.tag!=='None'?'"'+choices.tag+'" modifies the play at execution.':''}`.trim(), ytSearch:choices.playType+' '+choices.formation+' football drill tutorial' })
-    } else if (sport==='Basketball') {
-      const name=[choices.series?.split(' ')[0],choices.action?.split(' ').slice(0,2).join(' '),choices.finish?.split(' ').slice(0,2).join(' ')].filter(Boolean).join(' ')
-      setResult({ name, explanation:`Series "${choices.series}" calls the set. Action "${choices.action}" is the trigger. Entry "${choices.entry}" moves the ball. Finish "${choices.finish}" is the scoring action.`, ytSearch:choices.action+' basketball play drill' })
-    } else if (sport==='Soccer') {
-      const name=[choices.phase?.split(' ').slice(0,2).join(' '),choices.pattern?.split(' ').slice(0,2).join(' ')].filter(Boolean).join(' — ')
-      setResult({ name, explanation:`Phase "${choices.phase}" — where on the field. Pattern "${choices.pattern}" — how players move. Finish "${choices.finish}" — the final decision.`, ytSearch:choices.pattern+' soccer coaching drill' })
+  function buildResult() {
+    if (sport === 'Football') {
+      const parts = []
+      if (choices.personnel) parts.push(choices.personnel)
+      if (choices.formation) parts.push(choices.formation)
+      if (choices.modifier && choices.modifier!=='') parts.push(choices.modifier)
+      if (choices.motion && choices.motion!=='') parts.push(choices.motion)
+      if (choices.playNum) parts.push(choices.playNum)
+      if (choices.xRoute && choices.xRoute!=='') parts.push(choices.xRoute)
+      if (choices.yzRoute && choices.yzRoute!=='') parts.push(choices.yzRoute)
+      if (choices.tag && choices.tag!=='') parts.push(choices.tag)
+      const name = parts.join(' ')
+      const isShort = parts.length <= 3
+      const explanation = `"${choices.personnel}" = personnel group (${choices.personnel==='11'?'1 RB 1 TE':choices.personnel==='22'?'2 RBs 2 TEs':choices.personnel}). "${choices.formation}" = formation and strength. ${choices.modifier&&choices.modifier!==''?'"'+choices.modifier+'" = TE/line alignment. ':''}${choices.motion&&choices.motion!==''?'"'+choices.motion+'" = pre-snap motion. ':''}${choices.playNum?'"'+choices.playNum+'" = play number (gap attacked + ball carrier). ':''}${choices.xRoute&&choices.xRoute!==''?'"'+choices.xRoute+'" = X receiver route. ':''}${choices.yzRoute&&choices.yzRoute!==''?'"'+choices.yzRoute+'" = Y/Z receiver route. ':''}${choices.tag&&choices.tag!==''?'"'+choices.tag+'" = execution tag.':''}${isShort?' Note: Short calls like this are common and completely valid — every word earns its spot.':''}`
+      setResult({ name, explanation, ytSearch: (choices.formation||'') + ' ' + (choices.playNum||'') + ' football play' })
+    } else if (sport === 'Basketball') {
+      const parts = [choices.setName, choices.action, choices.read, choices.finish]
+      if (choices.tag && choices.tag!=='') parts.push(choices.tag)
+      setResult({ name: parts.filter(Boolean).join(' '), explanation: `"${choices.setName}" = the set name tells everyone which series to run. "${choices.action}" = the primary screening/cutting action. "${choices.read}" = what the ball handler does. "${choices.finish}" = how the play ends.`, ytSearch: choices.setName + ' ' + choices.action + ' basketball' })
+    } else if (sport === 'Baseball' || sport === 'Softball') {
+      const sig = buildSignalSequence(choices.indicator||'belt', choices.call||'Take', choices.wipeoff||'swipe jersey')
+      const seqStr = sig.sequence.map(s=>s.touch).join(' → ')
+      setResult({
+        name: choices.call || 'Signal',
+        isSignal: true,
+        signalData: sig,
+        seqStr,
+        explanation: `Situation: ${choices.situation}. Call: ${choices.call}. Indicator (key): touch ${choices.indicator} — everything after this is live. Signal sequence: ${seqStr}. Wipe-off: ${choices.wipeoff}.`,
+        ytSearch: (choices.call||'') + ' ' + sport.toLowerCase() + ' third base coach signals'
+      })
     } else {
-      const name=[(choices.strategy||choices.approach)?.split(' ').slice(0,3).join(' '),choices.situation?.split(' ').slice(0,3).join(' ')].filter(Boolean).join(' / ')
-      setResult({ name, explanation:`Situation: "${choices.situation}." Approach: "${choices.approach||choices.strategy}." Baserunning / Pitching: "${choices.baserunning||choices.pitcher}."`, ytSearch:(choices.strategy||choices.approach||'')+' '+sport.toLowerCase()+' coaching' })
+      const parts = [choices.phase, choices.pattern, choices.trigger, choices.finish]
+      setResult({ name: parts.filter(Boolean).join(' — '), explanation: `Phase: "${choices.phase}". Pattern: "${choices.pattern}". Triggered by: "${choices.trigger}". Finish: "${choices.finish}".`, ytSearch: choices.pattern + ' soccer tactical drill' })
     }
   }
 
+  const currentStep = steps[step]
+  const currentVal = choices[currentStep?.id] ?? null
+  const canAdvance = currentVal !== null && currentVal !== undefined
+  const isLastStep = step === steps.length - 1
+
   function reset() { setStep(0); setChoices({}); setResult(null) }
-  const cur = steps[step]
 
   return (
     <Card>
-      <CardHead icon="✏️" title="Play Name Builder" tag="LEARN" tagColor={P} accent={P} />
+      <CardHead icon="✏️" title="Play Name Builder" tag={sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'LEARN'} tagColor={P} accent={P} />
       <div style={{ padding:14 }}>
-        <p style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, marginBottom:10 }}>Build a professional play call step by step. The diagram updates with every choice you make.</p>
+        <p style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6, marginBottom:10 }}>{sport==='Baseball'||sport==='Softball'?'Define the situation, choose the play, and generate a real third-base coach signal sequence.':'Build a professional play call step by step. The diagram updates with every choice you make.'}</p>
+
         {!result ? (
           <>
-            <div style={{ display:'flex', gap:4, marginBottom:8 }}>
-              {steps.map((_,i)=><div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<=step?P:'#1e2330', transition:'background 0.2s' }}/>)}
+            <div style={{ display:'flex', gap:3, marginBottom:10 }}>
+              {steps.map((_,i)=><div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<step?P:i===step?P:'#1e2330', opacity:i===step?1:i<step?0.7:0.3, transition:'all 0.2s' }}/>)}
             </div>
-            <div style={{ background:'#0a140a', borderRadius:6, border:'1px solid #1e2330', overflow:'hidden', marginBottom:10 }}>
-              <div style={{ fontSize:8, letterSpacing:1.5, color:'#3d4559', textTransform:'uppercase', fontWeight:700, padding:'4px 10px', borderBottom:'1px solid #1e2330' }}>Live Diagram — updates with each selection</div>
-              <LiveDiagram />
+
+            <div style={{ background:'#0a1a0a', borderRadius:6, border:'1px solid #1e2330', overflow:'hidden', marginBottom:10 }}>
+              <div style={{ fontSize:7, letterSpacing:1.5, color:'#3d4559', textTransform:'uppercase', fontWeight:700, padding:'4px 10px', borderBottom:'1px solid #1e2330' }}>
+                {sport==='Baseball'||sport==='Softball'?'Signal Preview — builds as you choose':'Live Diagram — updates with each selection'}
+              </div>
+              <div style={{ padding:'6px' }}><LiveDiagram /></div>
             </div>
+
             <div style={{ marginBottom:10 }}>
-              <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Step {step+1} of {steps.length} — {cur.label}</div>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{cur.desc}</div>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
-                {cur.opts.map(opt=>(
-                  <button key={opt} onClick={()=>setChoices(c=>({...c,[cur.id]:opt}))} style={{ padding:'7px 11px', borderRadius:4, fontSize:11, border:`1px solid ${choices[cur.id]===opt?P:'#1e2330'}`, background:choices[cur.id]===opt?al(P,0.15):'#161922', color:choices[cur.id]===opt?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, transition:'all 0.15s' }}>{opt}</button>
-                ))}
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+                <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700 }}>Step {step+1} of {steps.length} — {currentStep.label}</div>
+                {currentStep.optional && <span style={{ fontSize:8, color:'#6b7a96', padding:'1px 6px', background:'#1e2330', borderRadius:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>OPTIONAL</span>}
+              </div>
+              <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.5, marginBottom:6 }}>{currentStep.desc}</div>
+              {currentStep.note && (
+                <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.5, padding:'6px 10px', background:'rgba(107,154,255,0.06)', borderRadius:4, borderLeft:'2px solid rgba(107,154,255,0.3)', marginBottom:8 }}>
+                  💡 {currentStep.note}
+                </div>
+              )}
+              <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                {currentStep.opts.map(opt => {
+                  const val = typeof opt === 'string' ? opt : opt.v
+                  const label = typeof opt === 'string' ? opt : opt.label
+                  const ex = typeof opt === 'object' ? opt.ex : null
+                  const isSelected = choices[currentStep.id] === val
+                  return (
+                    <div key={val} onClick={()=>setChoices(c=>({...c,[currentStep.id]:val}))} style={{ padding:'8px 12px', borderRadius:5, border:`1px solid ${isSelected?P:'#1e2330'}`, background:isSelected?al(P,0.12):'#161922', cursor:'pointer', display:'flex', alignItems:'center', gap:8, transition:'all 0.15s' }}>
+                      <div style={{ width:14, height:14, borderRadius:'50%', border:`2px solid ${isSelected?P:'#3d4559'}`, background:isSelected?P:'transparent', flexShrink:0 }}/>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:12, color:isSelected?P:'#f2f4f8', fontWeight:isSelected?700:400 }}>{label}</div>
+                        {ex && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{ex}</div>}
+                      </div>
+                      {isSelected && <span style={{ fontSize:12, color:P }}>✓</span>}
+                    </div>
+                  )
+                })}
               </div>
             </div>
-            {choices[cur.id] && (
-              <div style={{ padding:'6px 10px', background:al(P,0.08), borderRadius:4, fontSize:11, color:P, marginBottom:8 }}>
-                {step>0&&<span style={{ color:'#6b7a96' }}>Built: </span>}
-                <strong>{steps.slice(0,step+1).map(s=>choices[s.id]).filter(Boolean).join(' · ')}</strong>
+
+            {choices[currentStep?.id] !== undefined && choices[currentStep?.id] !== null && (
+              <div style={{ marginTop:4, padding:'5px 10px', background:al(P,0.07), borderRadius:4, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif" }}>
+                {step > 0 ? <span style={{ color:'#6b7a96' }}>Built: </span> : null}
+                {steps.slice(0,step+1).map(s=>choices[s.id]).filter(Boolean).join(' · ')}
               </div>
             )}
-            <div style={{ display:'flex', gap:8 }}>
-              {step>0&&<button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
-              {step<steps.length-1&&<button onClick={()=>choices[cur.id]&&setStep(s=>s+1)} disabled={!choices[cur.id]} style={{ flex:2, padding:'9px', background:choices[cur.id]?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:choices[cur.id]?'pointer':'not-allowed', letterSpacing:'1px' }}>NEXT →</button>}
-              {step===steps.length-1&&<button onClick={buildName} disabled={!choices[cur.id]} style={{ flex:2, padding:'9px', background:choices[cur.id]?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:choices[cur.id]?'pointer':'not-allowed', letterSpacing:'1px' }}>BUILD CALL →</button>}
+
+            <div style={{ display:'flex', gap:8, marginTop:10 }}>
+              {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
+              {!isLastStep && (
+                <button onClick={()=>{ if(canAdvance||currentStep.optional) setStep(s=>s+1) }} style={{ flex:2, padding:'10px', background:canAdvance?P:currentStep.optional?al(P,0.4):'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:(canAdvance||currentStep.optional)?'pointer':'not-allowed', letterSpacing:'1px' }}>
+                  {currentStep.optional && !canAdvance ? 'SKIP →' : 'NEXT →'}
+                </button>
+              )}
+              {isLastStep && (
+                <button onClick={buildResult} style={{ flex:2, padding:'10px', background:canAdvance||currentStep.optional?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:(canAdvance||currentStep.optional)?'pointer':'not-allowed', letterSpacing:'1px' }}>
+                  {sport==='Baseball'||sport==='Softball'?'GENERATE SIGNAL →':'BUILD CALL →'}
+                </button>
+              )}
             </div>
           </>
         ) : (
           <div style={{ animation:'fadeIn 0.3s ease' }}>
-            <div style={{ background:'#0a140a', borderRadius:6, border:'1px solid #1e2330', overflow:'hidden', marginBottom:10 }}>
-              <LiveDiagram/>
-            </div>
-            <div style={{ padding:'12px', background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:8, marginBottom:10, textAlign:'center' }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:5 }}>Your Play Call</div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:900, fontSize:20, color:'#f2f4f8', letterSpacing:1, lineHeight:1.3 }}>{result.name}</div>
-            </div>
-            <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:10 }}>
-              <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:5 }}>Why it is called this</div>
-              <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.7 }}>{result.explanation}</div>
-            </div>
-            {result.ytSearch&&<a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(result.ytSearch)} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 12px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:6, textDecoration:'none', marginBottom:10 }}><span style={{ fontSize:16 }}>▶</span><div><div style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WATCH ON YOUTUBE</div><div style={{ fontSize:11, color:'#6b7a96' }}>{result.ytSearch}</div></div><span style={{ marginLeft:'auto', fontSize:11, color:'#ef4444' }}>→</span></a>}
-            <button onClick={reset} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>BUILD ANOTHER →</button>
+            {result.isSignal ? (
+              <>
+                <div style={{ padding:'12px', background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:8, marginBottom:10 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Signal Sequence — {result.signalData.call}</div>
+                  <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', justifyContent:'center', padding:'8px 0' }}>
+                    {result.signalData.sequence.map((s,i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', gap:4 }}>
+                        <div style={{ padding:'8px 10px', borderRadius:6, background: s.type==='indicator'?'rgba(245,158,11,0.15)':s.type==='live'?al(P,0.15):'#161922', border: s.type==='indicator'?'2px solid #f59e0b':s.type==='live'?`2px solid ${P}`:'1px solid #1e2330', textAlign:'center', minWidth:52 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>{s.touch.toUpperCase()}</div>
+                          <div style={{ fontSize:8, color:s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:2 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</div>
+                        </div>
+                        {i < result.signalData.sequence.length-1 && <span style={{ color:'#3d4559', fontSize:14 }}>→</span>}
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop:8, padding:'6px 10px', background:'rgba(239,68,68,0.08)', borderRadius:4, border:'1px solid rgba(239,68,68,0.2)', textAlign:'center' }}>
+                    <span style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>WIPE-OFF: </span>
+                    <span style={{ fontSize:11, color:'#f2f4f8' }}>{result.signalData.wipeoff} — cancels all signs</span>
+                  </div>
+                </div>
+                <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:10 }}>
+                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>How It Works</div>
+                  <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.7 }}>{result.explanation}</div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ padding:'12px', background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:8, marginBottom:10, textAlign:'center' }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Your Play Call</div>
+                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:900, fontSize:20, color:'#f2f4f8', letterSpacing:0.5, lineHeight:1.4 }}>{result.name}</div>
+                </div>
+                <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:10 }}>
+                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Why It Is Called This</div>
+                  <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.7 }}>{result.explanation}</div>
+                </div>
+              </>
+            )}
+            {result.ytSearch && (
+              <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(result.ytSearch)} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 12px', background:'rgba(239,68,68,0.07)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:6, textDecoration:'none', marginBottom:10 }}>
+                <span style={{ fontSize:16 }}>▶</span>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WATCH ON YOUTUBE</div>
+                  <div style={{ fontSize:11, color:'#6b7a96' }}>{result.ytSearch}</div>
+                </div>
+                <span style={{ fontSize:11, color:'#ef4444' }}>→</span>
+              </a>
+            )}
+            <button onClick={reset} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>
+              {sport==='Baseball'||sport==='Softball'?'BUILD ANOTHER SIGNAL →':'BUILD ANOTHER CALL →'}
+            </button>
           </div>
         )}
       </div>
     </Card>
   )
 }
+
 
 function RulebookPage({ sport, P, al, callAI }) {
   const [leagueSearch, setLeagueSearch] = useState('')
@@ -3070,7 +3920,9 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
             <div style={{ height:3, background:ct?`linear-gradient(90deg,${ct.primary},${ct.secondary||P},${ct.accent1||P},${ct.accent2||P})`:`linear-gradient(90deg,${P},${S})` }} />
             {/* Mascot background — large, centered */}
             {ct && mascotObj && (
-              <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)', fontSize:ct?80:0, opacity:0.1, pointerEvents:'none', userSelect:'none', lineHeight:1, zIndex:0 }}>{mascotObj.emoji}</div>
+              <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)', opacity:0.12, pointerEvents:'none', zIndex:0 }}>
+                <MascotAvatar mascotId={ct.mascot} color={ct.primary||P} size={100} />
+              </div>
             )}
             {!ct && (
               <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)', fontSize:50, opacity:0.06, pointerEvents:'none', zIndex:0 }}>{SPORT_BIG[sport]||'🏈'}</div>
@@ -3852,6 +4704,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
           </div>
 
           {section==='roster'   && <RosterSection   team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
+          {section==='lineup'   && <LineupBuilder    team={currentTeam} sport={sport} P={P} S={S} al={al} teams={teams} setTeams={setTeams} />}
           {section==='schedule' && <ScheduleSection  team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
           {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} />}
           {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} />}
@@ -3931,7 +4784,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
 
       <div style={{ marginTop:14 }}>
         <div onClick={()=>setExpanded(e=>!e)} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
-          <span style={{ fontSize:18 }}>{mascotObj?.emoji || sportEmoji[sport] || '🏆'}</span>
+          <MascotAvatar mascotId={current?.mascot} color={P} size={32} />
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:current?15:13, color:'#f2f4f8', textTransform:'uppercase' }}>
               {current ? current.name : 'No '+sport+' Team Selected'}
@@ -3953,7 +4806,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                   const fs = (TEAM_FONTS||[]).find(f=>f.id===team.teamFont)?.style||"'Barlow Condensed',sans-serif"
                   return (
                     <div key={team.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:current?.id===team.id?al(P,0.1):'#161922', border:`1px solid ${current?.id===team.id?al(P,0.4):'#1e2330'}`, borderRadius:6, marginBottom:6 }}>
-                      <span style={{ fontSize:18, flexShrink:0 }}>{m?.emoji||'🏆'}</span>
+                      <MascotAvatar mascotId={team.mascot} color={current?.id===team.id?P:'#607080'} size={32} />
                       <div style={{ flex:1, cursor:'pointer' }} onClick={()=>{ selectTeam(team); setTimeout(()=>{ if(onOpenTeamTab) onOpenTeamTab() }, 50) }}>
                         <div style={{ fontFamily:fs, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
                         <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
@@ -3983,15 +4836,29 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                 </div>
                 <div style={{ marginBottom:12 }}>
                   <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Mascot</label>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:3, maxHeight:110, overflowY:'auto', padding:4, background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
-                    {(MASCOTS||[]).map(m=>(
-                      <div key={m.id} onClick={()=>setForm(f=>({...f,mascot:m.id}))} title={m.name} style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'5px 2px', borderRadius:4, background:form.mascot===m.id?al(P,0.2):'transparent', border:`1px solid ${form.mascot===m.id?P:'transparent'}`, cursor:'pointer' }}>
-                        <span style={{ fontSize:16 }}>{m.emoji}</span>
-                        <span style={{ fontSize:6, color:'#6b7a96', textAlign:'center', lineHeight:1.1 }}>{m.name.slice(0,5)}</span>
-                      </div>
-                    ))}
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:5, maxHeight:180, overflowY:'auto', padding:6, background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
+                    {(MASCOTS||[]).map(m=>{
+                      const isLocked = m.tier === 'premium'
+                      const isSelected = form.mascot === m.id
+                      return (
+                        <div key={m.id} onClick={()=>{ if(!isLocked) setForm(f=>({...f,mascot:m.id})); else setShowUpgrade(true) }} title={isLocked?m.name+' — Premium':m.name} style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'6px 2px', borderRadius:6, background:isSelected?al(P,0.2):isLocked?'rgba(255,255,255,0.02)':'transparent', border:`1px solid ${isSelected?P:isLocked?'rgba(255,255,255,0.06)':'transparent'}`, cursor:isLocked?'default':'pointer', position:'relative' }}>
+                          <MascotAvatar mascotId={m.id} color={isSelected?P:'#607080'} size={36} locked={isLocked} />
+                          <span style={{ fontSize:6, color:isLocked?'#2a3040':'#6b7a96', textAlign:'center', lineHeight:1.2, marginTop:2 }}>{m.name.slice(0,6)}</span>
+                        </div>
+                      )
+                    })}
                   </div>
-                  {form.mascot && <div style={{ fontSize:10, color:P, marginTop:3 }}>Selected: {(MASCOTS||[]).find(m=>m.id===form.mascot)?.emoji} {(MASCOTS||[]).find(m=>m.id===form.mascot)?.name}</div>}
+                  {showUpgrade && (
+                    <div style={{ marginTop:8, padding:'8px 10px', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:6, display:'flex', alignItems:'center', gap:8 }}>
+                      <span style={{ fontSize:16 }}>⭐</span>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:11, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Premium Mascot</div>
+                        <div style={{ fontSize:10, color:'#6b7a96' }}>40 more mascots available with CoachIQ Pro.</div>
+                      </div>
+                      <button onClick={()=>setShowUpgrade(false)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>✕</button>
+                    </div>
+                  )}
+                  {form.mascot && <div style={{ fontSize:10, color:P, marginTop:4, display:'flex', alignItems:'center', gap:6 }}><MascotAvatar mascotId={form.mascot} color={P} size={20}/> {(MASCOTS||[]).find(m=>m.id===form.mascot)?.name}</div>}
                 </div>
                 <div style={{ marginBottom:12 }}>
                   <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Name Font</label>
@@ -4200,6 +5067,264 @@ function AddressSearch({ value, onChange, placeholder, P, al }) {
             )
           })}
         </div>
+      )}
+    </div>
+  )
+}
+
+
+// ─── LINEUP BUILDER ───────────────────────────────────────────────────────────
+const FIELD_POSITIONS = {
+  Football: {
+    offense: [
+      {id:'LT',   x:28, y:52, label:'LT'},  {id:'LG',  x:38, y:52, label:'LG'},
+      {id:'C',    x:50, y:52, label:'C'},   {id:'RG',  x:62, y:52, label:'RG'},
+      {id:'RT',   x:72, y:52, label:'RT'},  {id:'QB',  x:50, y:62, label:'QB'},
+      {id:'HB',   x:50, y:73, label:'HB'},  {id:'WR1', x:8,  y:52, label:'WR'},
+      {id:'WR2',  x:92, y:52, label:'WR'},  {id:'TE',  x:82, y:52, label:'TE'},
+      {id:'FB',   x:50, y:68, label:'FB'},
+    ],
+    defense: [
+      {id:'DE1',  x:28, y:48, label:'DE'}, {id:'DT1', x:40, y:48, label:'DT'},
+      {id:'DT2',  x:60, y:48, label:'DT'}, {id:'DE2', x:72, y:48, label:'DE'},
+      {id:'OLB1', x:20, y:38, label:'OLB'},{id:'MLB', x:50, y:36, label:'MLB'},
+      {id:'OLB2', x:80, y:38, label:'OLB'},{id:'CB1', x:8,  y:30, label:'CB'},
+      {id:'CB2',  x:92, y:30, label:'CB'}, {id:'FS',  x:36, y:24, label:'FS'},
+      {id:'SS',   x:64, y:24, label:'SS'},
+    ]
+  },
+  Basketball: {
+    offense: [
+      {id:'PG', x:50, y:78, label:'PG'}, {id:'SG', x:22, y:55, label:'SG'},
+      {id:'SF', x:78, y:55, label:'SF'}, {id:'PF', x:32, y:35, label:'PF'},
+      {id:'C',  x:68, y:35, label:'C'},
+    ]
+  },
+  Baseball: {
+    batting: [
+      {id:'P',   x:50, y:50, label:'P'},   {id:'C',  x:50, y:78, label:'C'},
+      {id:'1B',  x:72, y:56, label:'1B'},  {id:'2B', x:62, y:38, label:'2B'},
+      {id:'3B',  x:28, y:56, label:'3B'},  {id:'SS', x:38, y:38, label:'SS'},
+      {id:'LF',  x:18, y:22, label:'LF'},  {id:'CF', x:50, y:14, label:'CF'},
+      {id:'RF',  x:82, y:22, label:'RF'},
+    ]
+  },
+  Soccer: {
+    '4-3-3': [
+      {id:'GK',  x:50, y:88, label:'GK'},
+      {id:'LB',  x:18, y:72, label:'LB'},  {id:'CB1', x:36, y:72, label:'CB'},
+      {id:'CB2', x:64, y:72, label:'CB'},  {id:'RB',  x:82, y:72, label:'RB'},
+      {id:'CDM', x:34, y:55, label:'CDM'}, {id:'CM',  x:50, y:52, label:'CM'},
+      {id:'CDM2',x:66, y:55, label:'CM'},
+      {id:'LW',  x:15, y:35, label:'LW'},  {id:'ST',  x:50, y:30, label:'ST'},
+      {id:'RW',  x:85, y:35, label:'RW'},
+    ]
+  },
+  Softball: {
+    batting: [
+      {id:'P',   x:50, y:50, label:'P'},   {id:'C',  x:50, y:78, label:'C'},
+      {id:'1B',  x:72, y:56, label:'1B'},  {id:'2B', x:62, y:38, label:'2B'},
+      {id:'3B',  x:28, y:56, label:'3B'},  {id:'SS', x:38, y:38, label:'SS'},
+      {id:'LF',  x:18, y:22, label:'LF'},  {id:'CF', x:50, y:14, label:'CF'},
+      {id:'RF',  x:82, y:22, label:'RF'},
+    ]
+  },
+}
+
+function LineupBuilder({ team, sport, P, S, al, teams, setTeams }) {
+  const [lineups, setLineups] = useState(team.lineups || [])
+  const [activeLineup, setActiveLineup] = useState(null)
+  const [selectedSlot, setSelectedSlot] = useState(null)
+  const [view, setView] = useState('offense')
+  const [showNewLineup, setShowNewLineup] = useState(false)
+  const [newLineupName, setNewLineupName] = useState('')
+  const [isGameDay, setIsGameDay] = useState(false)
+
+  const players = team.players || []
+  const sportPositions = FIELD_POSITIONS[sport] || FIELD_POSITIONS.Football
+  const currentPositions = sportPositions[view] || Object.values(sportPositions)[0]
+  const currentLineup = lineups.find(l => l.id === activeLineup)
+
+  function saveLineups(updated) {
+    setLineups(updated)
+    setTeams(prev => ({
+      ...prev,
+      [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, lineups:updated} : t)
+    }))
+  }
+
+  function createLineup() {
+    if (!newLineupName.trim()) return
+    const newL = { id:Date.now(), name:newLineupName.trim(), isGameDay:isGameDay, slots:{}, view }
+    const updated = [...lineups, newL]
+    if (isGameDay) {
+      // Only one game day lineup
+      updated.forEach(l => { if (l.id !== newL.id) l.isGameDay = false })
+    }
+    saveLineups(updated)
+    setActiveLineup(newL.id)
+    setNewLineupName('')
+    setShowNewLineup(false)
+    setIsGameDay(false)
+  }
+
+  function assignPlayer(slotId, playerId) {
+    if (!currentLineup) return
+    const updated = lineups.map(l => l.id===activeLineup ? {...l, slots:{...l.slots, [slotId]:playerId}} : l)
+    saveLineups(updated)
+    setSelectedSlot(null)
+  }
+
+  function setGameDayLineup(lineupId) {
+    const updated = lineups.map(l => ({...l, isGameDay: l.id===lineupId}))
+    saveLineups(updated)
+  }
+
+  function deleteLineup(lineupId) {
+    const updated = lineups.filter(l => l.id !== lineupId)
+    saveLineups(updated)
+    if (activeLineup === lineupId) setActiveLineup(updated[0]?.id || null)
+  }
+
+  // Field background per sport
+  function FieldBackground() {
+    if (sport==='Basketball') return (
+      <g>
+        <rect x="4" y="4" width="92" height="92" rx="3" fill="#0a0a1f" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8"/>
+        <path d="M4 72 Q50 10 96 72" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.7"/>
+        <rect x="32" y="68" width="36" height="28" rx="2" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7"/>
+        <circle cx="50" cy="68" r="13" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.7"/>
+        <circle cx="50" cy="92" r="2.5" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8"/>
+        <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5"/>
+      </g>
+    )
+    if (sport==='Baseball'||sport==='Softball') return (
+      <g>
+        <rect x="0" y="0" width="100" height="100" fill="#0a1a0a" rx="3"/>
+        <path d="M50 88 Q90 40 50 8 Q10 40 50 88Z" fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8"/>
+        <path d="M50 88 L90 60 L50 32 L10 60 Z" fill="rgba(180,140,80,0.08)" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+        <line x1="50" y1="88" x2="10" y2="18" stroke="rgba(255,255,255,0.05)" strokeWidth="0.6" strokeDasharray="4,3"/>
+        <line x1="50" y1="88" x2="90" y2="18" stroke="rgba(255,255,255,0.05)" strokeWidth="0.6" strokeDasharray="4,3"/>
+        <circle cx="50" cy="50" r="4" fill="rgba(180,140,80,0.15)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5"/>
+      </g>
+    )
+    if (sport==='Soccer') return (
+      <g>
+        <rect x="2" y="2" width="96" height="96" fill="#0d1a0d" rx="3"/>
+        <rect x="4" y="4" width="92" height="92" rx="2" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.7"/>
+        <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6"/>
+        <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6"/>
+        <rect x="28" y="4" width="44" height="18" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
+        <rect x="28" y="78" width="44" height="18" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6"/>
+      </g>
+    )
+    // Football
+    return (
+      <g>
+        <rect x="0" y="0" width="100" height="100" fill="#0a1a0a" rx="3"/>
+        {[25,50,75].map((x,i)=><line key={i} x1={x} y1="2" x2={x} y2="98" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" strokeDasharray="3,3"/>)}
+        <line x1="2" y1={view==='offense'?55:55} x2="98" y2={view==='offense'?55:55} stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+        <text x="4" y={view==='offense'?53:57} fill="rgba(255,255,255,0.18)" fontSize="4" fontFamily="monospace">LOS</text>
+      </g>
+    )
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      {/* Lineup list */}
+      <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
+        {lineups.map(lineup => (
+          <div key={lineup.id} onClick={()=>setActiveLineup(lineup.id)} style={{ flexShrink:0, padding:'6px 10px', borderRadius:6, border:`1px solid ${activeLineup===lineup.id?P:'#1e2330'}`, background:activeLineup===lineup.id?al(P,0.12):'#161922', cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
+            {lineup.isGameDay && <span style={{ fontSize:12 }}>⭐</span>}
+            <span style={{ fontSize:11, color:activeLineup===lineup.id?P:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{lineup.name}</span>
+            <button onClick={e=>{e.stopPropagation();deleteLineup(lineup.id)}} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:12, padding:0 }}>✕</button>
+          </div>
+        ))}
+        <button onClick={()=>setShowNewLineup(true)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:6, border:`1px dashed ${al(P,0.4)}`, background:'transparent', color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Lineup</button>
+      </div>
+
+      {/* New lineup form */}
+      {showNewLineup && (
+        <div style={{ padding:'10px 12px', background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:6, animation:'fadeIn 0.2s ease' }}>
+          <div style={{ display:'flex', gap:8, marginBottom:8 }}>
+            <input value={newLineupName} onChange={e=>setNewLineupName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&createLineup()} placeholder="e.g. Base Offense, 2-Minute, Nickel D" style={{ flex:1, background:'#0f1219', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'7px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }}/>
+            <button onClick={createLineup} style={{ padding:'7px 12px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer' }}>CREATE</button>
+            <button onClick={()=>{setShowNewLineup(false);setIsGameDay(false)}} style={{ padding:'7px 10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', cursor:'pointer', fontSize:12 }}>✕</button>
+          </div>
+          <div onClick={()=>setIsGameDay(g=>!g)} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
+            <div style={{ width:18, height:18, borderRadius:4, border:`2px solid ${isGameDay?P:'#3d4559'}`, background:isGameDay?P:'transparent', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              {isGameDay && <span style={{ fontSize:11, color:'white' }}>✓</span>}
+            </div>
+            <span style={{ fontSize:11, color:'#f2f4f8' }}>⭐ Set as Game Day Starter</span>
+          </div>
+        </div>
+      )}
+
+      {/* View tabs (Football only) */}
+      {sport==='Football' && (
+        <div style={{ display:'flex', gap:6 }}>
+          {Object.keys(FIELD_POSITIONS[sport]||{}).map(v => (
+            <button key={v} onClick={()=>setView(v)} style={{ padding:'5px 12px', borderRadius:4, fontSize:11, border:`1px solid ${view===v?P:'#1e2330'}`, background:view===v?al(P,0.15):'transparent', color:view===v?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textTransform:'uppercase' }}>{v}</button>
+          ))}
+        </div>
+      )}
+
+      {currentLineup ? (
+        <>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+            <span style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{currentLineup.name}</span>
+            {!currentLineup.isGameDay && (
+              <button onClick={()=>setGameDayLineup(currentLineup.id)} style={{ fontSize:9, color:'#f59e0b', padding:'2px 8px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:3, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>⭐ Set Game Day</button>
+            )}
+            {currentLineup.isGameDay && <span style={{ fontSize:9, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>⭐ GAME DAY STARTER</span>}
+          </div>
+
+          {/* Field diagram */}
+          <div style={{ background:'#0a1a0a', borderRadius:8, overflow:'hidden', border:'1px solid #1e2330' }}>
+            <svg viewBox="0 0 100 100" style={{ width:'100%', aspectRatio:'1', display:'block' }}>
+              <FieldBackground />
+              {currentPositions.map(pos => {
+                const assignedId = currentLineup.slots[pos.id]
+                const player = players.find(p => p.id === assignedId)
+                const isSelected = selectedSlot === pos.id
+                const hasPlayer = !!player
+                return (
+                  <g key={pos.id} onClick={()=>setSelectedSlot(isSelected?null:pos.id)} style={{ cursor:'pointer' }}>
+                    <circle cx={pos.x} cy={pos.y} r={isSelected?7:6} fill={hasPlayer?P:al(P,0.2)} stroke={isSelected?'#f59e0b':hasPlayer?P:'rgba(255,255,255,0.2)'} strokeWidth={isSelected?1.5:1}/>
+                    <text x={pos.x} y={pos.y+1.5} textAnchor="middle" fill="white" fontSize={hasPlayer?4:4.5} fontWeight="700" fontFamily="monospace">
+                      {hasPlayer ? (player.lastName||player.firstName||'').slice(0,4).toUpperCase() : pos.label}
+                    </text>
+                    {hasPlayer && player.number && (
+                      <text x={pos.x+7} y={pos.y-4} textAnchor="middle" fill={P} fontSize="3.5" fontFamily="monospace" opacity="0.8">#{player.number}</text>
+                    )}
+                  </g>
+                )
+              })}
+            </svg>
+          </div>
+
+          {/* Player assignment panel */}
+          {selectedSlot && (
+            <div style={{ padding:'10px 12px', background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:6, animation:'fadeIn 0.2s ease' }}>
+              <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>
+                Assign player to {selectedSlot}
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:4, maxHeight:150, overflowY:'auto' }}>
+                <div onClick={()=>assignPlayer(selectedSlot, null)} style={{ padding:'6px 10px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, cursor:'pointer', fontSize:11, color:'#6b7a96' }}>— Remove assignment</div>
+                {players.map(p => (
+                  <div key={p.id} onClick={()=>assignPlayer(selectedSlot, p.id)} style={{ padding:'6px 10px', background:currentLineup.slots[selectedSlot]===p.id?al(P,0.12):'#0f1219', border:`1px solid ${currentLineup.slots[selectedSlot]===p.id?P:'#1e2330'}`, borderRadius:4, cursor:'pointer', display:'flex', alignItems:'center', gap:8 }}>
+                    <span style={{ fontSize:11, color:'#f2f4f8', fontWeight:500 }}>{p.lastName||''}{p.lastName&&p.firstName?', ':''}{p.firstName||''}</span>
+                    {p.position && <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{p.position}</span>}
+                    {p.number && <span style={{ fontSize:9, color:'#6b7a96', marginLeft:'auto' }}>#{p.number}</span>}
+                  </div>
+                ))}
+                {players.length === 0 && <div style={{ fontSize:11, color:'#3d4559', padding:'6px' }}>No players in roster yet. Add players in the Roster tab.</div>}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div style={{ textAlign:'center', padding:'24px 0', color:'#3d4559', fontSize:12 }}>Create a lineup above to start assigning players to positions.</div>
       )}
     </div>
   )
