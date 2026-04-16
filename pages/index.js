@@ -768,9 +768,9 @@ function Sel({ label, value, onChange, options }) {
         <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:100, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.6)' }}>
           {options.map(o => (
             <div key={o} onClick={()=>{ onChange(o); setOpen(false) }}
-              style={{ padding:'9px 11px', color:o===value?'#f2f4f8':'#9aa0b0', background:o===value?'#1e2330':'transparent', fontSize:13, cursor:'pointer', borderBottom:'1px solid #0e1220' }}
+              style={{ padding:'9px 11px', color:o===value?'#f2f4f8':'#9aa0b0', background:o===value?'#1e2330':'#161922', fontSize:13, cursor:'pointer', borderBottom:'1px solid #0e1220' }}
               onMouseEnter={e=>e.currentTarget.style.background='#1e2330'}
-              onMouseLeave={e=>e.currentTarget.style.background=o===value?'#1e2330':'transparent'}>
+              onMouseLeave={e=>e.currentTarget.style.background=o===value?'#1e2330':'#161922'}>
               {o}
             </div>
           ))}
@@ -1140,7 +1140,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
                   <div style={{ width:44, height:44, background:'rgba(255,215,0,0.15)', border:'1px solid rgba(255,215,0,0.3)', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>⭐</div>
                 </div>
                 {nflComp.famousExample && (<div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.3)', borderRadius:8, marginBottom:10, borderLeft:'3px solid #f59e0b' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:3 }}>Famous Example</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.famousExample}</div></div>)}
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10, background:'#07090d' }}>
                   <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:4 }}>What Matches</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.whatMatches}</div></div>
                   <div style={{ padding:'8px 10px', background:'rgba(208,2,27,0.06)', borderRadius:8, border:'1px solid rgba(208,2,27,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#ff6b6b', fontWeight:700, marginBottom:4 }}>Key Difference</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.keyDifference}</div></div>
                 </div>
@@ -2538,7 +2538,7 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
           <span style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{offOpen ? '▲' : '▼'}</span>
         </div>
         {offOpen && (
-          <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
+          <div style={{ padding:14, animation:'fadeIn 0.2s ease', background:'#0f1219' }}>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
               {(() => { const skillVal = offFields['skill'] || offFields['teamSkill'] || (cfg.fields.find(x=>x.id==='skill'||x.id==='teamSkill')?.opts[0]||''); const isBeginner = skillVal.includes('First Year') || skillVal.includes('Beginner') || skillVal.includes('Recreational'); return cfg.fields.filter(f => !(f.id==='oppTendency' && isBeginner)).map(f => <Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />) })()} 
             </div>
@@ -4713,7 +4713,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
     <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 32px', overflow:'hidden', zIndex:999 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&display=swap');
-        * { box-sizing:border-box; margin:0; padding:0; }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; } :root { color-scheme: dark; background-color: #07090d; } body { background-color: #07090d !important; }
         @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
         @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
         @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
@@ -4963,7 +4963,7 @@ export default function CoachIQ() {
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </Head>
-      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
+      <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#07090d', color:'#f2f4f8', fontFamily:"'DM Sans', system-ui, sans-serif", colorScheme:'dark' }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@400;600;700&family=Big+Shoulders+Display:wght@500;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
           * { box-sizing:border-box; margin:0; padding:0; }
@@ -5028,7 +5028,7 @@ export default function CoachIQ() {
         </div>
 
         {/* PAGE CONTENT */}
-        <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14 }}>
+        <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14, background:'#07090d' }}>
           {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} homeLocation={homeLocation} setPage={setPage} />}
           {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
