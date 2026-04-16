@@ -376,7 +376,17 @@ const MASCOTS = [
   { id:'plumes',   name:'Plumes',    tier:'premium', fn: MASCOT_SVGS.plumes },
 ]
 
-function MascotAvatar({ mascotId, color='#C0392B', size=40, locked=false }) {
+function MascotAvatar({ mascotId, color='#C0392B', size=40, locked=false, customMascot=null }) {
+  // Handle custom mascots
+  if (customMascot && customMascot.svgFn) {
+    const lockStyle = locked ? { filter:'brightness(0.6) saturate(0.35) contrast(0.9)' } : {}
+    return (
+      <div style={{ position:'relative', width:size, height:size, flexShrink:0 }}>
+        <div style={{ width:size, height:size, ...lockStyle }} dangerouslySetInnerHTML={{ __html: customMascot.svgFn(color) }}/>
+        {locked && <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ fontSize:size*0.3, lineHeight:1, filter:'brightness(2)' }}>🔒</span></div>}
+      </div>
+    )
+  }
   const mascot = MASCOTS.find(m => m.id === mascotId)
   if (!mascot) return (
     <div style={{ width:size, height:size, borderRadius:'50%', background:'#1e2330',
@@ -926,7 +936,7 @@ function FootballHoleDiagram({ P }) {
 
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(startExpanded)
   const [showBreakdown, setShowBreakdown] = useState(false)
   const [showAnim, setShowAnim] = useState(false)
   const [steps, setSteps] = useState(null)
@@ -4812,6 +4822,17 @@ function NavButton({ id, icon, label, submenu, isActive, P, al, setPage }) {
 }
 
 
+// ─── SEASONAL THEMES ─────────────────────────────────────────────────────────
+function getSpecialTheme() {
+  const t=new Date(), m=t.getMonth()+1, d=t.getDate()
+  if(m===11&&d>=20&&d<=28) return {badge:'🦃',msg:'Happy Thanksgiving, Coach!'}
+  if(m===12&&d>=20)         return {badge:'🎄',msg:'Happy Holidays, Coach!'}
+  if(m===1&&d<=5)           return {badge:'🎉',msg:'Happy New Year, Coach!'}
+  if(m===7&&d===4)          return {badge:'🇺🇸',msg:'Happy 4th, Coach!'}
+  return null
+}
+
+
 export default function CoachIQ() {
   // All hooks must be declared before any early returns (React Rules of Hooks)
   const [mounted, setMounted] = useState(false)
@@ -4823,7 +4844,7 @@ export default function CoachIQ() {
   const [brand, setBrand] = useState('Red — C+IQ colored')
   const [page, setPage] = useState('home')
   const [sport, setSport] = useState('Football')
-  const [iq, setIQ] = useState(847)
+  const [iq, setIQ] = useState(500)
   const [gauntlets, setGauntlets] = useState(0)
   const [playbook, setPlaybook] = useState({ Football:{}, Basketball:{}, Baseball:{}, Soccer:{}, Softball:{} })
   const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] })
@@ -4842,13 +4863,13 @@ export default function CoachIQ() {
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
   async function callAI(prompt, imageData) {
-    const messages = imageData
-      ? [{ role:'user', content:[{ type:'image', source:{ type:'base64', media_type:imageData.mime, data:imageData.b64 } },{ type:'text', text:prompt }] }]
-      : [{ role:'user', content:prompt }]
-    const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ messages }) })
+    const body = imageData
+      ? { prompt, image: imageData }
+      : { prompt }
+    const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify(body) })
     const d = await res.json()
     if (!res.ok) throw new Error(d.error || 'API error')
-    return d.text
+    return d.result || d.text || ''
   }
 
   function parseJSON(raw) {
@@ -4884,12 +4905,12 @@ export default function CoachIQ() {
   )
 
   const NAV_ITEMS = [
-    { id:'home',     icon:'\u{1F3E0}', label:'HOME',    submenu:[{label:'Dashboard'},{label:'Gauntlet'},{label:'Situational'}] },
-    { id:'schemes',  icon:'\u{1F4CB}', label:'SCHEMES', submenu:[{label:'Offense'},  {label:'Defense'},{label:'Playbook'},{label:'History'}] },
-    { id:'team',     icon:'\u{1F3C6}', label:'TEAM',    submenu:[{label:'Roster'},{label:'Lineup'},{label:'Schedule'},{label:'Practice'}] },
-    { id:'news',     icon:'\u{1F4F0}', label:'NEWS',    submenu:[{label:'All'},{label:'Coaching'},{label:'Sports News'}] },
-    { id:'learn',    icon:'\u{1F393}', label:'LEARN',   submenu:[{label:'Play Builder'},{label:'Gauntlet'},{label:'Rulebook'},{label:'Help'}] },
-    { id:'more',     icon:'\u22EF',    label:'MORE',    submenu:[{label:'Playbook'},{label:'Scout'},{label:'Settings'}] },
+    { id:'home',     icon:'🏠', label:'HOME',     submenu:[{label:'Dashboard'},{label:'Gauntlet'},{label:'Situational'}] },
+    { id:'schemes',  icon:'📋', label:'SCHEMES',  submenu:[{label:'Offense'},{label:'Defense'},{label:'Playbook'},{label:'History'}] },
+    { id:'team',     icon:'🏆', label:'TEAM',     submenu:[{label:'Roster'},{label:'Lineup'},{label:'Schedule'},{label:'Practice'}] },
+    { id:'news',     icon:'📰', label:'NEWS',     submenu:[{label:'All'},{label:'Coaching'},{label:'Sports News'}] },
+    { id:'learn',    icon:'🎓', label:'LEARN',    submenu:[{label:'Play Builder'},{label:'Gauntlet'},{label:'Rulebook'},{label:'Help'}] },
+    { id:'more',     icon:'⋯',  label:'MORE',     submenu:[{label:'Playbook'},{label:'Scout'},{label:'Settings'}] },
   ]
 
   return (
@@ -4970,7 +4991,7 @@ export default function CoachIQ() {
           {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} homeLocation={homeLocation} setPage={setPage} />}
           {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
-          {page==='team'     && <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} />}
+          {page==='team'     && <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} setPage={setPage} />}
           {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
           {page==='news'  && <NewsPage  P={P} S={S} al={al} sport={sport} callAI={callAI} />}
           {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} />}
@@ -5278,7 +5299,7 @@ function PrintSection({ team, P, S, al, callAI, sport }) {
 
 
 // ─── TEAM PAGE ─────────────────────────────────────────────────────────────────
-function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg }) {
+function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, setPage }) {
   const [section, setSection] = useState('roster')
   const currentTeam = activeTeam[sport]
   const mascotObj = currentTeam ? (MASCOTS||[]).find(m=>m.id===currentTeam.mascot) : null
@@ -5290,7 +5311,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
       </div>
 
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setPage('team')} />
+      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={null} startExpanded={true} />
 
       {!currentTeam ? (
         <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
@@ -5331,8 +5352,223 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
 }
 
 
-function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
+
+// ─── CREATE-A-MASCOT BUILDER ──────────────────────────────────────────────────
+function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
+  const [step, setStep] = useState(0) // 0=pick animal, 1=pick shape, 2=pick colors, 3=preview
+  const [selected, setSelected] = useState({
+    animal: null,
+    shape: 'circle',
+    primaryColor: currentColor || '#C0392B',
+    secondaryColor: '#0f1219',
+    label: '',
+  })
+
+  const ANIMAL_OPTIONS = [
+    // Animals
+    { id:'lion', emoji:'🦁', label:'Lion', cp:'1f981' },
+    { id:'tiger', emoji:'🐯', label:'Tiger', cp:'1f42f' },
+    { id:'bear', emoji:'🐻', label:'Bear', cp:'1f43b' },
+    { id:'wolf', emoji:'🐺', label:'Wolf', cp:'1f43a' },
+    { id:'eagle', emoji:'🦅', label:'Eagle', cp:'1f985' },
+    { id:'shark', emoji:'🦈', label:'Shark', cp:'1f988' },
+    { id:'dragon', emoji:'🐉', label:'Dragon', cp:'1f409' },
+    { id:'snake', emoji:'🐍', label:'Snake', cp:'1f40d' },
+    { id:'horse', emoji:'🐎', label:'Horse', cp:'1f40e' },
+    { id:'gorilla', emoji:'🦍', label:'Gorilla', cp:'1f98d' },
+    { id:'leopard', emoji:'🐆', label:'Leopard', cp:'1f406' },
+    { id:'rhino', emoji:'🦏', label:'Rhino', cp:'1f98f' },
+    { id:'croc', emoji:'🐊', label:'Gator', cp:'1f40a' },
+    { id:'scorpion', emoji:'🦂', label:'Scorpion', cp:'1f982' },
+    { id:'trex', emoji:'🦖', label:'T-Rex', cp:'1f996' },
+    { id:'bat', emoji:'🦇', label:'Bat', cp:'1f987' },
+    { id:'owl', emoji:'🦉', label:'Owl', cp:'1f989' },
+    { id:'fox', emoji:'🦊', label:'Fox', cp:'1f98a' },
+    { id:'mammoth', emoji:'🦣', label:'Mammoth', cp:'1f9a3' },
+    { id:'boar', emoji:'🐗', label:'Boar', cp:'1f417' },
+    // Symbols
+    { id:'fire', emoji:'🔥', label:'Fire', cp:'1f525' },
+    { id:'lightning', emoji:'⚡', label:'Lightning', cp:'26a1' },
+    { id:'skull', emoji:'💀', label:'Skull', cp:'1f480' },
+    { id:'sword', emoji:'🗡️', label:'Sword', cp:'1f5e1' },
+    { id:'rocket', emoji:'🚀', label:'Rocket', cp:'1f680' },
+    { id:'trident', emoji:'🔱', label:'Trident', cp:'1f531' },
+    { id:'crown', emoji:'👑', label:'Crown', cp:'1f451' },
+    { id:'axe', emoji:'🪓', label:'Axe', cp:'1fa93' },
+    { id:'ghost', emoji:'👻', label:'Ghost', cp:'1f47b' },
+    { id:'cyclone', emoji:'🌀', label:'Cyclone', cp:'1f300' },
+  ]
+
+  const SHAPE_OPTIONS = [
+    { id:'circle', label:'Classic Circle', path:null },
+    { id:'shield', label:'Shield', path:'M30 4 L54 14 L54 36 L30 56 L6 36 L6 14 Z' },
+    { id:'diamond', label:'Diamond', path:'M30 4 L56 30 L30 56 L4 30 Z' },
+    { id:'hex', label:'Hexagon', path:'M30 4 L54 17 L54 43 L30 56 L6 43 L6 17 Z' },
+    { id:'star5', label:'Star', path:'M30 4 L35 22 L54 22 L39 33 L44 52 L30 41 L16 52 L21 33 L6 22 L25 22 Z' },
+  ]
+
+  const PRESET_COLORS = [
+    '#C0392B','#e05c2b','#f59e0b','#2d7a2d','#1565C0','#7c3aed',
+    '#0891b2','#be185d','#374151','#1a1a2e','#8B4513','#1a6b3a',
+  ]
+
+  function buildPreviewSVG(opts, size=80) {
+    const mascot = MASCOT_SVGS[ANIMAL_OPTIONS.find(a=>a.id===opts.animal)?.id]
+    if (!mascot) return ''
+    const inner = mascot(opts.primaryColor)
+    // For custom shapes, we just use the badge style but with a different shape
+    return inner.replace('width:100%', `width:${size}px`).replace('height:100%', `height:${size}px`)
+  }
+
+  const steps = ['Pick Animal', 'Pick Colors', 'Add Label', 'Preview']
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.92)', zIndex:600, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+      <div style={{ background:'#0f1219', border:`1px solid ${al(P,0.4)}`, borderRadius:10, width:'100%', maxWidth:420, maxHeight:'90vh', overflow:'auto', animation:'fadeIn 0.2s' }}>
+        {/* Header */}
+        <div style={{ padding:'16px 16px 0', display:'flex', alignItems:'center', gap:10 }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase' }}>Mascot Builder</div>
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f2f4f8' }}>Create Your Mascot</div>
+          </div>
+          <button onClick={onClose} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:20 }}>✕</button>
+        </div>
+
+        {/* Step indicator */}
+        <div style={{ display:'flex', gap:4, padding:'12px 16px 0' }}>
+          {steps.map((s,i) => (
+            <div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<=step?P:'#1e2330', transition:'background 0.2s' }}/>
+          ))}
+        </div>
+        <div style={{ padding:'4px 16px 12px', fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:al(P,0.8), fontWeight:700, textTransform:'uppercase', letterSpacing:'1px' }}>
+          Step {step+1}: {steps[step]}
+        </div>
+
+        <div style={{ padding:'0 16px 16px' }}>
+
+          {/* Step 0: Pick Animal */}
+          {step === 0 && (
+            <div>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:12 }}>Choose the icon for your mascot badge.</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
+                {ANIMAL_OPTIONS.map(a => (
+                  <div key={a.id} onClick={()=>setSelected(s=>({...s,animal:a.id}))}
+                    style={{ padding:'8px 4px', borderRadius:6, border:`2px solid ${selected.animal===a.id?P:'#1e2330'}`, background:selected.animal===a.id?al(P,0.1):'#161922', cursor:'pointer', textAlign:'center', transition:'all 0.15s' }}>
+                    <div style={{ fontSize:24, lineHeight:1.2 }}>{a.emoji}</div>
+                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:selected.animal===a.id?P:'#6b7a96', fontWeight:700, marginTop:2 }}>{a.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 1: Pick Colors */}
+          {step === 1 && (
+            <div>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:14 }}>Set your mascot badge colors.</div>
+              <div style={{ marginBottom:14 }}>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:8, fontWeight:700 }}>Primary Color (ring + accent)</div>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:8 }}>
+                  {PRESET_COLORS.map(c => (
+                    <div key={c} onClick={()=>setSelected(s=>({...s,primaryColor:c}))}
+                      style={{ width:32, height:32, borderRadius:4, background:c, cursor:'pointer', border:`3px solid ${selected.primaryColor===c?'white':'transparent'}`, transition:'border 0.15s' }}/>
+                  ))}
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <input type="color" value={selected.primaryColor} onChange={e=>setSelected(s=>({...s,primaryColor:e.target.value}))}
+                    style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0 }}/>
+                  <span style={{ fontSize:11, color:'#6b7a96', fontFamily:'monospace' }}>Custom: {selected.primaryColor}</span>
+                </div>
+              </div>
+              {/* Live preview */}
+              <div style={{ textAlign:'center', padding:'16px', background:'#161922', borderRadius:8, border:'1px solid #1e2330' }}>
+                <div style={{ display:'inline-block', width:80, height:80 }}
+                  dangerouslySetInnerHTML={{ __html: MASCOT_SVGS[selected.animal]?.(selected.primaryColor) || '' }}/>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b7a96', marginTop:6 }}>Preview</div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Add Label */}
+          {step === 2 && (
+            <div>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:14 }}>Optional: this label auto-fills from your team name. Leave blank to use the animal name.</div>
+              <div style={{ marginBottom:16 }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, display:'block', marginBottom:6 }}>Badge Label (shows at bottom)</label>
+                <input value={selected.label} onChange={e=>setSelected(s=>({...s,label:e.target.value.toUpperCase().slice(0,12)}))}
+                  placeholder={ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label?.toUpperCase() || 'TEAM NAME'}
+                  style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'2px', outline:'none' }}/>
+                <div style={{ fontSize:10, color:'#3d4559', marginTop:4 }}>Max 12 characters · auto-UPPERCASE</div>
+              </div>
+              {/* Live preview */}
+              <div style={{ textAlign:'center', padding:'16px', background:'#161922', borderRadius:8, border:'1px solid #1e2330' }}>
+                <div style={{ display:'inline-block', width:80, height:80 }}
+                  dangerouslySetInnerHTML={{ __html: MASCOT_SVGS[selected.animal]?.(selected.primaryColor) || '' }}/>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Preview + Save */}
+          {step === 3 && (
+            <div style={{ textAlign:'center' }}>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:16 }}>Your custom mascot is ready. Save it to use on your team.</div>
+              <div style={{ display:'flex', justifyContent:'center', gap:16, marginBottom:16 }}>
+                {[80, 52, 32].map(sz => (
+                  <div key={sz}>
+                    <div style={{ width:sz, height:sz, margin:'0 auto' }}
+                      dangerouslySetInnerHTML={{ __html: MASCOT_SVGS[selected.animal]?.(selected.primaryColor) || '' }}/>
+                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559', textAlign:'center', marginTop:4 }}>{sz}px</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ background:'#161922', borderRadius:6, padding:'10px 14px', border:'1px solid #1e2330', marginBottom:16, textAlign:'left' }}>
+                <div style={{ fontSize:10, color:'#6b7a96', marginBottom:4 }}>Mascot summary</div>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8' }}>
+                  {ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label} · {selected.primaryColor}
+                </div>
+                {selected.label && <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:P, marginTop:2 }}>Label: {selected.label}</div>}
+              </div>
+              <button onClick={()=>onSave({
+                  type:'custom',
+                  animalId: selected.animal,
+                  primaryColor: selected.primaryColor,
+                  label: selected.label || ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label?.toUpperCase() || 'CUSTOM',
+                  id: 'custom_'+Date.now(),
+                  name: selected.label || ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label || 'Custom',
+                  svgFn: (col) => MASCOT_SVGS[selected.animal]?.(col || selected.primaryColor) || '',
+                })}
+                style={{ width:'100%', padding:'12px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1.5px', marginBottom:8 }}>
+                SAVE MASCOT
+              </button>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div style={{ display:'flex', gap:8, marginTop:16 }}>
+            {step > 0 && (
+              <button onClick={()=>setStep(s=>s-1)}
+                style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
+                ← Back
+              </button>
+            )}
+            {step < 3 && (
+              <button onClick={()=>{ if(step===0&&!selected.animal) return; setStep(s=>s+1) }}
+                disabled={step===0&&!selected.animal}
+                style={{ flex:2, padding:'10px', background:step===0&&!selected.animal?'#2a3040':P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:step===0&&!selected.animal?'not-allowed':'pointer', opacity:step===0&&!selected.animal?0.5:1 }}>
+                {step===0&&!selected.animal?'Select an animal first':'Next →'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab, startExpanded=false }) {
   const [mode, setMode] = useState('view')
+  const [showMascotBuilder, setShowMascotBuilder] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
