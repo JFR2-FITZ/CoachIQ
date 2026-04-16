@@ -12,241 +12,309 @@ const BRAND_PALETTES = {
 
 
 // ─── MASCOTS ──────────────────────────────────────────────────────────────────
-// ─── MASCOT SVGs v3 — Bold Geometric Sports Logo Style ───────────────────────
-// Inspired by NHL/NFL logos: sharp angles, strong silhouettes, minimal detail
-// No faces. Bold shapes that read at any size.
+// ─── SVG MASCOT LIBRARY v2 ────────────────────────────────────────────────────
+// Fierce, angular, sports-logo quality. Sharp lines, bold shapes, no cartoon softness.
+// Style reference: NHL/NFL/MLB logos — geometric, high contrast, aggressive.
 
 const MASCOT_SVGS = {
 
-  // EAGLES — angular wing silhouette with sharp head profile
+  // ── EAGLES — sharp angular head, hooked beak, fierce eye ─────────────────
   eagles: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <path d="M8 38 L22 18 L30 22 L38 14 L52 20 L44 28 L48 36 L36 30 L30 44 L24 32Z" fill="${col}"/>
-    <path d="M30 22 L36 14 L42 16 L38 22Z" fill="#c8a020"/>
-    <path d="M30 22 L36 28 L30 44 L24 32 L28 26Z" fill="${col}" opacity="0.7"/>
-    <path d="M34 24 L48 20 L44 28 L36 28Z" fill="#c8a020" opacity="0.8"/>
-    <path d="M8 38 L22 18 L26 26 L18 30Z" fill="${col}" opacity="0.85"/>
-    <polygon points="30,44 27,50 33,50" fill="${col}" opacity="0.6"/>
+    <path d="M38 14 L46 10 L50 18 L44 20 L48 26 L40 24 L36 30 L28 26 L24 20 L30 16Z" fill="${col}"/>
+    <path d="M36 30 L44 32 L50 40 L46 44 L38 42 L32 48 L26 44 L20 36 L24 30 L28 26Z" fill="${col}" opacity="0.9"/>
+    <path d="M36 30 L44 32 L50 40 L38 38 L34 44 L30 40 L26 44 L22 38 L24 30Z" fill="#c8a020" opacity="0.85"/>
+    <path d="M44 20 L52 16 L56 24 L50 26 L54 32 L46 28" fill="#c8a020"/>
+    <ellipse cx="38" cy="22" rx="4" ry="3" fill="white" transform="rotate(-15 38 22)"/>
+    <ellipse cx="38" cy="22" rx="2.5" ry="2" fill="#1a1a1a" transform="rotate(-15 38 22)"/>
+    <circle cx="38.5" cy="21" r="0.7" fill="white"/>
+    <path d="M34 16 L38 14 L40 18 L36 20Z" fill="${col}"/>
+    <path d="M42 26 L52 22 L54 28 L46 30Z" fill="#c8a020"/>
   </svg>`,
 
-  // HAWKS — sweeping angular wing, diving silhouette
+  // ── HAWKS — angular predator, sharp talons implied, hooded eyes ───────────
   hawks: (col='#D4600A') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <path d="M6 20 L20 16 L38 8 L46 16 L38 22 L50 30 L38 34 L30 26 L20 38 L14 30 L22 24Z" fill="${col}"/>
-    <path d="M38 8 L50 12 L46 16 L38 12Z" fill="#f59e0b"/>
-    <path d="M38 22 L50 30 L42 32 L36 26Z" fill="#f59e0b" opacity="0.8"/>
-    <path d="M20 38 L22 46 L16 44 L14 30Z" fill="${col}" opacity="0.7"/>
-    <path d="M30 26 L38 34 L30 38 L24 32Z" fill="${col}" opacity="0.6"/>
+    <path d="M20 12 L36 10 L46 16 L50 28 L44 38 L34 44 L22 42 L14 34 L12 22Z" fill="${col}"/>
+    <path d="M14 22 L20 12 L16 8 L10 16Z" fill="${col}" opacity="0.8"/>
+    <path d="M36 10 L44 6 L48 14 L40 16Z" fill="${col}" opacity="0.8"/>
+    <path d="M22 28 L36 24 L44 30 L40 40 L28 42 L18 36Z" fill="#8B3800"/>
+    <ellipse cx="26" cy="24" rx="5" ry="4" fill="white" transform="rotate(10 26 24)"/>
+    <ellipse cx="26" cy="24" rx="3" ry="2.5" fill="#1a1a1a" transform="rotate(10 26 24)"/>
+    <circle cx="26.5" cy="23" r="0.8" fill="white"/>
+    <ellipse cx="38" cy="22" rx="4" ry="3.5" fill="white" transform="rotate(-10 38 22)"/>
+    <ellipse cx="38" cy="22" rx="2.5" ry="2.2" fill="#1a1a1a" transform="rotate(-10 38 22)"/>
+    <circle cx="38.5" cy="21" r="0.7" fill="white"/>
+    <path d="M22 18 L30 20" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M34 16 L42 18" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M24 32 L36 30 L42 36 L32 40 L22 38Z" fill="#c8a020" opacity="0.7"/>
+    <path d="M28 40 L32 44 L30 50 L26 48Z" fill="${col}"/>
+    <path d="M36 40 L40 44 L38 50 L34 48Z" fill="${col}"/>
   </svg>`,
 
-  // TIGERS — bold T-stripe pattern, unmistakably tiger
+  // ── TIGERS — geometric stripes, fierce angular face ──────────────────────
   tigers: (col='#f59e0b') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <rect x="14" y="14" width="32" height="32" rx="4" fill="${col}"/>
-    <path d="M14 20 L22 14 L22 20Z" fill="#07090d"/>
-    <path d="M46 20 L38 14 L38 20Z" fill="#07090d"/>
-    <rect x="18" y="14" width="5" height="16" rx="1" fill="#07090d"/>
-    <rect x="37" y="14" width="5" height="16" rx="1" fill="#07090d"/>
-    <rect x="26" y="14" width="8" height="11" rx="1" fill="#07090d"/>
-    <path d="M14 30 L18 26 L18 34Z" fill="#07090d"/>
-    <path d="M46 30 L42 26 L42 34Z" fill="#07090d"/>
-    <rect x="14" y="34" width="32" height="6" rx="1" fill="#07090d"/>
-    <rect x="14" y="36" width="32" height="4" rx="1" fill="${col}"/>
-    <rect x="20" y="40" width="6" height="6" rx="1" fill="${col}"/>
-    <rect x="34" y="40" width="6" height="6" rx="1" fill="${col}"/>
-    <rect x="26" y="38" width="8" height="8" rx="1" fill="${col}"/>
-    <circle cx="30" cy="24" r="6" fill="${col}"/>
-    <rect x="27" y="18" width="6" height="12" rx="1" fill="#07090d"/>
-    <rect x="24" y="21" width="12" height="6" rx="1" fill="#07090d"/>
+    <path d="M16 18 L22 12 L30 10 L38 12 L44 18 L46 28 L42 38 L30 44 L18 38 L14 28Z" fill="${col}"/>
+    <path d="M18 14 L22 8 L20 4 L16 10Z" fill="${col}"/>
+    <path d="M42 14 L38 8 L40 4 L44 10Z" fill="${col}"/>
+    <path d="M20 14 L22 8 L24 12Z" fill="#07090d"/>
+    <path d="M40 14 L38 8 L36 12Z" fill="#07090d"/>
+    <path d="M18 18 L22 16 L20 22Z" fill="#07090d" opacity="0.9"/>
+    <path d="M24 14 L28 12 L26 18Z" fill="#07090d" opacity="0.9"/>
+    <path d="M42 18 L38 16 L40 22Z" fill="#07090d" opacity="0.9"/>
+    <path d="M36 14 L32 12 L34 18Z" fill="#07090d" opacity="0.9"/>
+    <path d="M20 34 L16 30 L18 26Z" fill="#07090d" opacity="0.9"/>
+    <path d="M40 34 L44 30 L42 26Z" fill="#07090d" opacity="0.9"/>
+    <ellipse cx="30" cy="32" rx="12" ry="10" fill="white" opacity="0.92"/>
+    <ellipse cx="23" cy="26" rx="4.5" ry="4" fill="#1a6b1a"/>
+    <ellipse cx="23" cy="26" rx="2" ry="3.5" fill="#07090d"/>
+    <circle cx="23.6" cy="24.5" r="0.8" fill="white"/>
+    <ellipse cx="37" cy="26" rx="4.5" ry="4" fill="#1a6b1a"/>
+    <ellipse cx="37" cy="26" rx="2" ry="3.5" fill="#07090d"/>
+    <circle cx="37.6" cy="24.5" r="0.8" fill="white"/>
+    <path d="M21 21 L27 24" stroke="#07090d" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M39 21 L33 24" stroke="#07090d" strokeWidth="2.5" strokeLinecap="round"/>
+    <ellipse cx="30" cy="34" rx="5" ry="3.5" fill="#e88b00"/>
+    <path d="M26 38 Q30 42 34 38" stroke="#07090d" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <line x1="30" y1="37" x2="30" y2="41" stroke="#07090d" strokeWidth="1.2"/>
+    <circle cx="20" cy="36" r="0.9" fill="#07090d"/>
+    <circle cx="22" cy="37" r="0.9" fill="#07090d"/>
+    <circle cx="40" cy="36" r="0.9" fill="#07090d"/>
+    <circle cx="38" cy="37" r="0.9" fill="#07090d"/>
   </svg>`,
 
-  // LIONS — angular mane ring, powerful crown shape
+  // ── LIONS — angular mane, regal but fierce ───────────────────────────────
   lions: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <polygon points="30,6 34,14 42,12 38,20 46,22 40,28 46,34 38,34 36,42 30,38 24,42 22,34 14,34 20,28 14,22 22,20 18,12 26,14" fill="#8B4513"/>
-    <circle cx="30" cy="30" r="12" fill="${col}"/>
-    <polygon points="30,18 32,24 38,24 33,28 35,34 30,30 25,34 27,28 22,24 28,24" fill="#f59e0b"/>
-    <circle cx="30" cy="30" r="5" fill="${col}"/>
-    <circle cx="30" cy="30" r="3" fill="#8B4513"/>
+    <path d="M30 6 L36 10 L42 8 L44 14 L50 14 L48 20 L54 22 L50 28 L54 34 L48 34 L46 40 L40 38 L36 44 L30 42 L24 44 L20 38 L14 40 L12 34 L6 34 L10 28 L6 22 L12 20 L10 14 L16 14 L18 8 L24 10Z" fill="#8B4513"/>
+    <path d="M22 14 L28 12 L30 6 L32 12 L38 14 L34 18 L36 24 L30 22 L24 24 L26 18Z" fill="${col}" opacity="0.9"/>
+    <path d="M14 20 L18 16 L22 18 L20 24 L14 26Z" fill="${col}" opacity="0.7"/>
+    <path d="M46 20 L42 16 L38 18 L40 24 L46 26Z" fill="${col}" opacity="0.7"/>
+    <path d="M12 32 L14 26 L20 28 L18 34 L12 34Z" fill="${col}" opacity="0.6"/>
+    <path d="M48 32 L46 26 L40 28 L42 34 L48 34Z" fill="${col}" opacity="0.6"/>
+    <circle cx="30" cy="30" r="14" fill="${col}"/>
+    <ellipse cx="30" cy="33" rx="10" ry="9" fill="#f59e0b" opacity="0.55"/>
+    <ellipse cx="23" cy="26" rx="4" ry="3.5" fill="#f0c040"/>
+    <ellipse cx="23" cy="26" rx="1.8" ry="3" fill="#07090d"/>
+    <circle cx="23.6" cy="24.5" r="0.8" fill="white"/>
+    <ellipse cx="37" cy="26" rx="4" ry="3.5" fill="#f0c040"/>
+    <ellipse cx="37" cy="26" rx="1.8" ry="3" fill="#07090d"/>
+    <circle cx="37.6" cy="24.5" r="0.8" fill="white"/>
+    <path d="M19 22 L25 25" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <path d="M41 22 L35 25" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <ellipse cx="30" cy="33" rx="5" ry="3.5" fill="#8B3010"/>
+    <path d="M26 37 Q30 42 34 37" stroke="#07090d" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M30 36 L30 39" stroke="#07090d" strokeWidth="1.2"/>
   </svg>`,
 
-  // BEARS — bold B shape or paw print silhouette
+  // ── BEARS — massive, angular, intimidating ───────────────────────────────
   bears: (col='#8B4513') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <ellipse cx="30" cy="33" rx="16" ry="14" fill="${col}"/>
-    <circle cx="18" cy="18" rx="7" ry="7" r="7" fill="${col}"/>
-    <circle cx="42" cy="18" rx="7" ry="7" r="7" fill="${col}"/>
-    <ellipse cx="30" cy="30" rx="10" ry="9" fill="#5a2d0c"/>
-    <circle cx="26" cy="27" r="4" fill="#07090d"/>
-    <circle cx="34" cy="27" r="4" fill="#07090d"/>
-    <circle cx="26.8" cy="25.8" r="1.2" fill="white"/>
-    <circle cx="34.8" cy="25.8" r="1.2" fill="white"/>
-    <ellipse cx="30" cy="33" rx="5" ry="3.5" fill="#3a1a08"/>
-    <path d="M25 36 Q30 40 35 36" stroke="#07090d" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+    <path d="M16 30 L18 18 L26 12 L34 12 L42 18 L44 30 L40 42 L30 46 L20 42Z" fill="${col}"/>
+    <path d="M18 18 L14 12 L16 6 L22 10 L22 16Z" fill="${col}"/>
+    <path d="M42 18 L46 12 L44 6 L38 10 L38 16Z" fill="${col}"/>
+    <ellipse cx="17" cy="11" rx="7" ry="6" fill="${col}"/>
+    <ellipse cx="43" cy="11" rx="7" ry="6" fill="${col}"/>
+    <ellipse cx="17" cy="11" rx="4" ry="3.5" fill="#5a2d0c"/>
+    <ellipse cx="43" cy="11" rx="4" ry="3.5" fill="#5a2d0c"/>
+    <ellipse cx="30" cy="35" rx="12" ry="10" fill="#c08040"/>
+    <ellipse cx="22" cy="27" rx="5" ry="4.5" fill="#1a1a1a"/>
+    <ellipse cx="38" cy="27" rx="5" ry="4.5" fill="#1a1a1a"/>
+    <circle cx="22.8" cy="25.5" r="1.5" fill="white"/>
+    <circle cx="38.8" cy="25.5" r="1.5" fill="white"/>
+    <path d="M18 22 L26 26" stroke="#07090d" strokeWidth="2.8" strokeLinecap="round"/>
+    <path d="M42 22 L34 26" stroke="#07090d" strokeWidth="2.8" strokeLinecap="round"/>
+    <ellipse cx="30" cy="36" rx="7" ry="5" fill="#a06030"/>
+    <ellipse cx="30" cy="33" rx="4.5" ry="3" fill="#1a1a1a"/>
+    <path d="M26 40 Q30 44 34 40" stroke="#07090d" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M30 39 L30 41" stroke="#07090d" strokeWidth="1.2"/>
   </svg>`,
 
-  // WOLVES — sharp angular wolf head silhouette, geometric
+  // ── WOLVES — sharp snout, angular ears, fierce snarl ────────────────────
   wolves: (col='#607080') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <path d="M16 42 L14 28 L18 18 L14 10 L22 14 L26 10 L30 8 L34 10 L38 14 L46 10 L42 18 L46 28 L44 42 L38 36 L34 42 L30 46 L26 42 L22 36Z" fill="${col}"/>
-    <path d="M14 10 L18 18 L14 18Z" fill="#3a2a2a"/>
-    <path d="M46 10 L42 18 L46 18Z" fill="#3a2a2a"/>
-    <path d="M22 28 L30 24 L38 28 L36 36 L30 40 L24 36Z" fill="#9090a0"/>
-    <ellipse cx="24" cy="26" rx="4" ry="3.5" fill="#c0a000"/>
-    <ellipse cx="24" cy="26" rx="1.8" ry="3" fill="#07090d"/>
-    <circle cx="24.6" cy="24.5" r="0.8" fill="white"/>
-    <ellipse cx="36" cy="26" rx="4" ry="3.5" fill="#c0a000"/>
-    <ellipse cx="36" cy="26" rx="1.8" ry="3" fill="#07090d"/>
-    <circle cx="36.6" cy="24.5" r="0.8" fill="white"/>
-    <path d="M22 20 L27 24" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M38 20 L33 24" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M24 34 Q30 40 36 34" fill="none" stroke="#07090d" strokeWidth="1.2"/>
-    <polygon points="27,34 29,38 27,38" fill="white"/>
-    <polygon points="33,34 31,38 33,38" fill="white"/>
+    <path d="M14 22 L16 10 L24 14 L30 10 L36 14 L44 10 L46 22 L50 34 L44 42 L30 48 L16 42 L10 34Z" fill="${col}"/>
+    <path d="M16 10 L14 4 L20 6 L22 12Z" fill="${col}"/>
+    <path d="M44 10 L46 4 L40 6 L38 12Z" fill="${col}"/>
+    <path d="M16 10 L14 4 L20 6Z" fill="#2a1a1a"/>
+    <path d="M44 10 L46 4 L40 6Z" fill="#2a1a1a"/>
+    <path d="M16 26 L22 22 L30 20 L38 22 L44 26 L44 36 L38 42 L30 44 L22 42 L16 36Z" fill="#9090a0"/>
+    <ellipse cx="23" cy="25" rx="5" ry="4" fill="#c0a000"/>
+    <ellipse cx="23" cy="25" rx="2" ry="3.2" fill="#07090d"/>
+    <circle cx="23.6" cy="23.5" r="0.9" fill="white"/>
+    <ellipse cx="37" cy="25" rx="5" ry="4" fill="#c0a000"/>
+    <ellipse cx="37" cy="25" rx="2" ry="3.2" fill="#07090d"/>
+    <circle cx="37.6" cy="23.5" r="0.9" fill="white"/>
+    <path d="M18 20 L24 24" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <path d="M42 20 L36 24" stroke="#07090d" strokeWidth="2.2" strokeLinecap="round"/>
+    <path d="M18 34 L24 32 L30 34 L36 32 L42 34 L36 38 L30 40 L24 38Z" fill="#b0b0c0"/>
+    <path d="M24 36 Q30 42 36 36" stroke="#07090d" strokeWidth="1.2" fill="none"/>
+    <rect x="25.5" y="36" width="3.5" height="4" rx="0.5" fill="white"/>
+    <rect x="31" y="36" width="3.5" height="4" rx="0.5" fill="white"/>
+    <rect x="20" y="36" width="2.5" height="3" rx="0.4" fill="white" opacity="0.8"/>
+    <rect x="37.5" y="36" width="2.5" height="3" rx="0.4" fill="white" opacity="0.8"/>
   </svg>`,
 
-  // SHARKS — aggressive shark fin silhouette with teeth
+  // ── SHARKS — sleek angular silhouette, dead-eye, jagged teeth ────────────
   sharks: (col='#1565C0') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <path d="M6 36 L18 24 L24 10 L30 8 L36 12 L54 28 L50 38 L40 44 L20 44Z" fill="${col}"/>
-    <path d="M24 10 L28 6 L32 10 L30 8Z" fill="${col}" opacity="0.8"/>
-    <path d="M20 44 L40 44 L36 48 L24 48Z" fill="white" opacity="0.9"/>
-    <polygon points="22,44 25,48 22,48" fill="${col}"/>
-    <polygon points="27,44 30,48 27,48" fill="${col}"/>
-    <polygon points="32,44 35,48 32,48" fill="${col}"/>
-    <polygon points="37,44 40,48 37,48" fill="${col}"/>
-    <path d="M6 36 L18 24 L20 30 L12 36Z" fill="${col}" opacity="0.7"/>
-    <ellipse cx="40" cy="26" rx="4" ry="3" fill="white" opacity="0.15"/>
-    <circle cx="41" cy="25" r="2.5" fill="#07090d"/>
-    <circle cx="41.5" cy="24.2" r="0.8" fill="white"/>
-    <path d="M24 36 Q36 32 50 36" stroke="white" strokeWidth="0.8" fill="none" opacity="0.2"/>
+    <path d="M6 32 L16 22 L28 18 L44 20 L54 28 L50 36 L40 42 L24 40 L12 36Z" fill="${col}"/>
+    <path d="M30 10 L36 18 L34 22 L28 20 L26 16Z" fill="${col}"/>
+    <path d="M22 20 L18 14 L24 16Z" fill="${col}" opacity="0.7"/>
+    <path d="M14 34 L8 38 L10 44 L18 40Z" fill="${col}" opacity="0.8"/>
+    <path d="M40 38 L44 44 L50 40 L46 36Z" fill="${col}" opacity="0.7"/>
+    <path d="M14 30 L22 26 L38 26 L50 32 L38 36 L22 36Z" fill="white" opacity="0.12"/>
+    <ellipse cx="40" cy="26" rx="4" ry="3" fill="#1a1a1a"/>
+    <circle cx="40.8" cy="25" r="1" fill="white"/>
+    <path d="M46 24 L58 20 L56 28 L46 30Z" fill="white" opacity="0.9"/>
+    <path d="M48 24 L55 21 L54 26 L48 28Z" fill="${col}"/>
+    <path d="M48 24 L52 22 L51 25Z" fill="white"/>
+    <path d="M51 24 L55 22 L54 26Z" fill="white"/>
+    <path d="M22 26 L22 22 L16 24Z" fill="${col}" opacity="0.6"/>
+    <path d="M28 24 L28 20 L34 22Z" fill="${col}" opacity="0.5"/>
   </svg>`,
 
-  // DRAGONS — bold dragon D shape with fire
+  // ── DRAGONS — angular scales, sharp horns, glowing eyes ─────────────────
   dragons: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <path d="M18 12 L24 8 L36 8 L44 14 L48 24 L46 34 L40 42 L30 46 L20 44 L14 36 L12 26 L16 16Z" fill="${col}"/>
-    <path d="M24 8 L22 4 L28 6Z" fill="#8B1a1a"/>
-    <path d="M36 8 L38 4 L32 6Z" fill="#8B1a1a"/>
-    <path d="M44 14 L50 10 L50 18Z" fill="#8B1a1a"/>
-    <path d="M16 16 L10 12 L10 20Z" fill="#8B1a1a"/>
-    <ellipse cx="24" cy="22" rx="5" ry="4" fill="#00c040"/>
-    <ellipse cx="24" cy="22" rx="2" ry="3.5" fill="#07090d"/>
-    <circle cx="24.6" cy="20.5" r="0.8" fill="white"/>
-    <ellipse cx="36" cy="22" rx="5" ry="4" fill="#00c040"/>
-    <ellipse cx="36" cy="22" rx="2" ry="3.5" fill="#07090d"/>
-    <circle cx="36.6" cy="20.5" r="0.8" fill="white"/>
-    <path d="M20 18 L26 22" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M40 18 L34 22" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M26 34 Q30 30 34 34 Q30 38 26 34Z" fill="#f59e0b"/>
-    <path d="M28 40 Q30 46 32 40 Q33 50 30 52 Q27 50 28 40Z" fill="#f59e0b" opacity="0.9"/>
-    <path d="M24 38 Q26 44 28 42" stroke="#ef4444" strokeWidth="1.5" fill="none" opacity="0.8"/>
-    <path d="M36 38 Q34 44 32 42" stroke="#ef4444" strokeWidth="1.5" fill="none" opacity="0.8"/>
+    <path d="M18 28 L22 16 L30 12 L38 16 L42 28 L38 40 L30 46 L22 40Z" fill="${col}"/>
+    <path d="M22 16 L18 10 L22 6 L26 12Z" fill="#8B1a1a"/>
+    <path d="M38 16 L42 10 L38 6 L34 12Z" fill="#8B1a1a"/>
+    <path d="M24 10 L26 6 L28 10 L30 6 L32 10 L34 6 L36 10" fill="none" stroke="#8B1a1a" strokeWidth="2.5" strokeLinejoin="round"/>
+    <path d="M18 28 L22 24 L38 24 L42 28 L38 34 L30 38 L22 34Z" fill="#a02020"/>
+    <ellipse cx="23" cy="24" rx="5" ry="4.5" fill="#00c040"/>
+    <ellipse cx="23" cy="24" rx="2" ry="3.8" fill="#07090d"/>
+    <circle cx="23.6" cy="22.5" r="0.9" fill="white"/>
+    <ellipse cx="37" cy="24" rx="5" ry="4.5" fill="#00c040"/>
+    <ellipse cx="37" cy="24" rx="2" ry="3.8" fill="#07090d"/>
+    <circle cx="37.6" cy="22.5" r="0.9" fill="white"/>
+    <path d="M20 20 L24 23" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M40 20 L36 23" stroke="#07090d" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M24 30 L22 28 L20 30" stroke="#8B1a1a" strokeWidth="1.2"/>
+    <path d="M36 30 L38 28 L40 30" stroke="#8B1a1a" strokeWidth="1.2"/>
+    <ellipse cx="30" cy="34" rx="5" ry="3.5" fill="#8B2020"/>
+    <path d="M28 32 L30 30 L32 32" stroke="${col}" strokeWidth="1" fill="none"/>
+    <path d="M30 38 Q34 44 33 50" stroke="#f59e0b" strokeWidth="1.5" fill="none" opacity="0.9"/>
+    <path d="M30 38 Q26 44 27 50" stroke="#ef4444" strokeWidth="1.2" fill="none" opacity="0.8"/>
+    <path d="M30 38 Q31 46 30 50" stroke="#f59e0b" strokeWidth="1" fill="none" opacity="0.7"/>
   </svg>`,
 
-  // BULLS — charging bull silhouette, horns prominent
+  // ── BULLS — massive head, sharp horns, ring through nose, rage ───────────
   bulls: (col='#C0392B') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <path d="M8 26 L6 16 L14 12 L16 20 L20 16 L30 14 L40 16 L44 20 L46 12 L54 16 L52 26 L48 30 L50 40 L44 44 L38 40 L30 44 L22 40 L16 44 L10 40 L12 30Z" fill="#1a0800"/>
-    <path d="M8 26 L14 22 L16 28 L12 30Z" fill="${col}" opacity="0.8"/>
-    <path d="M52 26 L46 22 L44 28 L48 30Z" fill="${col}" opacity="0.8"/>
-    <path d="M6 16 L14 12 L12 18Z" fill="#c8a040"/>
-    <path d="M54 16 L46 12 L48 18Z" fill="#c8a040"/>
-    <ellipse cx="30" cy="30" rx="16" ry="14" fill="${col}"/>
-    <ellipse cx="30" cy="32" rx="10" ry="9" fill="#2a0800"/>
-    <circle cx="23" cy="27" r="4.5" fill="#c00000"/>
-    <circle cx="37" cy="27" r="4.5" fill="#c00000"/>
-    <circle cx="23" cy="27" r="2.5" fill="#07090d"/>
-    <circle cx="37" cy="27" r="2.5" fill="#07090d"/>
-    <circle cx="23.8" cy="25.8" r="0.9" fill="white"/>
-    <circle cx="37.8" cy="25.8" r="0.9" fill="white"/>
-    <path d="M22 21 L28 26" stroke="#07090d" strokeWidth="3" strokeLinecap="round"/>
-    <path d="M38 21 L32 26" stroke="#07090d" strokeWidth="3" strokeLinecap="round"/>
-    <ellipse cx="30" cy="34" rx="5" ry="3.5" fill="#1a0800"/>
-    <path d="M24 36 Q30 41 36 36" stroke="#a0a0a0" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+    <path d="M10 26 L6 16 L12 12 L16 18 L18 24Z" fill="#c8a040"/>
+    <path d="M50 26 L54 16 L48 12 L44 18 L42 24Z" fill="#c8a040"/>
+    <path d="M8 26 L14 22 L30 20 L46 22 L52 26 L48 38 L38 46 L30 48 L22 46 L12 38Z" fill="#1a0800"/>
+    <path d="M16 32 L22 26 L30 24 L38 26 L44 32 L40 42 L30 46 L20 42Z" fill="#3a1810"/>
+    <ellipse cx="22" cy="28" rx="5.5" ry="5" fill="#c00000"/>
+    <ellipse cx="22" cy="28" rx="3" ry="4.5" fill="#07090d"/>
+    <circle cx="22.8" cy="26.5" r="0.9" fill="white"/>
+    <ellipse cx="38" cy="28" rx="5.5" ry="5" fill="#c00000"/>
+    <ellipse cx="38" cy="28" rx="3" ry="4.5" fill="#07090d"/>
+    <circle cx="38.8" cy="26.5" r="0.9" fill="white"/>
+    <path d="M17 22 L25 27" stroke="#07090d" strokeWidth="3" strokeLinecap="round"/>
+    <path d="M43 22 L35 27" stroke="#07090d" strokeWidth="3" strokeLinecap="round"/>
+    <ellipse cx="30" cy="36" rx="8" ry="6" fill="#2a1008"/>
+    <ellipse cx="30" cy="34" rx="5.5" ry="3.5" fill="#07090d"/>
+    <path d="M24 38 Q30 42 36 38" stroke="#c0c0c0" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+    <ellipse cx="26" cy="38" rx="2" ry="1" fill="#c0c0c0" opacity="0.6"/>
+    <ellipse cx="34" cy="38" rx="2" ry="1" fill="#c0c0c0" opacity="0.6"/>
+    <path d="M16 28 L10 24 L8 30" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
+    <path d="M44 28 L50 24 L52 30" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
   </svg>`,
 
-  // KNIGHTS — bold shield with visor/sword design
+  // ── KNIGHTS — angular helmet, visor slit with red eyes, imposing ─────────
   knights: (col='#607080') => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
     <circle cx="30" cy="30" r="28" fill="#07090d" stroke="${col}" strokeWidth="1.5"/>
-    <path d="M16 12 L44 12 L48 28 L44 40 L30 50 L16 40 L12 28Z" fill="${col}"/>
-    <path d="M16 12 L30 12 L30 50 L16 40 L12 28Z" fill="${col}" opacity="0.85"/>
-    <path d="M16 12 L44 12 L44 16 L16 16Z" fill="#8B0000"/>
-    <rect x="14" y="22" width="32" height="10" rx="2" fill="#07090d"/>
-    <rect x="16" y="24" width="12" height="6" rx="1" fill="#ef4444" opacity="0.8"/>
-    <rect x="32" y="24" width="12" height="6" rx="1" fill="#ef4444" opacity="0.8"/>
-    <line x1="30" y1="12" x2="30" y2="50" stroke="#4a5a6a" strokeWidth="2"/>
-    <line x1="12" y1="28" x2="48" y2="28" stroke="#4a5a6a" strokeWidth="1.5" opacity="0.5"/>
-    <path d="M20 34 L24 38 L26 36 L30 42 L34 36 L36 38 L40 34" stroke="${col}" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M18 48 L16 32 L14 22 L18 14 L30 10 L42 14 L46 22 L44 32 L42 48Z" fill="${col}"/>
+    <path d="M24 10 L30 4 L36 10" fill="${col}" opacity="0.9"/>
+    <path d="M26 8 L30 2 L34 8 L32 12 L28 12Z" fill="#8B0000"/>
+    <path d="M16 32 L44 32 L46 26 L14 26Z" fill="#2a3a4a"/>
+    <rect x="18" y="26" width="24" height="7" rx="1" fill="#07090d"/>
+    <rect x="20" y="27.5" width="8" height="4" rx="1" fill="#ef4444" opacity="0.8"/>
+    <rect x="32" y="27.5" width="8" height="4" rx="1" fill="#ef4444" opacity="0.8"/>
+    <line x1="30" y1="26" x2="30" y2="33" stroke="#3a4a5a" strokeWidth="1.5"/>
+    <path d="M18 14 L14 12 L12 16 L16 18Z" fill="${col}" opacity="0.7"/>
+    <path d="M42 14 L46 12 L48 16 L44 18Z" fill="${col}" opacity="0.7"/>
+    <rect x="20" y="38" width="20" height="8" rx="2" fill="#3a4a5a"/>
+    <line x1="22" y1="42" x2="38" y2="42" stroke="${col}" strokeWidth="1" opacity="0.4"/>
+    <path d="M18 48 L20 52 L40 52 L42 48Z" fill="#2a3a4a"/>
+    <circle cx="18" cy="16" r="2" fill="#3a4a5a"/>
+    <circle cx="42" cy="16" r="2" fill="#3a4a5a"/>
+    <circle cx="16" cy="34" r="2" fill="#3a4a5a"/>
+    <circle cx="44" cy="34" r="2" fill="#3a4a5a"/>
   </svg>`,
+
+  // ── BEARS (10th free mascot, renamed from hawks position) ─────────────────
+  // Already defined above — the 10th free mascot
 }
 
-function mascotPlaceholder(name, col='#C0392B') {
-  const letter = name.charAt(0).toUpperCase()
-  const colors = { premium:'#2a3040' }
+function mascotPlaceholder(name, emoji, col='#C0392B') {
+  const firstLetter = name.charAt(0).toUpperCase()
   return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}88" strokeWidth="1.2"/>
-    <text x="30" y="36" textAnchor="middle" fontSize="26" fill="${col}" fontWeight="900" fontFamily="'Arial Black',Impact,sans-serif" opacity="0.5">${letter}</text>
-    <text x="30" y="50" textAnchor="middle" fontSize="6" fill="rgba(255,255,255,0.2)" fontFamily="monospace">${name.toUpperCase()}</text>
+    <circle cx="30" cy="30" r="28" fill="#0f1219" stroke="${col}" strokeWidth="1.5"/>
+    <text x="30" y="36" textAnchor="middle" fontSize="22" fill="${col}" fontWeight="900" fontFamily="'Arial Black',sans-serif">${firstLetter}</text>
+    <text x="30" y="52" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.3)" fontFamily="'Arial',sans-serif">${name.toUpperCase()}</text>
   </svg>`
 }
 
 const MASCOTS = [
-  { id:'eagles',   name:'Eagles',    tier:'free',    svg: MASCOT_SVGS.eagles },
-  { id:'tigers',   name:'Tigers',    tier:'free',    svg: MASCOT_SVGS.tigers },
-  { id:'lions',    name:'Lions',     tier:'free',    svg: MASCOT_SVGS.lions },
-  { id:'bears',    name:'Bears',     tier:'free',    svg: MASCOT_SVGS.bears },
-  { id:'wolves',   name:'Wolves',    tier:'free',    svg: MASCOT_SVGS.wolves },
-  { id:'sharks',   name:'Sharks',    tier:'free',    svg: MASCOT_SVGS.sharks },
-  { id:'dragons',  name:'Dragons',   tier:'free',    svg: MASCOT_SVGS.dragons },
-  { id:'bulls',    name:'Bulls',     tier:'free',    svg: MASCOT_SVGS.bulls },
-  { id:'knights',  name:'Knights',   tier:'free',    svg: MASCOT_SVGS.knights },
-  { id:'hawks',    name:'Hawks',     tier:'free',    svg: MASCOT_SVGS.hawks },
-  { id:'falcons',  name:'Falcons',   tier:'premium', svg: (c)=>mascotPlaceholder('Falcons',c) },
-  { id:'ravens',   name:'Ravens',    tier:'premium', svg: (c)=>mascotPlaceholder('Ravens',c) },
-  { id:'cardinals',name:'Cardinals', tier:'premium', svg: (c)=>mascotPlaceholder('Cardinals',c) },
-  { id:'owls',     name:'Owls',      tier:'premium', svg: (c)=>mascotPlaceholder('Owls',c) },
-  { id:'panthers', name:'Panthers',  tier:'premium', svg: (c)=>mascotPlaceholder('Panthers',c) },
-  { id:'cougars',  name:'Cougars',   tier:'premium', svg: (c)=>mascotPlaceholder('Cougars',c) },
-  { id:'jaguars',  name:'Jaguars',   tier:'premium', svg: (c)=>mascotPlaceholder('Jaguars',c) },
-  { id:'huskies',  name:'Huskies',   tier:'premium', svg: (c)=>mascotPlaceholder('Huskies',c) },
-  { id:'bulldogs', name:'Bulldogs',  tier:'premium', svg: (c)=>mascotPlaceholder('Bulldogs',c) },
-  { id:'vipers',   name:'Vipers',    tier:'premium', svg: (c)=>mascotPlaceholder('Vipers',c) },
-  { id:'cobras',   name:'Cobras',    tier:'premium', svg: (c)=>mascotPlaceholder('Cobras',c) },
-  { id:'gators',   name:'Gators',    tier:'premium', svg: (c)=>mascotPlaceholder('Gators',c) },
-  { id:'mustangs', name:'Mustangs',  tier:'premium', svg: (c)=>mascotPlaceholder('Mustangs',c) },
-  { id:'stallions',name:'Stallions', tier:'premium', svg: (c)=>mascotPlaceholder('Stallions',c) },
-  { id:'broncos',  name:'Broncos',   tier:'premium', svg: (c)=>mascotPlaceholder('Broncos',c) },
-  { id:'rams',     name:'Rams',      tier:'premium', svg: (c)=>mascotPlaceholder('Rams',c) },
-  { id:'bison',    name:'Bison',     tier:'premium', svg: (c)=>mascotPlaceholder('Bison',c) },
-  { id:'warriors', name:'Warriors',  tier:'premium', svg: (c)=>mascotPlaceholder('Warriors',c) },
-  { id:'spartans', name:'Spartans',  tier:'premium', svg: (c)=>mascotPlaceholder('Spartans',c) },
-  { id:'titans',   name:'Titans',    tier:'premium', svg: (c)=>mascotPlaceholder('Titans',c) },
-  { id:'giants',   name:'Giants',    tier:'premium', svg: (c)=>mascotPlaceholder('Giants',c) },
-  { id:'rockets',  name:'Rockets',   tier:'premium', svg: (c)=>mascotPlaceholder('Rockets',c) },
-  { id:'blazers',  name:'Blazers',   tier:'premium', svg: (c)=>mascotPlaceholder('Blazers',c) },
-  { id:'thunder',  name:'Thunder',   tier:'premium', svg: (c)=>mascotPlaceholder('Thunder',c) },
-  { id:'storm',    name:'Storm',     tier:'premium', svg: (c)=>mascotPlaceholder('Storm',c) },
-  { id:'cyclones', name:'Cyclones',  tier:'premium', svg: (c)=>mascotPlaceholder('Cyclones',c) },
-  { id:'tornados', name:'Tornados',  tier:'premium', svg: (c)=>mascotPlaceholder('Tornados',c) },
-  { id:'comets',   name:'Comets',    tier:'premium', svg: (c)=>mascotPlaceholder('Comets',c) },
-  { id:'jets',     name:'Jets',      tier:'premium', svg: (c)=>mascotPlaceholder('Jets',c) },
-  { id:'phantoms', name:'Phantoms',  tier:'premium', svg: (c)=>mascotPlaceholder('Phantoms',c) },
-  { id:'chargers', name:'Chargers',  tier:'premium', svg: (c)=>mascotPlaceholder('Chargers',c) },
-  { id:'patriots', name:'Patriots',  tier:'premium', svg: (c)=>mascotPlaceholder('Patriots',c) },
-  { id:'rebels',   name:'Rebels',    tier:'premium', svg: (c)=>mascotPlaceholder('Rebels',c) },
-  { id:'trojans',  name:'Trojans',   tier:'premium', svg: (c)=>mascotPlaceholder('Trojans',c) },
-  { id:'vikings',  name:'Vikings',   tier:'premium', svg: (c)=>mascotPlaceholder('Vikings',c) },
-  { id:'pirates',  name:'Pirates',   tier:'premium', svg: (c)=>mascotPlaceholder('Pirates',c) },
-  { id:'raiders',  name:'Raiders',   tier:'premium', svg: (c)=>mascotPlaceholder('Raiders',c) },
-  { id:'colts',    name:'Colts',     tier:'premium', svg: (c)=>mascotPlaceholder('Colts',c) },
-  { id:'lightning',name:'Lightning', tier:'premium', svg: (c)=>mascotPlaceholder('Lightning',c) },
+  { id:'eagles',   name:'Eagles',    emoji:'🦅', tier:'free',    svg: MASCOT_SVGS.eagles },
+  { id:'tigers',   name:'Tigers',    emoji:'🐯', tier:'free',    svg: MASCOT_SVGS.tigers },
+  { id:'lions',    name:'Lions',     emoji:'🦁', tier:'free',    svg: MASCOT_SVGS.lions },
+  { id:'bears',    name:'Bears',     emoji:'🐻', tier:'free',    svg: MASCOT_SVGS.bears },
+  { id:'wolves',   name:'Wolves',    emoji:'🐺', tier:'free',    svg: MASCOT_SVGS.wolves },
+  { id:'sharks',   name:'Sharks',    emoji:'🦈', tier:'free',    svg: MASCOT_SVGS.sharks },
+  { id:'dragons',  name:'Dragons',   emoji:'🐉', tier:'free',    svg: MASCOT_SVGS.dragons },
+  { id:'bulls',    name:'Bulls',     emoji:'🐂', tier:'free',    svg: MASCOT_SVGS.bulls },
+  { id:'knights',  name:'Knights',   emoji:'🛡️', tier:'free',    svg: MASCOT_SVGS.knights },
+  { id:'hawks',    name:'Hawks',     emoji:'🪶', tier:'free',    svg: MASCOT_SVGS.hawks },
+  { id:'falcons',  name:'Falcons',   emoji:'🦜', tier:'premium', svg: (c)=>mascotPlaceholder('Falcons','F',c) },
+  { id:'ravens',   name:'Ravens',    emoji:'🐦', tier:'premium', svg: (c)=>mascotPlaceholder('Ravens','R',c) },
+  { id:'cardinals',name:'Cardinals', emoji:'🔴', tier:'premium', svg: (c)=>mascotPlaceholder('Cardinals','C',c) },
+  { id:'owls',     name:'Owls',      emoji:'🦉', tier:'premium', svg: (c)=>mascotPlaceholder('Owls','O',c) },
+  { id:'panthers', name:'Panthers',  emoji:'🐆', tier:'premium', svg: (c)=>mascotPlaceholder('Panthers','P',c) },
+  { id:'cougars',  name:'Cougars',   emoji:'🐈', tier:'premium', svg: (c)=>mascotPlaceholder('Cougars','C',c) },
+  { id:'jaguars',  name:'Jaguars',   emoji:'🐱', tier:'premium', svg: (c)=>mascotPlaceholder('Jaguars','J',c) },
+  { id:'huskies',  name:'Huskies',   emoji:'🐕', tier:'premium', svg: (c)=>mascotPlaceholder('Huskies','H',c) },
+  { id:'bulldogs', name:'Bulldogs',  emoji:'🦮', tier:'premium', svg: (c)=>mascotPlaceholder('Bulldogs','B',c) },
+  { id:'vipers',   name:'Vipers',    emoji:'🐍', tier:'premium', svg: (c)=>mascotPlaceholder('Vipers','V',c) },
+  { id:'cobras',   name:'Cobras',    emoji:'🐍', tier:'premium', svg: (c)=>mascotPlaceholder('Cobras','C',c) },
+  { id:'gators',   name:'Gators',    emoji:'🐊', tier:'premium', svg: (c)=>mascotPlaceholder('Gators','G',c) },
+  { id:'mustangs', name:'Mustangs',  emoji:'🐎', tier:'premium', svg: (c)=>mascotPlaceholder('Mustangs','M',c) },
+  { id:'stallions',name:'Stallions', emoji:'🏇', tier:'premium', svg: (c)=>mascotPlaceholder('Stallions','S',c) },
+  { id:'broncos',  name:'Broncos',   emoji:'🤠', tier:'premium', svg: (c)=>mascotPlaceholder('Broncos','B',c) },
+  { id:'rams',     name:'Rams',      emoji:'🐏', tier:'premium', svg: (c)=>mascotPlaceholder('Rams','R',c) },
+  { id:'bison',    name:'Bison',     emoji:'🦬', tier:'premium', svg: (c)=>mascotPlaceholder('Bison','B',c) },
+  { id:'warriors', name:'Warriors',  emoji:'⚔️', tier:'premium', svg: (c)=>mascotPlaceholder('Warriors','W',c) },
+  { id:'spartans', name:'Spartans',  emoji:'🗡️', tier:'premium', svg: (c)=>mascotPlaceholder('Spartans','S',c) },
+  { id:'titans',   name:'Titans',    emoji:'💪', tier:'premium', svg: (c)=>mascotPlaceholder('Titans','T',c) },
+  { id:'giants',   name:'Giants',    emoji:'🏔️', tier:'premium', svg: (c)=>mascotPlaceholder('Giants','G',c) },
+  { id:'rockets',  name:'Rockets',   emoji:'🚀', tier:'premium', svg: (c)=>mascotPlaceholder('Rockets','R',c) },
+  { id:'blazers',  name:'Blazers',   emoji:'🔥', tier:'premium', svg: (c)=>mascotPlaceholder('Blazers','B',c) },
+  { id:'thunder',  name:'Thunder',   emoji:'⛈️', tier:'premium', svg: (c)=>mascotPlaceholder('Thunder','T',c) },
+  { id:'storm',    name:'Storm',     emoji:'🌩️', tier:'premium', svg: (c)=>mascotPlaceholder('Storm','S',c) },
+  { id:'cyclones', name:'Cyclones',  emoji:'🌀', tier:'premium', svg: (c)=>mascotPlaceholder('Cyclones','C',c) },
+  { id:'tornados', name:'Tornados',  emoji:'💨', tier:'premium', svg: (c)=>mascotPlaceholder('Tornados','T',c) },
+  { id:'comets',   name:'Comets',    emoji:'☄️', tier:'premium', svg: (c)=>mascotPlaceholder('Comets','C',c) },
+  { id:'jets',     name:'Jets',      emoji:'✈️', tier:'premium', svg: (c)=>mascotPlaceholder('Jets','J',c) },
+  { id:'phantoms', name:'Phantoms',  emoji:'👻', tier:'premium', svg: (c)=>mascotPlaceholder('Phantoms','P',c) },
+  { id:'chargers', name:'Chargers',  emoji:'🔋', tier:'premium', svg: (c)=>mascotPlaceholder('Chargers','C',c) },
+  { id:'patriots', name:'Patriots',  emoji:'🎖️', tier:'premium', svg: (c)=>mascotPlaceholder('Patriots','P',c) },
+  { id:'rebels',   name:'Rebels',    emoji:'🏴', tier:'premium', svg: (c)=>mascotPlaceholder('Rebels','R',c) },
+  { id:'trojans',  name:'Trojans',   emoji:'🏛️', tier:'premium', svg: (c)=>mascotPlaceholder('Trojans','T',c) },
+  { id:'vikings',  name:'Vikings',   emoji:'🪓', tier:'premium', svg: (c)=>mascotPlaceholder('Vikings','V',c) },
+  { id:'pirates',  name:'Pirates',   emoji:'☠️', tier:'premium', svg: (c)=>mascotPlaceholder('Pirates','P',c) },
+  { id:'raiders',  name:'Raiders',   emoji:'💀', tier:'premium', svg: (c)=>mascotPlaceholder('Raiders','R',c) },
+  { id:'colts',    name:'Colts',     emoji:'🐴', tier:'premium', svg: (c)=>mascotPlaceholder('Colts','C',c) },
+  { id:'lightning',name:'Lightning', emoji:'🌪️', tier:'premium', svg: (c)=>mascotPlaceholder('Lightning','L',c) },
 ]
 
 function MascotAvatar({ mascotId, color='#C0392B', size=40, locked=false }) {
   const mascot = MASCOTS.find(m => m.id === mascotId)
-  if (!mascot) return <div style={{ width:size, height:size, borderRadius:'50%', background:'#1e2330', display:'flex', alignItems:'center', justifyContent:'center', fontSize:size*0.35, opacity:0.4 }}>🏆</div>
-  const svgStr = mascot.svg(locked ? '#2a3040' : color)
+  if (!mascot) return <div style={{ width:size, height:size, borderRadius:'50%', background:'#1e2330', display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ fontSize:size*0.35, opacity:0.4 }}>🏆</span></div>
+  const svgStr = mascot.svg(color)
   return (
     <div style={{ position:'relative', width:size, height:size, flexShrink:0 }}>
       <div style={{ width:size, height:size, filter:locked?'grayscale(100%) brightness(0.35)':'none', transition:'filter 0.2s' }} dangerouslySetInnerHTML={{ __html: svgStr }}/>
@@ -461,6 +529,7 @@ const SPORTS = {
       {id:'focus',label:'Offensive Philosophy',opts:['Balanced Attack','Ground and Pound','Air It Out','Misdirection Heavy','Option / Read Heavy','Two Minute Drill']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','4-3','3-4','5-2','6-2 Youth','4-2-5','46 Bear','Multiple / Varies']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
     buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -472,10 +541,11 @@ const SPORTS = {
       {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
       {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
       {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Team Experience',opts:['First Year','Developing','Intermediate','Competitive']},
+      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
       {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -487,10 +557,11 @@ const SPORTS = {
       {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
       {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
       {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
-      {id:'skill',label:'Team Experience',opts:['First Year','Developing','Intermediate','Competitive']},
+      {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
       {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
       {id:'defense',label:'Batting Order',opts:['Traditional Best at 3-4','Speedy Leadoff Heavy','Power Through Lineup','Youth Everyone Hits']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
+      {id:'experience',label:'Your Players Experience',opts:['First Year / Never Played','Beginner — 1 Season','Average — 2-3 Seasons','Experienced — 4+ Seasons','Mixed Skill Levels on Roster']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
     buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
@@ -503,7 +574,7 @@ const SPORTS = {
       {id:'format',    label:'Game Format',       opts:['11v11 Standard','9v9 Youth','7v7 Youth','5v5 Futsal']},
       {id:'system',    label:'Playing Style',      opts:['Possession / Tiki-Taka','Direct / Counter','High Press','Park the Bus / Defensive','4-3-3 Attack','4-4-2 Classic','3-5-2 Wing Play']},
       {id:'age',       label:'Age Group',          opts:['U6-U8','U9-U10','U11-U12','U13-U14','U15-U16','High School']},
-      {id:'skill',     label:'Team Experience',    opts:['First Year','Developing','Intermediate','Competitive','Elite']},
+      {id:'skill',     label:'Skill Level',        opts:['Beginner','Average','Competitive','Elite']},
       {id:'focus',     label:'Training Focus',     opts:['Attacking Patterns','Defensive Shape','Set Pieces','Transitions','Pressing','Restarts','Goalkeeping']},
       {id:'formation', label:'Your Formation',     opts:['4-3-3','4-4-2','3-5-2','4-2-3-1','5-3-2','3-4-3','4-1-4-1']},
       {id:'oppShape',  label:'Opponent Shape',     opts:['Unknown / Balanced','4-4-2 Block','5-4-1 Defensive','4-3-3 High Press','4-2-3-1','3-5-2 Wings','Long Ball Direct']},
@@ -1726,7 +1797,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
   const [battleLoading, setBattleLoading] = useState(false)
   const [battleStarted, setBattleStarted] = useState(false)
 
-  const diffMap = { Rookie: { label: 'Rookie', color: '#4ade80', pts: 8, penalty: 4 }, Varsity: { label: 'Varsity', color: '#f59e0b', pts: 15, penalty: 7 }, Elite: { label: 'Elite', color: P, pts: 25, penalty: 12 } }
+  const diffMap = { Rookie: { label: 'Rookie', color: '#4ade80', pts: 5 }, Varsity: { label: 'Varsity', color: '#f59e0b', pts: 10 }, Elite: { label: 'Elite', color: P, pts: 20 } }
 
   const coordinatorTitle = sport === 'Basketball' ? 'Head Coach' : sport === 'Baseball' ? 'Manager' : 'Offensive Coordinator'
   const oppTitle = sport === 'Basketball' ? 'Opposing Coach' : sport === 'Baseball' ? 'Opposing Manager' : 'Defensive Coordinator'
@@ -1750,11 +1821,10 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
     setScore(s => ({ correct: s.correct + (correct?1:0), total: s.total + 1 }))
     if (correct) {
       const pts = diffMap[difficulty]?.pts || 10
-      setIQ(q => Math.min(1000, q + pts + (streak > 0 && (streak+1) % 3 === 0 ? 10 : 0)))
+      setIQ(q => q + pts)
       setGauntlets(g => g + 1)
     } else {
-      const penalty = diffMap[difficulty]?.penalty || 5
-      setIQ(q => Math.max(100, q - penalty))
+      setIQ(q => Math.max(0, q - 5))
     }
   }
 
@@ -3327,15 +3397,15 @@ function PlayNameBuilder({ P, S, al, sport }) {
 
     // ── FOOTBALL DIAGRAM ─────────────────────────────────────────────────────
     const fmtPositions = {
-      'Ace Right':          { wr:[[14,48],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Ace Left':           { wr:[[14,48],[14,38],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'I-Formation Right':  { wr:[[14,48],[148,46]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
-      'I-Formation Left':   { wr:[[14,48],[148,46]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
-      'Shotgun Right':      { wr:[[12,48],[148,48],[132,48],[36,46]], qb:[84,64], rb:[[110,64]], fb:[] },
-      'Pistol Right':       { wr:[[12,48],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Right':          { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Ace Left':           { wr:[[14,48],[14,38],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'I-Formation Right':  { wr:[[14,48],[148,48]], qb:[84,60], rb:[[84,76]], fb:[[84,67]] },
+      'I-Formation Left':   { wr:[[14,48],[148,48]], qb:[84,58], rb:[[84,74]], fb:[[84,66]] },
+      'Shotgun Right':      { wr:[[12,48],[148,48],[132,48],[36,48]], qb:[84,64], rb:[[110,64]], fb:[] },
+      'Pistol Right':       { wr:[[12,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
       'Trips Right':        { wr:[[12,38],[130,38],[144,30],[156,38]], qb:[84,58], rb:[[84,68]], fb:[] },
-      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,46]], qb:[84,60], rb:[[84,72]], fb:[] },
-      'Pro Set Right':      { wr:[[12,48],[148,46]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
+      'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
+      'Pro Set Right':      { wr:[[12,48],[148,48]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
     }
     const personnelDefaultFmt = {
       '11':'Ace Right', '12':'I-Formation Right', '21':'I-Formation Right',
@@ -3375,8 +3445,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         <rect x="0" y="0" width="200" height="100" fill="#0a1a0a" rx="3"/>
         {[50,100,150].map((x,i)=><line key={i} x1={x} y1="4" x2={x} y2="96" stroke="rgba(255,255,255,0.04)" strokeWidth="0.6" strokeDasharray="3,3"/>)}
         {/* LOS */}
-        <line x1="4" y1="46" x2="196" y2="46" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
-        <text x="8" y="44" fill="rgba(255,255,255,0.35)" fontSize="5" fontFamily="monospace">LOS</text>
+        <line x1="4" y1="52" x2="196" y2="52" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2"/>
+        <text x="8" y="50" fill="rgba(255,255,255,0.3)" fontSize="5" fontFamily="monospace">LOS</text>
         {/* Strength indicator */}
         {choices.formation && (
           <text x={choices.formation.includes('Left')?20:176} y="15" textAnchor="middle" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace">STR{choices.formation.includes('Left')?'◄':'►'}</text>
@@ -3384,14 +3454,14 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* OL — 5 linemen always on LOS */}
         {[60,72,84,96,108].map((x,i)=>(
           <g key={i}>
-            <rect x={x-6} y={46} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
+            <rect x={x-6} y={49} width={12} height={9} rx="1.5" fill={P} opacity={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1:0.85}
               stroke={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?'#f59e0b':'none'}
               strokeWidth={gap&&!isPassPlay&&Math.abs(x-gap.x)<15?1.5:0}/>
-            <text x={x} y={52} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace" fontWeight="700">{['LT','LG','C','RG','RT'][i]}</text>
+            <text x={x} y={47} textAnchor="middle" fill="white" fontSize="3.5" fontFamily="monospace">{['LT','LG','C','RG','RT'][i]}</text>
           </g>
         ))}
         {/* TE if tight modifier */}
-        {choices.modifier==='Tight'&&<rect x={112} y={46} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
+        {choices.modifier==='Tight'&&<rect x={112} y={49} width={12} height={9} rx="1.5" fill={P} opacity={0.8}/>}
         {/* WRs */}
         {fmt.wr.map(([cx,cy],i)=>{
           const labels = ['X','Z','H','Y','W']
@@ -3422,8 +3492,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* Gap arrow */}
         {gap && !isPassPlay && (
           <g>
-            <rect x={gap.x-5} y={43} width={10} height={11} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
-            <path d={`M${gap.x} 44 L${gap.x} 30`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
+            <rect x={gap.x-5} y={44} width={10} height={10} rx="1" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" strokeWidth="1"/>
+            <path d={`M${gap.x} 52 L${gap.x} 36`} stroke="#f59e0b" strokeWidth="2" fill="none" markerEnd="url(#arr)"/>
             <text x={gap.x} y={35} textAnchor="middle" fill="#f59e0b" fontSize="5" fontWeight="700" fontFamily="monospace">{gap.label}</text>
           </g>
         )}
@@ -4125,30 +4195,7 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
                 <input value={homeLocation||''} onChange={e=>setHomeLocation&&setHomeLocation(e.target.value)} placeholder="e.g. Tolland, CT" style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
                 <button onClick={()=>{ if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(pos=>{ fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+pos.coords.latitude+'&lon='+pos.coords.longitude).then(r=>r.json()).then(d=>{ const a=d.address||{}; const city=a.city||a.town||a.village||''; const state=a.state||''; if(setHomeLocation) setHomeLocation([city,state].filter(Boolean).join(', ')) }) }) }}} style={{ padding:'9px 12px', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>📍 AUTO</button>
               </div>
-    
-          <Card>
-            <CardHead icon="📊" title="Home Widget Settings" accent={P} />
-            <div style={{ padding:14 }}>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:12 }}>Choose which widgets appear on your home screen. Toggle rotation or pin one permanently.</div>
-              <div onClick={()=>setCfg(c=>({...c,widgetRotate:c.widgetRotate===false}))} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10, padding:'10px 12px', background:'#161922', borderRadius:6, cursor:'pointer' }}>
-                <div style={{ flex:1 }}><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>Auto-Rotate</div><div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>Cycles through widgets every few seconds</div></div>
-                <div style={{ width:40, height:22, borderRadius:11, background:cfg.widgetRotate!==false?P:'#2a3040', position:'relative', flexShrink:0, transition:'background 0.2s' }}><div style={{ position:'absolute', width:18, height:18, borderRadius:'50%', background:'white', top:2, left:cfg.widgetRotate!==false?20:2, transition:'left 0.2s' }}/></div>
-              </div>
-              {[{id:'weather',label:'🌤️ Weather + Game Likelihood'},{id:'countdown',label:'⏰ Event Countdown'},{id:'time',label:'🕐 Date + Time'},{id:'tip',label:'💡 Coaching Tip'}].map(w => {
-                const on = !(cfg.widgetDisabled||[]).includes(w.id)
-                return <div key={w.id} onClick={()=>setCfg(c=>({...c,widgetDisabled:on?[...(c.widgetDisabled||[]),w.id]:(c.widgetDisabled||[]).filter(x=>x!==w.id)}))} style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:'#161922', borderRadius:5, marginBottom:5, cursor:'pointer' }}>
-                  <div style={{ width:16, height:16, borderRadius:3, border:`2px solid ${on?P:'#3d4559'}`, background:on?P:'transparent', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{on&&<span style={{ fontSize:10, color:'white' }}>✓</span>}</div>
-                  <span style={{ fontSize:12, color:'#f2f4f8' }}>{w.label}</span>
-                </div>
-              })}
-              {cfg.widgetRotate===false && <div style={{ marginTop:8 }}>
-                <div style={{ fontSize:9, color:'#6b7a96', textTransform:'uppercase', letterSpacing:'1.5px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:6 }}>Pinned Widget</div>
-                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>{[{id:'weather',label:'🌤️ Weather'},{id:'countdown',label:'⏰ Countdown'},{id:'time',label:'🕐 Time'},{id:'tip',label:'💡 Tip'}].map(w=>(
-                  <div key={w.id} onClick={()=>setCfg(c=>({...c,widgetPinned:w.id}))} style={{ padding:'5px 10px', borderRadius:4, border:`1px solid ${cfg.widgetPinned===w.id?P:'#1e2330'}`, background:cfg.widgetPinned===w.id?al(P,0.12):'transparent', cursor:'pointer', fontSize:11, color:cfg.widgetPinned===w.id?P:'#6b7a96' }}>{w.label}</div>
-                ))}</div>
-              </div>}
             </div>
-          </Card>        </div>
           </Card>
           <Card>
             <CardHead icon="🏷" title="Team Colors" accent={P} />
@@ -4267,20 +4314,18 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
             <div style={{ padding: ct ? '14px 16px' : '10px 16px', display:'flex', alignItems:'center', gap:12, position:'relative', zIndex:1 }}>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:1 }}>Welcome back</div>
-              {(()=>{ const s=getSpecialTheme(); return s?<div style={{ fontSize:11, color:'#f59e0b', marginTop:2 }}>{s.badge} {s.msg}</div>:null })()}
                 <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:ct?22:20, color:'#f2f4f8', lineHeight:1, marginBottom:ct?3:0 }}>Coach {lastName||'—'}</div>
                 {ct && <div style={{ fontFamily:teamFont, fontStyle:'italic', fontSize:13, color:ct.primary, letterSpacing:'0.5px', marginBottom:2 }}>{mascotObj?.emoji} {ct.name}</div>}
                 {ct?.season && <div style={{ fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif" }}>{ct.season}{ct.hometown?' · '+ct.hometown:''}</div>}
               </div>
               <RotatingInfoWidget
                 sport={sport}
-                homeLocation={ct?.hometown || homeLocation || ''}
+                homeLocation={ct ? ct.hometown : homeLocation}
                 awayLocation={awayLoc}
                 nextEvent={nextEvt}
                 P={P}
                 al={al}
                 onSetLocation={()=>setPage('more')}
-                cfg={cfg}
               />
             </div>
           </div>
@@ -4548,24 +4593,6 @@ function NavButton({ id, icon, label, submenu, isActive, P, al, setPage }) {
 }
 
 
-// ─── SEASONAL THEMES ──────────────────────────────────────────────────────────
-function getSeasonalTheme() {
-  const m = new Date().getMonth()
-  if (m>=2&&m<=4) return {name:'Spring',badge:'🌱'}
-  if (m>=5&&m<=7) return {name:'Summer',badge:'☀️'}
-  if (m>=8&&m<=10) return {name:'Fall',badge:'🍂'}
-  return {name:'Winter',badge:'❄️'}
-}
-function getSpecialTheme() {
-  const t=new Date(), m=t.getMonth()+1, d=t.getDate()
-  if(m===11&&d>=20&&d<=28) return {badge:'🦃',msg:'Happy Thanksgiving, Coach!'}
-  if(m===12&&d>=20)         return {badge:'🎄',msg:'Happy Holidays, Coach!'}
-  if(m===1&&d<=5)           return {badge:'🎉',msg:"Happy New Year, Coach!"}
-  if(m===7&&d===4)          return {badge:'🇺🇸',msg:'Happy 4th, Coach!'}
-  return null
-}
-
-
 export default function CoachIQ() {
   // All hooks must be declared before any early returns (React Rules of Hooks)
   const [mounted, setMounted] = useState(false)
@@ -4611,12 +4638,11 @@ export default function CoachIQ() {
     s = s.replace(/,\s*([\]}])/g,'$1')
     const a = s.indexOf('{'), b = s.lastIndexOf('}')
     if (a < 0 || b <= a) throw new Error('No JSON in response')
-    const clean = s.slice(a, b+1)
-    try { return JSON.parse(clean) }
+    try { return JSON.parse(s.slice(a,b+1)) }
     catch(e) {
-      const lc = clean.lastIndexOf(',"')
-      if (lc > 0) { try { return JSON.parse(clean.slice(0,lc)+']}}') } catch(e2){} }
-      throw new Error('Parse failed: ' + e.message.slice(0,60))
+      const lc = s.slice(a).lastIndexOf(',"')
+      if (lc>0) { try { return JSON.parse(s.slice(a,a+lc)+']}') } catch(e2){} }
+      throw new Error('Parse failed: '+e.message.slice(0,60))
     }
   }
 
@@ -4690,7 +4716,7 @@ export default function CoachIQ() {
         `}</style>
 
         {/* TOP BAR */}
-        <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'8px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
+        <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
           <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
           <CoachIQLogo size={22} brand={brand} />
           <div style={{ position:'relative', marginLeft:4 }}>
@@ -4698,18 +4724,11 @@ export default function CoachIQ() {
               {['Football','Basketball','Baseball','Soccer','Softball'].map(s=>(
                 <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾', Soccer:'⚽', Softball:'🥎' }[s]} {s}</option>
               ))}
-              <option disabled value="" style={{ color:'#3d4559', fontSize:11 }}>── 🏒 Flag Football, Hockey + more soon</option>
-              <option disabled style={{ color:'#3d4559' }}>── More sports soon</option>
+              <option disabled value="" style={{ color:'#3d4559' }}>── More sports coming soon</option>
             </select>
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
           <div style={{ flex:1 }} />
-          {/* News Feed button — always visible */}
-          <button onClick={()=>setPage('news')} style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'4px 10px', cursor:'pointer', userSelect:'none', flexShrink:0 }}>
-            <span style={{ fontSize:11 }}>📰</span>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b9fff', fontWeight:700, letterSpacing:'0.5px' }}>News</span>
-          </button>
-          {/* Team button — always visible, separate from News */}
           <TeamQuickSwitcher
             sport={sport}
             teams={teams}
@@ -5090,7 +5109,11 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
 
 
 function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
-  const [mode, setMode] = useState(() => (teams[sport]||[]).length === 0 ? 'create' : 'view')
+  const [mode, setMode] = useState('view')
+  // Auto-open create form when no teams exist
+  useEffect(() => {
+    if ((teams[sport]||[]).length === 0) { setMode('create'); setExpanded(true) }
+  }, [sport, teams])
   const [expanded, setExpanded] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
@@ -5912,7 +5935,7 @@ function useWeather(location) {
 }
 
 // ─── ROTATING INFO WIDGET ─────────────────────────────────────────────────────
-function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, al, onSetLocation, cfg={} }) {
+function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, al, onSetLocation }) {
   const [slot, setSlot] = useState(0)
   const [now, setNow] = useState(() => new Date())
   const [currentTip, setCurrentTip] = useState(() => getRandomTip(sport))
@@ -5948,13 +5971,7 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, a
           <div style={{ fontSize:8, color: likelihood > 70 ? '#4ade80' : likelihood > 40 ? '#f59e0b' : '#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:1 }}>{likelihood}% on</div>
         )}
       </div>
-    ) : (
-      <div key="noloc" onClick={onSetLocation} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2, cursor:'pointer' }}>
-        <div style={{ fontSize:16 }}>📍</div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#6b7a96', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', textAlign:'center' }}>Set Location</div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:6, color:'#3d4559', textAlign:'center' }}>More → Settings</div>
-      </div>
-    ),
+    ) : null,
 
     awayWeather && awayLocation && awayLocation !== homeLocation ? (
       <div key="aw" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
@@ -5986,7 +6003,7 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, a
 
   if (slots.length === 0) return null
 
-  const activeSlot = (() => { const a=slots.filter(Boolean); if(cfg.widgetRotate===false&&cfg.widgetPinned){const m={weather:0,tip:1,countdown:2,time:3};return a[(m[cfg.widgetPinned]||0)%Math.max(1,a.length)]||a[0]} return a[slot%Math.max(1,a.length)] })()
+  const activeSlot = slots[slot % slots.length]
 
   return (
     <div style={{ display:'flex', alignItems:'center', gap:5, flexShrink:0 }}>
