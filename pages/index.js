@@ -2853,31 +2853,26 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
   return (
     <div style={{ position:'relative' }}>
       <div
-        onClick={() => { if (current) { setPage('team') } else if (sportTeams.length === 0) { setPage('team') } else { setOpen(o => !o) } }}
-        style={{ display:'flex', alignItems:'center', gap:5, background: current ? al(P,0.12) : `rgba(${parseInt(P.slice(1,3),16)||192},${parseInt(P.slice(3,5),16)||57},${parseInt(P.slice(5,7),16)||43},0.12)`, border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none' }}
+        onClick={() => {
+          if (current) { setPage('team') }
+          else if (sportTeams.length === 0) { setPage('team') }
+          else { setOpen(o => !o) }
+        }}
+        style={{ display:'flex', alignItems:'center', gap:5, background:current?al(P,0.12):'rgba(255,255,255,0.05)', border:`1px solid ${current?al(P,0.35):'rgba(255,255,255,0.1)'}`, borderRadius:3, padding:'4px 10px', cursor:'pointer', userSelect:'none', minWidth:90, justifyContent:'center' }}
       >
-        {current ? (
-          <>
-            {!current && sportTeams.length === 0 ? (
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', display:'flex', alignItems:'center', gap:4 }}>
-                <span style={{ fontSize:11 }}>➕</span> Create Team
-              </span>
-            ) : !current ? (
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b7a96', fontWeight:700, letterSpacing:'0.5px', display:'flex', alignItems:'center', gap:4 }}>
-                <span style={{ fontSize:11 }}>🏆</span> Select Team <span style={{ fontSize:8 }}>▾</span>
-              </span>
-            ) : (
-              <>
-                <MascotAvatar mascotId={current.mascot} color={P} size={22} />
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{current.name}</span>
-                <span style={{ fontSize:8, color:'#6b7a96' }}>▾</span>
-              </>
-            )}
-          </>
+        {sportTeams.length === 0 ? (
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', display:'flex', alignItems:'center', gap:5 }}>
+            <span style={{ fontSize:12 }}>➕</span> Create Team
+          </span>
+        ) : !current ? (
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b7a96', fontWeight:700, letterSpacing:'0.5px', display:'flex', alignItems:'center', gap:5 }}>
+            <span style={{ fontSize:12 }}>🏆</span> Select Team <span style={{ fontSize:8 }}>▾</span>
+          </span>
         ) : (
           <>
-            <span style={{ fontSize:12 }}>📰</span>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px' }}>Feed</span>
+            <MascotAvatar mascotId={current.mascot} color={P} size={22} />
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{current.name}</span>
+            <span style={{ fontSize:8, color:'#6b7a96' }}>▾</span>
           </>
         )}
       </div>
@@ -3412,7 +3407,13 @@ function PlayNameBuilder({ P, S, al, sport }) {
       'Trips Left':         { wr:[[10,48],[22,40],[34,48],[148,48]], qb:[84,60], rb:[[84,72]], fb:[] },
       'Pro Set Right':      { wr:[[12,48],[148,48]], qb:[84,58], rb:[[100,68]], fb:[[68,64]] },
     }
-    const fmt = fmtPositions[choices.formation] || fmtPositions['Ace Right']
+    const personnelDefaultFmt = {
+      '11':'Ace Right', '12':'I-Formation Right', '21':'I-Formation Right',
+      '22':'I-Formation Right', '10':'Trips Right', '00':'Shotgun Right',
+      'Heavy':'I-Formation Right', 'Scatter':'Shotgun Right'
+    }
+    const defaultFmt = personnelDefaultFmt[choices.personnel] || 'Ace Right'
+    const fmt = fmtPositions[choices.formation] || fmtPositions[defaultFmt] || fmtPositions['Ace Right']
     const gapMap = {
       '22':  {x:82,  side:'R', label:'A-Gap R'},
       '23':  {x:68,  side:'L', label:'B-Gap L'},
@@ -3475,6 +3476,8 @@ function PlayNameBuilder({ P, S, al, sport }) {
         {/* QB — BEHIND the LOS */}
         <circle cx={fmt.qb[0]} cy={fmt.qb[1]} r={5.5} fill={P} opacity={0.95}/>
         <text x={fmt.qb[0]} y={fmt.qb[1]+2} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">QB</text>
+        {/* Personnel label */}
+        {choices.personnel && <text x="8" y="95" fill={P} fontSize="5" fontWeight="700" fontFamily="monospace" opacity="0.7">{choices.personnel}</text>}
         {/* FB */}
         {fmt.fb.map(([cx,cy],i)=>(
           <g key={i}><circle cx={cx} cy={cy} r={4} fill={P} opacity={0.8}/><text x={cx} y={cy+1.5} textAnchor="middle" fill="white" fontSize="3.5">FB</text></g>
@@ -3564,7 +3567,7 @@ function PlayNameBuilder({ P, S, al, sport }) {
 
   return (
     <Card>
-      <CardHead icon="✏️" title="Play Name Builder" tag={sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'LEARN'} tagColor={P} accent={P} />
+      <CardHead icon="✏️" title={sport==='Baseball'||sport==='Softball'?'Signal Creator':'Play Name Builder'} tag={sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'LEARN'} tagColor={P} accent={P} />
       <div style={{ padding:14 }}>
         <p style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6, marginBottom:10 }}>{sport==='Baseball'||sport==='Softball'?'Define the situation, choose the play, and generate a real third-base coach signal sequence.':'Build a professional play call step by step. The diagram updates with every choice you make.'}</p>
 
@@ -4717,10 +4720,6 @@ export default function CoachIQ() {
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
           <div style={{ flex:1 }} />
-          <div onClick={()=>setPage('home')} style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'3px 9px', cursor:'pointer', userSelect:'none' }}>
-            <span style={{ fontSize:11 }}>📰</span>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b9fff', fontWeight:700, letterSpacing:'0.5px' }}>Feed</span>
-          </div>
           <TeamQuickSwitcher
             sport={sport}
             teams={teams}
@@ -5167,7 +5166,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
       )}
 
       <div style={{ marginTop:14 }}>
-        <div onClick={()=>setExpanded(e=>!e)} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
+        <div onClick={()=>{ if(!current && sportTeams.length===0 && onOpenTeamTab) { onOpenTeamTab() } else { setExpanded(e=>!e) } }} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
           <MascotAvatar mascotId={current?.mascot} color={P} size={32} />
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:current?15:13, color:'#f2f4f8', textTransform:'uppercase' }}>
