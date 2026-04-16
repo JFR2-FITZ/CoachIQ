@@ -141,6 +141,50 @@ const COACHING_TIPS = {
     "The mental game starts between the ears, not in the batter's box.",
     "A team that communicates on defense makes half as many errors.",
   ],
+  Soccer: [
+    "Possession without purpose is just passing. Every touch should have intent.",
+    "The best defenders win the ball cleanly. Slide tackles are a last resort.",
+    "Width in attack creates depth. Stretch the defense before you penetrate it.",
+    "The goalkeeper is your first attacker. Teach distribution from the back.",
+    "Press as a unit or not at all. One player pressing alone opens gaps.",
+    "Set pieces win games at every level. Dedicate real practice time to them.",
+    "Quick restarts catch sleeping defenses. Spot them and take advantage.",
+    "The third man run is soccer IQ. Teach players to move when off the ball.",
+    "Compact shape defensively means no more than 25 yards between lines.",
+    "Every player needs a strong first touch. Control the ball, control the game.",
+    "Speed of play beats individual speed. Move the ball faster than they can run.",
+    "Overlapping runs from fullbacks create numerical advantages wide.",
+    "Counter-pressing after losing the ball is your best defensive weapon.",
+    "The false nine creates confusion. Teach your striker to drop and connect.",
+    "Switching the field quickly beats overloaded defenses every time.",
+    "Goalkeepers command their box. Teach them to organize the defense with voice.",
+    "One-touch finishing under pressure is a trained skill, not a talent.",
+    "Defensive headers should be won early and cleared with purpose.",
+    "The pivot player links defense and attack. Develop your sixes carefully.",
+    "Celebrate recovery runs. Culture is built in the moments no one is watching.",
+  ],
+  Softball: [
+    "The rise ball up in the zone is the most effective pitch in softball. Develop it.",
+    "Slap hitting is a weapon. Speed plus contact beats power at most youth levels.",
+    "The circle is the pitcher control zone. Know the rules and use them strategically.",
+    "Catchers call the game in softball just like baseball. Develop that relationship.",
+    "The drop ball away from a right-handed batter produces ground balls every time.",
+    "No leading off until ball release. Teach your runners this from day one.",
+    "The double first base bag protects both the runner and the first baseman.",
+    "Bunt defense is a specialty. Practice corners and pitcher coverage every week.",
+    "Change-up timing throws off even experienced hitters. Teach it early.",
+    "Outfielders should get behind the ball, not just under it. Teach the approach.",
+    "The safety squeeze is lower risk than the suicide squeeze at youth levels.",
+    "Pitchers who hit corners and change speeds will always outperform power pitchers.",
+    "First-and-third situations require practiced reads from every baserunner.",
+    "The slap game with runners in motion is nearly impossible to defend when executed.",
+    "Teach your hitters to use the whole field. Pull hitters are easy to defend.",
+    "A strong relay from center field to home is a game-saving play. Practice it.",
+    "The rise ball sets up the drop ball. Pitch sequencing matters from 10U onward.",
+    "Every rundown should end in an out within two throws. Practice the technique.",
+    "Winning the mental battle between pitcher and hitter wins games at every level.",
+    "Fundamentals look boring in practice. They look like championships in games.",
+  ],
 }
 
 function getRandomTip(sport) {
@@ -151,7 +195,7 @@ function getRandomTip(sport) {
 // ─── TUTORIAL DATA ────────────────────────────────────────────────────────────
 const TUTORIAL_STEPS = [
   { tab:'home',     icon:'🏠', title:'Home',             desc:'Your coaching dashboard. See the live coaching feed, quick-access Gauntlet and Situational modes, and your active team card. Everything starts here.' },
-  { tab:'schemes',  icon:'📋', title:'Scheme Generator', desc:'Build AI-powered offensive and defensive schemes. Get 6 plays with animated diagrams, step-by-step breakdowns, huddle cards, pro comparisons, and variations. Both generators are open by default — collapse either one.' },
+  { tab:'schemes',  icon:'📋', title:'Scheme Generator', desc:'Build AI-powered schemes for Football, Basketball, Baseball, Soccer, or Softball. Get 6 plays with animated diagrams, step-by-step breakdowns, huddle cards, pro comparisons, and variations. Everything is sport-specific.' },
   { tab:'team',     icon:'🏆', title:'Team',             desc:'Create and manage your teams. Add players with positions, build your schedule, generate practice plans, view analytics, and print coach sheets and wristbands.' },
   { tab:'playbook', icon:'📖', title:'Playbook',         desc:'Your saved plays organized in folders. Browse schemes you have saved, create individual plays with the same full feature set as the scheme generator, and copy plays across teams.' },
   { tab:'scout',    icon:'🔍', title:'Scout',            desc:'Two modes: Opponent Scouting builds a full AI scouting report with key threats and a game plan. Self Scout (Film Room) lets you describe or upload a clip and get AI coaching feedback.' },
@@ -199,7 +243,9 @@ const FEATURE_GUIDE = [
 const SPORT_COLORS = {
   Football:   { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', label: 'Football' },
   Basketball: { primary: '#D4600A', secondary: '#1a1208', accent: '#fff3e0', label: 'Basketball' },
-  Baseball:   { primary: '#1B5E20', secondary: '#1a1208', accent: '#f1f8e9', label: 'Baseball' },
+  Baseball:   { primary: '#1B5E20', secondary: '#1a1208', accent: '#e8f5e9', label: 'Baseball' },
+  Soccer:     { primary: '#0D6E3D', secondary: '#0a1a0a', accent: '#e8f5e9', label: 'Soccer' },
+  Softball:   { primary: '#7B1FA2', secondary: '#1a081a', accent: '#f3e5f5', label: 'Softball' },
 }
 
 // ─── DEFAULT PLAYBOOK FOLDERS ────────────────────────────────────────────────
@@ -207,6 +253,8 @@ const DEFAULT_FOLDERS = {
   Football:   ['Base Offense','Red Zone','2-Minute Drill','Base Defense','Special Teams','My Favorites'],
   Basketball: ['Base Offense','End of Game','Press Break','Zone Attack','Inbounds','My Favorites'],
   Baseball:   ['Base Offense','Late Innings','Small Ball','Pitching Strategy','Defensive Sets','My Favorites'],
+  Soccer:     ['Attacking Patterns','Set Pieces','Defensive Shape','Transitions','Restarts','My Favorites'],
+  Softball:   ['Base Offense','Late Innings','Small Ball','Pitching Strategy','Defensive Sets','My Favorites'],
 }
 
 // ─── SPORTS CONFIG ───────────────────────────────────────────────────────────
@@ -259,6 +307,40 @@ const SPORTS = {
     buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
     scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
+  Soccer: {
+    emoji:'SC',
+    formats:['11v11','9v9','7v7','5v5'],
+    fields:[
+      {id:'format',    label:'Game Format',       opts:['11v11 Standard','9v9 Youth','7v7 Youth','5v5 Futsal']},
+      {id:'system',    label:'Playing Style',      opts:['Possession / Tiki-Taka','Direct / Counter','High Press','Park the Bus / Defensive','4-3-3 Attack','4-4-2 Classic','3-5-2 Wing Play']},
+      {id:'age',       label:'Age Group',          opts:['U6-U8','U9-U10','U11-U12','U13-U14','U15-U16','High School']},
+      {id:'skill',     label:'Skill Level',        opts:['Beginner','Average','Competitive','Elite']},
+      {id:'focus',     label:'Training Focus',     opts:['Attacking Patterns','Defensive Shape','Set Pieces','Transitions','Pressing','Restarts','Goalkeeping']},
+      {id:'formation', label:'Your Formation',     opts:['4-3-3','4-4-2','3-5-2','4-2-3-1','5-3-2','3-4-3','4-1-4-1']},
+      {id:'oppShape',  label:'Opponent Shape',     opts:['Unknown / Balanced','4-4-2 Block','5-4-1 Defensive','4-3-3 High Press','4-2-3-1','3-5-2 Wings','Long Ball Direct']},
+      {id:'experience',label:'Player Experience',  opts:['First Year / Never Played','Beginner 1 Season','Average 2-3 Seasons','Experienced 4+ Seasons','Mixed Levels']},
+    ],
+    positions:['Goalkeeper','Center Back','Full Back','Defensive Mid','Central Mid','Attacking Mid','Winger','Striker','Wing Back'],
+    buildPrompt:(f)=>`You are an elite youth soccer coach. Generate a tactical session plan. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Format: ${f.format||'11v11'}. Return 6 tactical patterns/set pieces. Use types: ATTACKING PATTERN, DEFENSIVE SHAPE, SET PIECE ATTACK, SET PIECE DEFENSE, TRANSITION, PRESSING TRIGGER. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explain this tactical concept in simple terms for a youth coach"},{"number":2,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a soccer coaching AI. Create a youth soccer coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. DOWN 1 GOAL 15 MIN LEFT ATTACKING","phase":"ATTACK or DEFENSE or SET PIECE or TRANSITION or TIMEOUT","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
+  },
+  Softball: {
+    emoji:'SB',
+    fields:[
+      {id:'system',    label:'Offensive Approach',  opts:['Small Ball','Power Hitting','Speed and Slap','Balanced','Bunting Focus','Rise Ball Heavy']},
+      {id:'roster',    label:'Roster Size',         opts:['9-11 players','12-14 players','15+ players']},
+      {id:'age',       label:'Age Group',           opts:['8U Coach Pitch','10U','12U','14U','16U','18U','High School']},
+      {id:'skill',     label:'Skill Level',         opts:['Beginner','Average','Competitive']},
+      {id:'focus',     label:'Defensive Focus',     opts:['Fundamentals First','Circle Defense','Outfield Reads','Bunt Defense','Slap Defense']},
+      {id:'pitching',  label:'Pitching Style',      opts:['Rise Ball Dominant','Drop Ball Dominant','Change-Up Artist','Location Pitcher','Power Pitcher','Mixed Repertoire']},
+      {id:'oppTendency',label:'Opponent Tendency',  opts:['Unknown / Balanced','Slap Hitters Heavy','Power Lineup','Bunt Every Opportunity','Free Swingers','Patient Takes Pitches','Aggressive First Pitch','Pull Hitters Only','Spray Hitters','Speed Team Steals Often']},
+      {id:'experience',label:'Player Experience',   opts:['First Year / Never Played','Beginner 1 Season','Average 2-3 Seasons','Experienced 4+ Seasons','Mixed Levels']},
+    ],
+    positions:['Pitcher','Catcher','First Base','Second Base','Third Base','Shortstop','Left Field','Center Field','Right Field'],
+    buildPrompt:(f)=>`You are an elite youth softball coach with expertise in ASA/USA Softball rules. Generate a game plan. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Key softball rules: underhand pitching, no leading off until pitch release, double first base safety bag. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, SLAP/BUNT GAME, PITCHING STRATEGY, CIRCLE DEFENSE, OUTFIELD COVERAGE, BASERUNNING RULE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explain this softball concept simply"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    scenarioPrompt:(diff)=>`You are a softball coaching AI with knowledge of ASA/USA Softball rules. Create a coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 5TH RUNNER ON 2ND 1 OUT TIED 2-2","phase":"OFFENSE or PITCHING or DEFENSE or BASERUNNING","question":"2-3 sentence softball-specific scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
+  },
+
 }
 
 
@@ -1244,6 +1326,8 @@ function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
 
 function SituationalPanel({ sport, P, S, al, callAI }) {
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball'
+  const [soccerScore, setSoccerScore] = useState('Tied'), [situation, setSituation] = useState('Open Play'), [pressure, setPressure] = useState('Mid Block'), [soccerRecs, setSoccerRecs] = useState(null)
+  const [sbCount, setSbCount] = useState('0-0'), [sbOuts, setSbOuts] = useState('0 Outs'), [sbInning, setSbInning] = useState('1st'), [sbRunners, setSbRunners] = useState('None on'), [sbScore, setSbScore] = useState('Tied'), [sbHalf, setSbHalf] = useState('1st Half'), [sbTimeLeft, setSbTimeLeft] = useState('45+ min'), [sbRecs, setSbRecs] = useState(null)
   const [down,setDown]=useState('3rd'), [distance,setDistance]=useState('5'), [fieldPos,setFieldPos]=useState('OPP 28'), [score,setScore]=useState('UP 3'), [timeLeft,setTimeLeft]=useState('4:22')
   const [fbRec,setFbRec]=useState([{n:'1',top:true,name:'Slot Cross / Hi-Lo',why:'Attacks Cover 2 void',pct:'84%'},{n:'2',top:false,name:'QB Draw',why:'Exploit aggressive pass rush',pct:'61%'},{n:'3',top:false,name:'Four Verticals',why:'Force single coverage',pct:'43%'}])
   const [fbLoading,setFbLoading]=useState(false)
@@ -1331,6 +1415,59 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
           </div>
           {bbRec.calls.slice(1).map((c,i)=>(<div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, width:20, textAlign:'center', lineHeight:1, color:'#6b7a96', marginTop:2, flexShrink:0 }}>{i+2}</div><div style={{ flex:1 }}><div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{c.name}</div><span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:c.urgency==='HIGH'?al(P,0.2):al(S,0.15), color:c.urgency==='HIGH'?P:S }}>{c.urgency}</span></div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{c.why}</div></div></div>))}
         </>)}
+      </div>
+    </Card>
+  )
+
+    const isSoccer = sport === 'Soccer'
+  const isSoftball = sport === 'Softball'
+
+  if (isSoccer) return (
+    <Card>
+      <CardHead icon="⚽" title="Match Situation" tag="LIVE" tagColor={P} accent={P} />
+      <div style={{ padding:14 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginBottom:12 }}>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Score</label><select value={soccerScore} onChange={e=>setSoccerScore(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['UP 2','UP 1','Tied','DOWN 1','DOWN 2'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Half</label><select value={sbHalf} onChange={e=>setSbHalf(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['1st Half','2nd Half','Extra Time','Penalty Kicks'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Time Left</label><select value={sbTimeLeft} onChange={e=>setSbTimeLeft(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['45+ min','30 min','15 min','5 min','Stoppage'].map(o=><option key={o}>{o}</option>)}</select></div>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Situation</label><select value={situation} onChange={e=>setSituation(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['Open Play','Corner Kick','Free Kick','Throw-In','Goal Kick','Penalty Kick','Kickoff'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Pressure</label><select value={pressure} onChange={e=>setPressure(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['High Press','Mid Block','Low Block','Mixed'].map(o=><option key={o}>{o}</option>)}</select></div>
+        </div>
+        <PBtn onClick={async()=>{ const r=await callAI('Soccer situational advice: Score '+score+', situation: '+situation+'. Give 3 specific tactical adjustments. Return JSON: {"recommendations":[{"name":"tactic","why":"reason","detail":"1 sentence"}]}'); try { const d=JSON.parse(r.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim().slice(r.indexOf('{'),r.lastIndexOf('}')+1)); setSoccerRecs(d.recommendations||[]) } catch(e){} }} color={P}>GET TACTICAL ADVICE</PBtn>
+        {soccerRecs && soccerRecs.map((rec,i)=>(
+          <div key={i} style={{ marginTop:8, padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, borderLeft:`3px solid ${P}` }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', marginBottom:3 }}>{rec.name}</div>
+            <div style={{ fontSize:11, color:'#6b7a96' }}>{rec.why}</div>
+            <div style={{ fontSize:11, color:'#dde1f0', marginTop:3 }}>{rec.detail}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+
+  if (isSoftball) return (
+    <Card>
+      <CardHead icon="🥎" title="Count and Situation" tag="AT-BAT" tagColor={P} accent={P} />
+      <div style={{ padding:14 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:12 }}>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Count</label><select value={sbCount} onChange={e=>setSbCount(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['0-0','1-0','2-0','3-0','0-1','1-1','2-1','3-1','0-2','1-2','2-2','3-2'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Outs</label><select value={sbOuts} onChange={e=>setSbOuts(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['0 Outs','1 Out','2 Outs'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Inning</label><select value={sbInning} onChange={e=>setSbInning(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['1st','2nd','3rd','4th','5th','6th','7th','Extra'].map(o=><option key={o}>{o}</option>)}</select></div>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Runners</label><select value={sbRunners} onChange={e=>setSbRunners(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['None on','Runner 1st','Runner 2nd','Runner 3rd','1st and 2nd','1st and 3rd','2nd and 3rd','Bases Loaded'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Score</label><select value={sbScore} onChange={e=>setSbScore(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['UP 3+','UP 2','UP 1','Tied','DOWN 1','DOWN 2','DOWN 3+'].map(o=><option key={o}>{o}</option>)}</select></div>
+        </div>
+        <PBtn onClick={async()=>{ const r=await callAI('Softball situational advice per ASA/USA Softball rules: Count '+count+', Runners: '+runners+', Outs: '+outs+'. Give 3 recommendations. Return JSON: {"recommendations":[{"name":"play","why":"reason","pct":"success %"}]}'); try { const d=JSON.parse(r.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim().slice(r.indexOf('{'),r.lastIndexOf('}')+1)); setSbRecs(d.recommendations||[]) } catch(e){} }} color={P}>GET RECOMMENDATION</PBtn>
+        {sbRecs && sbRecs.map((rec,i)=>(
+          <div key={i} style={{ marginTop:8, padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, borderLeft:`3px solid ${P}` }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', marginBottom:2 }}>{rec.name}</div>
+            <div style={{ fontSize:11, color:'#6b7a96' }}>{rec.why}</div>
+            {rec.pct && <div style={{ fontSize:10, color:P, marginTop:2, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{rec.pct} success rate</div>}
+          </div>
+        ))}
       </div>
     </Card>
   )
@@ -1573,9 +1710,9 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
     try {
       let prompt
       if (imageData) {
-        prompt = `You are an elite youth ${sportCtx} film analyst. Analyze this ${positionLabel} or play diagram image. ${description ? 'Coach notes: '+description+'.' : ''} Identify: 1) What you see technically, 2) The key problem or strength, 3) Specific corrective coaching cues. Return ONLY valid JSON: {"headline":"one-line diagnosis","situation":"what is happening in the image","primaryIssue":"the main technical problem","coachingFix":"exact drill or correction","immediateRep":"what to do at very next practice","drillName":"name of the fix drill","drillSteps":["step 1","step 2","step 3"],"proReference":"how a pro coach would phrase this"}`
+        prompt = `You are an elite youth ${sportCtx} film analyst specializing in TEAM scheme and formation analysis. Analyze this team footage or play diagram. Important: focus on team-level execution, formations, assignments, and scheme - not individual player mechanics. Individual mechanical coaching belongs in separate athlete development. ${description ? 'Coach notes: '+description+'.' : ''} Identify: 1) What you see technically, 2) The key problem or strength, 3) Specific corrective coaching cues. Return ONLY valid JSON: {"headline":"one-line diagnosis","situation":"what is happening in the image","primaryIssue":"the main technical problem","coachingFix":"exact drill or correction","immediateRep":"what to do at very next practice","drillName":"name of the fix drill","drillSteps":["step 1","step 2","step 3"],"proReference":"how a pro coach would phrase this"}`
       } else {
-        prompt = `You are an elite youth ${sportCtx} film analyst and master diagnostician. A coach describes this problem: "${description}". Diagnose the root cause and give a complete fix. Return ONLY valid JSON: {"headline":"one-line diagnosis","rootCause":"the true underlying cause of the problem","whatYouSee":"what this looks like on film","coachingFix":"the specific correction technique","immediateRep":"exact rep to run at next practice","drillName":"best drill to fix this","drillSteps":["step 1","step 2","step 3"],"commonMistake":"what coaches usually try that doesn't work","proReference":"how an elite coach would address this"}`
+        prompt = `You are an elite youth ${sportCtx} film analyst and master diagnostician specializing in TEAM scheme analysis. A coach describes this team-level problem: "${description}". Diagnose the root cause and give a complete fix. Return ONLY valid JSON: {"headline":"one-line diagnosis","rootCause":"the true underlying cause of the problem","whatYouSee":"what this looks like on film","coachingFix":"the specific correction technique","immediateRep":"exact rep to run at next practice","drillName":"best drill to fix this","drillSteps":["step 1","step 2","step 3"],"commonMistake":"what coaches usually try that doesn't work","proReference":"how an elite coach would address this"}`
       }
       const raw = await callAI(prompt, imageData || undefined)
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
@@ -1648,59 +1785,115 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
 
 
 // ─── SCHEME PREVIEW (mini interactive diagrams for home card) ─────────────────
-function SchemePreviewMini({ type='offense', P }) {
+function SchemePreviewMini({ type='offense', P, sport='Football' }) {
   const isOff = type === 'offense'
-  const color = isOff ? P : '#6b9fff'
+  const col = isOff ? P : '#6b9fff'
+
+  if (sport === 'Basketball') {
+    return (
+      <svg viewBox="0 0 120 70" style={{ width:'100%', height:'100%' }}>
+        <path d="M10 65 Q60 5 110 65" stroke="rgba(255,255,255,0.08)" strokeWidth="1" fill="none"/>
+        <line x1="10" y1="65" x2="110" y2="65" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
+        <rect x="40" y="40" width="40" height="25" rx="2" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
+        <circle cx="60" cy="40" r="6" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none"/>
+        {isOff ? (
+          <>
+            <circle cx={60} cy={55} r={4} fill={col} opacity={0.9}/>
+            <circle cx={30} cy={35} r={4} fill={col} opacity={0.8}/>
+            <circle cx={90} cy={35} r={4} fill={col} opacity={0.8}/>
+            <circle cx={45} cy={18} r={4} fill={col} opacity={0.7}/>
+            <circle cx={75} cy={18} r={4} fill={col} opacity={0.7}/>
+            <path d="M60 55 L45 35" stroke={col} strokeWidth={1} fill="none" opacity={0.45} strokeDasharray="3,2"/>
+            <path d="M45 35 L60 18" stroke={col} strokeWidth={1} fill="none" opacity={0.45} strokeDasharray="3,2"/>
+          </>
+        ) : (
+          <>
+            <rect x={40} y={30} width={8} height={8} rx={1} fill={col} opacity={0.85}/>
+            <rect x={72} y={30} width={8} height={8} rx={1} fill={col} opacity={0.85}/>
+            <circle cx={50} cy={18} r={4} fill={col} opacity={0.7}/>
+            <circle cx={70} cy={18} r={4} fill={col} opacity={0.7}/>
+            <circle cx={60} cy={55} r={4} fill={col} opacity={0.6}/>
+          </>
+        )}
+      </svg>
+    )
+  }
+
+  if (sport === 'Baseball' || sport === 'Softball') {
+    return (
+      <svg viewBox="0 0 120 75" style={{ width:'100%', height:'100%' }}>
+        <path d="M60 65 L95 35 L60 5 L25 35 Z" stroke="rgba(255,255,255,0.12)" strokeWidth="1" fill="rgba(255,255,255,0.02)"/>
+        {isOff ? (
+          <>
+            <circle cx={60} cy={65} r={3} fill={col} opacity={0.9}/>
+            <circle cx={95} cy={35} r={3} fill={col} opacity={0.8}/>
+            <circle cx={60} cy={5}  r={3} fill={col} opacity={0.8}/>
+            <circle cx={25} cy={35} r={3} fill={col} opacity={0.8}/>
+            <circle cx={60} cy={38} r={3} fill={col} opacity={0.7}/>
+            <path d="M60 65 L95 35" stroke={col} strokeWidth={1} fill="none" opacity={0.4} strokeDasharray="3,2"/>
+          </>
+        ) : (
+          <>
+            {[[60,65],[95,35],[60,5],[25,35],[60,38],[15,60],[105,60],[60,-2],[40,60],[80,60]].slice(0,9).map(([cx,cy],i)=>(
+              <circle key={i} cx={cx} cy={cy} r={3} fill={col} opacity={0.75}/>
+            ))}
+          </>
+        )}
+      </svg>
+    )
+  }
+
+  if (sport === 'Soccer') {
+    return (
+      <svg viewBox="0 0 120 70" style={{ width:'100%', height:'100%' }}>
+        <rect x="5" y="3" width="110" height="64" rx="2" stroke="rgba(255,255,255,0.07)" strokeWidth="1" fill="none"/>
+        <line x1="60" y1="3" x2="60" y2="67" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+        <circle cx="60" cy="35" r="12" stroke="rgba(255,255,255,0.05)" strokeWidth="1" fill="none"/>
+        {isOff ? (
+          <>
+            {[25,60,95].map((x,i)=><circle key={i} cx={x} cy={12} r={3} fill={col} opacity={0.9}/>)}
+            {[35,55,75].map((x,i)=><circle key={i} cx={x} cy={28} r={3} fill={col} opacity={0.8}/>)}
+            {[20,45,75,100].map((x,i)=><circle key={i} cx={x} cy={46} r={3} fill={col} opacity={0.75}/>)}
+            <circle cx={60} cy={60} r={3} fill={col} opacity={0.6}/>
+            <path d="M55 28 L25 12" stroke={col} strokeWidth={1} fill="none" opacity={0.4} strokeDasharray="3,2"/>
+            <path d="M65 28 L95 12" stroke={col} strokeWidth={1} fill="none" opacity={0.4} strokeDasharray="3,2"/>
+          </>
+        ) : (
+          <>
+            {[20,45,75,100].map((x,i)=><rect key={i} x={x-4} y={15} width={8} height={8} rx={1} fill={col} opacity={0.85}/>)}
+            {[25,45,75,95].map((x,i)=><circle key={i} cx={x} cy={38} r={3} fill={col} opacity={0.75}/>)}
+            {[42,78].map((x,i)=><circle key={i} cx={x} cy={55} r={3} fill={col} opacity={0.7}/>)}
+          </>
+        )}
+      </svg>
+    )
+  }
+
+  // Football (default)
   return (
-    <svg viewBox="0 0 100 60" style={{ width:'100%', height:'100%' }}>
-      {/* field lines */}
-      <rect width="100" height="60" fill={isOff ? '#1a2a1a' : '#0d1520'} rx="3"/>
-      <line x1="0" y1="38" x2="100" y2="38" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" strokeDasharray="4,3"/>
+    <svg viewBox="0 0 120 60" style={{ width:'100%', height:'100%' }}>
       {isOff ? (
         <>
-          {/* OL */}
-          {[38,43,50,57,62].map(x => <rect key={x} x={x-3} y={35} width="6" height="6" fill={color} opacity="0.9" rx="1"/>)}
-          {/* QB */}
-          <circle cx="50" cy="44" r="3.5" fill={color} opacity="0.9"/>
-          {/* RB */}
-          <circle cx="50" cy="52" r="3" fill={color} opacity="0.7"/>
-          {/* WR */}
-          <circle cx="12" cy="36" r="3" fill={color} opacity="0.7"/>
-          <circle cx="88" cy="36" r="3" fill={color} opacity="0.7"/>
-          {/* routes */}
-          <path d="M12 36 L12 24" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
-          <path d="M88 36 L88 24" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
-          <path d="M50 52 L56 40" stroke={color} strokeWidth="1.5" fill="none" opacity="0.5" strokeDasharray="2,1"/>
-          {/* arrows */}
-          <polygon points="12,23 10,27 14,27" fill={color} opacity="0.6"/>
-          <polygon points="88,23 86,27 90,27" fill={color} opacity="0.6"/>
-          {/* defenders */}
-          {[40,50,60].map(x => <circle key={x} cx={x} cy={31} r="2.5" fill="none" stroke="rgba(200,200,200,0.4)" strokeWidth="1"/>)}
-          {[35,50,65].map(x => <circle key={x+'lb'} cx={x} cy={24} r="2.5" fill="none" stroke="rgba(200,200,200,0.3)" strokeWidth="1"/>)}
+          {[-20,-10,0,10,20].map((x,i) => <rect key={i} x={60+x-4} y={28} width={8} height={8} rx={1} fill={col} opacity={0.9}/>)}
+          <circle cx={60} cy={42} r={4} fill={col} opacity={0.7}/>
+          <circle cx={20} cy={30} r={3} fill={col} opacity={0.6}/>
+          <circle cx={100} cy={30} r={3} fill={col} opacity={0.6}/>
+          <circle cx={60} cy={20} r={3} fill={col} opacity={0.6}/>
+          <path d="M20 30 L20 15 L35 15" stroke={col} strokeWidth={1} fill="none" opacity={0.5}/>
+          <path d="M100 30 L100 15 L85 15" stroke={col} strokeWidth={1} fill="none" opacity={0.5}/>
         </>
       ) : (
         <>
-          {/* defense diagram */}
-          {/* DL */}
-          {[38,44,56,62].map(x => <rect key={x} x={x-3} y={33} width="6" height="6" fill={color} opacity="0.9" rx="1"/>)}
-          {/* LBs */}
-          {[34,50,66].map(x => <circle key={x} cx={x} cy={25} r="3.5" fill={color} opacity="0.85"/>)}
-          {/* DBs */}
-          {[12,30,70,88].map(x => <circle key={x} cx={x} cy={16} r="3" fill={color} opacity="0.6"/>)}
-          {/* coverage zones */}
-          <ellipse cx="50" cy="20" rx="28" ry="8" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25" strokeDasharray="3,2"/>
-          {/* offense ref */}
-          {[38,43,50,57,62].map(x => <rect key={x} x={x-3} y={40} width="6" height="5" fill="rgba(255,255,255,0.12)" rx="1"/>)}
-          {/* assignment lines */}
-          <line x1="38" y1="33" x2="34" y2="29" stroke={color} strokeWidth="1" opacity="0.5"/>
-          <line x1="62" y1="33" x2="66" y2="29" stroke={color} strokeWidth="1" opacity="0.5"/>
+          {[-30,-10,10,30].map((x,i) => <rect key={i} x={60+x-4} y={32} width={8} height={8} rx={1} fill={col} opacity={0.85}/>)}
+          {[-20,0,20].map((x,i) => <circle key={i} cx={60+x} cy={22} r={4} fill={col} opacity={0.7}/>)}
+          <circle cx={60} cy={14} r={3} fill={col} opacity={0.6}/>
+          <circle cx={20} cy={22} r={3} fill={col} opacity={0.6}/>
+          <circle cx={100} cy={22} r={3} fill={col} opacity={0.6}/>
         </>
       )}
     </svg>
   )
 }
-
-// ─── SCHEMES PAGE ─────────────────────────────────────────────────────────────
 function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
@@ -2380,7 +2573,120 @@ function PlayNameBuilder({ P, S, al, sport }) {
 }
 
 
-function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation }) {
+// ─── RULEBOOK COMPONENT ───────────────────────────────────────────────────────
+const RULEBOOK_LINKS = {
+  Football: [
+    { name:'NFHS Football Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/football/', level:'High School' },
+    { name:'Pop Warner Rulebook', org:'Pop Warner Little Scholars', url:'https://www.popwarner.com/Default.aspx?tabid=1441239', level:'Youth' },
+    { name:'USA Football Rules', org:'USA Football', url:'https://usafootball.com/programs/heads-up-football/', level:'Youth / All Levels' },
+  ],
+  Basketball: [
+    { name:'NFHS Basketball Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/basketball/', level:'High School' },
+    { name:'NBA Official Rules', org:'National Basketball Association', url:'https://official.nba.com/rulebook/', level:'Professional Reference' },
+    { name:'USA Basketball', org:'USA Basketball', url:'https://www.usab.com/youth/resources.aspx', level:'Youth / All Levels' },
+  ],
+  Baseball: [
+    { name:'Official Baseball Rules', org:'Major League Baseball', url:'https://www.mlb.com/official-information/umpires/rule-book', level:'Official Rules' },
+    { name:'Little League Rulebook', org:'Little League International', url:'https://www.littleleague.org/playing-rules/', level:'Youth' },
+    { name:'NFHS Baseball Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/baseball/', level:'High School' },
+  ],
+  Soccer: [
+    { name:'Laws of the Game', org:'FIFA / IFAB', url:'https://www.theifab.com/laws-of-the-game/overview/', level:'Official Rules' },
+    { name:'US Youth Soccer', org:'US Youth Soccer', url:'https://www.usyouthsoccer.org/resources/rules/', level:'Youth' },
+    { name:'AYSO Rules', org:'American Youth Soccer Organization', url:'https://www.ayso.org/resources/rules-regulations/', level:'Recreational Youth' },
+  ],
+  Softball: [
+    { name:'USA Softball Official Rules', org:'USA Softball / ASA', url:'https://www.usasoftball.com/rules/', level:'Official Rules' },
+    { name:'Little League Softball', org:'Little League International', url:'https://www.littleleague.org/playing-rules/softball/', level:'Youth' },
+    { name:'NFHS Softball Rules', org:'National Federation of State High School Associations', url:'https://www.nfhs.org/activities-sports/softball/', level:'High School' },
+  ],
+}
+
+function RulebookPage({ sport, P, al, callAI }) {
+  const [leagueSearch, setLeagueSearch] = useState('')
+  const [leagueResult, setLeagueResult] = useState(null)
+  const [searching, setSearching] = useState(false)
+  const links = RULEBOOK_LINKS[sport] || RULEBOOK_LINKS.Football
+
+  async function searchLeague() {
+    if (!leagueSearch.trim()) return
+    setSearching(true)
+    setLeagueResult(null)
+    try {
+      const raw = await callAI('A youth '+sport+' coach is looking for the official rules for their local league: "'+leagueSearch+'". Provide: 1) The most likely governing body for this league, 2) Their official rulebook link if known, 3) The most common youth-level rule modifications for '+sport+' at this level, 4) Any safety rules specific to youth '+sport+'. Be accurate and honest if you are not certain about specific details. Return ONLY valid JSON: {"governingBody":"name","officialUrl":"url or unknown","commonModifications":["rule 1","rule 2","rule 3","rule 4"],"safetyRules":["rule 1","rule 2"],"note":"any important caveat"}')
+      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
+      setLeagueResult(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
+    } catch(e) { setLeagueResult({ governingBody:'Search failed', note:'Try searching directly on your league website.' }) }
+    setSearching(false)
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      <Card>
+        <CardHead icon="📜" title={sport+' Rulebook'} tag="OFFICIAL RULES" tagColor={P} accent={P} />
+        <div style={{ padding:14 }}>
+          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, marginBottom:12 }}>Official rules and governing body resources for {sport}. Always verify rules with your specific league before each season.</div>
+          {links.map((link,i) => (
+            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', border:`1px solid ${al(P,0.2)}`, borderRadius:6, marginBottom:8, textDecoration:'none', borderLeft:`3px solid ${P}` }}>
+              <span style={{ fontSize:18, flexShrink:0, marginTop:1 }}>📋</span>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:2 }}>{link.name}</div>
+                <div style={{ fontSize:10, color:'#6b7a96' }}>{link.org}</div>
+                <div style={{ fontSize:9, color:P, marginTop:2, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{link.level}</div>
+              </div>
+              <span style={{ fontSize:12, color:P, flexShrink:0 }}>→</span>
+            </a>
+          ))}
+        </div>
+      </Card>
+
+      <Card>
+        <CardHead icon="🔍" title="Find Your League Rules" tag="AI SEARCH" tagColor={P} accent={P} />
+        <div style={{ padding:14 }}>
+          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, marginBottom:10 }}>Enter your league name to find specific rule modifications and governing body information.</div>
+          <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+            <input value={leagueSearch} onChange={e=>setLeagueSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchLeague()} placeholder={'e.g. Tolland Youth '+sport+' Association'} style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+            <button onClick={searchLeague} disabled={searching||!leagueSearch.trim()} style={{ padding:'9px 14px', background:leagueSearch.trim()?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:leagueSearch.trim()?'pointer':'not-allowed', whiteSpace:'nowrap' }}>{searching?'..':'SEARCH'}</button>
+          </div>
+          {searching && <div style={{ textAlign:'center', padding:'16px', color:'#6b7a96', fontSize:12 }}>Searching for league rules...</div>}
+          {leagueResult && (
+            <div style={{ animation:'fadeIn 0.3s ease' }}>
+              <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:6, marginBottom:8 }}>
+                <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Governing Body</div>
+                <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{leagueResult.governingBody}</div>
+                {leagueResult.officialUrl && leagueResult.officialUrl !== 'unknown' && (
+                  <a href={leagueResult.officialUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:P, display:'block', marginTop:4 }}>{leagueResult.officialUrl} →</a>
+                )}
+              </div>
+              {leagueResult.commonModifications && leagueResult.commonModifications.length > 0 && (
+                <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:8 }}>
+                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Common Youth Rule Modifications</div>
+                  {leagueResult.commonModifications.map((m,i) => (
+                    <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'4px 0', borderBottom:i<leagueResult.commonModifications.length-1?'1px solid #1e2330':'none' }}>• {m}</div>
+                  ))}
+                </div>
+              )}
+              {leagueResult.safetyRules && leagueResult.safetyRules.length > 0 && (
+                <div style={{ padding:'10px 12px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6, marginBottom:8 }}>
+                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Safety Rules</div>
+                  {leagueResult.safetyRules.map((r,i) => (
+                    <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'4px 0' }}>✓ {r}</div>
+                  ))}
+                </div>
+              )}
+              {leagueResult.note && (
+                <div style={{ fontSize:10, color:'#6b7a96', fontStyle:'italic', lineHeight:1.5, padding:'8px 10px', background:'#161922', borderRadius:4 }}>Note: {leagueResult.note}</div>
+              )}
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+
+function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI }) {
   const [activeSection, setActiveSection] = useState('features')
   const [helpMode, setHelpMode] = useState(null)
   const colorOptions = {
@@ -2412,7 +2718,7 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
 
       {/* Section switcher */}
       <div style={{ display:'flex', gap:6, marginBottom:14 }}>
-        {[['features','🚀 Features'],['help','❓ Help'],['settings','⚙️ Settings']].map(([k,lbl]) => (
+        {[['features','🚀 Features'],['rulebook','📜 Rules'],['help','❓ Help'],['settings','⚙️ Settings']].map(([k,lbl]) => (
           <button key={k} onClick={()=>setActiveSection(k)} style={{ flex:1, padding:'9px', borderRadius:4, fontSize:11, border:`1px solid ${activeSection===k?P:'#1e2330'}`, background:activeSection===k?al(P,0.15):'transparent', color:activeSection===k?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
         ))}
       </div>
@@ -2435,6 +2741,9 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
         </div>
       )}
 
+      {activeSection === 'rulebook' && (
+        <RulebookPage sport={sport} P={P} al={al} callAI={callAI} />
+      )}
       {activeSection === 'help' && (
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {helpMode === 'tour' && <QuickTourModal onDone={()=>setHelpMode(null)} P={P} al={al} />}
@@ -2541,7 +2850,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   async function loadFeed() {
     setFeedLoading(true)
     try {
-      const raw = await callAI('You are a sports coaching knowledge curator. Generate a daily coaching feed for a youth '+sport+' coach. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
+      const raw = await callAI('You are an expert '+sport+' coaching knowledge curator. Generate a daily coaching feed SPECIFICALLY for a youth '+sport+' coach. Every item must be specific to '+sport+', not generic sports advice. Return ONLY valid JSON: {"items":[{"type":"drill","title":"Drill of the Day","body":"describe a specific proven drill in 2 sentences","source":"coach or program name"},{"type":"science","title":"Coaching Science","body":"a real sports science finding relevant to youth '+sport+' in 2 sentences","source":"institution or researcher"},{"type":"concept","title":"Concept Spotlight","body":"explain a famous '+sport+' scheme or philosophy in 2 sentences","source":"coach name"}]}')
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setFeed(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
     } catch(e) { setFeed({ items: [] }) }
@@ -2666,11 +2975,11 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
             <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_offense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative', cursor:'pointer' }}>
               <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE ›</div>
-              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="offense" P={P} /></div>
+              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="offense" P={P} sport={sport} /></div>
             </div>
             <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_defense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative', cursor:'pointer' }}>
               <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE ›</div>
-              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="defense" P={P} /></div>
+              <div style={{ height:72, padding:'18px 6px 6px' }}><SchemePreviewMini type="defense" P={P} sport={sport} /></div>
             </div>
           </div>
           <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
@@ -2852,10 +3161,10 @@ export default function CoachIQ() {
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(847)
   const [gauntlets, setGauntlets] = useState(0)
-  const [playbook, setPlaybook] = useState({ Football:{}, Basketball:{}, Baseball:{} })
-  const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[] })
-  const [teams, setTeams] = useState({ Football:[], Basketball:[], Baseball:[] })
-  const [activeTeam, setActiveTeam] = useState({ Football:null, Basketball:null, Baseball:null })
+  const [playbook, setPlaybook] = useState({ Football:{}, Basketball:{}, Baseball:{}, Soccer:{}, Softball:{} })
+  const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] })
+  const [teams, setTeams] = useState({ Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] })
+  const [activeTeam, setActiveTeam] = useState({ Football:null, Basketball:null, Baseball:null, Soccer:null, Softball:null })
 
   // SSR guard - prevents crash during Next.js prerendering
   useEffect(() => { setMounted(true) }, [])
@@ -2960,8 +3269,8 @@ export default function CoachIQ() {
           <CoachIQLogo size={22} brand={brand} />
           <div style={{ position:'relative', marginLeft:4 }}>
             <select value={sport} onChange={e=>setSport(e.target.value)} style={{ background:'#161922', border:`1px solid ${al(P,0.35)}`, borderRadius:3, padding:'4px 26px 4px 8px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, letterSpacing:'0.5px', outline:'none', appearance:'none', cursor:'pointer' }}>
-              {['Football','Basketball','Baseball'].map(s=>(
-                <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾' }[s]} {s}</option>
+              {['Football','Basketball','Baseball','Soccer','Softball'].map(s=>(
+                <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾', Soccer:'⚽', Softball:'🥎' }[s]} {s}</option>
               ))}
             </select>
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
@@ -2986,7 +3295,7 @@ export default function CoachIQ() {
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
           {page==='team'     && <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} />}
           {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
-          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} />}
+          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} />}
         </div>
 
         {/* BOTTOM NAV */}
@@ -3011,11 +3320,14 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
   const [newLastName, setNewLastName] = useState('')
   const [newPos, setNewPos] = useState('')
   const [newNum, setNewNum] = useState('')
+  const [posOpen, setPosOpen] = useState(false)
 
   const positions = {
-    Football: ['QB','RB','WR','TE','OL','DL','LB','CB','S','K','P'],
-    Basketball: ['PG','SG','SF','PF','C'],
-    Baseball: ['P','C','1B','2B','3B','SS','LF','CF','RF','DH'],
+    Football:   ['QB','RB','FB','WR','TE','OL','LT','LG','C','RG','RT','DL','DE','DT','NT','LB','MLB','OLB','CB','S','FS','SS','K','P','LS'],
+    Basketball: ['PG','SG','SF','PF','C','6th Man'],
+    Baseball:   ['P','C','1B','2B','3B','SS','LF','CF','RF','DH','Utility'],
+    Soccer:     ['GK','CB','LB','RB','LWB','RWB','CDM','CM','CAM','LM','RM','LW','RW','SS','ST','CF'],
+    Softball:   ['P','C','1B','2B','3B','SS','LF','CF','RF','DP','FLEX','Utility'],
   }
 
   function addPlayer() {
@@ -3048,10 +3360,24 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
           </div>
           <div>
             <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Pos</label>
-            <select value={newPos} onChange={e=>setNewPos(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 6px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', appearance:'none' }}>
-              <option value="">—</option>
-              {(positions[sport]||[]).map(p=><option key={p}>{p}</option>)}
-            </select>
+            <div onClick={()=>setPosOpen(o=>!o)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:newPos?'#f2f4f8':'#3d4559', fontFamily:'inherit', fontSize:12, cursor:'pointer', position:'relative', userSelect:'none' }}>
+              {newPos||'—'}
+              {posOpen && (
+                <div onClick={e=>e.stopPropagation()} style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:50, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
+                  {(positions[sport]||[]).map(pos => {
+                    const sel = newPos.split(',').map(s=>s.trim()).filter(Boolean)
+                    const isOn = sel.includes(pos)
+                    return (
+                      <div key={pos} onClick={()=>{ const cur=newPos.split(',').map(s=>s.trim()).filter(Boolean); if(isOn){ setNewPos(cur.filter(p=>p!==pos).join(', ')) } else if(cur.length<3){ setNewPos([...cur,pos].join(', ')) }}} style={{ padding:'7px 12px', cursor:'pointer', display:'flex', alignItems:'center', gap:8, background:isOn?al(P,0.12):'transparent', borderBottom:'1px solid #1a1f2e' }}>
+                        <div style={{ width:13, height:13, borderRadius:3, border:`2px solid ${isOn?P:'#3d4559'}`, background:isOn?P:'transparent', flexShrink:0 }}/>
+                        <span style={{ fontSize:12, color:isOn?P:'#f2f4f8' }}>{pos}</span>
+                      </div>
+                    )
+                  })}
+                  <div onClick={()=>setPosOpen(false)} style={{ padding:'7px 12px', cursor:'pointer', fontSize:11, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', borderTop:'1px solid #1e2330' }}>✓ DONE</div>
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>#</label>
@@ -3299,20 +3625,22 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
         </div>
       ) : (
         <>
-          {/* Team header */}
-          <div style={{ marginTop:12, padding:'10px 14px', background:`linear-gradient(135deg,${currentTeam.primary}22,#07090d)`, border:`1px solid ${al(P,0.2)}`, borderRadius:4, display:'flex', alignItems:'center', gap:10 }}>
-            <span style={{ fontSize:28 }}>{mascotObj?.emoji||'🏆'}</span>
-            <div>
-              <div style={{ fontFamily:(TEAM_FONTS||[]).find(f=>f.id===currentTeam.teamFont)?.style||"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8' }}>{currentTeam.name}</div>
-              <div style={{ fontSize:10, color:'#6b7a96' }}>{currentTeam.season}{currentTeam.hometown?' · '+currentTeam.hometown:''}</div>
+          {/* Slim team strip + tabs in one row */}
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10, marginBottom:12, overflowX:'auto', paddingBottom:2, borderBottom:`1px solid ${al(P,0.15)}`, paddingBottom:10 }}>
+            <span style={{ fontSize:20, flexShrink:0 }}>{mascotObj?.emoji||'🏆'}</span>
+            <div style={{ flexShrink:0, minWidth:0 }}>
+              <div style={{ fontFamily:(TEAM_FONTS||[]).find(f=>f.id===currentTeam.teamFont)?.style||"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:120 }}>{currentTeam.name}</div>
+              <div style={{ fontSize:9, color:'#6b7a96', whiteSpace:'nowrap' }}>{currentTeam.season}</div>
             </div>
-          </div>
-
-          {/* Section tabs */}
-          <div style={{ display:'flex', gap:6, marginTop:12, marginBottom:12, overflowX:'auto', paddingBottom:2 }}>
-            {[['roster','👥 Roster'],['schedule','📅 Schedule'],['practice','📆 Practice'],['analytics','📊 Analytics'],['print','🖨 Print']].map(([s,lbl])=>(
-              <button key={s} onClick={()=>setSection(s)} style={{ flexShrink:0, padding:'8px 12px', borderRadius:4, fontSize:11, border:`1px solid ${section===s?P:'#1e2330'}`, background:section===s?al(P,0.15):'transparent', color:section===s?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
-            ))}
+            <div style={{ width:1, height:28, background:'#1e2330', flexShrink:0 }} />
+            <div style={{ display:'flex', gap:5, overflowX:'auto' }}>
+              {[['roster','👥'],['schedule','📅'],['practice','📆'],['analytics','📊'],['print','🖨']].map(([s,ico])=>(
+                <button key={s} onClick={()=>setSection(s)} style={{ flexShrink:0, padding:'6px 10px', borderRadius:4, fontSize:11, border:`1px solid ${section===s?P:'#1e2330'}`, background:section===s?al(P,0.15):'transparent', color:section===s?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, display:'flex', alignItems:'center', gap:4, whiteSpace:'nowrap' }}>
+                  <span>{ico}</span>
+                  <span style={{ textTransform:'uppercase', fontSize:10, letterSpacing:'0.5px' }}>{s.charAt(0).toUpperCase()+s.slice(1)}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {section==='roster'   && <RosterSection   team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
@@ -3745,6 +4073,8 @@ const GAME_THRESHOLDS = {
   Football:   { thunderstorm:10, heavyRain:60, lightRain:85, snow:70, wind:5  },
   Basketball: { thunderstorm:100,heavyRain:100,lightRain:100,snow:100,wind:100 },
   Baseball:   { thunderstorm:5,  heavyRain:20, lightRain:70, snow:15, wind:80  },
+  Soccer:     { thunderstorm:5,  heavyRain:40, lightRain:80, snow:30, wind:60  },
+  Softball:   { thunderstorm:5,  heavyRain:20, lightRain:70, snow:15, wind:80  },
 }
 
 function getGameLikelihood(sport, weatherCode, windSpeed) {
