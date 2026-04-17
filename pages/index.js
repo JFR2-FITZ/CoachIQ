@@ -760,23 +760,25 @@ function Sel({ label, value, onChange, options }) {
   return (
     <div style={{ position:'relative', background:'#161922', border:'1px solid #1e2330', borderRadius:4 }}>
       <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, display:'block', paddingTop:6, paddingLeft:11, paddingRight:11 }}>{label}</label>
-      <div onClick={()=>setOpen(o=>!o)} style={{ padding:'6px 30px 9px 11px', color:'#f2f4f8', fontSize:13, cursor:'pointer', position:'relative', userSelect:'none', background:'#161922', minHeight:18 }}>
-        {value}
+      <div
+        onClick={()=>setOpen(o=>!o)}
+        style={{ padding:'10px 30px 10px 11px', color:'#f2f4f8', fontSize:16, cursor:'pointer', position:'relative', userSelect:'none', WebkitUserSelect:'none', background:'#161922', minHeight:44, display:'flex', alignItems:'center', WebkitTapHighlightColor:'transparent' }}>
+        <span style={{ fontSize:13 }}>{value}</span>
         <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:9, color:'#6b7a96', pointerEvents:'none' }}>▾</span>
       </div>
       {open && (
-        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:100, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.6)' }}>
+        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:200, maxHeight:240, overflowY:'auto', WebkitOverflowScrolling:'touch', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
           {options.map(o => (
-            <div key={o} onClick={()=>{ onChange(o); setOpen(false) }}
-              style={{ padding:'9px 11px', color:o===value?'#f2f4f8':'#9aa0b0', background:o===value?'#1e2330':'#161922', fontSize:13, cursor:'pointer', borderBottom:'1px solid #0e1220' }}
-              onMouseEnter={e=>e.currentTarget.style.background='#1e2330'}
-              onMouseLeave={e=>e.currentTarget.style.background=o===value?'#1e2330':'#161922'}>
+            <div key={o}
+              onTouchEnd={(e)=>{ e.preventDefault(); onChange(o); setOpen(false) }}
+              onMouseDown={()=>{ onChange(o); setOpen(false) }}
+              style={{ padding:'13px 11px', color:o===value?'#f2f4f8':'#9aa0b0', background:o===value?'#1e2330':'#161922', fontSize:14, cursor:'pointer', borderBottom:'1px solid #0e1220', minHeight:44, display:'flex', alignItems:'center', WebkitTapHighlightColor:'transparent' }}>
               {o}
             </div>
           ))}
         </div>
       )}
-      {open && <div style={{ position:'fixed', inset:0, zIndex:99 }} onClick={()=>setOpen(false)}/>}
+      {open && <div style={{ position:'fixed', inset:0, zIndex:199 }} onTouchEnd={()=>setOpen(false)} onClick={()=>setOpen(false)}/>}
     </div>
   )
 }
@@ -810,7 +812,7 @@ function QuickTourModal({ onDone, P, al, setPage }) {
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Step {step + 1} of {TUTORIAL_STEPS.length}</div>
             <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:'#f2f4f8', lineHeight:1.1 }}>{current.title}</div>
           </div>
-          <button onClick={onDone} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:18, padding:4, flexShrink:0 }}>✕</button>
+          <button onClick={onDone} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:18, padding:4, flexShrink:0 }}>✕</button>
         </div>
 
         {/* Progress bar */}
@@ -838,13 +840,13 @@ function QuickTourModal({ onDone, P, al, setPage }) {
           )}
           <div style={{ display:'flex', gap:8 }}>
             {step > 0 && (
-              <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← Back</button>
+              <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← Back</button>
             )}
             <button onClick={()=>{ if(isLast) onDone(); else setStep(s=>s+1) }} style={{ flex:2, padding:'9px', background:current.action?'transparent':P, border:current.action?'1px solid #1e2330':'none', borderRadius:5, color:current.action?'#6b7a96':'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
               {isLast ? 'Start Coaching! 🏈' : current.action ? 'Skip this step →' : 'Next →'}
             </button>
           </div>
-          <button onClick={onDone} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:11, fontFamily:"'Barlow Condensed',sans-serif", padding:'4px', textAlign:'center' }}>Exit tour</button>
+          <button onClick={onDone} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:11, fontFamily:"'Barlow Condensed',sans-serif", padding:'4px', textAlign:'center' }}>Exit tour</button>
         </div>
       </div>
     </div>
@@ -856,7 +858,7 @@ function FeatureGuide({ P, al, onClose }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:500, display:'flex', flexDirection:'column' }}>
       <div style={{ background:'#07090d', borderBottom:'1px solid #1e2330', padding:'14px 16px', display:'flex', alignItems:'center', gap:10 }}>
-        <button onClick={onClose} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
+        <button onClick={onClose} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
         <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', flex:1 }}>FEATURE GUIDE</div>
       </div>
       <div style={{ display:'flex', gap:0, overflowX:'auto', background:'#0a0c14', borderBottom:'1px solid #1e2330', padding:'8px 12px', flexShrink:0 }}>
@@ -889,8 +891,8 @@ function FirstTimeWelcome({ onChoice, P, al }) {
         <div style={{ fontSize:13, color:'#6b7a96', lineHeight:1.6, marginBottom:24 }}>Welcome! How would you like to get started?</div>
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           <button onClick={()=>onChoice('tour')} style={{ width:'100%', padding:'14px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px' }}>⚡ QUICK TOUR — 6 steps</button>
-          <button onClick={()=>onChoice('guide')} style={{ width:'100%', padding:'13px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px' }}>📖 BROWSE FEATURE GUIDE</button>
-          <button onClick={()=>onChoice('skip')} style={{ width:'100%', padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>Skip — I'll explore myself</button>
+          <button onClick={()=>onChoice('guide')} style={{ width:'100%', padding:'13px', background:'#0f1219', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px' }}>📖 BROWSE FEATURE GUIDE</button>
+          <button onClick={()=>onChoice('skip')} style={{ width:'100%', padding:'11px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>Skip — I'll explore myself</button>
         </div>
       </div>
     </div>
@@ -1792,9 +1794,9 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
     <div key={label} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px' }}>
       <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#3d4559', fontWeight:600, marginBottom:3 }}>{label}</div>
       {opts ? (
-        <select value={value} onChange={e=>onChange(e.target.value)} style={{ background:'transparent', border:'none', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, outline:'none', width:'100%', cursor:'pointer' }}>{opts.map(o=><option key={o} style={{background:'#161922'}}>{o}</option>)}</select>
+        <select value={value} onChange={e=>onChange(e.target.value)} style={{ background:'#161922', border:'none', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, outline:'none', width:'100%', cursor:'pointer' }}>{opts.map(o=><option key={o} style={{background:'#161922'}}>{o}</option>)}</select>
       ) : (
-        <input value={value} onChange={e=>onChange(e.target.value)} style={{ background:'transparent', border:'none', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, outline:'none', width:'100%' }} />
+        <input value={value} onChange={e=>onChange(e.target.value)} style={{ background:'#0f1219', border:'none', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, outline:'none', width:'100%' }} />
       )}
     </div>
   )
@@ -2543,7 +2545,7 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
               {(() => { const skillVal = offFields['skill'] || offFields['teamSkill'] || (cfg.fields.find(x=>x.id==='skill'||x.id==='teamSkill')?.opts[0]||''); const isBeginner = skillVal.includes('First Year') || skillVal.includes('Beginner') || skillVal.includes('Recreational'); return cfg.fields.filter(f => !(f.id==='oppTendency' && isBeginner)).map(f => <Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />) })()} 
             </div>
             <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
-            {offLoading && <Shimmer />}
+            {offLoading && (<div style={{ padding:'16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }}/><div style={{ fontSize:12, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Generating plays — this may take 15-30 seconds on mobile...</div></div>)}
             {offError && <ErrBox msg={offError} />}
             {offResult && (
               <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
@@ -2607,7 +2609,7 @@ function PlayCardWithSave({ play, P, S, al, callAI, parseJSON, sport, playbook, 
             <div style={{ position:'absolute', right:0, top:'100%', marginTop:4, background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:8, zIndex:50, minWidth:180, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
               <div style={{ fontSize:9, color:'#6b7a96', letterSpacing:1.5, textTransform:'uppercase', fontWeight:700, marginBottom:6, padding:'0 4px' }}>Add to folder</div>
               {existingFolders.map(f => (
-                <div key={f} onClick={()=>handleAdd(f)} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5, display:'flex', alignItems:'center', gap:6 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                <div key={f} onClick={()=>handleAdd(f)} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5, display:'flex', alignItems:'center', gap:6 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='#161922'}>
                   <span style={{ fontSize:11 }}>📁</span> {f}
                 </div>
               ))}
@@ -2738,7 +2740,7 @@ function DefFormationCardWithSave({ formation: f, S, P, al, callAI, parseJSON, s
           {showSaveMenu && (
             <div style={{ position:'absolute', right:0, top:'100%', marginTop:4, background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:8, zIndex:50, minWidth:180, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
               {existingFolders.map(fn => (
-                <div key={fn} onClick={()=>{onAddToPlaybook(f,fn);setSaved(fn);setShowSaveMenu(false)}} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                <div key={fn} onClick={()=>{onAddToPlaybook(f,fn);setSaved(fn);setShowSaveMenu(false)}} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='#161922'}>
                   <span style={{ fontSize:11 }}>📁</span> {fn}
                 </div>
               ))}
@@ -2791,7 +2793,7 @@ function PlaybookPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlayboo
             {f} <span style={{ opacity:0.6, marginLeft:3 }}>{(sportFolders[f]||[]).length}</span>
           </button>
         ))}
-        <button onClick={()=>setShowNewFolder(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Folder</button>
+        <button onClick={()=>setShowNewFolder(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'#161922', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Folder</button>
       </div>
 
       {showNewFolder && (
@@ -2885,7 +2887,7 @@ function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
         {opponents.map(o => (
           <button key={o.id} onClick={()=>{setActiveOpp(o.id);setScoutResult(null)}} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeOpp===o.id?P:'#1e2330'}`, background:activeOpp===o.id?al(P,0.15):'transparent', color:activeOpp===o.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>{o.name}</button>
         ))}
-        <button onClick={()=>setShowAddOpp(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ Add Opponent</button>
+        <button onClick={()=>setShowAddOpp(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'#161922', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ Add Opponent</button>
       </div>
 
       {showAddOpp && (
@@ -2922,7 +2924,7 @@ function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5 }}>
                     <div style={{ width:6, height:6, borderRadius:'50%', background:P, flexShrink:0 }} />
                     <div style={{ flex:1, fontSize:12, color:'#f2f4f8' }}>{t}</div>
-                    <button onClick={()=>removeTendency(i)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
+                    <button onClick={()=>removeTendency(i)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
                   </div>
                 ))}
                 <div style={{ display:'flex', gap:7 }}>
@@ -3757,7 +3759,7 @@ function PlayNameBuilder({ P, S, al, sport }) {
             )}
 
             <div style={{ display:'flex', gap:8, marginTop:10 }}>
-              {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
+              {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
               {!isLastStep && (
                 <button onClick={()=>{ if(canAdvance||currentStep.optional) setStep(s=>s+1) }} style={{ flex:2, padding:'10px', background:canAdvance?P:currentStep.optional?al(P,0.4):'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:(canAdvance||currentStep.optional)?'pointer':'not-allowed', letterSpacing:'1px' }}>
                   {currentStep.optional && !canAdvance ? 'SKIP →' : 'NEXT →'}
@@ -3819,7 +3821,7 @@ function PlayNameBuilder({ P, S, al, sport }) {
                 <span style={{ fontSize:11, color:'#ef4444' }}>→</span>
               </a>
             )}
-            <button onClick={reset} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>
+            <button onClick={reset} style={{ width:'100%', padding:'10px', background:'#0f1219', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>
               {sport==='Baseball'||sport==='Softball'?'BUILD ANOTHER SIGNAL →':'BUILD ANOTHER CALL →'}
             </button>
           </div>
@@ -3907,7 +3909,7 @@ function RulebookPage({ sport, P, al, callAI }) {
         <div style={{ padding:14 }}>
           <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Enter your league name to find rule modifications and governing body info.</div>
           <div style={{ display:'flex', gap:8, marginBottom:12 }}>
-            <input value={leagueSearch} onChange={e=>setLeagueSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchLeague()} placeholder={'e.g. Tolland Youth '+sport} style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+            <input value={leagueSearch} onChange={e=>setLeagueSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchLeague()} placeholder={'e.g. Tolland Youth '+sport} style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
             <button onClick={searchLeague} disabled={searching||!leagueSearch.trim()} style={{ padding:'9px 14px', background:leagueSearch.trim()&&!searching?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:leagueSearch.trim()&&!searching?'pointer':'not-allowed', whiteSpace:'nowrap' }}>{searching?'..':'SEARCH'}</button>
           </div>
           {searching && <div style={{ textAlign:'center', padding:'14px', color:'#6b7a96', fontSize:12 }}>Searching for {leagueSearch} rules...</div>}
@@ -4114,7 +4116,7 @@ function NewsPage({ P, S, al, sport, callAI }) {
             </button>
           )
         })}
-        <button onClick={()=>refreshChannel(activeChannel)} style={{ flexShrink:0, padding:'7px 12px', borderRadius:20, fontSize:11, border:'1px solid #1e2330', background:'transparent', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginLeft:4 }}>↻</button>
+        <button onClick={()=>refreshChannel(activeChannel)} style={{ flexShrink:0, padding:'7px 12px', borderRadius:20, fontSize:11, border:'1px solid #1e2330', background:'#161922', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginLeft:4 }}>↻</button>
       </div>
 
       {/* Active channel description */}
@@ -4240,21 +4242,21 @@ function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI
   ]
 
   if (activeMode === 'gauntlet') return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} /> </>
   )
   if (activeMode === 'playnames') return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <PlayNameBuilder P={P} S={S} al={al} sport={sport} /> </>
   )
   if (activeMode === 'rulebook') return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <RulebookPage sport={sport} P={P} al={al} callAI={callAI} /> </>
   )
   if (activeMode === 'guide') return ( <FeatureGuide P={P} al={al} onClose={()=>setActiveMode(null)} /> )
   if (activeMode === 'tour')  return ( <QuickTourModal onDone={()=>setActiveMode(null)} P={P} al={al} setPage={setPage} /> )
   if (activeMode === 'help')  return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'transparent', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <HelpPage P={P} al={al} setPage={setPage} sport={sport} /> </>
   )
 
@@ -4463,7 +4465,7 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
             <div style={{ padding:14 }}>
               <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Used for home weather when no team is selected. Auto-detects via GPS or enter manually.</div>
               <div style={{ display:'flex', gap:8 }}>
-                <input value={homeLocation||''} onChange={e=>setHomeLocation&&setHomeLocation(e.target.value)} placeholder="e.g. Tolland, CT" style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <input value={homeLocation||''} onChange={e=>setHomeLocation&&setHomeLocation(e.target.value)} placeholder="e.g. Tolland, CT" style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 <button onClick={()=>{ if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(pos=>{ fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+pos.coords.latitude+'&lon='+pos.coords.longitude).then(r=>r.json()).then(d=>{ const a=d.address||{}; const city=a.city||a.town||a.village||''; const state=a.state||''; if(setHomeLocation) setHomeLocation([city,state].filter(Boolean).join(', ')) }) }) }}} style={{ padding:'9px 12px', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>📍 AUTO</button>
               </div>
             </div>
@@ -4513,7 +4515,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   if (activeMode === 'schemes_offense' || activeMode === 'schemes_defense') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} {activeMode==='schemes_offense'?'Offensive':'Defensive'} Schemes</span>
       </div>
       <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={{Football:{},Basketball:{},Baseball:{}}} setPlaybook={()=>{}} genHistory={{Football:[],Basketball:[],Baseball:[]}} setGenHistory={()=>{}} iq={iq} setIQ={setIQ} defaultOpenOff={activeMode==='schemes_offense'} defaultOpenDef={activeMode==='schemes_defense'} />
@@ -4523,7 +4525,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   if (activeMode === 'gauntlet') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
       </div>
       <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
@@ -4533,7 +4535,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   if (activeMode === 'film') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Film Room</span>
       </div>
       <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />
@@ -4543,7 +4545,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
   if (activeMode === 'situational') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'transparent', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport==='Football'?'Situational Play Caller':sport==='Basketball'?'Live Game Adjustments':'Count & Situation Manager'}</span>
       </div>
       <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
@@ -4611,6 +4613,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
         P={P}
         al={al}
         setCfg={setCfg}
+        onOpenTeamTab={()=>setPage('team')}
       />
 
             {/* Scheme Generator Card — interactive preview */}
@@ -4668,7 +4671,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
           <div style={{ width:3, height:10, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
-          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'transparent', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
+          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'#161922', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
         </div>
         {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching feed...</div></div>}
         {!feedLoading && !feed && <div style={{ padding:'20px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ fontSize:11, color:'#3d4559', marginBottom:10 }}>Coaching content for {sport} coaches</div><button onClick={loadFeed} style={{ padding:'7px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>LOAD FEED</button></div>}
@@ -4713,7 +4716,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
     <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 32px', overflow:'hidden', zIndex:999 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&display=swap');
-        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; } :root { color-scheme: dark; background-color: #07090d; } body { background-color: #07090d !important; }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; } :root { color-scheme: dark; background-color: #07090d; } body { background-color: #07090d !important; overflow-x:hidden; } html { background-color: #07090d; color-scheme: dark; } #__next { background-color: #07090d; overflow-x:hidden; }
         @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
         @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
         @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
@@ -4752,7 +4755,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
       {phase === 'cta' && (
         <div style={{ position:'relative', zIndex:2, width:'100%', maxWidth:380, display:'flex', flexDirection:'column', gap:10, animation:'ctaReveal 0.4s ease forwards' }}>
           <button onClick={() => onDone(false)} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'15px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Get Started — Free</button>
-          <button onClick={() => onDone(false)} style={{ width:'100%', background:'transparent', border:'1px solid #1c2235', borderRadius:4, padding:'14px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}>Sign In</button>
+          <button onClick={() => onDone(false)} style={{ width:'100%', background:'#161922', border:'1px solid #1c2235', borderRadius:4, padding:'14px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}>Sign In</button>
           <div style={{ textAlign:'center', paddingTop:4 }}>
             <span onClick={() => onDone(true)} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:accent, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span>
           </div>
@@ -4811,29 +4814,61 @@ function Onboarding({ onLaunch, brand='Red — C+IQ colored' }) {
 function NavButton({ id, icon, label, submenu, isActive, P, al, setPage }) {
   const [showSub, setShowSub] = useState(false)
   const pressTimer = useRef(null)
+  const didLongPress = useRef(false)
 
-  function handlePressStart() {
+  function handlePressStart(e) {
     if (!submenu || submenu.length === 0) return
-    pressTimer.current = setTimeout(() => setShowSub(true), 450)
+    didLongPress.current = false
+    pressTimer.current = setTimeout(() => {
+      didLongPress.current = true
+      setShowSub(true)
+    }, 400)
   }
 
-  function handlePressEnd() {
+  function handlePressEnd(e) {
     clearTimeout(pressTimer.current)
   }
 
-  function handleClick() {
+  function handleTouchStart(e) {
+    // Prevent iOS text selection on long press
+    e.preventDefault()
+    handlePressStart(e)
+  }
+
+  function handleTouchEnd(e) {
+    clearTimeout(pressTimer.current)
+    // If not a long press, treat as a tap
+    if (!didLongPress.current) {
+      if (!showSub) setPage(id)
+    }
+    didLongPress.current = false
+  }
+
+  function handleClick(e) {
+    // Only fire on non-touch (mouse click) when submenu not open
     if (!showSub) setPage(id)
+  }
+
+  function handleContextMenu(e) {
+    // Prevent iOS context menu from appearing on long press
+    e.preventDefault()
   }
 
   return (
     <div style={{ flex:1, position:'relative' }}>
       {showSub && (
         <>
-          <div onClick={()=>setShowSub(false)} style={{ position:'fixed', inset:0, zIndex:90 }} />
-          <div style={{ position:'absolute', bottom:'100%', left:'50%', transform:'translateX(-50%)', background:'#0f1219', border:`1px solid ${al(P,0.35)}`, borderRadius:8, padding:6, zIndex:100, minWidth:110, boxShadow:'0 -8px 24px rgba(0,0,0,0.7)', animation:'fadeIn 0.15s ease', marginBottom:6 }}>
+          <div
+            onClick={()=>setShowSub(false)}
+            onTouchEnd={()=>setShowSub(false)}
+            style={{ position:'fixed', inset:0, zIndex:90, WebkitTapHighlightColor:'transparent' }} />
+          <div style={{ position:'absolute', bottom:'100%', left:'50%', transform:'translateX(-50%)', background:'#0f1219', border:`1px solid ${al(P,0.35)}`, borderRadius:8, padding:6, zIndex:100, minWidth:130, boxShadow:'0 -8px 24px rgba(0,0,0,0.7)', animation:'fadeIn 0.15s ease', marginBottom:6 }}>
             <div style={{ fontSize:8, letterSpacing:1.5, color:'#3d4559', textTransform:'uppercase', fontWeight:700, padding:'3px 8px 5px', borderBottom:'1px solid #1e2330', marginBottom:4 }}>{label}</div>
             {(submenu||[]).map((item,i) => (
-              <div key={i} onClick={()=>{ setPage(id); setShowSub(false) }} style={{ padding:'7px 10px', cursor:'pointer', fontSize:12, color:'#f2f4f8', borderRadius:4, display:'flex', alignItems:'center', gap:6 }} onMouseEnter={e=>e.currentTarget.style.background=al(P,0.1)} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+              <div key={i}
+                onMouseDown={()=>{ setPage(id); setShowSub(false) }}
+                onTouchEnd={(e)=>{ e.preventDefault(); setPage(id); setShowSub(false) }}
+                style={{ padding:'10px 10px', cursor:'pointer', fontSize:13, color:'#f2f4f8', borderRadius:4, display:'flex', alignItems:'center', gap:6, WebkitTapHighlightColor:'transparent' }}>
                 {item.label}
               </div>
             ))}
@@ -4844,9 +4879,10 @@ function NavButton({ id, icon, label, submenu, isActive, P, al, setPage }) {
         onClick={handleClick}
         onMouseDown={handlePressStart}
         onMouseUp={handlePressEnd}
-        onTouchStart={handlePressStart}
-        onTouchEnd={handlePressEnd}
-        style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:50 }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onContextMenu={handleContextMenu}
+        style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 4px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:50, WebkitTapHighlightColor:'transparent', touchAction:'manipulation', userSelect:'none', WebkitUserSelect:'none' }}
       >
         {isActive && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2, background:P }} />}
         <span style={{ fontSize:14, color:isActive?P:'#3d4559' }}>{icon}</span>
@@ -4901,10 +4937,19 @@ export default function CoachIQ() {
     const body = imageData
       ? { prompt, image: imageData }
       : { prompt }
-    const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify(body) })
-    const d = await res.json()
-    if (!res.ok) throw new Error(d.error || 'API error')
-    return d.result || d.text || ''
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 45000) // 45s timeout for slow mobile
+    try {
+      const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify(body), signal:controller.signal })
+      clearTimeout(timeout)
+      const d = await res.json()
+      if (!res.ok) throw new Error(d.error || 'API error')
+      return d.result || d.text || ''
+    } catch(e) {
+      clearTimeout(timeout)
+      if (e.name === 'AbortError') throw new Error('Request timed out — please check your connection and try again')
+      throw e
+    }
   }
 
   function parseJSON(raw) {
@@ -4952,7 +4997,7 @@ export default function CoachIQ() {
     <>
       <Head>
         <title>CoachIQ</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -4992,7 +5037,7 @@ export default function CoachIQ() {
             .scheme-grid { grid-template-columns: 1fr 1fr !important; }
           }
           @media (min-width:768px) { input, select, textarea { font-size:13px !important; } }
-          button { -webkit-tap-highlight-color:transparent; }
+          button { -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; -webkit-user-select:none; } a { -webkit-tap-highlight-color:transparent; } input, textarea { -webkit-appearance:none; border-radius:0; }
           * { -webkit-text-size-adjust:100%; }
         `}</style>
 
@@ -5028,7 +5073,7 @@ export default function CoachIQ() {
         </div>
 
         {/* PAGE CONTENT */}
-        <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14, background:'#07090d' }}>
+        <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px max(14px,env(safe-area-inset-right,14px)) 90px max(14px,env(safe-area-inset-left,14px))', display:'flex', flexDirection:'column', gap:14, background:'#07090d' }}>
           {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} homeLocation={homeLocation} setPage={setPage} />}
           {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
@@ -5040,7 +5085,7 @@ export default function CoachIQ() {
         </div>
 
         {/* BOTTOM NAV */}
-        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:'min(640px,100%)', background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50 }}>
+        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:'min(640px,100%)', background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50, paddingBottom:'env(safe-area-inset-bottom,0px)' }}>
           {NAV_ITEMS.map(({ id, icon, label, submenu }) => (
             <NavButton key={id} id={id} icon={icon} label={label} submenu={submenu} isActive={page===id} P={P} al={al} setPage={setPage} />
           ))}
@@ -5130,7 +5175,7 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
               <div key={p.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:6 }}>
                 {p.number && <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, flexShrink:0 }}>{p.number}</div>}
                 <div style={{ flex:1 }}><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:500 }}>{p.lastName ? p.lastName+', '+p.firstName : p.name}</div>{p.position&&<div style={{ fontSize:10, color:'#6b7a96' }}>{p.position}</div>}</div>
-                <button onClick={()=>removePlayer(p.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>×</button>
+                <button onClick={()=>removePlayer(p.id)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>×</button>
               </div>
             ))}
           </div>
@@ -5184,15 +5229,15 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
                 <Sel label="Intensity" value={planForm.intensity} onChange={v=>setPlanForm(f=>({...f,intensity:v}))} options={['Light / Recovery','Medium','High / Game Prep','Game Week Intensity']} />
                 <div>
                   <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Practice Date</label>
-                  <input value={planForm.date} onChange={e=>setPlanForm(f=>({...f,date:e.target.value}))} placeholder="e.g. Monday 4/21" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                  <input value={planForm.date} onChange={e=>setPlanForm(f=>({...f,date:e.target.value}))} placeholder="e.g. Monday 4/21" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 </div>
                 <div style={{ gridColumn:'1/-1' }}>
                   <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Upcoming Opponent <span style={{ color:'#3d4559' }}>(optional)</span></label>
-                  <input value={planForm.opponent} onChange={e=>setPlanForm(f=>({...f,opponent:e.target.value}))} placeholder="e.g. Coventry Eagles" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                  <input value={planForm.opponent} onChange={e=>setPlanForm(f=>({...f,opponent:e.target.value}))} placeholder="e.g. Coventry Eagles" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 </div>
               </div>
               <div style={{ display:'flex', gap:8 }}>
-                <button onClick={()=>setShowForm(false)} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                <button onClick={()=>setShowForm(false)} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
                 <button onClick={generatePlan} disabled={generating} style={{ flex:2, padding:'10px', background:generating?'#3d4559':P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:generating?'not-allowed':'pointer', letterSpacing:'1px' }}>{generating?'GENERATING...':'GENERATE PLAN'}</button>
               </div>
               {generating && <Shimmer />}
@@ -5352,7 +5397,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
       </div>
 
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setSection('roster')} />
+      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setSection('roster')} startExpanded={(teams[sport]||[]).length===0} />
 
       {!currentTeam ? (
         <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
@@ -5472,7 +5517,7 @@ function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase' }}>Mascot Builder</div>
             <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f2f4f8' }}>Create Your Mascot</div>
           </div>
-          <button onClick={onClose} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:20 }}>✕</button>
+          <button onClick={onClose} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:20 }}>✕</button>
         </div>
 
         {/* Step indicator */}
@@ -5588,7 +5633,7 @@ function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
           <div style={{ display:'flex', gap:8, marginTop:16 }}>
             {step > 0 && (
               <button onClick={()=>setStep(s=>s-1)}
-                style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
+                style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
                 ← Back
               </button>
             )}
@@ -5612,7 +5657,14 @@ function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
 function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab, startExpanded=false }) {
   const [mode, setMode] = useState('view')
   const [showMascotBuilder, setShowMascotBuilder] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(startExpanded || false)
+  // Auto-open create mode when startExpanded and no teams
+  useEffect(() => {
+    if (startExpanded && (teams[sport]||[]).length === 0) {
+      setExpanded(true)
+      setMode('create')
+    }
+  }, [sport])
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
     const [error, setError] = useState('')
@@ -5669,7 +5721,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:18, color:'#f2f4f8', textAlign:'center', marginBottom:6 }}>Delete Team?</div>
             <div style={{ fontSize:13, color:'#6b7a96', textAlign:'center', lineHeight:1.6, marginBottom:20 }}>This will permanently delete <span style={{ color:'#f2f4f8', fontWeight:600 }}>{deleteConfirm.name}</span>. This cannot be undone.</div>
             <div style={{ display:'flex', gap:8 }}>
-              <button onClick={()=>setDeleteConfirm(null)} style={{ flex:1, padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>CANCEL</button>
+              <button onClick={()=>setDeleteConfirm(null)} style={{ flex:1, padding:'11px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>CANCEL</button>
               <button onClick={doDelete} style={{ flex:1, padding:'11px', background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.5)', borderRadius:4, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>DELETE</button>
             </div>
           </div>
@@ -5720,7 +5772,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                 <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:12 }}>Create New Team</div>
                 <div style={{ marginBottom:10 }}>
                   <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
-                  <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={'e.g. Tolland Youth '+sport} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                  <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={'e.g. Tolland Youth '+sport} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 </div>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
                   <Sel label="Season" value={form.season||seasons[0]} onChange={v=>setForm(f=>({...f,season:v}))} options={seasons} />
@@ -5758,7 +5810,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                         <div style={{ fontSize:11, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Premium Mascot</div>
                         <div style={{ fontSize:10, color:'#6b7a96' }}>40 more mascots available with CoachIQ Pro.</div>
                       </div>
-                      <button onClick={()=>setShowUpgrade(false)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>✕</button>
+                      <button onClick={()=>setShowUpgrade(false)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>✕</button>
                     </div>
                   )}
                   {form.mascot && <div style={{ fontSize:10, color:P, marginTop:4, display:'flex', alignItems:'center', gap:6 }}><MascotAvatar mascotId={form.mascot} color={P} size={20}/> {(MASCOTS||[]).find(m=>m.id===form.mascot)?.name}</div>}
@@ -5795,14 +5847,14 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                 <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 25%,${form.secondary} 25%,${form.secondary} 50%,${form.accent1} 50%,${form.accent1} 75%,${form.accent2} 75%)`, marginBottom:12 }} />
                 {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
                 <div style={{ display:'flex', gap:8 }}>
-                  <button onClick={()=>{setMode('view');setError('')}} style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                  <button onClick={()=>{setMode('view');setError('')}} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
                   <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
                 </div>
               </div>
             )}
 
             {mode === 'view' && sportTeams.length < MAX_TEAMS && (
-              <button onClick={()=>setMode('create')} style={{ width:'100%', padding:'10px', background:'transparent', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+              <button onClick={()=>setMode('create')} style={{ width:'100%', padding:'10px', background:'#0f1219', border:`1px dashed ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
                 <span style={{ fontSize:16 }}>+</span> CREATE {sport.toUpperCase()} TEAM
               </button>
             )}
@@ -5859,7 +5911,7 @@ function CitySearch({ value, onChange, placeholder, P, al }) {
   return (
     <div ref={wrapRef} style={{ position:'relative' }}>
       <div style={{ position:'relative' }}>
-        <input value={query} onChange={e=>search(e.target.value)} onFocus={()=>results.length>0&&setOpen(true)} placeholder={placeholder||'Search city or town...'} style={{ width:'100%', background:'#161922', border:`1px solid ${query?al(P,0.4):'#1e2330'}`, borderRadius:4, padding:'9px 32px 9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+        <input value={query} onChange={e=>search(e.target.value)} onFocus={()=>results.length>0&&setOpen(true)} placeholder={placeholder||'Search city or town...'} style={{ width:'100%', background:'#161922', border:`1px solid ${query?al(P,0.4):'#1e2330'}`, borderRadius:4, padding:'9px 32px 9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
         {loading ? <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', width:12, height:12, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.7s linear infinite' }}/> : <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:12, opacity:0.4 }}>🏙️</span>}
       </div>
       {open && results.length > 0 && (
@@ -5869,7 +5921,7 @@ function CitySearch({ value, onChange, placeholder, P, al }) {
             const city = a.city||a.town||a.village||item.name||''
             const state = a.state||''
             return (
-              <div key={i} onMouseDown={()=>select(item)} style={{ padding:'8px 12px', borderBottom:i<results.length-1?'1px solid #1e2330':'none', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+              <div key={i} onMouseDown={()=>select(item)} style={{ padding:'8px 12px', borderBottom:i<results.length-1?'1px solid #1e2330':'none', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={e=>e.currentTarget.style.background='#161922'}>
                 <div style={{ fontSize:12, color:'#f2f4f8' }}>{city}{state?', '+state:''}</div>
               </div>
             )
@@ -5894,7 +5946,8 @@ function AddressSearch({ value, onChange, placeholder, P, al }) {
   useEffect(() => {
     function handle(e) { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handle)
-    return () => document.removeEventListener('mousedown', handle)
+    document.addEventListener('touchstart', handle)
+    return () => { document.removeEventListener('mousedown', handle); document.removeEventListener('touchstart', handle) }
   }, [])
 
   // Sync if parent value changes
@@ -5945,7 +5998,7 @@ function AddressSearch({ value, onChange, placeholder, P, al }) {
           onChange={e => search(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           placeholder={placeholder || 'Search address or venue...'}
-          style={{ width:'100%', background:'#161922', border:`1px solid ${query ? al(P,0.5) : '#1e2330'}`, borderRadius:4, padding:'9px 36px 9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }}
+          style={{ width:'100%', background:'#161922', border:`1px solid ${query ? al(P,0.5) : '#1e2330'}`, borderRadius:4, padding:'9px 36px 9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }}
         />
         {loading ? (
           <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', width:14, height:14, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.7s linear infinite' }} />
@@ -5954,7 +6007,7 @@ function AddressSearch({ value, onChange, placeholder, P, al }) {
         )}
       </div>
       {open && results.length > 0 && (
-        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:'0 0 6px 6px', zIndex:100, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.6)' }}>
+        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:'0 0 6px 6px', zIndex:100, maxHeight:240, overflowY:'auto', WebkitOverflowScrolling:'touch', boxShadow:'0 8px 24px rgba(0,0,0,0.6)' }}>
           {results.map((item, i) => {
             const addr = item.address || {}
             const city = addr.city || addr.town || addr.village || ''
@@ -5962,9 +6015,10 @@ function AddressSearch({ value, onChange, placeholder, P, al }) {
             const mainText = item.name || item.display_name.split(',')[0]
             const subText = [city, state].filter(Boolean).join(', ')
             return (
-              <div key={i} onMouseDown={()=>select(item)} style={{ padding:'9px 12px', borderBottom:i<results.length-1?'1px solid #1e2330':'none', cursor:'pointer', display:'flex', alignItems:'flex-start', gap:8 }}
-                onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'}
-                onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+              <div key={i}
+                onMouseDown={()=>select(item)}
+                onTouchEnd={(e)=>{ e.preventDefault(); select(item) }}
+                style={{ padding:'12px 12px', borderBottom:i<results.length-1?'1px solid #1e2330':'none', cursor:'pointer', display:'flex', alignItems:'flex-start', gap:8, minHeight:48, WebkitTapHighlightColor:'transparent' }}>
                 <span style={{ fontSize:13, flexShrink:0, marginTop:1 }}>📍</span>
                 <div>
                   <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.3 }}>{mainText}</div>
@@ -6160,10 +6214,10 @@ function LineupBuilder({ team, sport, P, S, al, teams, setTeams }) {
           <div key={lineup.id} onClick={()=>setActiveLineup(lineup.id)} style={{ flexShrink:0, padding:'6px 10px', borderRadius:6, border:`1px solid ${activeLineup===lineup.id?P:'#1e2330'}`, background:activeLineup===lineup.id?al(P,0.12):'#161922', cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
             {lineup.isGameDay && <span style={{ fontSize:12 }}>⭐</span>}
             <span style={{ fontSize:11, color:activeLineup===lineup.id?P:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{lineup.name}</span>
-            <button onClick={e=>{e.stopPropagation();deleteLineup(lineup.id)}} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:12, padding:0 }}>✕</button>
+            <button onClick={e=>{e.stopPropagation();deleteLineup(lineup.id)}} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:12, padding:0 }}>✕</button>
           </div>
         ))}
-        <button onClick={()=>setShowNewLineup(true)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:6, border:`1px dashed ${al(P,0.4)}`, background:'transparent', color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Lineup</button>
+        <button onClick={()=>setShowNewLineup(true)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:6, border:`1px dashed ${al(P,0.4)}`, background:'#161922', color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Lineup</button>
       </div>
 
       {/* New lineup form */}
@@ -6172,7 +6226,7 @@ function LineupBuilder({ team, sport, P, S, al, teams, setTeams }) {
           <div style={{ display:'flex', gap:8, marginBottom:8 }}>
             <input value={newLineupName} onChange={e=>setNewLineupName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&createLineup()} placeholder="e.g. Base Offense, 2-Minute, Nickel D" style={{ flex:1, background:'#0f1219', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'7px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }}/>
             <button onClick={createLineup} style={{ padding:'7px 12px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer' }}>CREATE</button>
-            <button onClick={()=>{setShowNewLineup(false);setIsGameDay(false)}} style={{ padding:'7px 10px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', cursor:'pointer', fontSize:12 }}>✕</button>
+            <button onClick={()=>{setShowNewLineup(false);setIsGameDay(false)}} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', cursor:'pointer', fontSize:12 }}>✕</button>
           </div>
           <div onClick={()=>setIsGameDay(g=>!g)} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
             <div style={{ width:18, height:18, borderRadius:4, border:`2px solid ${isGameDay?P:'#3d4559'}`, background:isGameDay?P:'transparent', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -6302,20 +6356,20 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
               <Sel label="Home / Away" value={form.homeAway} onChange={v=>setForm(f=>({...f,homeAway:v}))} options={['Home','Away','Neutral']} />
               <div style={{ gridColumn:'1/-1' }}>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Opponent / Event Name</label>
-                <input value={form.opponent} onChange={e=>setForm(f=>({...f,opponent:e.target.value}))} placeholder={form.type==='Practice' ? 'Practice session' : 'e.g. Westport Eagles'} list="saved-opps-list" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <input value={form.opponent} onChange={e=>setForm(f=>({...f,opponent:e.target.value}))} placeholder={form.type==='Practice' ? 'Practice session' : 'e.g. Westport Eagles'} list="saved-opps-list" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 <datalist id="saved-opps-list">{savedOpponents.map(o=><option key={o} value={o}/>)}</datalist>
               </div>
               <div>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Date *</label>
-                <input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:`1px solid ${form.date?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:`1px solid ${form.date?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
               <div>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Start Time</label>
-                <input type="time" value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <input type="time" value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
               <div>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Arrive By</label>
-                <input type="time" value={form.arrivalTime} onChange={e=>setForm(f=>({...f,arrivalTime:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <input type="time" value={form.arrivalTime} onChange={e=>setForm(f=>({...f,arrivalTime:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
               <div>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / Address</label>
@@ -6329,11 +6383,11 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
               </div>
               <div style={{ gridColumn:'1/-1' }}>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
-                <input value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="e.g. Wear red jerseys, bring extra water" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:13, outline:'none' }} />
+                <input value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="e.g. Wear red jerseys, bring extra water" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
             </div>
             <div style={{ display:'flex', gap:8 }}>
-              <button onClick={()=>setShowAdd(false)} style={{ flex:1, padding:'9px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+              <button onClick={()=>setShowAdd(false)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
               <button onClick={saveEvent} disabled={!form.date} style={{ flex:2, padding:'9px', background:form.date?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:form.date?'pointer':'not-allowed', letterSpacing:'1px' }}>SAVE EVENT</button>
             </div>
           </div>
@@ -6363,7 +6417,7 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
                   {event.location && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>📍 {event.location}</div>}
                   {event.notes && <div style={{ fontSize:10, color:'#3d4559', marginTop:1, fontStyle:'italic' }}>{event.notes}</div>}
                 </div>
-                <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, flexShrink:0, padding:0 }}>×</button>
+                <button onClick={()=>removeEvent(event.id)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, flexShrink:0, padding:0 }}>×</button>
               </div>
             </div>
           )
@@ -6378,7 +6432,7 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
                   <span>{typeIcons[event.type]||'📅'}</span>
                   <span>{event.opponent || event.type}</span>
                   <span style={{ marginLeft:'auto' }}>{new Date(event.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'})}</span>
-                  <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
+                  <button onClick={()=>removeEvent(event.id)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
                 </div>
               ))}
             </div>
