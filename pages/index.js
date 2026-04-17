@@ -4967,7 +4967,26 @@ export default function CoachIQ() {
       const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify(body), signal:controller.signal })
       clearTimeout(timeout)
       const d = await res.json()
-      if (!res.ok) throw new Error(d.error || 'API error')
+      if (!res.ok) {
+        // Parse friendly error from raw JSON
+        let errMsg = 'API error'
+        try {
+          const errData = typeof d.error === 'string' ? JSON.parse(d.error) : d.error
+          if (errData?.error?.message) errMsg = errData.error.message
+          else if (errData?.message) errMsg = errData.message
+          else if (typeof d.error === 'string') errMsg = d.error
+        } catch(e2) {
+          errMsg = d.error || 'Request failed'
+        }
+        // Friendly messages for common errors
+        if (errMsg.includes('credit balance') || errMsg.includes('too low')) 
+          errMsg = 'API credits depleted. Please add credits at console.anthropic.com.'
+        if (errMsg.includes('rate_limit') || errMsg.includes('rate limit'))
+          errMsg = 'Too many requests — please wait 30 seconds and try again.'
+        if (errMsg.includes('overloaded'))
+          errMsg = 'AI is busy right now — please try again in a moment.'
+        throw new Error(errMsg)
+      }
       return d.result || d.text || ''
     } catch(e) {
       clearTimeout(timeout)
