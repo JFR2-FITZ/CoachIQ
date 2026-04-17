@@ -3029,7 +3029,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
     <div style={{ position:'relative' }}>
       {/* Badge button */}
       <div onClick={()=>{ if(sportTeams.length===0){ setPage('team') } else { setOpen(o=>!o) } }}
-        style={{ display:'flex', alignItems:'center', gap:5, background:current?al(P,0.12):'rgba(255,255,255,0.05)', border:`1px solid ${current?al(P,0.4):'rgba(255,255,255,0.12)'}`, borderRadius:3, padding:'4px 8px', cursor:'pointer', userSelect:'none', minWidth:0, maxWidth:140, overflow:'hidden' }}>
+        style={{ display:'flex', alignItems:'center', gap:5, background:current?al(P,0.12):'rgba(255,255,255,0.05)', border:`1px solid ${current?al(P,0.4):'rgba(255,255,255,0.12)'}`, borderRadius:3, padding:'4px 8px 4px 6px', cursor:'pointer', userSelect:'none', minWidth:0, maxWidth:130, overflow:'hidden', marginRight:2 }}>
         {current ? (
           <>
             <MascotAvatar mascotId={current.mascot} color={current.primary||P} size={22} />
@@ -3968,20 +3968,15 @@ function RulebookPage({ sport, P, al, callAI }) {
 // ─── NEWS PAGE ────────────────────────────────────────────────────────────────
 function NewsPage({ P, S, al, sport, callAI }) {
   // Each channel has its own state so they load independently
-  const [activeChannel, setActiveChannel] = useState('all')
+  const [activeChannel, setActiveChannel] = useState('sport')
   const [channels, setChannels] = useState({
     sport:     { items:[], loading:false, loaded:false },
-    youth:     { items:[], loading:false, loaded:false },
     sportNews: { items:[], loading:false, loaded:false },
-    allNews:   { items:[], loading:false, loaded:false },
   })
 
   const CHANNELS = [
-    { id:'all',       label:'All',              icon:'📰', desc:'Everything mixed' },
-    { id:'sport',     label:sport+' Coaching',  icon:'📋', desc:'Drills, schemes, science for '+sport },
-    { id:'youth',     label:'Youth Coaching',   icon:'🧒', desc:'General youth coaching theory' },
-    { id:'sportNews', label:sport+' News',      icon:'⚡', desc:'Pro + college '+sport+' news' },
-    { id:'allNews',   label:'All Sports News',  icon:'🌐', desc:'Headlines across all sports' },
+    { id:'sport',     label:sport+' Coaching',  icon:'📋', desc:'Drills, schemes & tips for '+sport },
+    { id:'sportNews', label:sport+' News',       icon:'⚡', desc:'Pro + college '+sport+' news' },
   ]
 
   const PROMPTS = {
@@ -4035,10 +4030,7 @@ function NewsPage({ P, S, al, sport, callAI }) {
   }
 
   function loadAll() {
-    loadChannel('sport')
-    setTimeout(() => loadChannel('youth'),    3000)
-    setTimeout(() => loadChannel('sportNews'), 6000)
-    setTimeout(() => loadChannel('allNews'),   9000)
+    // Load on demand only - no auto-loading
   }
 
   useEffect(() => {
@@ -4047,14 +4039,10 @@ function NewsPage({ P, S, al, sport, callAI }) {
       sessionStorage.removeItem('coachiq_feed_sport_'+sport)
       sessionStorage.removeItem('coachiq_feed_sportNews_'+sport)
     } catch(e) {}
-    setChannels(c => ({ ...c, sport: { items:[], loading:false, loaded:false }, sportNews: { items:[], loading:false, loaded:false } }))
+    setChannels({ sport: { items:[], loading:false, loaded:false }, sportNews: { items:[], loading:false, loaded:false } })
     // Load active channel immediately, others in background
-    setTimeout(() => loadChannel(activeChannel === 'all' ? 'sport' : activeChannel), 50)
-    if (activeChannel === 'all') {
-      setTimeout(() => loadChannel('youth'),    3000)
-      setTimeout(() => loadChannel('sportNews'), 6000)
-      setTimeout(() => loadChannel('allNews'),   9000)
-    }
+    // Reset loaded state when sport changes so user can reload
+    // Don't auto-load - user taps channel to load
   }, [sport])
 
   useEffect(() => {
@@ -4321,8 +4309,14 @@ function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI
     </>
   )
 }
-function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI, activeTeam, setTeams }) {
+function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI, activeTeam, setTeams, scrollToLocation=false }) {
   const [activeSection, setActiveSection] = useState('features')
+  const locationRef = useRef(null)
+  useEffect(() => {
+    if (scrollToLocation && locationRef.current) {
+      setTimeout(() => locationRef.current.scrollIntoView({ behavior:'smooth', block:'center' }), 200)
+    }
+  }, [scrollToLocation])
   const [helpMode, setHelpMode] = useState(null)
   const colorOptions = {
     primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
@@ -4484,16 +4478,22 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
           </Card>
 
           {/* Team colors */}
-          <Card>
+          <div ref={locationRef}><Card>
             <CardHead icon="📍" title="My Location" accent={P} />
             <div style={{ padding:14 }}>
               <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Used for home weather when no team is selected. Auto-detects via GPS or enter manually.</div>
-              <div style={{ display:'flex', gap:8 }}>
-                <input value={homeLocation||''} onChange={e=>setHomeLocation&&setHomeLocation(e.target.value)} placeholder="e.g. Tolland, CT" style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
-                <button onClick={()=>{ if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(pos=>{ fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+pos.coords.latitude+'&lon='+pos.coords.longitude).then(r=>r.json()).then(d=>{ const a=d.address||{}; const city=a.city||a.town||a.village||''; const state=a.state||''; if(setHomeLocation) setHomeLocation([city,state].filter(Boolean).join(', ')) }) }) }}} style={{ padding:'9px 12px', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>📍 AUTO</button>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                <AddressSearch
+                  value={homeLocation||''}
+                  onChange={v=>{ if(setHomeLocation) setHomeLocation(v) }}
+                  placeholder="e.g. Tolland, CT or Tolland High School"
+                  P={P}
+                  al={al}
+                />
+                <button onClick={()=>{ if(!navigator.geolocation) return; navigator.geolocation.getCurrentPosition(pos=>{ fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+pos.coords.latitude+'&lon='+pos.coords.longitude).then(r=>r.json()).then(d=>{ const a=d.address||{}; const city=a.city||a.town||a.village||''; const state=a.state||''; if(setHomeLocation) setHomeLocation([city,state].filter(Boolean).join(', ')) }) }) }} style={{ padding:'9px 12px', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, alignSelf:'flex-start', WebkitTapHighlightColor:'transparent' }}>📍 USE MY LOCATION</button>
               </div>
             </div>
-          </Card>
+          </Card></div>
           
 
           {/* App info */}
@@ -4614,7 +4614,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
                 nextEvent={nextEvt}
                 P={P}
                 al={al}
-                onSetLocation={()=>setPage('more')}
+                onSetLocation={()=>{ setScrollToLocation(true); setPage('more'); setTimeout(()=>setScrollToLocation(false),500) }}
               />
             </div>
           </div>
@@ -4740,7 +4740,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
     <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 32px', overflow:'hidden', zIndex:999 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Barlow+Condensed:wght@600;700&display=swap');
-        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; } :root { color-scheme: dark; background-color: #07090d; } body { background-color: #07090d !important; overflow-x:hidden; } html { background-color: #07090d; color-scheme: dark; } #__next { background-color: #07090d; overflow-x:hidden; }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; } :root { color-scheme: dark; background-color: #07090d; } body { background-color: #07090d !important; overflow-x:hidden; min-height:100vh; min-height:-webkit-fill-available; } html { background-color: #07090d !important; color-scheme: dark; } html, body { background-color: #07090d !important; } #__next { background-color: #07090d; overflow-x:hidden; } @media all { :root { background-color: #07090d !important; color-scheme: dark !important; } }
         @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(-22deg)} 33%{transform:translate(12px,-18px) rotate(-15deg)} 66%{transform:translate(-8px,10px) rotate(-28deg)} }
         @keyframes float2 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-14px,12px)} 75%{transform:translate(10px,-8px)} }
         @keyframes float3 { 0%,100%{transform:translate(0,0) rotate(12deg)} 40%{transform:translate(16px,-10px) rotate(20deg)} 80%{transform:translate(-6px,14px) rotate(6deg)} }
@@ -4750,6 +4750,23 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
         @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
         @keyframes logoReveal { 0%{opacity:0;transform:translateY(16px)} 100%{opacity:1;transform:translateY(0)} }
         @keyframes ctaReveal { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes qbThrow {
+          0%   { transform: translate(-80px, 120px) scale(0.25) rotate(-30deg); opacity:0; }
+          15%  { opacity:1; }
+          45%  { transform: translate(20px, -30px) scale(1.15) rotate(340deg); opacity:1; }
+          60%  { transform: translate(0px, 8px) scale(0.95) rotate(360deg); opacity:1; }
+          72%  { transform: translate(0px, -4px) scale(1.02) rotate(360deg); opacity:1; }
+          82%  { transform: translate(0px, 0px) scale(1.0) rotate(360deg); opacity:1; }
+          100% { transform: translate(0px, 0px) scale(1.0) rotate(360deg); opacity:1; }
+        }
+        @keyframes splashFadeOut {
+          0%   { opacity:1; }
+          100% { opacity:0; }
+        }
+        @keyframes splashTextIn {
+          0%   { opacity:0; transform:translateY(8px); }
+          100% { opacity:1; transform:translateY(0); }
+        }
       `}</style>
 
       {/* Floating balls - full screen coverage */}
@@ -4767,7 +4784,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
       <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'30%', background:'linear-gradient(0deg,rgba(7,9,13,0.7),transparent)', zIndex:1, pointerEvents:'none' }} />
 
       {/* Logo */}
-      <div style={{ position:'relative', zIndex:2, textAlign:'center', animation:'logoReveal 0.7s ease forwards', marginBottom: phase === 'cta' ? 40 : 0 }}>
+      <div style={{ position:'relative', zIndex:2, textAlign:'center', animation:'qbThrow 1.4s cubic-bezier(0.22,0.61,0.36,1) forwards', marginBottom: phase === 'cta' ? 40 : 0 }}>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:64, lineHeight:1, letterSpacing:'-1px', marginBottom:10 }}>
           <span style={{ color:cC }}>C</span>
           <span style={{ color:cOach }}>oach</span>
@@ -4835,89 +4852,20 @@ function Onboarding({ onLaunch, brand='Red — C+IQ colored' }) {
 
 
 // ─── NAV BUTTON WITH LONG PRESS ──────────────────────────────────────────────
-function NavButton({ id, icon, label, submenu, isActive, P, al, setPage }) {
-  const [showSub, setShowSub] = useState(false)
-  const pressTimer = useRef(null)
-  const didLongPress = useRef(false)
-
-  function handlePressStart(e) {
-    if (!submenu || submenu.length === 0) return
-    didLongPress.current = false
-    pressTimer.current = setTimeout(() => {
-      didLongPress.current = true
-      setShowSub(true)
-    }, 400)
-  }
-
-  function handlePressEnd(e) {
-    clearTimeout(pressTimer.current)
-  }
-
-  function handleTouchStart(e) {
-    // Prevent iOS text selection on long press
-    e.preventDefault()
-    handlePressStart(e)
-  }
-
-  function handleTouchEnd(e) {
-    clearTimeout(pressTimer.current)
-    // If not a long press, treat as a tap
-    if (!didLongPress.current) {
-      if (!showSub) setPage(id)
-    }
-    didLongPress.current = false
-  }
-
-  function handleClick(e) {
-    // Only fire on non-touch (mouse click) when submenu not open
-    if (!showSub) setPage(id)
-  }
-
-  function handleContextMenu(e) {
-    // Prevent iOS context menu from appearing on long press
-    e.preventDefault()
-  }
-
+function NavButton({ id, icon, label, isActive, P, al, setPage }) {
   return (
     <div style={{ flex:1, position:'relative' }}>
-      {showSub && (
-        <>
-          <div
-            onClick={()=>setShowSub(false)}
-            onTouchEnd={()=>setShowSub(false)}
-            style={{ position:'fixed', inset:0, zIndex:90, WebkitTapHighlightColor:'transparent' }} />
-          <div style={{ position:'absolute', bottom:'100%', left:'50%', transform:'translateX(-50%)', background:'#0f1219', border:`1px solid ${al(P,0.35)}`, borderRadius:8, padding:6, zIndex:100, minWidth:130, boxShadow:'0 -8px 24px rgba(0,0,0,0.7)', animation:'fadeIn 0.15s ease', marginBottom:6 }}>
-            <div style={{ fontSize:8, letterSpacing:1.5, color:'#3d4559', textTransform:'uppercase', fontWeight:700, padding:'3px 8px 5px', borderBottom:'1px solid #1e2330', marginBottom:4 }}>{label}</div>
-            {(submenu||[]).map((item,i) => (
-              <div key={i}
-                onMouseDown={()=>{ setPage(id); setShowSub(false) }}
-                onTouchEnd={(e)=>{ e.preventDefault(); setPage(id); setShowSub(false) }}
-                style={{ padding:'10px 10px', cursor:'pointer', fontSize:13, color:'#f2f4f8', borderRadius:4, display:'flex', alignItems:'center', gap:6, WebkitTapHighlightColor:'transparent' }}>
-                {item.label}
-              </div>
-            ))}
-          </div>
-        </>
-      )}
       <button
-        onClick={handleClick}
-        onMouseDown={handlePressStart}
-        onMouseUp={handlePressEnd}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onContextMenu={handleContextMenu}
-        style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'10px 2px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation', userSelect:'none', WebkitUserSelect:'none' }}
-      >
-        {isActive && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2, background:P }} />}
-        <span style={{ fontSize:14, color:isActive?P:'#3d4559' }}>{icon}</span>
+        onClick={()=>setPage(id)}
+        onTouchEnd={(e)=>{ e.preventDefault(); setPage(id) }}
+        style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'10px 2px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation', userSelect:'none', WebkitUserSelect:'none' }}>
+        {isActive && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:P, borderRadius:1 }} />}
+        <span style={{ fontSize:16, color:isActive?P:'#3d4559' }}>{icon}</span>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:isActive?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
       </button>
     </div>
   )
 }
-
-
-// ─── SEASONAL THEMES ─────────────────────────────────────────────────────────
 function getSpecialTheme() {
   const t=new Date(), m=t.getMonth()+1, d=t.getDate()
   if(m===11&&d>=20&&d<=28) return {badge:'🦃',msg:'Happy Thanksgiving, Coach!'}
@@ -4934,10 +4882,16 @@ export default function CoachIQ() {
   const [launched, setLaunched] = useState(false)
   const [tutorialState, setTutorialState] = useState('pending') // pending|tour|guide|done
   const [homeLocation, setHomeLocation] = useState('')
-  const [showSplash, setShowSplash] = useState(true)
+  const [showSplash, setShowSplash] = useState(() => {
+    try { return !localStorage.getItem('coachiq_ever_launched') }
+    catch(e) { return true }
+  })
   const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
   const [brand, setBrand] = useState('Red — C+IQ colored')
   const [page, setPage] = useState('home')
+  const [activeMode, setActiveMode] = useState(null)
+  const [showAllGrid, setShowAllGrid] = useState(false)
+  const [scrollToLocation, setScrollToLocation] = useState(false)
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(500)
   const [gauntlets, setGauntlets] = useState(0)
@@ -5010,7 +4964,10 @@ export default function CoachIQ() {
   }
 
   if (showSplash) return (
-    <SplashScreen onDone={(skipToApp) => { setShowSplash(false); if (skipToApp) setLaunched(true) }} alreadyAuthed={launched} brand={brand} />
+    <SplashScreen onDone={(skipToApp) => { 
+      try { localStorage.setItem('coachiq_ever_launched','1') } catch(e){}
+      setShowSplash(false); if (skipToApp) setLaunched(true) 
+    }} alreadyAuthed={launched} brand={brand} />
   )
   if (!launched) return (
     <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} brand={brand} />
@@ -5028,12 +4985,46 @@ export default function CoachIQ() {
   )
 
   const NAV_ITEMS = [
-    { id:'home',     icon:'🏠', label:'HOME',     submenu:[{label:'Dashboard'},{label:'Gauntlet'},{label:'Situational'}] },
-    { id:'schemes',  icon:'📋', label:'SCHEMES',  submenu:[{label:'Offense'},{label:'Defense'},{label:'Playbook'},{label:'History'}] },
-    { id:'team',     icon:'🏆', label:'TEAM',     submenu:[{label:'Roster'},{label:'Lineup'},{label:'Schedule'},{label:'Practice'}] },
-    { id:'news',     icon:'📰', label:'NEWS',     submenu:[{label:'All'},{label:'Coaching'},{label:'Sports News'}] },
-    { id:'learn',    icon:'🎓', label:'LEARN',    submenu:[{label:'Play Builder'},{label:'Gauntlet'},{label:'Rulebook'},{label:'Help'}] },
-    { id:'more',     icon:'⋯',  label:'MORE',     submenu:[{label:'Playbook'},{label:'Scout'},{label:'Settings'}] },
+    { id:'home',    icon:'🏠', label:'HOME'    },
+    { id:'schemes', icon:'📋', label:'SCHEMES' },
+    { id:'team',    icon:'🏆', label:'TEAM'    },
+    { id:'learn',   icon:'🎓', label:'LEARN'   },
+  ]
+
+  // Feature grid items for ALL button
+  const ALL_FEATURES = [
+    {
+      category:'Build', color:'#C0392B', items:[
+        { icon:'⚔️', label:'Offense',      action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } },
+        { icon:'🛡', label:'Defense',      action:()=>{ setPage('schemes'); setActiveMode('schemes_defense') } },
+        { icon:'✏️', label:'Play Builder', action:()=>{ setPage('learn');   setActiveMode('playbuilder') } },
+        { icon:'📖', label:'Playbook',     action:()=>{ setPage('schemes'); setActiveMode('playbook') } },
+      ]
+    },
+    {
+      category:'Team', color:'#6b9fff', items:[
+        { icon:'👥', label:'Roster',    action:()=>{ setPage('team'); } },
+        { icon:'🏟', label:'Lineup',    action:()=>{ setPage('team'); } },
+        { icon:'📅', label:'Schedule',  action:()=>{ setPage('team'); } },
+        { icon:'🏃', label:'Practice',  action:()=>{ setPage('team'); } },
+      ]
+    },
+    {
+      category:'Learn & Analyze', color:'#4ade80', items:[
+        { icon:'⚡', label:'Gauntlet',  action:()=>{ setPage('learn'); setActiveMode('gauntlet') } },
+        { icon:'🔍', label:'Scout',     action:()=>{ setPage('more');  setActiveMode('scout') } },
+        { icon:'📊', label:'Analytics', action:()=>{ setPage('team');  } },
+        { icon:'📰', label:'News',      action:()=>{ setPage('news') } },
+      ]
+    },
+    {
+      category:'Coming Soon', color:'#f59e0b', soon:true, items:[
+        { icon:'🎥', label:'Film Room'  },
+        { icon:'🖨', label:'Wristband'  },
+        { icon:'👤', label:'AthleteIQ'  },
+        { icon:'🤝', label:'Cowork'     },
+      ]
+    },
   ]
 
   return (
@@ -5135,14 +5126,56 @@ export default function CoachIQ() {
           {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
           {page==='news'  && <NewsPage  P={P} S={S} al={al} sport={sport} callAI={callAI} />}
           {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} />}
-          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} activeTeam={activeTeam} setTeams={setTeams} />}
+          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} activeTeam={activeTeam} setTeams={setTeams} scrollToLocation={scrollToLocation} />}
         </div>
 
         {/* BOTTOM NAV */}
-        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:'min(640px,100%)', background:'#07090d', borderTop:'1px solid #0e1220', display:'flex', zIndex:50, paddingBottom:'env(safe-area-inset-bottom,0px)' }}>
-          {NAV_ITEMS.map(({ id, icon, label, submenu }) => (
-            <NavButton key={id} id={id} icon={icon} label={label} submenu={submenu} isActive={page===id} P={P} al={al} setPage={setPage} />
-          ))}
+        <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:'min(640px,100%)', zIndex:50, background:'#07090d' }}>
+          {/* ALL Features Grid */}
+          {showAllGrid && (
+            <>
+              <div onClick={()=>setShowAllGrid(false)} style={{ position:'fixed', inset:0, zIndex:48, background:'rgba(0,0,0,0.5)' }} onTouchStart={()=>setShowAllGrid(false)} />
+              <div style={{ position:'relative', zIndex:49, background:'#0d1117', borderTop:'1px solid #1e2330', padding:'10px 10px 6px', maxHeight:'60vh', overflowY:'auto', WebkitOverflowScrolling:'touch' }}>
+                {ALL_FEATURES.map(cat => (
+                  <div key={cat.category} style={{ marginBottom:8 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:5 }}>
+                      <div style={{ width:6, height:6, borderRadius:'50%', background:cat.color, flexShrink:0 }} />
+                      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:cat.color }}>{cat.category}</span>
+                      {cat.soon && <span style={{ fontSize:7, color:'#f59e0b', fontWeight:700, background:'rgba(245,158,11,0.1)', borderRadius:3, padding:'1px 4px' }}>🏒 More sports + features coming</span>}
+                    </div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(4,minmax(0,1fr))', gap:4 }}>
+                      {cat.items.map((item, i) => (
+                        <div key={i}
+                          onClick={cat.soon ? undefined : ()=>{ item.action && item.action(); setShowAllGrid(false) }}
+                          onTouchEnd={cat.soon ? undefined : (e)=>{ e.preventDefault(); item.action && item.action(); setShowAllGrid(false) }}
+                          style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, padding:'8px 4px 7px', borderRadius:8, border:`1px solid ${cat.soon?'#1e2330':al(cat.color,0.3)}`, background:cat.soon?'#111620':al(cat.color,0.06), cursor:cat.soon?'default':'pointer', opacity:cat.soon?0.5:1, WebkitTapHighlightColor:'transparent', minHeight:60 }}>
+                          <span style={{ fontSize:18 }}>{item.icon}</span>
+                          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, fontWeight:700, letterSpacing:'0.3px', color:cat.soon?'#3d4559':cat.color==='#C0392B'?'#ef8070':cat.color==='#6b9fff'?'#6b9fff':cat.color==='#4ade80'?'#4ade80':'#9aa0b0', textAlign:'center', lineHeight:1.2 }}>{item.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {/* Nav bar */}
+          <div style={{ borderTop:'1px solid #0e1220', display:'flex', paddingBottom:'env(safe-area-inset-bottom,0px)' }}>
+          {/* 4 main nav tabs */}
+            {NAV_ITEMS.map(({ id, icon, label }) => (
+              <NavButton key={id} id={id} icon={icon} label={label} isActive={page===id} P={P} al={al} setPage={(pg) => { setPage(pg); setShowAllGrid(false) }} />
+            ))}
+            {/* ALL button */}
+            <div style={{ flex:1, position:'relative' }}>
+              <button
+                onClick={()=>setShowAllGrid(g=>!g)}
+                style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'10px 2px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation' }}>
+                {showAllGrid && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:'#f59e0b', borderRadius:1 }} />}
+                <span style={{ fontSize:16 }}>⊞</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#f59e0b', fontWeight:700, letterSpacing:'0.8px' }}>ALL</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>
@@ -5451,7 +5484,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
       </div>
 
-      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} onOpenTeamTab={()=>setSection('roster')} startExpanded={(teams[sport]||[]).length===0} />
+      <TeamManagerCard sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} P={P} al={al} setCfg={setCfg} />
 
       {!currentTeam ? (
         <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
@@ -5708,17 +5741,10 @@ function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
 
 // ─── MASCOT BUILDER ───────────────────────────────────────────────────────────
 
-function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab, startExpanded=false }) {
+function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
   const [mode, setMode] = useState('view')
   const [showMascotBuilder, setShowMascotBuilder] = useState(false)
-  const [expanded, setExpanded] = useState(startExpanded || false)
-  // Auto-open create mode when startExpanded and no teams
-  useEffect(() => {
-    if (startExpanded && (teams[sport]||[]).length === 0) {
-      setExpanded(true)
-      setMode('create')
-    }
-  }, [sport])
+  const [expanded, setExpanded] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
     const [error, setError] = useState('')
@@ -5783,7 +5809,22 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
       )}
 
       <div style={{ marginTop:14 }}>
-        <div onClick={()=>{ if(current && onOpenTeamTab) { onOpenTeamTab() } else if(sportTeams.length===0 && onOpenTeamTab) { onOpenTeamTab() } else { setExpanded(e=>!e) } }} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
+        <div onClick={()=>{
+              if (current && onOpenTeamTab) {
+                // Has team + on home page → go to team tab
+                onOpenTeamTab()
+              } else if (sportTeams.length === 0 && onOpenTeamTab) {
+                // No teams + on home page → go to team tab to create
+                onOpenTeamTab()
+              } else if (sportTeams.length === 0 && !onOpenTeamTab) {
+                // No teams + on team page → expand and open create form
+                setExpanded(true)
+                setMode('create')
+              } else {
+                // Has teams + on team page → toggle expand
+                setExpanded(e=>!e)
+              }
+            }} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
           <MascotAvatar mascotId={current?.mascot} color={P} size={32} />
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:current?15:13, color:'#f2f4f8', textTransform:'uppercase' }}>
