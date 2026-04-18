@@ -660,7 +660,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
-    buildPrompt:(f)=>`You are an elite youth football coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Generate the best all-around scheme.':'Tailor to attack the '+f.defense+' defense.'} Return 6 plays mixing runs and passes. Use types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth football coordinator. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==="Unknown / Surprise Me"||f.defense==="Multiple / Varies"?"Generate the best all-around scheme.":`Tailor to beat the ${f.defense} defense.`} Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 6 plays using types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":6,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
     scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
   },
   Basketball: {
@@ -675,7 +675,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth basketball coordinator. Generate a scheme package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 plays. Use types: SET PLAY HALF COURT, INBOUND BASELINE, PRESS BREAK, FAST BREAK, ZONE ATTACK, END OF GAME. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explain in simple words why this play has this name — break down each word for a youth coach"},{"number":2,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"play name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth basketball coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: HALF COURT SET, TRANSITION, PRESS BREAK, OUT OF BOUNDS, QUICK HITTER, MOTION. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -690,7 +690,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth baseball coordinator. Generate a game plan package. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, DEFENSE ALIGNMENT, BASERUNNING RULE, PITCHING STRATEGY, INFIELD COVERAGE, BATTING APPROACH. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth baseball coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: OFFENSIVE APPROACH, BASERUNNING SITUATION, BUNT PLAY, HIT AND RUN, FIRST AND THIRD, STEAL SITUATION. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
     scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Soccer: {
@@ -706,7 +706,7 @@ const SPORTS = {
       {id:'oppShape',  label:'Opponent Shape',     opts:['Unknown / Balanced','4-4-2 Block','5-4-1 Defensive','4-3-3 High Press','4-2-3-1','3-5-2 Wings','Long Ball Direct']},
     ],
     positions:['Goalkeeper','Center Back','Full Back','Defensive Mid','Central Mid','Attacking Mid','Winger','Striker','Wing Back'],
-    buildPrompt:(f)=>`You are an elite youth soccer coach. Generate a tactical session plan. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Format: ${f.format||'11v11'}. Return 6 tactical patterns/set pieces. Use types: ATTACKING PATTERN, DEFENSIVE SHAPE, SET PIECE ATTACK, SET PIECE DEFENSE, TRANSITION, PRESSING TRIGGER. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explain this tactical concept in simple terms for a youth coach"},{"number":2,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"pattern name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth soccer coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: ATTACKING BUILDUP, SET PIECE ATTACK, CORNER KICK, FREE KICK, COUNTER ATTACK, DEFENSIVE SHAPE. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
     scenarioPrompt:(diff)=>`You are a soccer coaching AI. Create a youth soccer coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. DOWN 1 GOAL 15 MIN LEFT ATTACKING","phase":"ATTACK or DEFENSE or SET PIECE or TRANSITION or TIMEOUT","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Softball: {
@@ -721,7 +721,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Tendency',  opts:['Unknown / Balanced','Slap Hitters Heavy','Power Lineup','Bunt Every Opportunity','Free Swingers','Patient Takes Pitches','Aggressive First Pitch','Pull Hitters Only','Spray Hitters','Speed Team Steals Often']},
     ],
     positions:['Pitcher','Catcher','First Base','Second Base','Third Base','Shortstop','Left Field','Center Field','Right Field'],
-    buildPrompt:(f)=>`You are an elite youth softball coach with expertise in ASA/USA Softball rules. Generate a game plan. ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. Key softball rules: underhand pitching, no leading off until pitch release, double first base safety bag. Return 6 situational strategies. Use types: OFFENSE SITUATIONAL, SLAP/BUNT GAME, PITCHING STRATEGY, CIRCLE DEFENSE, OUTFIELD COVERAGE, BASERUNNING RULE. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","plays":[{"number":1,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explain this softball concept simply"},{"number":2,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":3,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":4,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":5,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"},{"number":6,"name":"strategy name","type":"TYPE","note":"when to use","nameExplanation":"explanation"}],"defenseTip":"tip","coachingCue":"phrase"}`,
+    buildPrompt:(f)=>`You are an elite youth softball coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: OFFENSIVE APPROACH, BASERUNNING SITUATION, BUNT PLAY, HIT AND RUN, FIRST AND THIRD, STEAL SITUATION. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","nameExplanation":"explain name simply","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
     scenarioPrompt:(diff)=>`You are a softball coaching AI with knowledge of ASA/USA Softball rules. Create a coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 5TH RUNNER ON 2ND 1 OUT TIED 2-2","phase":"OFFENSE or PITCHING or DEFENSE or BASERUNNING","question":"2-3 sentence softball-specific scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
 
@@ -860,7 +860,7 @@ function QuickTourModal({ onDone, P, al, setPage }) {
             {step > 0 && (
               <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← Back</button>
             )}
-            <button onClick={()=>{ if(isLast) onDone(); else setStep(s=>s+1) }} style={{ flex:2, padding:'9px', background:current.action?'transparent':P, border:current.action?'1px solid #1e2330':'none', borderRadius:5, color:current.action?'#6b7a96':'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
+            <button onClick={()=>{ if(isLast) onDone(); else setStep(s=>s+1) }} style={{ flex:2, padding:'9px', background:current.action?'#0f1219':P, border:current.action?'1px solid #1e2330':'none', borderRadius:5, color:current.action?'#6b7a96':'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
               {isLast ? 'Start Coaching! 🏈' : current.action ? 'Skip this step →' : 'Next →'}
             </button>
           </div>
@@ -1077,6 +1077,39 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
               )}
             </div>
           )}
+
+          {/* Pre-snap read */}
+          {play.presnap && (
+            <div style={{ marginTop:6, padding:'6px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:5 }}>
+              <div style={{ fontSize:8, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>👁 Pre-Snap Read</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.presnap}</div>
+            </div>
+          )}
+
+          {/* Audible */}
+          {play.audible && (
+            <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:5 }}>
+              <div style={{ fontSize:8, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>📣 Audible</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.audible}</div>
+            </div>
+          )}
+
+          {/* Youth coaching cue */}
+          {play.youthCue && (
+            <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:5 }}>
+              <div style={{ fontSize:8, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>🧒 Youth Cue</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontStyle:'italic' }}>"{play.youthCue}"</div>
+            </div>
+          )}
+
+          {/* Common mistake */}
+          {play.mistake && (
+            <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:5 }}>
+              <div style={{ fontSize:8, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>⚠️ Common Mistake</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.mistake}</div>
+            </div>
+          )}
+
           <div style={{ display:'flex', gap:10, marginTop:5, flexWrap:'wrap' }}>
             <span style={{ fontSize:10, color:P, cursor:'pointer' }} onClick={()=>setExpanded(e=>!e)}>{expanded?'▲ Collapse':'▼ Show diagram'}</span>
             {expanded && <span style={{ fontSize:10, color:'#6b9fff', cursor:'pointer' }} onClick={e=>{e.stopPropagation();const nb=!showBreakdown;setShowBreakdown(nb);if(nb&&!steps)loadSteps()}}>{showBreakdown?'▲ Hide breakdown':'▼ Show breakdown'}</span>}
@@ -2037,7 +2070,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
         <div style={{ padding:14 }}>
           <div style={{ display:'flex', gap:7, marginBottom:12 }}>
             {Object.keys(diffMap).map(d => (
-              <button key={d} onClick={() => setDifficulty(d)} style={{ flex:1, padding:'8px 4px', background:difficulty===d?diffMap[d].color:'transparent', border:`1px solid ${difficulty===d?diffMap[d].color:'#1e2330'}`, borderRadius:6, color:difficulty===d?'#07090d':diffMap[d].color, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>{d.toUpperCase()}<div style={{ fontSize:9, fontWeight:400, opacity:0.8, marginTop:1 }}>+{diffMap[d].pts} IQ</div></button>
+              <button key={d} onClick={() => setDifficulty(d)} style={{ flex:1, padding:'8px 4px', background:difficulty===d?diffMap[d].color:'#0f1219', border:`1px solid ${difficulty===d?diffMap[d].color:'#1e2330'}`, borderRadius:6, color:difficulty===d?'#07090d':diffMap[d].color, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>{d.toUpperCase()}<div style={{ fontSize:9, fontWeight:400, opacity:0.8, marginTop:1 }}>+{diffMap[d].pts} IQ</div></button>
             ))}
           </div>
           <PBtn onClick={loadScenario} disabled={loading} color={P}>{loading ? 'LOADING...' : scenario ? 'NEXT SCENARIO' : 'START GAUNTLET'}</PBtn>
@@ -3763,7 +3796,7 @@ function PlayNameBuilder({ P, S, al, sport }) {
                   const isSelected = choices[currentStep.id] === val
                   return (
                     <div key={val} onClick={()=>setChoices(c=>({...c,[currentStep.id]:val}))} style={{ padding:'8px 12px', borderRadius:5, border:`1px solid ${isSelected?P:'#1e2330'}`, background:isSelected?al(P,0.12):'#161922', cursor:'pointer', display:'flex', alignItems:'center', gap:8, transition:'all 0.15s' }}>
-                      <div style={{ width:14, height:14, borderRadius:'50%', border:`2px solid ${isSelected?P:'#3d4559'}`, background:isSelected?P:'transparent', flexShrink:0 }}/>
+                      <div style={{ width:14, height:14, borderRadius:'50%', border:`2px solid ${isSelected?P:'#3d4559'}`, background:isSelected?P:'#0f1219', flexShrink:0 }}/>
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:12, color:isSelected?P:'#f2f4f8', fontWeight:isSelected?700:400 }}>{label}</div>
                         {ex && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{ex}</div>}
@@ -3966,209 +3999,234 @@ function RulebookPage({ sport, P, al, callAI }) {
   )
 }
 // ─── NEWS PAGE ────────────────────────────────────────────────────────────────
-function NewsPage({ P, S, al, sport, callAI }) {
-  // Each channel has its own state so they load independently
+function NewsPage({ P, S, al, sport }) {
   const [activeChannel, setActiveChannel] = useState('sport')
-  const [channels, setChannels] = useState({
-    sport:     { items:[], loading:false, loaded:false },
-    sportNews: { items:[], loading:false, loaded:false },
-  })
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [loaded, setLoaded] = useState(false)
 
   const CHANNELS = [
     { id:'sport',     label:sport+' Coaching',  icon:'📋', desc:'Drills, schemes & tips for '+sport },
     { id:'sportNews', label:sport+' News',       icon:'⚡', desc:'Pro + college '+sport+' news' },
   ]
 
-  const PROMPTS = {
-    sport: (s) => `You are an expert ${s} coaching knowledge curator. Generate 5 coaching items for youth ${s} coaches. Include: 1 drill with step-by-step instructions, 1 scheme tip, 1 coaching science item (with research basis), 1 motivational/culture concept, 1 safety or player development tip. Every item must be 100% specific to ${s}. Return ONLY valid JSON: {"items":[{"type":"drill","title":"...","body":"2-3 sentences","source":"source name","searchQuery":"specific google search","ytSearch":"youtube search term"},{"type":"concept","title":"...","body":"...","source":"...","searchQuery":"...","ytSearch":"..."},...]}`,
-
-    youth: () => `You are a youth sports coaching expert. Generate 5 items about youth coaching (any sport): child development, age-appropriate coaching, communication with parents, player motivation, mental health in youth sports, creating a positive culture, working with different skill levels. Be specific, practical, evidence-based. Return ONLY valid JSON: {"items":[{"type":"science","title":"...","body":"2-3 sentences","source":"research or org name","searchQuery":"google search","ytSearch":"youtube search"},...]}.`,
-
-    sportNews: (s) => `You are a sports news expert. Today is 2025. Generate 4 VERY RECENT ${s} news items from the last 7-10 days (or last 30 days max). REAL current player and team names only. No stories older than 30 days. Cover: signings, trades, draft picks, injuries, game results. Leagues: ${ s==='Football'?'NFL, CFB':s==='Basketball'?'NBA, NCAA':s==='Baseball'?'MLB':s==='Soccer'?'MLS, EPL':'NPF' } (${s==='Football'?'NFL, college football':s==='Basketball'?'NBA, NCAA':s==='Baseball'?'MLB, minor leagues':s==='Soccer'?'MLS, EPL, Champions League, USMNT':'NPF, college softball'}). Be specific and current. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences with specific names and details","source":"ESPN/AP/team source","searchQuery":"specific google search to find this story","ytSearch":"youtube search for highlights or analysis"},...]}.`,
-
-    allNews: () => `You are a sports news editor. Today is 2025. Generate 5 VERY RECENT sports news items from the last 7-10 days across NFL, NBA, MLB, MLS/soccer, and one other sport. Real names and teams only. No stories older than 30 days: football, basketball, baseball, soccer, and other sports. Cover pro and college sports. Include: trades, signings, coaching moves, playoff/championship updates, record performances. Use real names, teams, and leagues. Make each item a different sport. Return ONLY valid JSON: {"items":[{"type":"news","title":"...","body":"2-3 sentences","source":"ESPN/AP/etc","searchQuery":"google search","ytSearch":"youtube highlights search"},...]}.`,
+  // RSS feed URLs per sport and channel
+  const RSS_FEEDS = {
+    sport: {
+      Football:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.footballscoop.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://americanfootballcoaches.com/feed'],
+      Basketball: ['https://api.rss2json.com/v1/api.json?rss_url=https://www.coachesinsider.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://hoopscoach.org/feed'],
+      Baseball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://blogs.usabaseball.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://www.baseballcoachingdigest.com/feed'],
+      Soccer:     ['https://api.rss2json.com/v1/api.json?rss_url=https://www.soccercoachweekly.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://www.soccerspecific.com/feed'],
+      Softball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://blogs.usasoftball.com/feed'],
+    },
+    sportNews: {
+      Football:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nfl/news','https://api.rss2json.com/v1/api.json?rss_url=https://feeds.nfl.com/feeds-rs/news.json'],
+      Basketball: ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nba/news'],
+      Baseball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news'],
+      Soccer:     ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/soccer/news'],
+      Softball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news'],
+    }
   }
 
-  const TYPE_COLORS = { news:'#ef4444', drill:P, science:'#4ade80', concept:'#6b9fff', tip:'#c084fc' }
-  const TYPE_LABELS = { news:'SPORTS NEWS', drill:'DRILL', science:'COACHING SCIENCE', concept:'CONCEPT', tip:'TIP' }
-  const TYPE_ICONS  = { news:'⚡', drill:'🏃', science:'🔬', concept:'💡', tip:'✅' }
+  // Cache key includes sport and channel
+  function getCacheKey(ch) { return `coachiq_rss_${ch}_${sport}` }
 
+  // Load RSS feed for a channel
   async function loadChannel(channelId) {
-    if (channels[channelId]?.loaded) return
-    const cacheKey = `coachiq_feed_${channelId}_${sport}`
+    setLoading(true)
+    setError(null)
+    setLoaded(false)
+
+    // Check session cache (30 min)
     try {
-      const cached = sessionStorage.getItem(cacheKey)
+      const cached = sessionStorage.getItem(getCacheKey(channelId))
       if (cached) {
-        setChannels(c => ({ ...c, [channelId]: { items: JSON.parse(cached), loading:false, loaded:true } }))
-        return
+        const { items: cachedItems, ts } = JSON.parse(cached)
+        if (Date.now() - ts < 30 * 60 * 1000) {
+          setItems(cachedItems)
+          setLoading(false)
+          setLoaded(true)
+          return
+        }
       }
     } catch(e) {}
 
-    setChannels(c => ({ ...c, [channelId]: { ...c[channelId], loading:true } }))
-    try {
-      const prompt = channelId==='sport'     ? PROMPTS.sport(sport)
-                   : channelId==='youth'     ? PROMPTS.youth()
-                   : channelId==='sportNews' ? PROMPTS.sportNews(sport)
-                   : PROMPTS.allNews()
-      const raw = await callAI(prompt)
-      if (!raw || raw.trim() === '') throw new Error('Empty response from AI')
-      let s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      s = s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/,\s*([\]}])/g,'$1')
-      const a = s.indexOf('{'), b = s.lastIndexOf('}')
-      if (a < 0 || b <= a) throw new Error('No JSON in response')
-      const parsed = JSON.parse(s.slice(a, b+1))
-      const items = (parsed.items || []).filter(i => i && i.title && i.body)
-      if (items.length === 0) throw new Error('No valid items in response')
-      try { sessionStorage.setItem(cacheKey, JSON.stringify(items)) } catch(e2){}
-      setChannels(c => ({ ...c, [channelId]: { items, loading:false, loaded:true, error:null } }))
-    } catch(e) {
-      console.error('NewsPage loadChannel error:', channelId, e.message)
-      const isRateLimit = e.message && e.message.includes('rate_limit')
-      const userMsg = isRateLimit ? 'Too many requests — please wait 30 seconds and try again.' : e.message?.slice(0,80) || 'Load failed'
-      setChannels(c => ({ ...c, [channelId]: { items:[], loading:false, loaded:true, error:userMsg } }))
+    const urls = (RSS_FEEDS[channelId] || {})[sport] || (RSS_FEEDS[channelId] || {}).Football || []
+    if (!urls.length) {
+      setError('No feed available for this sport.')
+      setLoading(false)
+      return
     }
-  }
 
-  function loadAll() {
-    // Load on demand only - no auto-loading
-  }
-
-  useEffect(() => {
-    // Clear sport-specific cache when sport changes so news refreshes
     try {
-      sessionStorage.removeItem('coachiq_feed_sport_'+sport)
-      sessionStorage.removeItem('coachiq_feed_sportNews_'+sport)
+      // Fetch all feeds in parallel, use first that succeeds with items
+      const results = await Promise.allSettled(
+        urls.map(url => fetch(url, { headers: { 'Accept': 'application/json' } }).then(r => r.json()))
+      )
+      const allItems = []
+      for (const r of results) {
+        if (r.status === 'fulfilled' && r.value?.items?.length) {
+          allItems.push(...r.value.items)
+        }
+      }
+      if (!allItems.length) throw new Error('No articles found. Try again later.')
+
+      // Sort by date, deduplicate by title
+      const seen = new Set()
+      const deduped = allItems
+        .filter(it => { const key = it.title?.trim(); if(!key||seen.has(key)){return false} seen.add(key); return true })
+        .sort((a,b) => new Date(b.pubDate||0) - new Date(a.pubDate||0))
+        .slice(0, 15)
+
+      setItems(deduped)
+      setLoaded(true)
+      try { sessionStorage.setItem(getCacheKey(channelId), JSON.stringify({ items: deduped, ts: Date.now() })) } catch(e){}
+    } catch(e) {
+      setError(e.message || 'Failed to load feed. Check your connection.')
+    }
+    setLoading(false)
+  }
+
+  // Reset when sport changes
+  useEffect(() => {
+    setItems([])
+    setLoaded(false)
+    setError(null)
+    try {
+      sessionStorage.removeItem(getCacheKey('sport'))
+      sessionStorage.removeItem(getCacheKey('sportNews'))
     } catch(e) {}
-    setChannels({ sport: { items:[], loading:false, loaded:false }, sportNews: { items:[], loading:false, loaded:false } })
-    // Load active channel immediately, others in background
-    // Reset loaded state when sport changes so user can reload
-    // Don't auto-load - user taps channel to load
   }, [sport])
 
-  useEffect(() => {
-    if (activeChannel !== 'all') loadChannel(activeChannel)
-    else loadAll()
-  }, [activeChannel])
-
-  function refreshChannel(channelId) {
-    const idsToRefresh = channelId === 'all' ? ['sport','youth','sportNews','allNews'] : [channelId]
-    idsToRefresh.forEach(id => {
-      try { sessionStorage.removeItem(`coachiq_feed_${id}_${sport}`) } catch(e) {}
-      setChannels(c => ({ ...c, [id]: { items:[], loading:false, loaded:false } }))
-    })
-    setTimeout(() => {
-      if (channelId === 'all') loadAll()
-      else loadChannel(channelId)
-    }, 50)
+  function switchChannel(id) {
+    if (id === activeChannel && loaded) return
+    setActiveChannel(id)
+    setItems([])
+    setLoaded(false)
+    setError(null)
+    loadChannel(id)
   }
 
-  // Combine items for "All" channel
-  function getAllItems() {
-    const all = []
-    ;['sport','youth','sportNews','allNews'].forEach(id => {
-      (channels[id]?.items || []).forEach(item => all.push({ ...item, _channel: id }))
-    })
-    // interleave: sort so news and coaching alternate
-    const news = all.filter(i => i.type === 'news')
-    const coaching = all.filter(i => i.type !== 'news')
-    const result = []
-    const max = Math.max(news.length, coaching.length)
-    for (let i = 0; i < max; i++) {
-      if (coaching[i]) result.push(coaching[i])
-      if (news[i]) result.push(news[i])
-    }
-    return result
+  function formatDate(dateStr) {
+    if (!dateStr) return ''
+    const d = new Date(dateStr)
+    if (isNaN(d)) return ''
+    const now = new Date()
+    const diff = now - d
+    if (diff < 3600000) return Math.floor(diff/60000) + 'm ago'
+    if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago'
+    if (diff < 604800000) return Math.floor(diff/86400000) + 'd ago'
+    return d.toLocaleDateString([],{month:'short',day:'numeric'})
   }
 
-  const activeChData = activeChannel === 'all'
-    ? { items: getAllItems(), loading: ['sport','youth','sportNews','allNews'].some(id => channels[id]?.loading) }
-    : channels[activeChannel] || { items:[], loading:false }
-
-  function FeedItem({ item, i }) {
-    const tc = TYPE_COLORS[item.type] || P
-    return (
-      <div style={{ background:'#0f1219', border:`0.5px solid ${al(tc,0.18)}`, borderRadius:6, padding:'12px 14px', marginBottom:10, borderLeft:`3px solid ${tc}` }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
-          <span style={{ fontSize:13 }}>{TYPE_ICONS[item.type]||'📰'}</span>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:tc, textTransform:'uppercase', letterSpacing:'1px' }}>{TYPE_LABELS[item.type]||item.type}</span>
-          {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
-        </div>
-        <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:5, lineHeight:1.4 }}>{item.title}</div>
-        <div style={{ fontSize:12, color:'#9aa0b0', lineHeight:1.7, marginBottom: (item.searchQuery||item.ytSearch) ? 8 : 0 }}>{item.body}</div>
-        {(item.searchQuery || item.ytSearch) && (
-          <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-            {item.searchQuery && (
-              <a href={'https://www.google.com/search?q='+encodeURIComponent(item.searchQuery)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(107,154,255,0.1)', borderRadius:4, border:'1px solid rgba(107,154,255,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>🔍 Read more</a>
-            )}
-            {item.ytSearch && (
-              <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(item.ytSearch)} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 9px', background:'rgba(239,68,68,0.1)', borderRadius:4, border:'1px solid rgba(239,68,68,0.2)', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}>▶ Watch</a>
-            )}
-          </div>
-        )}
-      </div>
-    )
+  function stripHtml(str) {
+    return (str||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&quot;/g,'"').trim()
   }
+
+  const activeChData = CHANNELS.find(c=>c.id===activeChannel)
 
   return (
-    <>
-      <div style={{ padding:'14px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} coaching intelligence</div>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#dde1f0', lineHeight:1 }}>News + Feed</div>
+    <div style={{ padding:'16px 0 8px' }}>
+      {/* Header */}
+      <div style={{ marginBottom:14 }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} Coaching Intelligence</div>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:28, lineHeight:1, color:'#f2f4f8' }}>News + Feed</div>
       </div>
 
       {/* Channel tabs */}
-      <div style={{ display:'flex', gap:5, overflowX:'auto', paddingBottom:6, marginBottom:10, WebkitOverflowScrolling:'touch' }}>
-        {CHANNELS.map(ch => {
-          const chData = ch.id === 'all' ? { loading: Object.values(channels).some(c=>c.loading) } : channels[ch.id]
-          const isLoading = chData?.loading
-          return (
-            <button key={ch.id} onClick={()=>setActiveChannel(ch.id)} style={{ flexShrink:0, padding:'7px 12px', borderRadius:20, fontSize:11, border:`1px solid ${activeChannel===ch.id?P:'#1e2330'}`, background:activeChannel===ch.id?al(P,0.15):'#0f1219', color:activeChannel===ch.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, display:'flex', alignItems:'center', gap:4, transition:'all 0.15s' }}>
-              <span style={{ fontSize:12 }}>{isLoading ? '⏳' : ch.icon}</span>
-              <span>{ch.label}</span>
-            </button>
-          )
-        })}
-        <button onClick={()=>refreshChannel(activeChannel)} style={{ flexShrink:0, padding:'7px 12px', borderRadius:20, fontSize:11, border:'1px solid #1e2330', background:'#161922', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginLeft:4 }}>↻</button>
+      <div style={{ display:'flex', gap:8, marginBottom:14, overflowX:'auto', WebkitOverflowScrolling:'touch', paddingBottom:2 }}>
+        {CHANNELS.map(ch => (
+          <button key={ch.id} onClick={()=>switchChannel(ch.id)}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:20, border:`1px solid ${activeChannel===ch.id?P:'#1e2330'}`, background:activeChannel===ch.id?P:'#0f1219', color:activeChannel===ch.id?'white':'#9aa0b0', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px', WebkitTapHighlightColor:'transparent', flexShrink:0, touchAction:'manipulation' }}>
+            <span>{ch.icon}</span>{ch.label}
+          </button>
+        ))}
+        <button onClick={()=>loadChannel(activeChannel)}
+          style={{ padding:'7px 10px', borderRadius:20, border:'1px solid #1e2330', background:'#0f1219', color:'#6b7a96', fontSize:14, cursor:'pointer', WebkitTapHighlightColor:'transparent', flexShrink:0, touchAction:'manipulation' }}>⟳</button>
       </div>
 
-      {/* Active channel description */}
-      <div style={{ fontSize:10, color:'#3d4559', marginBottom:10, fontStyle:'italic' }}>
-        {CHANNELS.find(c=>c.id===activeChannel)?.desc}
-      </div>
+      {/* Channel description */}
+      {activeChData && (
+        <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, fontStyle:'italic' }}>{activeChData.desc}</div>
+      )}
 
       {/* Loading state */}
-      {activeChData.loading && activeChData.items.length === 0 && (
-        <div style={{ padding:'40px 0', textAlign:'center' }}>
-          <div style={{ width:22, height:22, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
-          <div style={{ fontSize:12, color:'#6b7a96' }}>Loading {CHANNELS.find(c=>c.id===activeChannel)?.label}...</div>
+      {loading && (
+        <div style={{ padding:'40px 20px', textAlign:'center' }}>
+          <div style={{ width:24, height:24, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }}/>
+          <div style={{ fontSize:12, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Loading {activeChData?.label}...</div>
         </div>
       )}
 
-      {/* Feed items */}
-      {activeChData.items.map((item, i) => <FeedItem key={i} item={item} i={i} />)}
-
-      {/* Loading more indicator for All channel */}
-      {activeChannel === 'all' && activeChData.loading && activeChData.items.length > 0 && (
-        <div style={{ textAlign:'center', padding:'10px', color:'#3d4559', fontSize:11 }}>Loading more...</div>
-      )}
-
-      {/* Empty state */}
-      {!activeChData.loading && activeChData.items.length === 0 && (
-        <div style={{ textAlign:'center', padding:'40px 20px' }}>
-          <div style={{ fontSize:32, marginBottom:8 }}>📰</div>
-          <div style={{ fontSize:13, color:'#3d4559', marginBottom:4 }}>No content loaded yet</div>
-          {activeChData.error && <div style={{ fontSize:10, color:'#ef4444', marginBottom:8, maxWidth:280, textAlign:'center', lineHeight:1.4 }}>Error: {activeChData.error}</div>}
-          <button onClick={()=>refreshChannel(activeChannel)} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>LOAD FEED</button>
+      {/* Error state */}
+      {!loading && error && (
+        <div style={{ padding:'20px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, marginBottom:12 }}>
+          <div style={{ fontSize:11, color:'#ef4444', marginBottom:8, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Feed Error</div>
+          <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:10 }}>{error}</div>
+          <button onClick={()=>loadChannel(activeChannel)} style={{ padding:'6px 14px', background:P, border:'none', borderRadius:4, color:'white', fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Retry</button>
         </div>
       )}
-    </>
+
+      {/* Empty/not loaded state */}
+      {!loading && !error && !loaded && (
+        <div style={{ padding:'50px 20px', textAlign:'center' }}>
+          <div style={{ fontSize:36, marginBottom:12 }}>📰</div>
+          <div style={{ fontSize:13, color:'#3d4559', marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>No content loaded yet</div>
+          <div style={{ fontSize:11, color:'#3d4559', marginBottom:16 }}>Tap a channel above to load real-time news</div>
+          <button onClick={()=>loadChannel(activeChannel)} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:6, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>LOAD FEED</button>
+        </div>
+      )}
+
+      {/* Articles */}
+      {!loading && loaded && items.length > 0 && (
+        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          {items.map((item, i) => (
+            <a key={i} href={item.link} target="_blank" rel="noopener noreferrer"
+              style={{ display:'block', background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'12px 14px', textDecoration:'none', WebkitTapHighlightColor:'transparent' }}>
+              {/* Source + date */}
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>
+                  {item.author || (item.link ? new URL(item.link).hostname.replace('www.','') : 'News')}
+                </span>
+                <span style={{ fontSize:9, color:'#3d4559' }}>{formatDate(item.pubDate)}</span>
+              </div>
+              {/* Title */}
+              <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', lineHeight:1.4, marginBottom:item.description?6:0 }}>
+                {stripHtml(item.title)}
+              </div>
+              {/* Excerpt */}
+              {item.description && (
+                <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+                  {stripHtml(item.description).slice(0,180)}
+                </div>
+              )}
+              {/* Read more */}
+              <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
+                READ ARTICLE →
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* Empty results */}
+      {!loading && loaded && items.length === 0 && (
+        <div style={{ padding:'40px 20px', textAlign:'center' }}>
+          <div style={{ fontSize:13, color:'#3d4559' }}>No articles found. Try refreshing.</div>
+          <button onClick={()=>loadChannel(activeChannel)} style={{ marginTop:12, padding:'8px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>REFRESH</button>
+        </div>
+      )}
+
+      {/* Footer note */}
+      {loaded && items.length > 0 && (
+        <div style={{ marginTop:14, fontSize:9, color:'#3d4559', textAlign:'center', lineHeight:1.5 }}>
+          Real-time news from trusted coaching sources · Tap any article to read in full
+        </div>
+      )}
+    </div>
   )
 }
-
-
-
-// ─── LEARN PAGE ───────────────────────────────────────────────────────────────
-// ─── HELP PAGE ────────────────────────────────────────────────────────────────
 function HelpPage({ P, al, setPage, sport }) {
   const [openSection, setOpenSection] = useState(null)
 
@@ -4906,7 +4964,7 @@ export default function CoachIQ() {
 
 
   const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
-  const currentTeam = activeTeam[sport]
+  const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const P = currentTeam?.primary || sportColors.primary
   const S = currentTeam?.secondary || sportColors.secondary
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
@@ -5083,7 +5141,7 @@ export default function CoachIQ() {
           }
           /* iOS input zoom prevention */
           @media (max-width:480px) {
-            input, select, textarea { font-size:16px !important; }
+            input, select, textarea { font-size:16px !important; background-color:#161922 !important; color:#f2f4f8 !important; color-scheme:dark !important; border-color:#1e2330; }
           }
         `}</style>
 
@@ -5238,7 +5296,7 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
                     const isOn = sel.includes(pos)
                     return (
                       <div key={pos} onClick={()=>{ const cur=newPos.split(',').map(s=>s.trim()).filter(Boolean); if(isOn){ setNewPos(cur.filter(p=>p!==pos).join(', ')) } else if(cur.length<3){ setNewPos([...cur,pos].join(', ')) }}} style={{ padding:'7px 12px', cursor:'pointer', display:'flex', alignItems:'center', gap:8, background:isOn?al(P,0.12):'transparent', borderBottom:'1px solid #1a1f2e' }}>
-                        <div style={{ width:13, height:13, borderRadius:3, border:`2px solid ${isOn?P:'#3d4559'}`, background:isOn?P:'transparent', flexShrink:0 }}/>
+                        <div style={{ width:13, height:13, borderRadius:3, border:`2px solid ${isOn?P:'#3d4559'}`, background:isOn?P:'#0f1219', flexShrink:0 }}/>
                         <span style={{ fontSize:12, color:isOn?P:'#f2f4f8' }}>{pos}</span>
                       </div>
                     )
@@ -5474,7 +5532,7 @@ function PrintSection({ team, P, S, al, callAI, sport }) {
 // ─── TEAM PAGE ─────────────────────────────────────────────────────────────────
 function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, setPage }) {
   const [section, setSection] = useState('roster')
-  const currentTeam = activeTeam[sport]
+  const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const mascotObj = currentTeam ? (MASCOTS||[]).find(m=>m.id===currentTeam.mascot) : null
 
   return (
@@ -6324,7 +6382,7 @@ function LineupBuilder({ team, sport, P, S, al, teams, setTeams }) {
             <button onClick={()=>{setShowNewLineup(false);setIsGameDay(false)}} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', cursor:'pointer', fontSize:12 }}>✕</button>
           </div>
           <div onClick={()=>setIsGameDay(g=>!g)} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
-            <div style={{ width:18, height:18, borderRadius:4, border:`2px solid ${isGameDay?P:'#3d4559'}`, background:isGameDay?P:'transparent', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ width:18, height:18, borderRadius:4, border:`2px solid ${isGameDay?P:'#3d4559'}`, background:isGameDay?P:'#0f1219', display:'flex', alignItems:'center', justifyContent:'center' }}>
               {isGameDay && <span style={{ fontSize:11, color:'white' }}>✓</span>}
             </div>
             <span style={{ fontSize:11, color:'#f2f4f8' }}>⭐ Set as Game Day Starter</span>
