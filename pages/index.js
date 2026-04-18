@@ -1082,7 +1082,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
           {play.presnap && (
             <div style={{ marginTop:6, padding:'6px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:5 }}>
               <div style={{ fontSize:8, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>👁 Pre-Snap Read</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.presnap}</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.presnap||'')}</div>
             </div>
           )}
 
@@ -1090,7 +1090,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
           {play.audible && (
             <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:5 }}>
               <div style={{ fontSize:8, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>📣 Audible</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.audible}</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.audible||'')}</div>
             </div>
           )}
 
@@ -1106,7 +1106,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
           {play.mistake && (
             <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:5 }}>
               <div style={{ fontSize:8, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>⚠️ Common Mistake</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.mistake}</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
             </div>
           )}
 
@@ -3999,7 +3999,7 @@ function RulebookPage({ sport, P, al, callAI }) {
   )
 }
 // ─── NEWS PAGE ────────────────────────────────────────────────────────────────
-function NewsPage({ P, S, al, sport }) {
+function NewsPage({ P, S, al, sport, callAI }) {
   const [activeChannel, setActiveChannel] = useState('sport')
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
@@ -4032,7 +4032,7 @@ function NewsPage({ P, S, al, sport }) {
   // Cache key includes sport and channel
   function getCacheKey(ch) { return `coachiq_rss_${ch}_${sport}` }
 
-  // Load RSS feed for a channel
+  // Load channel - coaching uses AI, news uses RSS
   async function loadChannel(channelId) {
     setLoading(true)
     setError(null)
@@ -4052,15 +4052,50 @@ function NewsPage({ P, S, al, sport }) {
       }
     } catch(e) {}
 
+    if (channelId === 'sport') {
+      // Coaching channel: use AI for high-quality, sport-specific coaching content
+      await loadCoachingAI()
+    } else {
+      // News channel: use RSS for real breaking news
+      await loadNewsRSS(channelId)
+    }
+    setLoading(false)
+  }
+
+  async function loadCoachingAI() {
+    try {
+      const prompt = `You are a youth ${sport} coaching expert. Generate 8 practical coaching insights for today. Mix drills, strategy tips, player development advice, and game management tips. Focus on youth coaches with beginner to intermediate players. Return ONLY valid JSON: {"items":[{"title":"coaching tip title","body":"2-3 sentence explanation with actionable detail","category":"DRILL|STRATEGY|DEVELOPMENT|GAME DAY","sport":"${sport}"},...]}`
+      const raw = await callAI(prompt)
+      let s = raw.replace(/\`\`\`[\w]*\n?/gi,'').replace(/\`\`\`/g,'').trim()
+      const a = s.indexOf('{'), b = s.lastIndexOf('}')
+      if (a < 0 || b <= a) throw new Error('No content returned')
+      const data = JSON.parse(s.slice(a, b+1))
+      const tips = (data.items || []).filter(i => i && i.title && i.body)
+      if (!tips.length) throw new Error('No coaching tips returned')
+      // Format as article-like items for consistent display
+      const formatted = tips.map((t, i) => ({
+        title: t.title,
+        description: t.body,
+        author: t.category || 'CoachIQ',
+        pubDate: new Date(Date.now() - i * 300000).toISOString(),
+        link: null,
+        isAI: true
+      }))
+      setItems(formatted)
+      setLoaded(true)
+      try { sessionStorage.setItem(getCacheKey('sport'), JSON.stringify({ items: formatted, ts: Date.now() })) } catch(e){}
+    } catch(e) {
+      setError(e.message || 'Could not load coaching content. Please try again.')
+    }
+  }
+
+  async function loadNewsRSS(channelId) {
     const urls = (RSS_FEEDS[channelId] || {})[sport] || (RSS_FEEDS[channelId] || {}).Football || []
     if (!urls.length) {
-      setError('No feed available for this sport.')
-      setLoading(false)
+      setError('No news feed available for this sport.')
       return
     }
-
     try {
-      // Fetch all feeds in parallel, use first that succeeds with items
       const results = await Promise.allSettled(
         urls.map(url => fetch(url, { headers: { 'Accept': 'application/json' } }).then(r => r.json()))
       )
@@ -4071,21 +4106,17 @@ function NewsPage({ P, S, al, sport }) {
         }
       }
       if (!allItems.length) throw new Error('No articles found. Try again later.')
-
-      // Sort by date, deduplicate by title
       const seen = new Set()
       const deduped = allItems
         .filter(it => { const key = it.title?.trim(); if(!key||seen.has(key)){return false} seen.add(key); return true })
         .sort((a,b) => new Date(b.pubDate||0) - new Date(a.pubDate||0))
         .slice(0, 15)
-
       setItems(deduped)
       setLoaded(true)
       try { sessionStorage.setItem(getCacheKey(channelId), JSON.stringify({ items: deduped, ts: Date.now() })) } catch(e){}
     } catch(e) {
-      setError(e.message || 'Failed to load feed. Check your connection.')
+      setError(e.message || 'Failed to load news feed.')
     }
-    setLoading(false)
   }
 
   // Reset when sport changes
@@ -4182,8 +4213,9 @@ function NewsPage({ P, S, al, sport }) {
       {!loading && loaded && items.length > 0 && (
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {items.map((item, i) => (
-            <a key={i} href={item.link} target="_blank" rel="noopener noreferrer"
-              style={{ display:'block', background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'12px 14px', textDecoration:'none', WebkitTapHighlightColor:'transparent' }}>
+            <div key={i}
+              onClick={()=>{ if(item.link) window.open(item.link,'_blank','noopener') }}
+              style={{ display:'block', background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'12px 14px', textDecoration:'none', WebkitTapHighlightColor:'transparent', cursor:item.link?'pointer':'default' }}>
               {/* Source + date */}
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
                 <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>
@@ -4201,11 +4233,13 @@ function NewsPage({ P, S, al, sport }) {
                   {stripHtml(item.description).slice(0,180)}
                 </div>
               )}
-              {/* Read more */}
-              <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>
-                READ ARTICLE →
-              </div>
-            </a>
+              {/* Read more or AI badge */}
+              {item.link ? (
+                <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>READ ARTICLE →</div>
+              ) : (
+                <div style={{ marginTop:8, fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>✦ AI COACHING INSIGHT</div>
+              )}
+            </div>
           ))}
         </div>
       )}
@@ -4685,6 +4719,45 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
         <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — AI Coaching Intelligence · Generate schemes · Scout opponents · Build your playbook`}</div></div>
       </div>
 
+      {/* Next Event Card — only shown when there's an upcoming event */}
+      {(() => {
+        const ct = activeTeam[sport]
+        if (!ct) return null
+        const upcoming = (ct.schedule||[]).filter(e => new Date(e.date+'T23:59:59') >= new Date()).sort((a,b) => new Date(a.date)-new Date(b.date))
+        const next = upcoming[0]
+        if (!next) return null
+        const msUntil = new Date(next.date+'T'+(next.time||'12:00')+':00') - new Date()
+        const daysUntil = Math.ceil(msUntil / (1000*60*60*24))
+        const hoursUntil = Math.ceil(msUntil / (1000*60*60))
+        const countdown = hoursUntil <= 24 ? (hoursUntil <= 1 ? 'Starting soon!' : `${hoursUntil}h away`) : (daysUntil === 1 ? 'Tomorrow' : `${daysUntil} days`)
+        const isUrgent = hoursUntil <= 48
+        const typeColor = { Game:P, Practice:'#4ade80', Scrimmage:'#f59e0b', Tournament:'#c084fc' }[next.type] || P
+        const typeIcon = { Game:'🏆', Practice:'📋', Scrimmage:'⚡', Tournament:'🥇' }[next.type] || '📅'
+        const rsvpColor = { yes:'#4ade80', maybe:'#f59e0b', no:'#e74c3c' }[next.rsvp]
+        return (
+          <div onClick={()=>setPage('team')} style={{ marginTop:12, background:isUrgent?`linear-gradient(135deg,${typeColor}18,#0d1117)`:'#0d1117', border:`1px solid ${al(typeColor, isUrgent?0.5:0.25)}`, borderRadius:8, padding:'12px 14px', cursor:'pointer', position:'relative', overflow:'hidden' }}>
+            {isUrgent && <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${typeColor},transparent)` }} />}
+            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              <div style={{ fontSize:24, flexShrink:0 }}>{typeIcon}</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:9, color:typeColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:2 }}>{next.type.toUpperCase()} · {next.homeAway?.toUpperCase()}</div>
+                <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8', lineHeight:1.1, marginBottom:2 }}>{next.opponent || next.type}</div>
+                <div style={{ fontSize:10, color:'#6b7a96' }}>
+                  {new Date(next.date+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
+                  {next.time && ' · ' + next.time}
+                  {next.location && ' · 📍 ' + next.location.split(',')[0]}
+                </div>
+              </div>
+              <div style={{ textAlign:'right', flexShrink:0 }}>
+                <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:isUrgent?typeColor:'#f2f4f8', lineHeight:1 }}>{countdown}</div>
+                {rsvpColor && <div style={{ fontSize:8, color:rsvpColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:2 }}>{next.rsvp==='yes'?'✓ Going':next.rsvp==='no'?'✗ Out':'? Maybe'}</div>}
+                {upcoming.length > 1 && <div style={{ fontSize:8, color:'#3d4559', marginTop:2 }}>+{upcoming.length-1} more</div>}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Team Manager Card */}
       <TeamManagerCard
         sport={sport}
@@ -4955,13 +5028,30 @@ export default function CoachIQ() {
   const [gauntlets, setGauntlets] = useState(0)
   const [playbook, setPlaybook] = useState({ Football:{}, Basketball:{}, Baseball:{}, Soccer:{}, Softball:{} })
   const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] })
-  const [teams, setTeams] = useState({ Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] })
-  const [activeTeam, setActiveTeam] = useState({ Football:null, Basketball:null, Baseball:null, Soccer:null, Softball:null })
+  const [teams, setTeams] = useState(() => {
+    try {
+      const s = localStorage.getItem('coachiq_teams')
+      if (s) return JSON.parse(s)
+    } catch(e) {}
+    return { Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] }
+  })
+  const [activeTeam, setActiveTeam] = useState(() => {
+    try {
+      const s = localStorage.getItem('coachiq_activeTeam')
+      if (s) return JSON.parse(s)
+    } catch(e) {}
+    return { Football:null, Basketball:null, Baseball:null, Soccer:null, Softball:null }
+  })
 
   // SSR guard - prevents crash during Next.js prerendering
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
+  // ── PERSISTENCE — write to localStorage whenever key state changes ────────
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => { try { localStorage.setItem('coachiq_teams', JSON.stringify(teams)) } catch(e){} }, [teams])
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => { try { localStorage.setItem('coachiq_activeTeam', JSON.stringify(activeTeam)) } catch(e){} }, [activeTeam])
 
   const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
@@ -5198,7 +5288,7 @@ export default function CoachIQ() {
                   <div key={cat.category} style={{ marginBottom:8 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:5 }}>
                       <div style={{ width:6, height:6, borderRadius:'50%', background:cat.color, flexShrink:0 }} />
-                      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:cat.color }}>{cat.category}</span>
+                      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:cat.color }}>{cat.category}</span>
                       {cat.soon && <span style={{ fontSize:7, color:'#f59e0b', fontWeight:700, background:'rgba(245,158,11,0.1)', borderRadius:3, padding:'1px 4px' }}>🏒 More sports + features coming</span>}
                     </div>
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(4,minmax(0,1fr))', gap:4 }}>
@@ -5206,9 +5296,9 @@ export default function CoachIQ() {
                         <div key={i}
                           onClick={cat.soon ? undefined : ()=>{ item.action && item.action(); setShowAllGrid(false) }}
                           onTouchEnd={cat.soon ? undefined : (e)=>{ e.preventDefault(); item.action && item.action(); setShowAllGrid(false) }}
-                          style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, padding:'8px 4px 7px', borderRadius:8, border:`1px solid ${cat.soon?'#1e2330':al(cat.color,0.3)}`, background:cat.soon?'#111620':al(cat.color,0.06), cursor:cat.soon?'default':'pointer', opacity:cat.soon?0.5:1, WebkitTapHighlightColor:'transparent', minHeight:60 }}>
-                          <span style={{ fontSize:18 }}>{item.icon}</span>
-                          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, fontWeight:700, letterSpacing:'0.3px', color:cat.soon?'#3d4559':cat.color==='#C0392B'?'#ef8070':cat.color==='#6b9fff'?'#6b9fff':cat.color==='#4ade80'?'#4ade80':'#9aa0b0', textAlign:'center', lineHeight:1.2 }}>{item.label}</span>
+                          style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, padding:'10px 4px 8px', borderRadius:8, border:`1px solid ${cat.soon?'rgba(245,158,11,0.25)':al(cat.color,0.3)}`, background:cat.soon?'rgba(245,158,11,0.05)':al(cat.color,0.06), cursor:cat.soon?'default':'pointer', opacity:cat.soon?0.75:1, WebkitTapHighlightColor:'transparent', minHeight:64 }}>
+                          <span style={{ fontSize:20 }}>{item.icon}</span>
+                          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'0.3px', color:cat.soon?'rgba(245,158,11,0.7)':cat.color==='#C0392B'?'#ef8070':cat.color==='#6b9fff'?'#6b9fff':cat.color==='#4ade80'?'#4ade80':'#9aa0b0', textAlign:'center', lineHeight:1.2 }}>{item.label}</span>
                         </div>
                       ))}
                     </div>
@@ -5229,8 +5319,10 @@ export default function CoachIQ() {
                 onClick={()=>setShowAllGrid(g=>!g)}
                 style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'10px 2px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation' }}>
                 {showAllGrid && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:'#f59e0b', borderRadius:1 }} />}
-                <span style={{ fontSize:16 }}>⊞</span>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#f59e0b', fontWeight:700, letterSpacing:'0.8px' }}>ALL</span>
+                <div style={{ width:26, height:26, borderRadius:6, background:showAllGrid?'#f59e0b':'rgba(245,158,11,0.15)', border:'1.5px solid rgba(245,158,11,0.5)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s' }}>
+                  <span style={{ fontSize:14, filter:showAllGrid?'none':'opacity(0.8)' }}>⊞</span>
+                </div>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#f59e0b', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>ALL</span>
               </button>
             </div>
           </div>
@@ -5330,11 +5422,18 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
   )
 }
 
-function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
-  const [plans, setPlans] = useState([])
-  function setPlanLinked(planId, evtId) {
-    setPlans(prev => prev.map(p => p.id===planId ? {...p,_linkedTo:evtId} : p))
+function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport, teams, setTeams }) {
+  const plans = team?.practicePlans || []
+
+  function updateTeam(updates) {
+    if (!team || !setTeams) return
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t,...updates} : t) }))
   }
+
+  function setPlanLinked(planId, evtId) {
+    updateTeam({ practicePlans: plans.map(p => p.id===planId ? {...p,_linkedTo:evtId} : p) })
+  }
+
   const [generating, setGenerating] = useState(false)
   const [planForm, setPlanForm] = useState({ focus:'', duration:'90 minutes', intensity:'Medium', opponent:'', date:'' })
   const [showForm, setShowForm] = useState(false)
@@ -5343,6 +5442,8 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
     Football: ['Balanced / Full Team','Offense Only','Defense Only','Special Teams','Red Zone','Two-Minute Drill','Goal Line','Opening Drive','Game Preparation'],
     Basketball: ['Balanced / Full Team','Offense Only','Defense Only','Press Break','Transition','End of Game Situations','Free Throws','Post Play','Perimeter'],
     Baseball: ['Balanced / Full Team','Hitting Only','Pitching / Bullpen','Fielding / Defense','Baserunning','Situations','Batting Practice','Infield / Outfield'],
+    Soccer: ['Balanced / Full Team','Attacking','Defending','Set Pieces','Transition','Pressing','Finishing','Passing & Possession'],
+    Softball: ['Balanced / Full Team','Hitting Only','Pitching / Bullpen','Fielding / Defense','Baserunning','Situations'],
   }
 
   async function generatePlan() {
@@ -5353,10 +5454,14 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
       const raw = await callAI(`You are an elite youth ${sport.toLowerCase()} coach. Generate a detailed practice plan. ${ctx} ${inputs} Return ONLY valid JSON: {"title":"practice plan name","date":"${planForm.date||'Next Practice'}","duration":"${planForm.duration}","warmup":{"time":"X min","activities":["activity 1","activity 2"]},"segments":[{"name":"segment name","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"how many reps or time"},{"name":"segment 2","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"},{"name":"segment 3","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"},{"name":"segment 4","time":"X min","drill":"drill name","purpose":"why","coaching":"key coaching point","reps":"reps"}],"teamPeriod":{"time":"X min","activity":"full team activity","notes":"coaching emphasis"},"cooldown":{"time":"X min","activity":"cooldown activity"},"coachNote":"motivational note for the team"}`)
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       const plan = { ...JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1)), id: Date.now(), _form: planForm }
-      setPlans(prev => [plan, ...prev])
+      updateTeam({ practicePlans: [plan, ...plans] })
       setShowForm(false)
     } catch(e) { console.error(e) }
     setGenerating(false)
+  }
+
+  function removePlan(id) {
+    updateTeam({ practicePlans: plans.filter(p => p.id !== id) })
   }
 
   return (
@@ -5406,6 +5511,7 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
               </select>
             )}
             {plan._linkedTo && <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>✓ LINKED</span>}
+            <button onClick={()=>removePlan(plan.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, padding:'0 0 0 6px', flexShrink:0 }}>×</button>
           </div>
           <div style={{ padding:14 }}>
             {plan.warmup && <div style={{ padding:'8px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Warmup — {plan.warmup.time}</div>{(plan.warmup.activities||[]).map((a,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:2 }}>• {a}</div>)}</div>}
@@ -5430,32 +5536,120 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport }) {
 }
 
 function AnalyticsSection({ team, P, al }) {
-  const metrics = [
-    { label:'Schemes Generated', val: 0, color: P, icon:'📋' },
-    { label:'Plays in Playbook', val: 0, color:'#4ade80', icon:'📖' },
-    { label:'Gauntlet Score', val: 847, color:'#f59e0b', icon:'⚡' },
-    { label:'Scout Reports', val: 0, color:'#6b9fff', icon:'🔍' },
-    { label:'Practice Plans', val: 0, color:'#c084fc', icon:'📆' },
-  ]
+  const history = team?.gameHistory || []
+  const schedule = team?.schedule || []
+
+  const wins   = history.filter(g => g.us > g.them).length
+  const losses = history.filter(g => g.us < g.them).length
+  const ties   = history.filter(g => g.us === g.them && history.length > 0).length
+  const gamesPlayed = history.length
+  const ptsFor  = history.reduce((s,g) => s + (g.us||0), 0)
+  const ptsAgainst = history.reduce((s,g) => s + (g.them||0), 0)
+  const ppg    = gamesPlayed ? (ptsFor / gamesPlayed).toFixed(1) : '—'
+  const papg   = gamesPlayed ? (ptsAgainst / gamesPlayed).toFixed(1) : '—'
+  const winPct = gamesPlayed ? Math.round((wins/gamesPlayed)*100) : null
+  const streak = (() => {
+    if (!history.length) return null
+    const sorted = [...history].sort((a,b) => new Date(b.date)-new Date(a.date))
+    const last = sorted[0].us > sorted[0].them ? 'W' : sorted[0].us < sorted[0].them ? 'L' : 'T'
+    let count = 1
+    for (let i=1;i<sorted.length;i++) {
+      const r = sorted[i].us > sorted[i].them ? 'W' : sorted[i].us < sorted[i].them ? 'L' : 'T'
+      if (r===last) count++; else break
+    }
+    return { type:last, count }
+  })()
+  const upcomingGames = schedule.filter(e=>e.type==='Game' && new Date(e.date+'T23:59:59')>=new Date()).length
+  const rosterSize = team?.players?.length || 0
+
+  const statCard = (icon, val, label, color=P, sub=null) => (
+    <div style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'14px 12px' }}>
+      <div style={{ fontSize:18, marginBottom:3 }}>{icon}</div>
+      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:28, color, lineHeight:1, marginBottom:2 }}>{val}</div>
+      <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.3 }}>{label}</div>
+      {sub && <div style={{ fontSize:9, color:'#3d4559', marginTop:2 }}>{sub}</div>}
+    </div>
+  )
+
   return (
-    <Card>
-      <CardHead icon="📊" title="Analytics" tag="COMING SOON" tagColor="#f59e0b" accent={P} />
-      <div style={{ padding:14 }}>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:14 }}>
-          {metrics.map((m,i) => (
-            <div key={i} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'12px' }}>
-              <div style={{ fontSize:20, marginBottom:4 }}>{m.icon}</div>
-              <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:24, color:m.color, lineHeight:1, marginBottom:3 }}>{m.val}</div>
-              <div style={{ fontSize:10, color:'#6b7a96' }}>{m.label}</div>
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      <Card>
+        <CardHead icon="📊" title="Season Record" tag={gamesPlayed ? `${gamesPlayed} games` : 'No games yet'} tagColor={P} accent={P} />
+        <div style={{ padding:14 }}>
+          {/* W/L Record big display */}
+          <div style={{ background:'#0d1117', borderRadius:8, padding:'16px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:0 }}>
+            <div style={{ textAlign:'center', flex:1 }}>
+              <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:56, fontWeight:900, color:'#4ade80', lineHeight:1 }}>{wins}</div>
+              <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2 }}>WINS</div>
             </div>
-          ))}
+            <div style={{ textAlign:'center', flex:1 }}>
+              <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:56, fontWeight:900, color:'#e74c3c', lineHeight:1 }}>{losses}</div>
+              <div style={{ fontSize:10, color:'#e74c3c', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2 }}>LOSSES</div>
+            </div>
+            {ties > 0 && (
+              <div style={{ textAlign:'center', flex:1 }}>
+                <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:56, fontWeight:900, color:'#f59e0b', lineHeight:1 }}>{ties}</div>
+                <div style={{ fontSize:10, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2 }}>TIES</div>
+              </div>
+            )}
+          </div>
+
+          {/* Win % bar */}
+          {gamesPlayed > 0 && (
+            <div style={{ marginBottom:14 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+                <span style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WIN RATE</span>
+                <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800 }}>{winPct}%</span>
+              </div>
+              <div style={{ height:6, background:'#1e2330', borderRadius:3, overflow:'hidden' }}>
+                <div style={{ height:'100%', width:`${winPct}%`, background:winPct>=50?P:'#e74c3c', borderRadius:3, transition:'width 0.6s ease' }} />
+              </div>
+            </div>
+          )}
+
+          {/* Stat grid */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:gamesPlayed?12:0 }}>
+            {statCard('⚡', ppg, 'Points Per Game', P, gamesPlayed?`${ptsFor} total pts for`:null)}
+            {statCard('🛡', papg, 'Points Allowed/Game', '#e74c3c', gamesPlayed?`${ptsAgainst} total pts against`:null)}
+            {statCard('📅', upcomingGames, 'Games Remaining', '#6b9fff')}
+            {statCard('👥', rosterSize, 'Roster Players', '#c084fc')}
+            {streak && statCard(
+              streak.type==='W'?'🔥':streak.type==='L'?'❄️':'➡️',
+              `${streak.count}${streak.type}`,
+              'Current Streak',
+              streak.type==='W'?'#4ade80':streak.type==='L'?'#e74c3c':'#f59e0b'
+            )}
+          </div>
+
+          {/* Game log */}
+          {history.length > 0 && (
+            <div>
+              <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:8 }}>GAME RESULTS</div>
+              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((g,i)=>{
+                const result = g.us>g.them?'W':g.us<g.them?'L':'T'
+                const rc = result==='W'?'#4ade80':result==='L'?'#e74c3c':'#f59e0b'
+                return (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#161922', border:`1px solid #1e2330`, borderRadius:6, marginBottom:6, borderLeft:`3px solid ${rc}` }}>
+                    <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:rc, width:16, textAlign:'center' }}>{result}</div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{g.opponent}</div>
+                      <div style={{ fontSize:10, color:'#6b7a96' }}>{g.date ? new Date(g.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}) : ''}</div>
+                    </div>
+                    <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8' }}>{g.us}–{g.them}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {gamesPlayed === 0 && (
+            <div style={{ textAlign:'center', padding:'18px 0', color:'#3d4559', fontSize:12 }}>
+              No games recorded yet. Use Live Scoring to track your games and stats will appear here automatically.
+            </div>
+          )}
         </div>
-        <div style={{ padding:'12px', background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8, textAlign:'center' }}>
-          <div style={{ fontSize:12, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, marginBottom:4 }}>FULL ANALYTICS COMING SOON</div>
-          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>Win probability models, tendency heat maps, opponent pattern recognition, and season-wide performance tracking.</div>
-        </div>
-      </div>
-    </Card>
+      </Card>
+    </div>
   )
 }
 
@@ -5561,7 +5755,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
             </div>
             <div style={{ width:1, height:28, background:'#1e2330', flexShrink:0 }} />
             <div style={{ display:'flex', gap:5, overflowX:'auto' }}>
-              {[['roster','👥'],['schedule','📅'],['practice','📆'],['analytics','📊'],['print','🖨']].map(([s,ico])=>(
+              {[['roster','👥'],['schedule','📅'],['scoring','🏟'],['practice','📆'],['analytics','📊'],['print','🖨']].map(([s,ico])=>(
                 <button key={s} onClick={()=>setSection(s)} style={{ flexShrink:0, padding:'6px 10px', borderRadius:4, fontSize:11, border:`1px solid ${section===s?P:'#1e2330'}`, background:section===s?al(P,0.15):'transparent', color:section===s?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, display:'flex', alignItems:'center', gap:4, whiteSpace:'nowrap' }}>
                   <span>{ico}</span>
                   <span style={{ textTransform:'uppercase', fontSize:10, letterSpacing:'0.5px' }}>{s.charAt(0).toUpperCase()+s.slice(1)}</span>
@@ -5573,7 +5767,8 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
           {section==='roster'   && <RosterSection   team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
           {section==='lineup'   && <LineupBuilder    team={currentTeam} sport={sport} P={P} S={S} al={al} teams={teams} setTeams={setTeams} />}
           {section==='schedule' && <ScheduleSection  team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
-          {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} />}
+          {section==='scoring'  && <LiveScoringSection team={currentTeam} P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} callAI={callAI} parseJSON={parseJSON} />}
+          {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} teams={teams} setTeams={setTeams} />}
           {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} />}
           {section==='print'    && <PrintSection     team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} />}
         </>
@@ -6462,12 +6657,369 @@ function LineupBuilder({ team, sport, P, S, al, teams, setTeams }) {
 
 
 // ─── SCHEDULE SECTION ─────────────────────────────────────────────────────────
+// ─── LIVE SCORING SECTION ────────────────────────────────────────────────────
+function LiveScoringSection({ team, P, S, al, sport, teams, setTeams, callAI, parseJSON }) {
+  const EMPTY_GAME = {
+    id: null, opponent:'', date:'', quarter:1, clock:'',
+    us:0, them:0, timeoutsUs:3, timeoutsThem:3,
+    quarters:{ us:[0,0,0,0], them:[0,0,0,0] },
+    log:[], active:false, final:false
+  }
+  const [game, setGame] = useState(() => {
+    if (!team) return EMPTY_GAME
+    try {
+      const s = localStorage.getItem('coachiq_live_' + team.id)
+      if (s) return JSON.parse(s)
+    } catch(e){}
+    return EMPTY_GAME
+  })
+  const [setupMode, setSetupMode] = useState(!game.active && !game.final)
+  const [setupForm, setSetupForm] = useState({ opponent: game.opponent||'', date: game.date||'' })
+  const [showQB, setShowQB] = useState(false)
+  const [scoreType, setScoreType] = useState('TD')
+  const [scoreSide, setScoreSide] = useState('us')
+  const [scoringPlayer, setScoringPlayer] = useState('')
+  const [showLog, setShowLog] = useState(false)
+  const [summary, setSummary] = useState(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+
+  const players = team?.players || []
+
+  function persist(g) {
+    if (!team) return
+    try { localStorage.setItem('coachiq_live_' + team.id, JSON.stringify(g)) } catch(e){}
+    setGame(g)
+  }
+
+  function startGame() {
+    if (!setupForm.opponent.trim()) return
+    const g = { ...EMPTY_GAME, id: Date.now(), opponent: setupForm.opponent.trim(), date: setupForm.date || new Date().toISOString().slice(0,10), active:true, final:false }
+    persist(g)
+    setSetupMode(false)
+  }
+
+  function endGame() {
+    const g = { ...game, active:false, final:true }
+    persist(g)
+    // Save result to team schedule and game history
+    if (team && teams && setTeams) {
+      setTeams(prev => ({
+        ...prev,
+        [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {
+          ...t,
+          schedule: (t.schedule||[]).map(ev => {
+            if (ev.type==='Game' && ev.opponent===game.opponent && ev.date===game.date) {
+              return { ...ev, finalScoreUs:game.us, finalScoreThem:game.them }
+            }
+            return ev
+          }),
+          gameHistory: [...(t.gameHistory||[]), { id:game.id, opponent:game.opponent, date:game.date, us:game.us, them:game.them, log:game.log }]
+        } : t)
+      }))
+    }
+    // Auto-generate summary
+    generateSummary(g)
+  }
+
+  function resetGame() {
+    if (!window.confirm('Clear this game and start a new one?')) return
+    persist(EMPTY_GAME)
+    setSetupMode(true)
+    setSetupForm({ opponent:'', date:'' })
+  }
+
+  function addScore() {
+    const pts = { TD:6, FG:3, Safety:2, XP:1, '2PT':2 }[scoreType] || 0
+    const label = { TD:'Touchdown', FG:'Field Goal', Safety:'Safety', XP:'Extra Point', '2PT':'2-Pt Conv' }[scoreType]
+    const g = { ...game }
+    const q = Math.min(g.quarter, 4) - 1
+    if (scoreSide==='us') {
+      g.us += pts
+      g.quarters = { ...g.quarters, us: g.quarters.us.map((v,i)=>i===q?v+pts:v) }
+    } else {
+      g.them += pts
+      g.quarters = { ...g.quarters, them: g.quarters.them.map((v,i)=>i===q?v+pts:v) }
+    }
+    const entry = { ts: Date.now(), side:scoreSide, type:scoreType, label, pts, player:scoringPlayer, quarter:g.quarter }
+    g.log = [entry, ...g.log]
+    persist(g)
+    setShowQB(false)
+    setScoringPlayer('')
+  }
+
+  function setQuarter(q) { persist({ ...game, quarter: q }) }
+  function useTimeout(side) {
+    if (side==='us' && game.timeoutsUs===0) return
+    if (side==='them' && game.timeoutsThem===0) return
+    persist({ ...game, timeoutsUs: side==='us'?game.timeoutsUs-1:game.timeoutsUs, timeoutsThem: side==='them'?game.timeoutsThem-1:game.timeoutsThem })
+  }
+  function setClock(v) { persist({ ...game, clock:v }) }
+
+  async function generateSummary(g) {
+    setSummaryLoading(true)
+    setSummary(null)
+    const result = g.us > g.them ? 'WIN' : g.us < g.them ? 'LOSS' : 'TIE'
+    const scorers = g.log.filter(e=>e.side==='us'&&e.player).map(e=>`${e.player} (${e.label}, Q${e.quarter})`).join('; ') || 'Not recorded'
+    const scoreByQ = `Q1: ${g.quarters.us[0]}-${g.quarters.them[0]}, Q2: ${g.quarters.us[1]}-${g.quarters.them[1]}, Q3: ${g.quarters.us[2]}-${g.quarters.them[2]}, Q4: ${g.quarters.us[3]}-${g.quarters.them[3]}`
+    const prompt = `You are an encouraging youth ${sport} coach writing a brief post-game summary. Team: ${team?.name||'Us'}. Opponent: ${g.opponent}. Final: ${g.us}–${g.them} (${result}). Scoring by quarter: ${scoreByQ}. Scoring plays: ${scorers}. Return ONLY valid JSON: {"headline":"one energetic headline line","recap":"2-3 sentence game recap mentioning specific scores and key moments","standout":"one standout performer or play (can be team-level if no individual stats)","positives":["positive 1","positive 2","positive 3"],"focusNext":"one specific thing to work on next practice based on the game","motivationalClose":"one short inspiring line for the team"}`
+    try {
+      const raw = await callAI(prompt)
+      const data = parseJSON(raw)
+      setSummary(data)
+    } catch(e) { setSummary({ headline:'Game Complete', recap:`Final score: ${team?.name||'Us'} ${g.us}, ${g.opponent} ${g.them}.`, positives:['Great effort by the team'], focusNext:'Review game film and prepare for next week', motivationalClose:'Keep grinding, champions are made in practice!' }) }
+    setSummaryLoading(false)
+  }
+
+  const btn = (label, onClick, color=P, disabled=false, size=14) => (
+    <button onClick={onClick} disabled={disabled} style={{ padding:'13px 10px', background:disabled?'#1e2330':color, border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:size, cursor:disabled?'not-allowed':'pointer', letterSpacing:'1px', opacity:disabled?0.4:1, touchAction:'manipulation', minHeight:50, userSelect:'none' }}>{label}</button>
+  )
+
+  const bigScore = (val, side) => (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', flex:1 }}>
+      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:72, fontWeight:900, color:side==='us'?P:'#f2f4f8', lineHeight:1 }}>{val}</div>
+    </div>
+  )
+
+  if (!team) return (
+    <Card><div style={{ padding:24, textAlign:'center', color:'#3d4559', fontSize:13 }}>Select or create a team to use live scoring.</div></Card>
+  )
+
+  if (setupMode) return (
+    <Card>
+      <CardHead icon="🏟" title="Live Scoring" tag="Game Setup" tagColor={P} accent={P} />
+      <div style={{ padding:16 }}>
+        {game.final && (
+          <div style={{ background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:6, padding:'10px 14px', marginBottom:14, fontSize:12, color:'#f2f4f8' }}>
+            Last game: <strong>{game.opponent}</strong> — {team.name} {game.us}, {game.opponent} {game.them}
+          </div>
+        )}
+        <div style={{ display:'grid', gap:10, marginBottom:14 }}>
+          <div>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Opponent *</label>
+            <input value={setupForm.opponent} onChange={e=>setSetupForm(f=>({...f,opponent:e.target.value}))} placeholder="e.g. Westport Eagles" style={{ width:'100%', background:'#161922', border:`1px solid ${setupForm.opponent?P:'#1e2330'}`, borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
+          </div>
+          <div>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Game Date</label>
+            <input type="date" value={setupForm.date} onChange={e=>setSetupForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
+          </div>
+        </div>
+        <button onClick={startGame} disabled={!setupForm.opponent.trim()} style={{ width:'100%', padding:'14px', background:setupForm.opponent.trim()?P:'#3d4559', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:16, cursor:setupForm.opponent.trim()?'pointer':'not-allowed', letterSpacing:'2px', minHeight:52 }}>⚡ START GAME</button>
+        {game.log && game.log.length > 0 && (
+          <button onClick={()=>{setSetupMode(false)}} style={{ width:'100%', marginTop:8, padding:'11px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:6, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>RESUME LAST GAME</button>
+        )}
+      </div>
+    </Card>
+  )
+
+  return (
+    <Card>
+      <CardHead icon="🏟" title={game.final ? 'Final Score' : '🔴 LIVE'} tag={game.opponent} tagColor={game.final?'#4ade80':P} accent={P} />
+      <div style={{ padding:14 }}>
+
+        {/* SCOREBOARD */}
+        <div style={{ background:'#0d1117', borderRadius:8, padding:'16px 12px', marginBottom:12, border:`1px solid ${al(P,0.2)}` }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+            {bigScore(game.us,'us')}
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:36, fontWeight:900, color:'#3d4559' }}>—</div>
+            {bigScore(game.them,'them')}
+          </div>
+          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:10 }}>
+            <div style={{ fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>{team.name?.toUpperCase()}</div>
+            <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>{game.opponent?.toUpperCase()}</div>
+          </div>
+
+          {/* Quarter box scores */}
+          <div style={{ display:'grid', gridTemplateColumns:'auto 1fr 1fr 1fr 1fr auto', gap:4, fontSize:10, textAlign:'center', color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>
+            {['','Q1','Q2','Q3','Q4','TOT'].map((h,i)=><div key={i} style={{ fontWeight:700, color:i===0||i===5?'#3d4559':'#6b7a96' }}>{h}</div>)}
+            {[team.name?.slice(0,4)||'US', ...game.quarters.us, game.us].map((v,i)=><div key={'u'+i} style={{ color:i===0?P:'#f2f4f8', fontWeight:i===5?800:600 }}>{v}</div>)}
+            {[game.opponent?.slice(0,4)||'THM', ...game.quarters.them, game.them].map((v,i)=><div key={'t'+i} style={{ color:i===0?'#a0aec0':'#f2f4f8', fontWeight:i===5?800:600 }}>{v}</div>)}
+          </div>
+        </div>
+
+        {/* QUARTER + CLOCK CONTROLS */}
+        {!game.final && (
+          <div style={{ marginBottom:12 }}>
+            <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>QUARTER</div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6, marginBottom:10 }}>
+              {[1,2,3,4].map(q=>(
+                <button key={q} onClick={()=>setQuarter(q)} style={{ padding:'10px 0', background:game.quarter===q?P:'#161922', border:`1px solid ${game.quarter===q?P:'#1e2330'}`, borderRadius:6, color:game.quarter===q?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:14, cursor:'pointer', minHeight:46, touchAction:'manipulation' }}>Q{q}</button>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:4 }}>CLOCK</div>
+              <input value={game.clock} onChange={e=>setClock(e.target.value)} placeholder="e.g. 4:32" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:"'Big Shoulders Display',sans-serif", fontSize:20, fontWeight:900, outline:'none', textAlign:'center' }} />
+            </div>
+          </div>
+        )}
+
+        {/* TIMEOUTS */}
+        {!game.final && (
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+            {[['us', team.name?.slice(0,10)||'Us'], ['them', game.opponent?.slice(0,10)||'Them']].map(([side, label])=>(
+              <div key={side} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'10px 12px' }}>
+                <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, marginBottom:6 }}>{label.toUpperCase()}</div>
+                <div style={{ display:'flex', gap:5, marginBottom:6 }}>
+                  {[0,1,2].map(i=>(
+                    <div key={i} style={{ width:14, height:14, borderRadius:'50%', background:i<(side==='us'?game.timeoutsUs:game.timeoutsThem)?P:'#1e2330', border:`1px solid ${al(P,0.4)}` }} />
+                  ))}
+                </div>
+                <button onClick={()=>useTimeout(side)} disabled={(side==='us'?game.timeoutsUs:game.timeoutsThem)===0} style={{ width:'100%', padding:'7px 0', background:'transparent', border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1, opacity:(side==='us'?game.timeoutsUs:game.timeoutsThem)===0?0.3:1, minHeight:36 }}>USE TIMEOUT</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* SCORE BUTTONS */}
+        {!game.final && !showQB && (
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+            {btn(`+ Score ${team.name?.slice(0,8)||'Us'}`, ()=>{setScoreSide('us');setShowQB(true)}, P)}
+            {btn(`+ Score ${game.opponent?.slice(0,8)||'Them'}`, ()=>{setScoreSide('them');setShowQB(true)}, '#e74c3c')}
+          </div>
+        )}
+
+        {/* SCORE ENTRY PANEL */}
+        {!game.final && showQB && (
+          <div style={{ background:'#0d1117', border:`1px solid ${al(scoreSide==='us'?P:'#e74c3c',0.4)}`, borderRadius:8, padding:14, marginBottom:12 }}>
+            <div style={{ fontSize:11, color:scoreSide==='us'?P:'#e74c3c', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, letterSpacing:2, marginBottom:10 }}>
+              {scoreSide==='us'?`${team.name?.toUpperCase()||'US'} SCORE`:`${game.opponent?.toUpperCase()||'THEM'} SCORE`}
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6, marginBottom:10 }}>
+              {['TD','FG','Safety','XP','2PT'].map(t=>(
+                <button key={t} onClick={()=>setScoreType(t)} style={{ padding:'11px 0', background:scoreType===t?(scoreSide==='us'?P:'#e74c3c'):'#161922', border:`1px solid ${scoreType===t?(scoreSide==='us'?P:'#e74c3c'):'#1e2330'}`, borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:12, cursor:'pointer', minHeight:44, touchAction:'manipulation' }}>
+                  {t}<br/><span style={{ fontSize:9, fontWeight:400, color:scoreType===t?'rgba(255,255,255,0.8)':'#6b7a96' }}>({({TD:6,FG:3,Safety:2,XP:1,'2PT':2})[t]}pts)</span>
+                </button>
+              ))}
+            </div>
+            {players.length > 0 && scoreSide==='us' && (
+              <div style={{ marginBottom:10 }}>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Scored by (optional)</label>
+                <select value={scoringPlayer} onChange={e=>setScoringPlayer(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }}>
+                  <option value="">—</option>
+                  {players.map(p=><option key={p.id} value={`#${p.jersey} ${p.firstName}`}>#{p.jersey} {p.firstName} {p.lastName}</option>)}
+                </select>
+              </div>
+            )}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+              <button onClick={()=>{setShowQB(false);setScoringPlayer('')}} style={{ padding:'12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', minHeight:48 }}>CANCEL</button>
+              <button onClick={addScore} style={{ padding:'12px', background:scoreSide==='us'?P:'#e74c3c', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:13, cursor:'pointer', letterSpacing:1, minHeight:48 }}>CONFIRM +{({TD:6,FG:3,Safety:2,XP:1,'2PT':2})[scoreType]}</button>
+            </div>
+          </div>
+        )}
+
+        {/* PLAY LOG */}
+        {game.log && game.log.length > 0 && (
+          <div style={{ marginBottom:12 }}>
+            <button onClick={()=>setShowLog(v=>!v)} style={{ width:'100%', textAlign:'left', background:'transparent', border:'none', color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, letterSpacing:2, cursor:'pointer', padding:'6px 0', display:'flex', justifyContent:'space-between' }}>
+              <span>SCORE LOG ({game.log.length})</span><span>{showLog?'▲':'▼'}</span>
+            </button>
+            {showLog && (
+              <div style={{ background:'#0d1117', borderRadius:6, padding:'8px 10px', maxHeight:200, overflowY:'auto' }}>
+                {game.log.map((entry,i)=>(
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 0', borderBottom:'1px solid #1e2330', fontSize:11 }}>
+                    <span style={{ fontSize:14 }}>{entry.side==='us'?'🟢':'🔴'}</span>
+                    <span style={{ color:'#f2f4f8', fontWeight:600 }}>{entry.label}</span>
+                    <span style={{ color:entry.side==='us'?P:'#e74c3c', fontWeight:800 }}>+{entry.pts}</span>
+                    {entry.player && <span style={{ color:'#6b7a96' }}>{entry.player}</span>}
+                    <span style={{ color:'#3d4559', marginLeft:'auto', fontSize:9 }}>Q{entry.quarter}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* END GAME / RESET */}
+        <div style={{ display:'grid', gridTemplateColumns: game.final ? '1fr' : '1fr 1fr', gap:8 }}>
+          <button onClick={resetGame} style={{ padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:6, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1, minHeight:46 }}>NEW GAME</button>
+          {!game.final && (
+            <button onClick={endGame} style={{ padding:'11px', background:'#161922', border:`1px solid ${al('#4ade80',0.4)}`, borderRadius:6, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:12, cursor:'pointer', letterSpacing:1, minHeight:46 }}>✓ END GAME</button>
+          )}
+        </div>
+        {game.final && (
+          <div style={{ textAlign:'center', marginTop:10, fontSize:11, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>
+            FINAL — {game.us > game.them ? '🏆 WIN' : game.us < game.them ? 'LOSS' : 'TIE'} · {game.us}–{game.them}
+          </div>
+        )}
+
+        {/* POST-GAME AI SUMMARY */}
+        {game.final && (
+          <div style={{ marginTop:14 }}>
+            {!summary && !summaryLoading && (
+              <button onClick={()=>generateSummary(game)} style={{ width:'100%', padding:'13px', background:al(P,0.12), border:`1px dashed ${al(P,0.4)}`, borderRadius:8, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:14, cursor:'pointer', letterSpacing:'1.5px', minHeight:52 }}>⚡ GENERATE POST-GAME SUMMARY</button>
+            )}
+            {summaryLoading && (
+              <div style={{ padding:'16px', background:'#0d1117', border:`1px solid ${al(P,0.2)}`, borderRadius:8, textAlign:'center' }}>
+                <div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }} />
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96', letterSpacing:1 }}>AI ANALYZING GAME DATA...</div>
+              </div>
+            )}
+            {summary && (
+              <div style={{ background:'#0d1117', border:`1px solid ${al(P,0.3)}`, borderRadius:8, overflow:'hidden', animation:'fadeIn 0.3s ease' }}>
+                {/* Header */}
+                <div style={{ background:al(P,0.1), borderBottom:`1px solid ${al(P,0.2)}`, padding:'12px 14px' }}>
+                  <div style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:4 }}>⚡ POST-GAME AI SUMMARY</div>
+                  <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:'#f2f4f8', lineHeight:1.2 }}>{summary.headline}</div>
+                </div>
+                <div style={{ padding:'12px 14px', display:'flex', flexDirection:'column', gap:12 }}>
+                  {/* Recap */}
+                  <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.6 }}>{summary.recap}</div>
+
+                  {/* Standout */}
+                  {summary.standout && (
+                    <div style={{ padding:'8px 12px', background:al('#f59e0b',0.08), border:`1px solid ${al('#f59e0b',0.25)}`, borderRadius:6, borderLeft:`3px solid #f59e0b` }}>
+                      <div style={{ fontSize:9, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:3 }}>⭐ STANDOUT</div>
+                      <div style={{ fontSize:12, color:'#f2f4f8' }}>{summary.standout}</div>
+                    </div>
+                  )}
+
+                  {/* Positives */}
+                  {summary.positives && summary.positives.length > 0 && (
+                    <div>
+                      <div style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>✓ WHAT WENT WELL</div>
+                      {summary.positives.map((p,i) => (
+                        <div key={i} style={{ display:'flex', gap:8, marginBottom:4, alignItems:'flex-start' }}>
+                          <div style={{ width:4, height:4, borderRadius:'50%', background:'#4ade80', marginTop:5, flexShrink:0 }} />
+                          <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{p}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Focus next */}
+                  {summary.focusNext && (
+                    <div style={{ padding:'8px 12px', background:al('#6b9fff',0.08), border:`1px solid ${al('#6b9fff',0.25)}`, borderRadius:6, borderLeft:`3px solid #6b9fff` }}>
+                      <div style={{ fontSize:9, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:3 }}>📋 NEXT PRACTICE FOCUS</div>
+                      <div style={{ fontSize:12, color:'#f2f4f8' }}>{summary.focusNext}</div>
+                    </div>
+                  )}
+
+                  {/* Motivational close */}
+                  {summary.motivationalClose && (
+                    <div style={{ textAlign:'center', padding:'8px 0 4px', borderTop:'1px solid #1e2330' }}>
+                      <div style={{ fontFamily:"'Kalam',cursive", fontSize:14, color:P, fontWeight:700, lineHeight:1.4 }}>"{summary.motivationalClose}"</div>
+                    </div>
+                  )}
+
+                  <button onClick={()=>generateSummary(game)} style={{ width:'100%', padding:'8px', background:'transparent', border:`1px solid ${al(P,0.3)}`, borderRadius:6, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1 }}>↺ REGENERATE</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+}
+
+
+// ─── SCHEDULE SECTION ────────────────────────────────────────────────────────
 function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
   const [showAdd, setShowAdd] = useState(false)
   const [savedOpponents, setSavedOpponents] = useState([])
+  const [expandedEvent, setExpandedEvent] = useState(null)
   const [form, setForm] = useState({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
 
-  const schedule = team.schedule || []
+  const schedule = team?.schedule || []
 
   function updateTeam(updates) {
     setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t,...updates} : t) }))
@@ -6475,7 +7027,7 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
 
   function saveEvent() {
     if (!form.date) return
-    const event = { id:Date.now(), ...form }
+    const event = { id:Date.now(), ...form, rsvp:'yes' } // coach RSVPs yes by default
     const updated = [...schedule, event].sort((a,b) => new Date(a.date) - new Date(b.date))
     updateTeam({ schedule: updated })
     if (form.opponent && !savedOpponents.includes(form.opponent)) {
@@ -6487,6 +7039,11 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
 
   function removeEvent(id) {
     updateTeam({ schedule: schedule.filter(e => e.id !== id) })
+    if (expandedEvent === id) setExpandedEvent(null)
+  }
+
+  function setRsvp(id, status) {
+    updateTeam({ schedule: schedule.map(e => e.id===id ? {...e, rsvp:status} : e) })
   }
 
   const typeColors = { Game:P, Practice:'#4ade80', Scrimmage:'#f59e0b', Tournament:'#c084fc' }
@@ -6494,6 +7051,20 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
   const now = new Date()
   const upcoming = schedule.filter(e => new Date(e.date+'T23:59:59') >= now)
   const past     = schedule.filter(e => new Date(e.date+'T23:59:59') < now)
+
+  function openInMaps(location) {
+    const q = encodeURIComponent(location)
+    // Opens Apple Maps on iOS, Google Maps on Android/desktop
+    const ua = navigator.userAgent
+    if (/iPhone|iPad|iPod/.test(ua)) {
+      window.open(`maps://maps.apple.com/?q=${q}`)
+    } else {
+      window.open(`https://maps.google.com/?q=${q}`)
+    }
+  }
+
+  const rsvpColor = { yes:'#4ade80', no:'#e74c3c', maybe:'#f59e0b' }
+  const rsvpLabel = { yes:'✓ Going', no:'✗ Can\'t Go', maybe:'? Maybe' }
 
   return (
     <Card>
@@ -6553,14 +7124,18 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
         {upcoming.map(event => {
           const tc = typeColors[event.type] || P
           const d = new Date(event.date + 'T12:00:00')
+          const isExpanded = expandedEvent === event.id
+          const rsvp = event.rsvp || null
           return (
-            <div key={event.id} style={{ padding:'10px 12px', background:'#161922', border:`1px solid ${al(tc,0.25)}`, borderRadius:6, marginBottom:8, borderLeft:`3px solid ${tc}` }}>
-              <div style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
+            <div key={event.id} style={{ background:'#161922', border:`1px solid ${al(tc,0.25)}`, borderRadius:8, marginBottom:8, borderLeft:`3px solid ${tc}`, overflow:'hidden' }}>
+              {/* Main row - tap to expand */}
+              <div onClick={()=>setExpandedEvent(isExpanded?null:event.id)} style={{ padding:'10px 12px', cursor:'pointer', display:'flex', alignItems:'flex-start', gap:8 }}>
                 <span style={{ fontSize:16, flexShrink:0 }}>{typeIcons[event.type]||'📅'}</span>
-                <div style={{ flex:1 }}>
+                <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:2 }}>
                     <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{event.opponent || event.type}</div>
                     <span style={{ fontSize:8, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} · {event.homeAway}</span>
+                    {rsvp && <span style={{ fontSize:8, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(rsvpColor[rsvp],0.15), color:rsvpColor[rsvp], fontFamily:"'Barlow Condensed',sans-serif" }}>{rsvpLabel[rsvp]}</span>}
                   </div>
                   <div style={{ fontSize:11, color:'#6b7a96' }}>
                     {d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
@@ -6568,10 +7143,34 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
                     {event.arrivalTime && ' · Arrive ' + event.arrivalTime}
                   </div>
                   {event.location && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>📍 {event.location}</div>}
-                  {event.notes && <div style={{ fontSize:10, color:'#3d4559', marginTop:1, fontStyle:'italic' }}>{event.notes}</div>}
                 </div>
-                <button onClick={()=>removeEvent(event.id)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, flexShrink:0, padding:0 }}>×</button>
+                <span style={{ color:'#3d4559', fontSize:12, flexShrink:0 }}>{isExpanded?'▲':'▼'}</span>
               </div>
+
+              {/* Expanded panel */}
+              {isExpanded && (
+                <div style={{ borderTop:`1px solid ${al(tc,0.15)}`, padding:'10px 12px', background:al(tc,0.04) }}>
+                  {event.notes && <div style={{ fontSize:11, color:'#a0aec0', marginBottom:10, fontStyle:'italic', lineHeight:1.4 }}>📝 {event.notes}</div>}
+
+                  {/* RSVP row */}
+                  <div style={{ marginBottom:10 }}>
+                    <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>YOUR RSVP</div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6 }}>
+                      {[['yes','✓ Going','#4ade80'],['maybe','? Maybe','#f59e0b'],['no','✗ Can\'t','#e74c3c']].map(([status,label,color])=>(
+                        <button key={status} onClick={()=>setRsvp(event.id,status)} style={{ padding:'9px 0', background:rsvp===status?al(color,0.2):'#161922', border:`1px solid ${rsvp===status?color:'#1e2330'}`, borderRadius:6, color:rsvp===status?color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', minHeight:40, touchAction:'manipulation' }}>{label}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions row */}
+                  <div style={{ display:'flex', gap:8 }}>
+                    {event.location && (
+                      <button onClick={()=>openInMaps(event.location)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, minHeight:38 }}>📍 DIRECTIONS</button>
+                    )}
+                    <button onClick={()=>removeEvent(event.id)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#e74c3c', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, minHeight:38 }}>🗑 REMOVE</button>
+                  </div>
+                </div>
+              )}
             </div>
           )
         })}
