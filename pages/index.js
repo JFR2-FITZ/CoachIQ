@@ -5014,7 +5014,9 @@ export default function CoachIQ() {
   const [tutorialState, setTutorialState] = useState('pending') // pending|tour|guide|done
   const [homeLocation, setHomeLocation] = useState('')
   const [showSplash, setShowSplash] = useState(() => {
-    try { return !localStorage.getItem('coachiq_ever_launched') }
+    // Show splash every cold launch (sessionStorage clears on app close)
+    // alreadyAuthed (launched) check lets returning users skip the CTA
+    try { return !sessionStorage.getItem('coachiq_session_started') }
     catch(e) { return true }
   })
   const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
@@ -5044,14 +5046,12 @@ export default function CoachIQ() {
   })
 
   // SSR guard - prevents crash during Next.js prerendering
+  // ── PERSISTENCE — must be before any early returns (React Rules of Hooks) ──
+  useEffect(() => { try { localStorage.setItem('coachiq_teams', JSON.stringify(teams)) } catch(e){} }, [teams])
+  useEffect(() => { try { localStorage.setItem('coachiq_activeTeam', JSON.stringify(activeTeam)) } catch(e){} }, [activeTeam])
+
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
-
-  // ── PERSISTENCE — write to localStorage whenever key state changes ────────
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => { try { localStorage.setItem('coachiq_teams', JSON.stringify(teams)) } catch(e){} }, [teams])
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => { try { localStorage.setItem('coachiq_activeTeam', JSON.stringify(activeTeam)) } catch(e){} }, [activeTeam])
 
   const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
@@ -5113,6 +5113,7 @@ export default function CoachIQ() {
 
   if (showSplash) return (
     <SplashScreen onDone={(skipToApp) => { 
+      try { sessionStorage.setItem('coachiq_session_started','1') } catch(e){}
       try { localStorage.setItem('coachiq_ever_launched','1') } catch(e){}
       setShowSplash(false); if (skipToApp) setLaunched(true) 
     }} alreadyAuthed={launched} brand={brand} />
