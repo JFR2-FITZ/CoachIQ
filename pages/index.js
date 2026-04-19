@@ -4988,7 +4988,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
           </div>
         ) : (
           <div>
-            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning','All three']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
+            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
             <PhilQ label="How do you measure a good season?" options={['Every kid improved','Everyone had fun','Strong record','Mix of all three']} value={philosophy.measure} onChange={v=>setPhilosophy(p=>({...p,measure:v}))} />
             <PhilQ label="Who are you coaching?" options={['First-timers / Brand new','Mixed experience levels','Competitive / Experienced']} value={philosophy.who} onChange={v=>setPhilosophy(p=>({...p,who:v}))} />
             <button onClick={handleLaunch} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Enter CoachIQ</button>
@@ -5001,79 +5001,529 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
 
 
 // ─── C·IQ HUB PAGE ────────────────────────────────────────────────────────────
-function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation }) {
+function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation, setTeams }) {
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const gameHistory = currentTeam?.gameHistory || []
   const practicePlans = currentTeam?.practicePlans || []
   const schedule = currentTeam?.schedule || []
   const sportGenHistory = genHistory[sport] || []
 
-  // Stats derived from real data
+  // Stats
   const wins = gameHistory.filter(g=>g.us>g.them).length
   const losses = gameHistory.filter(g=>g.us<=g.them).length
   const record = gameHistory.length > 0 ? `${wins}-${losses}` : '0-0'
   const ppg = gameHistory.length > 0 ? Math.round(gameHistory.reduce((s,g)=>s+g.us,0)/gameHistory.length) : null
   const papg = gameHistory.length > 0 ? Math.round(gameHistory.reduce((s,g)=>s+g.them,0)/gameHistory.length) : null
-
-  // Last offensive and defensive scheme names from genHistory
   const offSchemes = sportGenHistory.filter(h=>h.plays&&h.plays.length)
   const defSchemes = sportGenHistory.filter(h=>h.formations&&h.formations.length)
   const lastOffScheme = offSchemes[0]?.packageName || null
   const lastDefScheme = defSchemes[0]?.packageName || null
-
-  // Next game and next practice from schedule
+  const totalPlays = Object.values(playbook[sport]||{}).reduce((s,folder)=>s+(folder?.length||0),0)
   const now = new Date()
   const upcoming = schedule.filter(e=>new Date(e.date+'T23:59:59')>=now).sort((a,b)=>new Date(a.date)-new Date(b.date))
   const nextGame = upcoming.find(e=>e.type==='Game')
   const nextPractice = upcoming.find(e=>e.type==='Practice')
+  const nextEvent = upcoming[0]
+  const lastPlan = practicePlans[0]
+  const daysSincePractice = lastPlan ? Math.floor((now-new Date(lastPlan.id))/(1000*60*60*24)) : null
+  const nextOpponent = nextGame?.opponent || null
+  const coachName = cfg?.coach || 'Coach'
 
   function daysUntil(dateStr) {
     if (!dateStr) return null
-    const d = new Date(dateStr+'T23:59:59')
-    const diff = Math.ceil((d-now)/(1000*60*60*24))
+    const diff = Math.ceil((new Date(dateStr+'T23:59:59')-now)/(1000*60*60*24))
     return diff <= 0 ? 'Today' : diff === 1 ? '1d' : diff+'d'
   }
 
-  // Daily ritual greeting
+  // Greeting logic — updated with team-aware messaging
   function getGreeting() {
-    const day = now.getDay() // 0=Sun, 1=Mon...
     const nextGameDays = nextGame ? Math.ceil((new Date(nextGame.date+'T23:59:59')-now)/(1000*60*60*24)) : null
-    if (nextGameDays !== null && nextGameDays <= 0) return { label:'Game day', msg:'"It\'s game day, Coach. You\'ve prepared. Trust your players."', actions:['SCORING','LINEUP'] }
-    if (nextGameDays !== null && nextGameDays <= 2) return { label:`${nextGameDays}d to game day`, msg:'"Almost time. Is your scheme locked in and your lineup set?"', actions:['SCHEME','LINEUP'] }
-    if (nextGameDays !== null && nextGameDays <= 4) return { label:`${nextGameDays}d to game day`, msg:'"Game week. Good time to run through your scheme with your players."', actions:['SCHEME','PRACTICE'] }
-    if (nextPractice) return { label:'Practice coming up', msg:'"Have you built your practice plan yet? Sharp practices make sharp teams."', actions:['PRACTICE','DRILLS'] }
-    if (day === 1) return { label:'New week', msg:'"New week, new opportunity. What will you build this week?"', actions:['SCHEME','PRACTICE'] }
-    return { label:'Keep building', msg:'"No game on the calendar. Great time to explore a new scheme or run the Gauntlet."', actions:['SCHEME','GAUNTLET'] }
+    if (!currentTeam) return { label:'Welcome, Coach', msg:'Create a team to get started. Then add your schedule, roster, and build your first scheme.', btn1:{ label:'CREATE TEAM', action:()=>setPage('team') }, btn2:{ label:'EXPLORE SCHEMES', action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } } }
+    if (nextGameDays !== null && nextGameDays <= 0) return { label:'Game day', msg:'It\'s game day, Coach. You\'ve prepared. Trust your players.', btn1:{ label:'SCORING', action:()=>setPage('team') }, btn2:{ label:'LINEUP', action:()=>setPage('team') } }
+    if (nextGameDays !== null && nextGameDays <= 2) return { label:`${nextGameDays}d to game day`, msg:'Almost time. Is your scheme locked in and your lineup set?', btn1:{ label:'VIEW SCHEME', action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } }, btn2:{ label:'LINEUP', action:()=>setPage('team') } }
+    if (nextGameDays !== null && nextGameDays <= 5) return { label:`${nextGameDays}d to game day`, msg:'Game week. Great time to run your scheme and build a practice plan.', btn1:{ label:'SCHEMES', action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } }, btn2:{ label:'PRACTICE', action:()=>setPage('team') } }
+    if (!nextGame && schedule.length === 0) return { label:'Add your schedule', msg:'Add your schedule after creating a team. Great time to explore a new scheme or run the Gauntlet.', btn1:{ label:'ADD SCHEDULE', action:()=>setPage('team') }, btn2:{ label:'EXPLORE SCHEMES', action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } } }
+    if (nextPractice) return { label:'Practice coming up', msg:'Have you built your practice plan yet? Sharp practices make sharp teams.', btn1:{ label:'PRACTICE PLAN', action:()=>setPage('team') }, btn2:{ label:'SCHEMES', action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } } }
+    return { label:'Keep building', msg:'No game on the calendar. Great time to explore a new scheme, review your playbook, or run the Gauntlet.', btn1:{ label:'EXPLORE SCHEMES', action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } }, btn2:{ label:'GAUNTLET', action:()=>{ setPage('learn'); setActiveMode('gauntlet') } } }
   }
 
   const [showGreeting, setShowGreeting] = useState(true)
+  const [weatherData, setWeatherData] = useState(null)
+  const [weatherExpanded, setWeatherExpanded] = useState(false)
+  const [weatherAction, setWeatherAction] = useState(null) // 'indoor'|'postpone'|'cancel'
+  const [postponeDate, setPostponeDate] = useState('')
   const greeting = getGreeting()
 
-  // Coach name display
-  const coachName = cfg?.coach || 'Coach'
+  // Weather fetch for hub
+  useEffect(() => {
+    if (!homeLocation) return
+    async function fetchWeather() {
+      try {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(homeLocation)}&limit=1`)
+        const geoData = await geoRes.json()
+        if (!geoData[0]) return
+        const { lat, lon } = geoData[0]
+        const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&daily=weathercode,precipitation_probability_max,windspeed_10m_max,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7&temperature_unit=fahrenheit&windspeed_unit=mph`)
+        const wx = await wxRes.json()
+        setWeatherData({ current: wx.current, daily: wx.daily, lat, lon })
+      } catch(e) {}
+    }
+    fetchWeather()
+  }, [homeLocation])
 
-  // Saved plays count
-  const totalPlays = Object.values(playbook[sport]||{}).reduce((s,folder)=>s+(folder?.length||0),0)
+  // Weather code to description
+  function wxDesc(code) {
+    if (code === 0) return 'Clear'
+    if (code <= 3) return 'Partly cloudy'
+    if (code <= 48) return 'Foggy'
+    if (code <= 57) return 'Drizzle'
+    if (code <= 67) return 'Rain'
+    if (code <= 77) return 'Snow'
+    if (code <= 82) return 'Showers'
+    if (code <= 86) return 'Snow showers'
+    if (code <= 99) return 'Thunderstorm'
+    return 'Unknown'
+  }
 
-  // Days since last practice
-  const lastPlan = practicePlans[0]
-  const daysSincePractice = lastPlan ? Math.floor((now-new Date(lastPlan.id))/(1000*60*60*24)) : null
+  function wxEmoji(code) {
+    if (code === 0) return '☀️'
+    if (code <= 3) return '⛅'
+    if (code <= 48) return '🌫️'
+    if (code <= 57) return '🌦️'
+    if (code <= 67) return '🌧️'
+    if (code <= 77) return '❄️'
+    if (code <= 82) return '🌧️'
+    if (code <= 86) return '🌨️'
+    if (code <= 99) return '⛈️'
+    return '🌡️'
+  }
 
-  // Next opponent from schedule
-  const nextOpponent = nextGame?.opponent || null
+  // Sport-specific weather thresholds and indoor labels
+  const sportWeatherConfig = {
+    Football:   { threshold:65, lightRainOk:true,  indoorLabel:'Move to Indoor Turf / Facility', indoorNote:'Most football drills can continue on indoor turf.', cancelBias:'low' },
+    Basketball: { threshold:100, lightRainOk:true, indoorLabel:'Already indoors — notify travel concerns', indoorNote:'Basketball is indoors. Check travel conditions for away games.', cancelBias:'none' },
+    Baseball:   { threshold:40, lightRainOk:false, indoorLabel:'Move to Batting Cages / Indoor Facility', indoorNote:'Wet fields affect footing and ball grip. Move hitting/fielding drills to cages.', cancelBias:'high' },
+    Soccer:     { threshold:45, lightRainOk:false, indoorLabel:'Move to Indoor Turf / Gymnasium', indoorNote:'Lightning on open fields is mandatory evacuation. Check lightning alerts.', cancelBias:'high' },
+    Softball:   { threshold:40, lightRainOk:false, indoorLabel:'Move to Batting Cages / Indoor Facility', indoorNote:'Wet infields are hazardous. Move to batting cages or covered facility.', cancelBias:'high' },
+  }
+  const wxCfg = sportWeatherConfig[sport] || sportWeatherConfig.Football
+
+  // Get weather prediction for next event
+  function getEventWeatherPrediction() {
+    if (!weatherData || !nextEvent) return null
+    const eventDate = new Date(nextEvent.date+'T12:00:00')
+    const today = new Date(); today.setHours(0,0,0,0)
+    const dayIndex = Math.round((eventDate-today)/(1000*60*60*24))
+    if (dayIndex < 0 || dayIndex >= 7) return null
+    const daily = weatherData.daily
+    const code = daily.weathercode[dayIndex]
+    const precip = daily.precipitation_probability_max[dayIndex]
+    const wind = daily.windspeed_10m_max[dayIndex]
+    const maxTemp = daily.temperature_2m_max[dayIndex]
+    const minTemp = daily.temperature_2m_min[dayIndex]
+    const isThunder = code >= 95
+    const isHeavyRain = code >= 61 && code <= 67
+    const isAnyRain = code >= 51 && code <= 82
+    const isSnow = code >= 71 && code <= 77
+    let risk = 'low', riskLabel = '✓ Good conditions', riskColor = '#4ade80'
+    if (isThunder) { risk = 'high'; riskLabel = '⚠️ Thunderstorm — likely impacted'; riskColor = '#ef4444' }
+    else if (isSnow) { risk = 'high'; riskLabel = '⚠️ Snow expected — likely impacted'; riskColor = '#ef4444' }
+    else if (isHeavyRain && !wxCfg.lightRainOk) { risk = 'high'; riskLabel = '⚠️ Heavy rain — likely impacted'; riskColor = '#f59e0b' }
+    else if (isAnyRain && precip > wxCfg.threshold) { risk = 'medium'; riskLabel = '⚠️ Rain possible — may be affected'; riskColor = '#f59e0b' }
+    else if (wind > 25 && sport === 'Football') { risk = 'low'; riskLabel = '🏈 High wind — favor run game'; riskColor = '#f59e0b' }
+    let sportNote = ''
+    if (sport === 'Football' && wind > 20) sportNote = `Wind ${Math.round(wind)}mph — consider run-heavy scheme`
+    else if (sport === 'Baseball' || sport === 'Softball') sportNote = isAnyRain ? 'Wet field expected — prepare batting cage backup' : 'Field conditions look good'
+    else if (sport === 'Soccer') sportNote = isThunder ? 'Lightning protocol required — mandatory evacuation' : isAnyRain ? 'Wet turf — tighten cleats, adjust passing game' : 'Pitch conditions look good'
+    else if (sport === 'Basketball') sportNote = 'Indoor sport — check travel conditions for away games'
+    return { code, precip, wind, maxTemp, minTemp, risk, riskLabel, riskColor, sportNote, dayIndex, desc: wxDesc(code), emoji: wxEmoji(code) }
+  }
+
+  const pred = getEventWeatherPrediction()
+
+  // Postpone event (keeps it, removes date, marks as needs-rescheduling)
+  function postponeEvent(eventId, newDate) {
+    if (!currentTeam) return
+    const updated = schedule.map(e => e.id===eventId ? { ...e, date: newDate||'', _postponed:true, _needsReschedule:!newDate } : e)
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===currentTeam.id ? {...t, schedule:updated} : t) }))
+    setWeatherAction(null); setPostponeDate('')
+  }
+
+  function cancelEvent(eventId) {
+    if (!currentTeam) return
+    const updated = schedule.filter(e => e.id!==eventId)
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===currentTeam.id ? {...t, schedule:updated} : t) }))
+    setWeatherAction(null); setWeatherExpanded(false)
+  }
+
+  // Sport-specific SVG card art
+  function SportArt({ type }) {
+    const isOff = type === 'offense'
+    const isDef = type === 'defense'
+    const isPrac = type === 'practice'
+    const isScout = type === 'scout'
+    const color = isOff ? '#C0392B' : isDef ? '#6b9fff' : isPrac ? '#4ade80' : '#f59e0b'
+    const opacity = 0.12
+
+    if (sport === 'Football') {
+      return (
+        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
+          <rect x="0" y="0" width="200" height="48" fill="none"/>
+          {/* Field lines */}
+          <line x1="0" y1="24" x2="200" y2="24" stroke={color} strokeWidth="0.5" strokeDasharray="4,4"/>
+          {/* Line of scrimmage */}
+          <line x1="80" y1="0" x2="80" y2="48" stroke={color} strokeWidth="0.8" opacity="0.4"/>
+          {isOff && (<>
+            {/* Offensive formation - spread */}
+            <circle cx="100" cy="30" r="5" fill={color} opacity="0.9"/>{/* QB */}
+            <circle cx="80" cy="24" r="4" fill={color} opacity="0.7"/>{/* C */}
+            <circle cx="72" cy="24" r="4" fill={color} opacity="0.7"/>
+            <circle cx="88" cy="24" r="4" fill={color} opacity="0.7"/>
+            <circle cx="64" cy="24" r="4" fill={color} opacity="0.7"/>
+            <circle cx="96" cy="24" r="4" fill={color} opacity="0.7"/>
+            <circle cx="40" cy="26" r="4" fill={color} opacity="0.7"/>{/* WR left */}
+            <circle cx="160" cy="26" r="4" fill={color} opacity="0.7"/>{/* WR right */}
+            <circle cx="130" cy="26" r="4" fill={color} opacity="0.7"/>{/* TE */}
+            {/* Routes */}
+            <path d="M40,26 Q30,10 50,5" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <path d="M160,26 Q170,10 150,5" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <path d="M130,26 Q140,15 145,8" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+          </>)}
+          {isDef && (<>
+            {/* Defensive formation */}
+            <circle cx="80" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="90" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="70" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="100" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="75" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
+            <circle cx="95" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
+            <circle cx="85" cy="5" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
+            <circle cx="50" cy="12" r="3" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
+            <circle cx="120" cy="12" r="3" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
+          </>)}
+          {isPrac && (<>
+            <circle cx="60" cy="24" r="5" fill={color} opacity="0.8"/>
+            <circle cx="100" cy="24" r="5" fill={color} opacity="0.8"/>
+            <circle cx="140" cy="24" r="5" fill={color} opacity="0.8"/>
+            <circle cx="80" cy="12" r="4" fill={color} opacity="0.6"/>
+            <circle cx="120" cy="12" r="4" fill={color} opacity="0.6"/>
+            <path d="M60,24 L100,24 L140,24" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,3" opacity="0.5"/>
+            <path d="M60,24 L80,12 L100,24" stroke={color} strokeWidth="1" fill="none" opacity="0.5"/>
+            <path d="M100,24 L120,12 L140,24" stroke={color} strokeWidth="1" fill="none" opacity="0.5"/>
+          </>)}
+          {isScout && (<>
+            <circle cx="100" cy="20" r="14" stroke={color} strokeWidth="1.5" fill="none" opacity="0.4"/>
+            <circle cx="100" cy="20" r="8" stroke={color} strokeWidth="1" fill="none" opacity="0.3"/>
+            <line x1="86" y1="6" x2="114" y2="34" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+            <circle cx="118" cy="34" r="5" fill={color} opacity="0.7"/>
+          </>)}
+        </svg>
+      )
+    }
+
+    if (sport === 'Basketball') {
+      return (
+        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
+          {/* Half court arc */}
+          <path d="M100,48 Q150,48 175,20 Q185,5 100,2 Q15,5 25,20 Q50,48 100,48" stroke={color} strokeWidth="0.8" fill="none" opacity="0.3"/>
+          {/* Three point arc */}
+          <path d="M60,48 Q60,15 100,10 Q140,15 140,48" stroke={color} strokeWidth="1" fill="none" opacity="0.4"/>
+          {/* Paint */}
+          <rect x="80" y="30" width="40" height="18" stroke={color} strokeWidth="1" fill="none" opacity="0.4"/>
+          {/* Hoop */}
+          <circle cx="100" cy="30" r="6" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
+          {isOff && (<>
+            <circle cx="100" cy="44" r="4" fill={color} opacity="0.9"/>{/* PG */}
+            <circle cx="65" cy="35" r="4" fill={color} opacity="0.7"/>
+            <circle cx="135" cy="35" r="4" fill={color} opacity="0.7"/>
+            <circle cx="75" cy="22" r="4" fill={color} opacity="0.7"/>
+            <circle cx="125" cy="22" r="4" fill={color} opacity="0.7"/>
+            <path d="M100,44 Q85,38 75,22" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7" strokeDasharray="3,2"/>
+            <path d="M65,35 Q60,20 75,12" stroke={color} strokeWidth="1.2" fill="none" opacity="0.6"/>
+          </>)}
+          {isDef && (<>
+            <circle cx="100" cy="44" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="65" cy="35" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="135" cy="35" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="82" cy="22" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
+            <circle cx="118" cy="22" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
+          </>)}
+          {isPrac && (<>
+            <circle cx="70" cy="38" r="4" fill={color} opacity="0.8"/>
+            <circle cx="100" cy="38" r="4" fill={color} opacity="0.8"/>
+            <circle cx="130" cy="38" r="4" fill={color} opacity="0.8"/>
+            <path d="M70,38 L100,38 L130,38" stroke={color} strokeWidth="1" strokeDasharray="3,3" opacity="0.5"/>
+            <path d="M100,38 L100,30" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          </>)}
+          {isScout && (<>
+            <circle cx="100" cy="25" r="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.4"/>
+            <line x1="88" y1="13" x2="115" y2="38" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+            <circle cx="118" cy="40" r="4" fill={color} opacity="0.7"/>
+          </>)}
+        </svg>
+      )
+    }
+
+    if (sport === 'Baseball' || sport === 'Softball') {
+      return (
+        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
+          {/* Diamond */}
+          <path d="M100,4 L155,28 L100,46 L45,28 Z" stroke={color} strokeWidth="1.2" fill="none" opacity="0.5"/>
+          {/* Base paths */}
+          <line x1="100" y1="4" x2="155" y2="28" stroke={color} strokeWidth="0.8" opacity="0.3"/>
+          <line x1="155" y1="28" x2="100" y2="46" stroke={color} strokeWidth="0.8" opacity="0.3"/>
+          <line x1="100" y1="46" x2="45" y2="28" stroke={color} strokeWidth="0.8" opacity="0.3"/>
+          <line x1="45" y1="28" x2="100" y2="4" stroke={color} strokeWidth="0.8" opacity="0.3"/>
+          {/* Bases */}
+          <rect x="97" y="1" width="6" height="6" fill={color} opacity="0.7"/>
+          <rect x="152" y="25" width="6" height="6" fill={color} opacity="0.7"/>
+          <rect x="97" y="43" width="6" height="6" fill={color} opacity="0.7"/>
+          <rect x="42" y="25" width="6" height="6" fill={color} opacity="0.7"/>
+          {isOff && (<>
+            {/* Batter and baserunners */}
+            <circle cx="100" cy="42" r="4" fill={color} opacity="0.9"/>
+            <path d="M100,42 Q120,40 154,28" stroke={color} strokeWidth="1.5" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+          </>)}
+          {isDef && (<>
+            <circle cx="100" cy="26" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>{/* SS */}
+            <circle cx="120" cy="30" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>{/* 2B */}
+            <circle cx="80" cy="30" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>{/* 3B */}
+            <circle cx="100" cy="14" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>{/* P */}
+          </>)}
+          {isPrac && (<>
+            <circle cx="100" cy="44" r="4" fill={color} opacity="0.8"/>
+            <path d="M100,44 Q85,35 45,28" stroke={color} strokeWidth="1.5" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+          </>)}
+          {isScout && (<>
+            <circle cx="100" cy="26" r="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.3"/>
+            <line x1="94" y1="14" x2="112" y2="40" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+            <circle cx="115" cy="42" r="4" fill={color} opacity="0.7"/>
+          </>)}
+        </svg>
+      )
+    }
+
+    if (sport === 'Soccer') {
+      return (
+        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
+          {/* Half pitch */}
+          <rect x="10" y="4" width="180" height="40" rx="2" stroke={color} strokeWidth="1" fill="none" opacity="0.3"/>
+          {/* Center line */}
+          <line x1="10" y1="24" x2="190" y2="24" stroke={color} strokeWidth="0.8" opacity="0.2"/>
+          {/* Goal area */}
+          <rect x="10" y="14" width="30" height="20" stroke={color} strokeWidth="1" fill="none" opacity="0.4"/>
+          {/* Goal */}
+          <rect x="10" y="18" width="8" height="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
+          {isOff && (<>
+            {/* 4-3-3 attacking */}
+            <circle cx="80" cy="38" r="4" fill={color} opacity="0.9"/>
+            <circle cx="60" cy="30" r="4" fill={color} opacity="0.7"/>
+            <circle cx="100" cy="30" r="4" fill={color} opacity="0.7"/>
+            <circle cx="140" cy="30" r="4" fill={color} opacity="0.7"/>
+            <circle cx="50" cy="15" r="4" fill={color} opacity="0.8"/>
+            <circle cx="100" cy="12" r="4" fill={color} opacity="0.8"/>
+            <circle cx="150" cy="15" r="4" fill={color} opacity="0.8"/>
+            <path d="M80,38 L60,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.6"/>
+            <path d="M60,30 L50,15" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          </>)}
+          {isDef && (<>
+            <circle cx="110" cy="38" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="80" cy="26" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="110" cy="22" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="140" cy="26" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+            <circle cx="95" cy="15" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
+            <circle cx="125" cy="15" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
+          </>)}
+          {isPrac && (<>
+            <circle cx="70" cy="30" r="4" fill={color} opacity="0.8"/>
+            <circle cx="100" cy="20" r="4" fill={color} opacity="0.8"/>
+            <circle cx="130" cy="30" r="4" fill={color} opacity="0.8"/>
+            <path d="M70,30 L100,20 L130,30" stroke={color} strokeWidth="1.2" strokeDasharray="3,3" opacity="0.5"/>
+            <path d="M130,30 L70,30" stroke={color} strokeWidth="1" strokeDasharray="4,4" opacity="0.4"/>
+          </>)}
+          {isScout && (<>
+            <circle cx="110" cy="24" r="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.4"/>
+            <line x1="100" y1="12" x2="122" y2="38" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+            <circle cx="125" cy="40" r="4" fill={color} opacity="0.7"/>
+          </>)}
+        </svg>
+      )
+    }
+
+    // Default generic dots
+    return (
+      <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.5 }}>
+        <circle cx="60" cy="24" r="5" fill={color} opacity="0.7"/>
+        <circle cx="100" cy="24" r="5" fill={color} opacity="0.7"/>
+        <circle cx="140" cy="24" r="5" fill={color} opacity="0.7"/>
+        <path d="M60,24 L100,24 L140,24" stroke={color} strokeWidth="1.5" fill="none" opacity="0.5"/>
+      </svg>
+    )
+  }
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
 
-      {/* DAILY GREETING */}
-      {showGreeting && (
-        <div style={{ background:'#0f1219', border:'1px solid rgba(192,57,43,0.3)', borderLeft:`3px solid #C0392B`, borderRadius:10, padding:'12px 14px', marginBottom:12, position:'relative' }}>
-          <button onClick={()=>setShowGreeting(false)} style={{ position:'absolute', top:8, right:10, background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:4 }}>✕</button>
-          <div style={{ fontSize:8, letterSpacing:2, color:'#C0392B', fontWeight:700, textTransform:'uppercase', marginBottom:4 }}>{greeting.label}</div>
-          <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5, marginBottom:10, paddingRight:20 }}>{greeting.msg}</div>
-          <div style={{ display:'flex', gap:6 }}>
-            <button onClick={()=>{ setPage('schemes'); setActiveMode('schemes_offense') }} style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', fontSize:9, fontWeight:700, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>SCHEMES</button>
-            <button onClick={()=>{ setPage('team') }} style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', fontSize:9, fontWeight:700, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>TEAM</button>
+      {/* TOP ROW — Weather + Greeting side by side */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+
+        {/* WEATHER CARD */}
+        <div onClick={()=>setWeatherExpanded(true)} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:10, padding:'10px 12px', cursor:'pointer', position:'relative', overflow:'hidden' }}>
+          {pred && pred.risk !== 'low' && <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:pred.riskColor }} />}
+          {weatherData ? (
+            <>
+              <div style={{ fontSize:20, marginBottom:2 }}>{wxEmoji(weatherData.current.weathercode)}</div>
+              <div style={{ fontSize:18, fontWeight:900, color:'#f2f4f8', lineHeight:1 }}>{Math.round(weatherData.current.temperature_2m)}°</div>
+              <div style={{ fontSize:8, color:'#6b7a96', marginTop:2, lineHeight:1.3 }}>{homeLocation ? homeLocation.split(',')[0] : 'Set location'}</div>
+              {pred && (
+                <div style={{ marginTop:6, fontSize:8, color:pred.riskColor, fontWeight:700, lineHeight:1.3 }}>{pred.riskLabel}</div>
+              )}
+              <div style={{ fontSize:7, color:'#3d4559', marginTop:4 }}>Tap for details</div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize:20, marginBottom:4 }}>🌡️</div>
+              <div style={{ fontSize:10, fontWeight:700, color:'#6b7a96', lineHeight:1.4 }}>Set your location for weather</div>
+              <div style={{ fontSize:7, color:'#3d4559', marginTop:4 }}>Settings → Location</div>
+            </>
+          )}
+        </div>
+
+        {/* GREETING CARD */}
+        {showGreeting && (
+          <div style={{ background:'#0f1219', border:'1px solid rgba(192,57,43,0.3)', borderLeft:'3px solid #C0392B', borderRadius:10, padding:'10px 12px', position:'relative' }}>
+            <button onClick={()=>setShowGreeting(false)} style={{ position:'absolute', top:6, right:8, background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:12, padding:2 }}>✕</button>
+            <div style={{ fontSize:7, letterSpacing:2, color:'#C0392B', fontWeight:700, textTransform:'uppercase', marginBottom:4 }}>{greeting.label}</div>
+            <div style={{ fontSize:10, color:'#f2f4f8', lineHeight:1.4, marginBottom:8, paddingRight:12 }}>{greeting.msg}</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+              <button onClick={greeting.btn1.action} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 6px', fontSize:8, fontWeight:700, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>{greeting.btn1.label}</button>
+              <button onClick={greeting.btn2.action} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 6px', fontSize:8, fontWeight:700, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>{greeting.btn2.label}</button>
+            </div>
+          </div>
+        )}
+        {!showGreeting && (
+          <div onClick={()=>setShowGreeting(true)} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:10, padding:'10px 12px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ fontSize:16, marginBottom:4 }}>💬</div>
+            <div style={{ fontSize:8, color:'#3d4559', fontWeight:700, letterSpacing:1, textAlign:'center' }}>DAILY TIP</div>
+          </div>
+        )}
+      </div>
+
+      {/* WEATHER EXPANDED MODAL */}
+      {weatherExpanded && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:100, display:'flex', alignItems:'flex-end', justifyContent:'center' }} onClick={()=>{ setWeatherExpanded(false); setWeatherAction(null) }}>
+          <div onClick={e=>e.stopPropagation()} style={{ background:'#0d1117', borderRadius:'16px 16px 0 0', padding:'20px 16px 32px', width:'100%', maxWidth:480, maxHeight:'80vh', overflowY:'auto' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:2, textTransform:'uppercase' }}>Weather Intelligence</div>
+              <button onClick={()=>{ setWeatherExpanded(false); setWeatherAction(null) }} style={{ background:'transparent', border:'none', color:'#6b7a96', cursor:'pointer', fontSize:18 }}>✕</button>
+            </div>
+
+            {weatherData && (
+              <>
+                {/* Current conditions */}
+                <div style={{ background:'#161922', borderRadius:8, padding:'12px 14px', marginBottom:12 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
+                    <div style={{ fontSize:32 }}>{wxEmoji(weatherData.current.weathercode)}</div>
+                    <div>
+                      <div style={{ fontSize:28, fontWeight:900, color:'#f2f4f8', lineHeight:1 }}>{Math.round(weatherData.current.temperature_2m)}°F</div>
+                      <div style={{ fontSize:11, color:'#6b7a96' }}>{wxDesc(weatherData.current.weathercode)} · Wind {Math.round(weatherData.current.windspeed_10m)}mph</div>
+                      <div style={{ fontSize:10, color:'#3d4559' }}>{homeLocation}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next event prediction */}
+                {pred && nextEvent && (
+                  <div style={{ background:'#161922', borderRadius:8, padding:'12px 14px', marginBottom:12, borderLeft:`3px solid ${pred.riskColor}` }}>
+                    <div style={{ fontSize:9, color:pred.riskColor, fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:6 }}>
+                      {nextEvent.type} · {new Date(nextEvent.date+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}
+                    </div>
+                    <div style={{ display:'flex', gap:10, marginBottom:8 }}>
+                      <div style={{ textAlign:'center' }}>
+                        <div style={{ fontSize:22 }}>{pred.emoji}</div>
+                        <div style={{ fontSize:9, color:'#6b7a96' }}>{pred.desc}</div>
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:13, fontWeight:700, color:pred.riskColor, marginBottom:3 }}>{pred.riskLabel}</div>
+                        <div style={{ fontSize:11, color:'#6b7a96' }}>Rain chance: {pred.precip}% · Wind: {Math.round(pred.wind)}mph</div>
+                        <div style={{ fontSize:11, color:'#6b7a96' }}>Hi {Math.round(pred.maxTemp)}° Lo {Math.round(pred.minTemp)}°</div>
+                      </div>
+                    </div>
+                    {pred.sportNote && <div style={{ fontSize:10, color:'#f59e0b', fontStyle:'italic', lineHeight:1.4 }}>🏅 {pred.sportNote}</div>}
+
+                    {/* Action buttons - only show if risk is medium or high */}
+                    {pred.risk !== 'low' && !weatherAction && (
+                      <div style={{ marginTop:12 }}>
+                        <div style={{ fontSize:8, color:'#6b7a96', letterSpacing:2, textTransform:'uppercase', marginBottom:8 }}>What do you want to do?</div>
+                        <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                          {sport !== 'Basketball' && (
+                            <button onClick={()=>setWeatherAction('indoor')} style={{ width:'100%', padding:'10px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:6, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, textAlign:'left' }}>
+                              🏢 {wxCfg.indoorLabel}
+                            </button>
+                          )}
+                          <button onClick={()=>setWeatherAction('postpone')} style={{ width:'100%', padding:'10px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:6, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, textAlign:'left' }}>
+                            📅 Postpone — pick a new date later
+                          </button>
+                          <button onClick={()=>setWeatherAction('cancel')} style={{ width:'100%', padding:'10px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, textAlign:'left' }}>
+                            ✕ Cancel this {nextEvent.type.toLowerCase()}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Indoor action */}
+                    {weatherAction === 'indoor' && (
+                      <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(107,154,255,0.08)', borderRadius:8 }}>
+                        <div style={{ fontSize:10, color:'#6b9fff', fontWeight:700, marginBottom:4 }}>Moving Indoors</div>
+                        <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:8 }}>{wxCfg.indoorNote}</div>
+                        <div style={{ display:'flex', gap:6 }}>
+                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                          <button onClick={()=>{ setWeatherExpanded(false); setWeatherAction(null) }} style={{ flex:2, padding:'8px', background:'#6b9fff', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>GOT IT — STAYING ON SCHEDULE</button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Postpone action */}
+                    {weatherAction === 'postpone' && (
+                      <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(245,158,11,0.08)', borderRadius:8 }}>
+                        <div style={{ fontSize:10, color:'#f59e0b', fontWeight:700, marginBottom:4 }}>Postpone {nextEvent.type}</div>
+                        <div style={{ fontSize:11, color:'#9aa0b0', marginBottom:8 }}>Pick a new date now, or leave blank to reschedule later.</div>
+                        <input type="date" value={postponeDate} onChange={e=>setPostponeDate(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, marginBottom:8, outline:'none' }} />
+                        <div style={{ display:'flex', gap:6 }}>
+                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                          <button onClick={()=>postponeEvent(nextEvent.id, postponeDate)} style={{ flex:2, padding:'8px', background:'#f59e0b', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>{postponeDate ? 'MOVE TO NEW DATE' : 'MARK NEEDS RESCHEDULE'}</button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Cancel action */}
+                    {weatherAction === 'cancel' && (
+                      <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(239,68,68,0.08)', borderRadius:8 }}>
+                        <div style={{ fontSize:10, color:'#ef4444', fontWeight:700, marginBottom:4 }}>Cancel {nextEvent.type}?</div>
+                        <div style={{ fontSize:11, color:'#9aa0b0', marginBottom:8 }}>This permanently removes the event from your schedule. This cannot be undone.</div>
+                        <div style={{ display:'flex', gap:6 }}>
+                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                          <button onClick={()=>cancelEvent(nextEvent.id)} style={{ flex:2, padding:'8px', background:'#ef4444', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>YES, CANCEL IT</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!nextEvent && (
+                  <div style={{ background:'#161922', borderRadius:8, padding:'10px 12px', marginBottom:12 }}>
+                    <div style={{ fontSize:10, color:'#6b7a96' }}>No upcoming events to predict. Add a game or practice to your schedule to see weather impact.</div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {!weatherData && (
+              <div style={{ textAlign:'center', padding:'20px 0' }}>
+                <div style={{ fontSize:13, color:'#6b7a96', marginBottom:8 }}>Set your location in Settings to enable weather forecasts and game-day predictions.</div>
+                <button onClick={()=>{ setWeatherExpanded(false); setPage('more') }} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>GO TO SETTINGS</button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -5106,108 +5556,94 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
         </div>
       </div>
 
-      {/* TICKER BAR — Record · Next Game · Next Practice */}
-      <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, display:'flex', height:52, marginBottom:12, overflow:'hidden' }}>
-        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', borderRight:'1px solid #1e2330', padding:'0 6px' }}>
-          <div style={{ fontSize:22, fontWeight:900, color:'#f2f4f8', lineHeight:1, letterSpacing:-1 }}>{record}</div>
-          <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginTop:2 }}>Record</div>
-        </div>
-        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', borderRight:'1px solid #1e2330', padding:'0 6px' }}>
-          <div style={{ fontSize:22, fontWeight:900, color: nextGame ? '#4ade80' : '#3d4559', lineHeight:1, letterSpacing:-1 }}>{nextGame ? daysUntil(nextGame.date) : '—'}</div>
-          <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginTop:2 }}>{nextGame ? `Game · ${new Date(nextGame.date+'T12:00:00').toLocaleDateString([],{weekday:'short'})}` : 'No game'}</div>
-        </div>
-        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 6px' }}>
-          <div style={{ fontSize:22, fontWeight:900, color: nextPractice ? '#6b9fff' : '#3d4559', lineHeight:1, letterSpacing:-1 }}>{nextPractice ? daysUntil(nextPractice.date) : '—'}</div>
-          <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginTop:2 }}>{nextPractice ? `Practice · ${new Date(nextPractice.date+'T12:00:00').toLocaleDateString([],{weekday:'short'})}` : 'No practice'}</div>
-        </div>
-      </div>
-
       {/* BEFORE THE GAME */}
       <div style={{ fontSize:8, letterSpacing:2, color:'#3d4559', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Before the game</div>
 
       {/* OFFENSE CARD */}
       <div style={{ background:'linear-gradient(135deg,#1a0a08,#0f1219)', border:'1px solid rgba(192,57,43,0.5)', borderTop:'3px solid #C0392B', borderRadius:12, marginBottom:8, overflow:'hidden' }}>
-        <div onClick={()=>{ setPage('schemes'); setActiveMode('schemes_offense') }} style={{ padding:'12px 14px 10px', display:'flex', alignItems:'flex-start', gap:10, cursor:'pointer' }}>
-          <div style={{ width:42, height:42, borderRadius:10, background:'rgba(192,57,43,0.2)', border:'1px solid rgba(192,57,43,0.4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:21, flexShrink:0 }}>⚔️</div>
-          <div style={{ flex:1 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>Offense</div>
-              {nextGame && daysUntil(nextGame.date) !== null && <div style={{ background:'#C0392B', borderRadius:3, padding:'1px 6px', fontSize:7, fontWeight:700, color:'white', letterSpacing:1 }}>GAME WEEK</div>}
+        <div onClick={()=>{ setPage('schemes'); setActiveMode('schemes_offense') }} style={{ cursor:'pointer' }}>
+          {/* Sport art header */}
+          <div style={{ padding:'0 0 0 0', borderBottom:'1px solid rgba(192,57,43,0.15)' }}>
+            <SportArt type="offense" />
+          </div>
+          <div style={{ padding:'10px 14px 8px', display:'flex', alignItems:'center', gap:10 }}>
+            <div style={{ flex:1 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
+                <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{{ Football:'Offense', Basketball:'Offense', Baseball:'Game Plan', Soccer:'Attack', Softball:'Game Plan' }[sport]||'Offense'}</div>
+                {nextGame && <div style={{ background:'#C0392B', borderRadius:3, padding:'1px 6px', fontSize:7, fontWeight:700, color:'white', letterSpacing:1 }}>GAME WEEK</div>}
+              </div>
+              <div style={{ fontSize:9, color:'rgba(192,57,43,0.9)', fontWeight:700 }}>{{ Football:'Build your attack →', Basketball:'Build your offense →', Baseball:'Build your game plan →', Soccer:'Build your attack →', Softball:'Build your game plan →' }[sport]||'Build your attack →'}</div>
             </div>
-            <div style={{ fontSize:9, color:'rgba(192,57,43,0.9)', fontWeight:700 }}>Build your attack →</div>
           </div>
         </div>
         <div style={{ display:'flex', borderTop:'1px solid rgba(192,57,43,0.15)', borderBottom:'1px solid rgba(192,57,43,0.15)' }}>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
             <div style={{ fontSize:17, fontWeight:700, color: ppg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{ppg!==null?ppg:'—'}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Off. PPG</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Off. PPG', Basketball:'Off. PPG', Baseball:'Runs/game', Soccer:'Goals/game', Softball:'Runs/game' }[sport]||'PPG'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
             <div style={{ fontSize:17, fontWeight:700, color:'#3d4559', lineHeight:1 }}>—</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Yds/play</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds/play', Basketball:'Pts/poss', Baseball:'Hits/game', Soccer:'Shots/game', Softball:'Hits/game' }[sport]||'Stat'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
             <div style={{ fontSize:lastOffScheme?9:14, fontWeight:700, color:lastOffScheme?'#C0392B':'#3d4559', lineHeight:1.2 }}>{lastOffScheme ? lastOffScheme.slice(0,14) : '—'}</div>
             <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
           </div>
         </div>
-        <div style={{ padding:'7px 14px', borderBottom:'1px solid rgba(192,57,43,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>Track offensive yards in Live Scoring to see this</div>
-          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#C0392B', fontWeight:700, cursor:'pointer' }}>Scoring →</div>
-        </div>
-        <div onClick={()=>setPage('team')} style={{ padding:'7px 14px', display:'flex', justifyContent:'flex-end', cursor:'pointer' }}>
-          <div style={{ fontSize:9, color:'#C0392B', fontWeight:700, letterSpacing:'0.5px' }}>Full analytics →</div>
+        <div style={{ padding:'7px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>{{ Football:'Track offensive yards in Live Scoring to see this', Basketball:'Track possessions in Live Scoring to see this', Baseball:'Track hits in Live Scoring to see this', Soccer:'Track shots in Live Scoring to see this', Softball:'Track hits in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
+          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#C0392B', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics →</div>
         </div>
       </div>
 
       {/* DEFENSE CARD */}
       <div style={{ background:'linear-gradient(135deg,#080d1a,#0f1219)', border:'1px solid rgba(107,154,255,0.35)', borderTop:'3px solid #6b9fff', borderRadius:12, marginBottom:8, overflow:'hidden' }}>
-        <div onClick={()=>{ setPage('schemes'); setActiveMode('schemes_defense') }} style={{ padding:'12px 14px 10px', display:'flex', alignItems:'flex-start', gap:10, cursor:'pointer' }}>
-          <div style={{ width:42, height:42, borderRadius:10, background:'rgba(107,154,255,0.12)', border:'1px solid rgba(107,154,255,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:21, flexShrink:0 }}>🛡</div>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Defense</div>
-            <div style={{ fontSize:9, color:'rgba(107,154,255,0.9)', fontWeight:700 }}>Shut them down →</div>
+        <div onClick={()=>{ setPage('schemes'); setActiveMode('schemes_defense') }} style={{ cursor:'pointer' }}>
+          <div style={{ borderBottom:'1px solid rgba(107,154,255,0.15)' }}>
+            <SportArt type="defense" />
+          </div>
+          <div style={{ padding:'10px 14px 8px' }}>
+            <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{{ Football:'Defense', Basketball:'Defense', Baseball:'Pitching & Defense', Soccer:'Defensive Shape', Softball:'Pitching & Defense' }[sport]||'Defense'}</div>
+            <div style={{ fontSize:9, color:'rgba(107,154,255,0.9)', fontWeight:700 }}>{{ Football:'Shut them down →', Basketball:'Lock it down →', Baseball:'Hold them here →', Soccer:'Keep the clean sheet →', Softball:'Hold them here →' }[sport]||'Shut them down →'}</div>
           </div>
         </div>
         <div style={{ display:'flex', borderTop:'1px solid rgba(107,154,255,0.15)', borderBottom:'1px solid rgba(107,154,255,0.15)' }}>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
             <div style={{ fontSize:17, fontWeight:700, color: papg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{papg!==null?papg:'—'}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Pts allowed avg</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Pts allowed avg', Basketball:'Pts allowed avg', Baseball:'Runs allowed avg', Soccer:'Goals allowed avg', Softball:'Runs allowed avg' }[sport]||'Pts allowed'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
             <div style={{ fontSize:17, fontWeight:700, color:'#3d4559', lineHeight:1 }}>—</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Yds allowed/play</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds allowed/play', Basketball:'Opp pts/poss', Baseball:'ERA', Soccer:'Shots allowed', Softball:'ERA' }[sport]||'Stat'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
             <div style={{ fontSize:lastDefScheme?9:14, fontWeight:700, color:lastDefScheme?'#6b9fff':'#3d4559', lineHeight:1.2 }}>{lastDefScheme ? lastDefScheme.slice(0,14) : '—'}</div>
             <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
           </div>
         </div>
-        <div style={{ padding:'7px 14px', borderBottom:'1px solid rgba(107,154,255,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>Track yards allowed in Live Scoring to see this</div>
-          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#6b9fff', fontWeight:700, cursor:'pointer' }}>Scoring →</div>
-        </div>
-        <div onClick={()=>setPage('team')} style={{ padding:'7px 14px', display:'flex', justifyContent:'flex-end', cursor:'pointer' }}>
-          <div style={{ fontSize:9, color:'#6b9fff', fontWeight:700, letterSpacing:'0.5px' }}>Full analytics →</div>
+        <div style={{ padding:'7px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>{{ Football:'Track yards allowed in Live Scoring to see this', Basketball:'Track opponent scoring in Live Scoring', Baseball:'Track runs allowed in Live Scoring to see this', Soccer:'Track shots allowed in Live Scoring', Softball:'Track runs allowed in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
+          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#6b9fff', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics →</div>
         </div>
       </div>
 
       {/* PRACTICE + SCOUT 2-col */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
-
         {/* Practice Plan */}
         <div onClick={()=>setPage('team')} style={{ background:'linear-gradient(135deg,#081a0d,#0f1219)', border:'1px solid rgba(74,222,128,0.3)', borderTop:'3px solid #4ade80', borderRadius:12, overflow:'hidden', cursor:'pointer' }}>
-          <div style={{ padding:'12px 12px 8px' }}>
-            <div style={{ fontSize:22, marginBottom:5 }}>🏃</div>
+          <div style={{ borderBottom:'1px solid rgba(74,222,128,0.15)' }}>
+            <SportArt type="practice" />
+          </div>
+          <div style={{ padding:'10px 12px 8px' }}>
             <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Practice Plan</div>
-            <div style={{ fontSize:9, color:'rgba(74,222,128,0.8)', fontWeight:700 }}>Run a sharp session →</div>
+            <div style={{ fontSize:9, color:'rgba(74,222,128,0.8)', fontWeight:700 }}>{{ Football:'Run a sharp session →', Basketball:'Run a sharp session →', Baseball:'Build your practice →', Soccer:'Run a sharp session →', Softball:'Build your practice →' }[sport]||'Run a sharp session →'}</div>
           </div>
           <div style={{ borderTop:'1px solid rgba(74,222,128,0.15)', padding:'8px 12px' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
               <div style={{ fontSize:8, color:'#6b7a96' }}>Plans saved</div>
               <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8' }}>{practicePlans.length}</div>
             </div>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
               <div style={{ fontSize:8, color:'#6b7a96' }}>Last focus</div>
               <div style={{ fontSize:9, fontWeight:700, color:'#f2f4f8', textAlign:'right', maxWidth:70, lineHeight:1.2 }}>{lastPlan?.focus || '—'}</div>
             </div>
@@ -5220,9 +5656,11 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
         </div>
 
         {/* Scout */}
-        <div onClick={()=>{ setPage('scout') }} style={{ background:'linear-gradient(135deg,#150f08,#0f1219)', border:'1px solid rgba(245,158,11,0.3)', borderTop:'3px solid #f59e0b', borderRadius:12, overflow:'hidden', cursor:'pointer' }}>
-          <div style={{ padding:'12px 12px 8px' }}>
-            <div style={{ fontSize:22, marginBottom:5 }}>🔍</div>
+        <div onClick={()=>setPage('scout')} style={{ background:'linear-gradient(135deg,#150f08,#0f1219)', border:'1px solid rgba(245,158,11,0.3)', borderTop:'3px solid #f59e0b', borderRadius:12, overflow:'hidden', cursor:'pointer' }}>
+          <div style={{ borderBottom:'1px solid rgba(245,158,11,0.15)' }}>
+            <SportArt type="scout" />
+          </div>
+          <div style={{ padding:'10px 12px 8px' }}>
             <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Scout</div>
             <div style={{ fontSize:9, color:'rgba(245,158,11,0.8)', fontWeight:700 }}>Know your opponent →</div>
           </div>
@@ -5232,13 +5670,12 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
                 <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginBottom:3 }}>NEXT OPPONENT</div>
                 <div style={{ fontSize:11, fontWeight:700, color:'#f2f4f8', lineHeight:1.3, marginBottom:5 }}>{nextOpponent}</div>
                 <div style={{ background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:4, padding:'3px 6px', textAlign:'center', marginBottom:6 }}>
-                  <div style={{ fontSize:7, color:'#f59e0b', fontWeight:700, letterSpacing:'0.5px' }}>NO SCOUT BUILT YET</div>
+                  <div style={{ fontSize:7, color:'#f59e0b', fontWeight:700 }}>NO SCOUT BUILT YET</div>
                 </div>
                 <div style={{ fontSize:8, color:'#f59e0b', fontWeight:700 }}>Build one now →</div>
               </>
             ) : (
               <>
-                <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginBottom:6 }}>NO UPCOMING GAME</div>
                 <div style={{ fontSize:10, color:'#3d4559', lineHeight:1.4, marginBottom:6 }}>Add a game to your schedule to prep a scout report</div>
                 <div style={{ fontSize:8, color:'#f59e0b', fontWeight:700 }}>Add to schedule →</div>
               </>
@@ -5279,12 +5716,12 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
         ))}
       </div>
 
-      {/* WHAT'S COMING */}
+      {/* ROADMAP */}
       <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:12, padding:'12px 14px', marginBottom:8 }}>
         <div style={{ fontSize:8, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:10 }}>What's coming</div>
         {[
-          { color:'#4ade80', label:'Just added', items:'Live scoring · Practice plans · Post-game summary · Player editing · Collapsible play cards' },
-          { color:'#f59e0b', label:'In progress', items:'Full play breakdown · Flag football · Position tracker · Yards tracking in live scoring' },
+          { color:'#4ade80', label:'Just added', items:'Live scoring · Practice plans · Post-game summary · Player editing · CoachIQ Hub' },
+          { color:'#f59e0b', label:'In progress', items:'Full play breakdown · Flag football · Position tracker · Yards tracking' },
           { color:'#3d4559', label:'Planned', items:'Film room · Wristbands · AthleteIQ · Coach network · Season manager' },
         ].map(row => (
           <div key={row.label} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:8 }}>
@@ -5306,6 +5743,42 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
         </div>
       </div>
 
+    </div>
+  )
+}
+
+
+// ─── NEWS TICKER ──────────────────────────────────────────────────────────────
+function NewsTicker({ sport, P }) {
+  const [headlines, setHeadlines] = useState([])
+  const RSS_URLS = {
+    Football:   'https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nfl/news',
+    Basketball: 'https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nba/news',
+    Baseball:   'https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news',
+    Soccer:     'https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/soccer/news',
+    Softball:   'https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news',
+  }
+  useEffect(() => {
+    const cacheKey = 'coachiq_ticker_'+sport
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) { const {items,ts} = JSON.parse(cached); if (Date.now()-ts < 30*60*1000 && items?.length) { setHeadlines(items); return } }
+    } catch(e) {}
+    fetch(RSS_URLS[sport]||RSS_URLS.Football)
+      .then(r=>r.json())
+      .then(d=>{ const items=(d.items||[]).slice(0,8).map(i=>i.title?.replace(/<[^>]+>/g,'').trim()).filter(Boolean); setHeadlines(items); try { sessionStorage.setItem(cacheKey, JSON.stringify({items,ts:Date.now()})) } catch(e){} })
+      .catch(()=>{})
+  }, [sport])
+
+  if (!headlines.length) return <div style={{ flex:1 }} />
+
+  return (
+    <div style={{ flex:1, overflow:'hidden', margin:'0 6px' }}>
+      <div style={{ overflow:'hidden', whiteSpace:'nowrap' }}>
+        <div style={{ display:'inline-block', animation:'ticker 30s linear infinite', fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
+          {headlines.join('  ·  ')}  ·  {headlines.join('  ·  ')}
+        </div>
+      </div>
     </div>
   )
 }
@@ -5462,8 +5935,8 @@ export default function CoachIQ() {
 
   const NAV_ITEMS = [
     { id:'hub',     label:'HUB'     },
-    { id:'schemes', icon:'📋', label:'SCHEMES' },
     { id:'team',    icon:'🏆', label:'TEAM'    },
+    { id:'schemes', icon:'📋', label:'SCHEMES' },
     { id:'learn',   icon:'🎓', label:'LEARN'   },
   ]
 
@@ -5600,30 +6073,20 @@ export default function CoachIQ() {
               {['Football','Basketball','Baseball','Soccer','Softball'].map(s=>(
                 <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾', Soccer:'⚽', Softball:'🥎' }[s]} {s}</option>
               ))}
-              <option disabled value="" style={{ color:'#3d4559' }}>── More sports coming soon</option>
             </select>
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
           </div>
-          <div style={{ flex:1 }} />
+          {/* NEWS TICKER */}
+          <NewsTicker sport={sport} P={P} />
           <button onClick={()=>setPage('news')} style={{ display:'flex', alignItems:'center', gap:3, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'4px 8px', cursor:'pointer', userSelect:'none', flexShrink:0, WebkitTapHighlightColor:'transparent' }}>
             <span style={{ fontSize:14 }}>📰</span>
           </button>
-          <TeamQuickSwitcher
-            sport={sport}
-            teams={teams}
-            activeTeam={activeTeam}
-            setActiveTeam={setActiveTeam}
-            setCfg={setCfg}
-            setPage={setPage}
-            P={P}
-            al={al}
-            iq={iq}
-          />
+          <TeamQuickSwitcher sport={sport} teams={teams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setCfg={setCfg} setPage={setPage} P={P} al={al} iq={iq} />
         </div>
 
         {/* PAGE CONTENT */}
         <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14, background:'#07090d', overflowX:'hidden', boxSizing:'border-box' }}>
-          {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={teams} activeTeam={activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} callAI={callAI} homeLocation={homeLocation} />}
+          {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={teams} activeTeam={activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} callAI={callAI} homeLocation={homeLocation} setTeams={setTeams} />}
           {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} homeLocation={homeLocation} setPage={setPage} />}
           {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
@@ -7405,6 +7868,9 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
   const [showAdd, setShowAdd] = useState(false)
   const [savedOpponents, setSavedOpponents] = useState([])
   const [expandedEvent, setExpandedEvent] = useState(null)
+  const [postponingId, setPostponingId] = useState(null)
+  const [postponeDate, setPostponeDate] = useState('')
+  const [cancelConfirmId, setCancelConfirmId] = useState(null)
   const [form, setForm] = useState({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
 
   const schedule = team?.schedule || []
@@ -7415,12 +7881,10 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
 
   function saveEvent() {
     if (!form.date) return
-    const event = { id:Date.now(), ...form, rsvp:'yes' } // coach RSVPs yes by default
+    const event = { id:Date.now(), ...form, rsvp:'yes' }
     const updated = [...schedule, event].sort((a,b) => new Date(a.date) - new Date(b.date))
     updateTeam({ schedule: updated })
-    if (form.opponent && !savedOpponents.includes(form.opponent)) {
-      setSavedOpponents(prev => [...prev, form.opponent])
-    }
+    if (form.opponent && !savedOpponents.includes(form.opponent)) setSavedOpponents(prev => [...prev, form.opponent])
     setForm({ type:'Game', opponent:'', date:'', time:'', arrivalTime:'', location:'', homeAway:'Home', notes:'' })
     setShowAdd(false)
   }
@@ -7428,6 +7892,13 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
   function removeEvent(id) {
     updateTeam({ schedule: schedule.filter(e => e.id !== id) })
     if (expandedEvent === id) setExpandedEvent(null)
+    setCancelConfirmId(null)
+  }
+
+  function postponeEvent(id, newDate) {
+    const updated = schedule.map(e => e.id===id ? { ...e, date: newDate||'', _postponed:true, _needsReschedule:!newDate } : e)
+    updateTeam({ schedule: updated.sort((a,b) => new Date(a.date||'9999')-new Date(b.date||'9999')) })
+    setPostponingId(null); setPostponeDate('')
   }
 
   function setRsvp(id, status) {
@@ -7437,18 +7908,14 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
   const typeColors = { Game:P, Practice:'#4ade80', Scrimmage:'#f59e0b', Tournament:'#c084fc' }
   const typeIcons  = { Game:'🏆', Practice:'📋', Scrimmage:'⚡', Tournament:'🥇' }
   const now = new Date()
-  const upcoming = schedule.filter(e => new Date(e.date+'T23:59:59') >= now)
-  const past     = schedule.filter(e => new Date(e.date+'T23:59:59') < now)
+  const upcoming = schedule.filter(e => !e._needsReschedule && new Date((e.date||'9999')+'T23:59:59') >= now)
+  const needsReschedule = schedule.filter(e => e._needsReschedule)
+  const past = schedule.filter(e => !e._needsReschedule && new Date((e.date||'9999')+'T23:59:59') < now)
 
   function openInMaps(location) {
     const q = encodeURIComponent(location)
-    // Opens Apple Maps on iOS, Google Maps on Android/desktop
-    const ua = navigator.userAgent
-    if (/iPhone|iPad|iPod/.test(ua)) {
-      window.open(`maps://maps.apple.com/?q=${q}`)
-    } else {
-      window.open(`https://maps.google.com/?q=${q}`)
-    }
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) window.open(`maps://maps.apple.com/?q=${q}`)
+    else window.open(`https://maps.google.com/?q=${q}`)
   }
 
   const rsvpColor = { yes:'#4ade80', no:'#e74c3c', maybe:'#f59e0b' }
@@ -7485,13 +7952,7 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
               </div>
               <div>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / Address</label>
-                <AddressSearch
-                  value={form.location}
-                  onChange={v=>setForm(f=>({...f,location:v}))}
-                  placeholder={form.homeAway==='Home' ? (team.hometown||'Search home field address...') : 'Search away venue address...'}
-                  P={P}
-                  al={al}
-                />
+                <AddressSearch value={form.location} onChange={v=>setForm(f=>({...f,location:v}))} placeholder={form.homeAway==='Home' ? (team.hometown||'Search home field address...') : 'Search away venue address...'} P={P} al={al} />
               </div>
               <div style={{ gridColumn:'1/-1' }}>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
@@ -7505,7 +7966,37 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
           </div>
         )}
 
-        {upcoming.length === 0 && !showAdd && (
+        {/* Needs Rescheduling */}
+        {needsReschedule.length > 0 && (
+          <div style={{ marginBottom:10 }}>
+            <div style={{ fontSize:8, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:6 }}>Needs Rescheduling</div>
+            {needsReschedule.map(event => (
+              <div key={event.id} style={{ background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:8, padding:'10px 12px', marginBottom:6 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+                  <span style={{ fontSize:14 }}>{typeIcons[event.type]||'📅'}</span>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{event.opponent || event.type}</div>
+                    <div style={{ fontSize:9, color:'#f59e0b', fontWeight:700 }}>📅 POSTPONED — needs new date</div>
+                  </div>
+                  <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, padding:0 }}>×</button>
+                </div>
+                {postponingId === event.id ? (
+                  <div>
+                    <input type="date" value={postponeDate} onChange={e=>setPostponeDate(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 10px', color:'#f2f4f8', fontSize:14, marginBottom:6, outline:'none' }} />
+                    <div style={{ display:'flex', gap:6 }}>
+                      <button onClick={()=>setPostponingId(null)} style={{ flex:1, padding:'7px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>CANCEL</button>
+                      <button onClick={()=>postponeEvent(event.id, postponeDate)} disabled={!postponeDate} style={{ flex:2, padding:'7px', background:postponeDate?'#f59e0b':'#3d4559', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:postponeDate?'pointer':'not-allowed', letterSpacing:1 }}>SET NEW DATE</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={()=>{ setPostponingId(event.id); setPostponeDate('') }} style={{ width:'100%', padding:'7px', background:'#f59e0b', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SET NEW DATE →</button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {upcoming.length === 0 && !showAdd && needsReschedule.length === 0 && (
           <div style={{ textAlign:'center', padding:'18px 0', color:'#3d4559', fontSize:12 }}>No upcoming events — tap above to add your schedule</div>
         )}
 
@@ -7514,9 +8005,10 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
           const d = new Date(event.date + 'T12:00:00')
           const isExpanded = expandedEvent === event.id
           const rsvp = event.rsvp || null
+          const isConfirmCancel = cancelConfirmId === event.id
+          const isPostponing = postponingId === event.id
           return (
             <div key={event.id} style={{ background:'#161922', border:`1px solid ${al(tc,0.25)}`, borderRadius:8, marginBottom:8, borderLeft:`3px solid ${tc}`, overflow:'hidden' }}>
-              {/* Main row - tap to expand */}
               <div onClick={()=>setExpandedEvent(isExpanded?null:event.id)} style={{ padding:'10px 12px', cursor:'pointer', display:'flex', alignItems:'flex-start', gap:8 }}>
                 <span style={{ fontSize:16, flexShrink:0 }}>{typeIcons[event.type]||'📅'}</span>
                 <div style={{ flex:1, minWidth:0 }}>
@@ -7535,12 +8027,11 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
                 <span style={{ color:'#3d4559', fontSize:12, flexShrink:0 }}>{isExpanded?'▲':'▼'}</span>
               </div>
 
-              {/* Expanded panel */}
               {isExpanded && (
                 <div style={{ borderTop:`1px solid ${al(tc,0.15)}`, padding:'10px 12px', background:al(tc,0.04) }}>
                   {event.notes && <div style={{ fontSize:11, color:'#a0aec0', marginBottom:10, fontStyle:'italic', lineHeight:1.4 }}>📝 {event.notes}</div>}
 
-                  {/* RSVP row */}
+                  {/* RSVP */}
                   <div style={{ marginBottom:10 }}>
                     <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>YOUR RSVP</div>
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6 }}>
@@ -7550,13 +8041,31 @@ function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
                     </div>
                   </div>
 
-                  {/* Actions row */}
-                  <div style={{ display:'flex', gap:8 }}>
-                    {event.location && (
-                      <button onClick={()=>openInMaps(event.location)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, minHeight:38 }}>📍 DIRECTIONS</button>
-                    )}
-                    <button onClick={()=>removeEvent(event.id)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#e74c3c', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, minHeight:38 }}>🗑 REMOVE</button>
-                  </div>
+                  {/* Postpone flow */}
+                  {isPostponing ? (
+                    <div style={{ marginBottom:8 }}>
+                      <div style={{ fontSize:9, color:'#f59e0b', fontWeight:700, letterSpacing:1, marginBottom:6 }}>POSTPONE — Pick new date or leave blank to reschedule later</div>
+                      <input type="date" value={postponeDate} onChange={e=>setPostponeDate(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, marginBottom:6, outline:'none' }} />
+                      <div style={{ display:'flex', gap:6 }}>
+                        <button onClick={()=>setPostponingId(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                        <button onClick={()=>postponeEvent(event.id, postponeDate)} style={{ flex:2, padding:'8px', background:'#f59e0b', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>{postponeDate ? 'MOVE TO NEW DATE' : 'MARK AS POSTPONED'}</button>
+                      </div>
+                    </div>
+                  ) : isConfirmCancel ? (
+                    <div style={{ marginBottom:8, padding:'10px', background:'rgba(239,68,68,0.08)', borderRadius:6 }}>
+                      <div style={{ fontSize:10, color:'#ef4444', fontWeight:700, marginBottom:6 }}>Cancel this {event.type.toLowerCase()}? This cannot be undone.</div>
+                      <div style={{ display:'flex', gap:6 }}>
+                        <button onClick={()=>setCancelConfirmId(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                        <button onClick={()=>removeEvent(event.id)} style={{ flex:2, padding:'8px', background:'#ef4444', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>YES, CANCEL IT</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display:'flex', gap:6 }}>
+                      {event.location && <button onClick={()=>openInMaps(event.location)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1, minHeight:38 }}>📍 DIRECTIONS</button>}
+                      <button onClick={()=>{ setPostponingId(event.id); setPostponeDate(''); setCancelConfirmId(null) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid rgba(245,158,11,0.4)', borderRadius:6, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1, minHeight:38 }}>📅 POSTPONE</button>
+                      <button onClick={()=>{ setCancelConfirmId(event.id); setPostponingId(null) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1, minHeight:38 }}>✕ CANCEL</button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
