@@ -4603,6 +4603,8 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
               />
             </div>
           </Card>
+
+          <div ref={locationRef}><Card>
             <CardHead icon="📍" title="My Location" accent={P} />
             <div style={{ padding:14 }}>
               <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Used for home weather when no team is selected. Auto-detects via GPS or enter manually.</div>
