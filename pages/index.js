@@ -2650,6 +2650,7 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
 function PlayCardWithSave({ play, P, S, al, callAI, parseJSON, sport, playbook, onAddToPlaybook, onCreateAndAdd }) {
   const [showSaveMenu, setShowSaveMenu] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
+  const wrapRef = useRef(null)
   const sportFolders = playbook[sport] || {}
   const existingFolders = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
   const [saved, setSaved] = useState(false)
