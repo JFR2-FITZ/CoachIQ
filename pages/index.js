@@ -5216,13 +5216,15 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
     const isScout = type === 'scout'
     const color = isOff ? '#C0392B' : isDef ? '#6b9fff' : isPrac ? '#4ade80' : '#f59e0b'
 
-    // Small labeled circle helper
-    const Dot = ({ cx, cy, r=4, fill, stroke, label, labelDy=0 }) => (
-      <g>
-        <circle cx={cx} cy={cy} r={r} fill={fill||'none'} stroke={stroke||color} strokeWidth="1.2"/>
-        {label && <text x={cx} y={cy+r+7+labelDy} textAnchor="middle" fontSize="5" fill={color} opacity="0.7">{label}</text>}
-      </g>
-    )
+    // Inline SVG dot helper — not a component, just a function returning SVG elements
+    function dot(cx, cy, r, fill, stroke, label, labelDy=0) {
+      return (
+        <g key={cx+','+cy}>
+          <circle cx={cx} cy={cy} r={r||4} fill={fill||'none'} stroke={stroke||color} strokeWidth="1.2"/>
+          {label && <text x={cx} y={cy+(r||4)+7+labelDy} textAnchor="middle" fontSize="5" fill={color} opacity="0.7">{label}</text>}
+        </g>
+      )
+    }
 
     if (sport === 'Football') {
       // Simple spread formation: 5 OL, QB, 2 WR, 1 TE, routes
@@ -5289,7 +5291,7 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
 
     if (sport === 'Basketball') {
       // Accurate half court: arc, paint, hoop, labeled player circles
-      const Court = () => (
+      function courtSVG() { return (
         <>
           {/* Half court outline */}
           <rect x="10" y="4" width="200" height="52" rx="2" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25"/>
@@ -5303,37 +5305,38 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
           <path d="M78,44 Q110,30 142,44" fill="none" stroke={color} strokeWidth="0.6" strokeDasharray="2,2" opacity="0.3"/>
         </>
       )
+      }
       if (isOff) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Court/>
-          <Dot cx={110} cy={54} r={5} fill={color} label="PG" labelDy={-12}/>
-          <Dot cx={50} cy={44} r={4} fill={color} label="SF" labelDy={-12}/>
-          <Dot cx={170} cy={44} r={4} fill={color} label="SG" labelDy={-12}/>
-          <Dot cx={82} cy={30} r={4} fill={color} label="PF" labelDy={-12}/>
-          <Dot cx={138} cy={30} r={4} fill={color} label="C" labelDy={-12}/>
+          {courtSVG()}
+          {dot(110,54,5,color,undefined,'PG',-12)}
+          {dot(50,44,4,color,undefined,'SF',-12)}
+          {dot(170,44,4,color,undefined,'SG',-12)}
+          {dot(82,30,4,color,undefined,'PF',-12)}
+          {dot(138,30,4,color,undefined,'C',-12)}
           <path d="M110,54 Q90,48 50,44" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.6"/>
           <polygon points="50,44 55,41 54,47" fill={color} opacity="0.6"/>
         </svg>
       )
       if (isDef) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Court/>
+          {courtSVG()}
           {/* 2-3 Zone */}
-          <Dot cx={90} cy={48} stroke={color} label="G" labelDy={-12}/>
-          <Dot cx={130} cy={48} stroke={color} label="G" labelDy={-12}/>
-          <Dot cx={70} cy={36} stroke={color} label="F" labelDy={-12}/>
-          <Dot cx={110} cy={34} stroke={color} label="C" labelDy={-12}/>
-          <Dot cx={150} cy={36} stroke={color} label="F" labelDy={-12}/>
+          {dot(90,48,4,undefined,color,'G',-12)}
+          {dot(130,48,4,undefined,color,'G',-12)}
+          {dot(70,36,4,undefined,color,'F',-12)}
+          {dot(110,34,4,undefined,color,'C',-12)}
+          {dot(150,36,4,undefined,color,'F',-12)}
           <text x="110" y="10" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">2-3 ZONE</text>
         </svg>
       )
       if (isPrac) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Court/>
+          {courtSVG()}
           {/* 3-man weave drill */}
-          <Dot cx={60} cy={54} r={4} fill={color}/>
-          <Dot cx={110} cy={54} r={4} fill={color}/>
-          <Dot cx={160} cy={54} r={4} fill={color}/>
+          {dot(60,54,4,color,undefined,undefined,0)}
+          {dot(110,54,4,color,undefined,undefined,0)}
+          {dot(160,54,4,color,undefined,undefined,0)}
           <path d="M60,54 Q85,42 110,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.7"/>
           <path d="M110,54 Q85,42 60,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
           <polygon points="110,30 106,35 113,35" fill={color} opacity="0.7"/>
@@ -5342,7 +5345,7 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
       )
       return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Court/>
+          {courtSVG()}
           <circle cx="110" cy="35" r="18" fill="none" stroke={color} strokeWidth="1" opacity="0.4"/>
           <path d="M96,21 L126,51" stroke={color} strokeWidth="1.5" opacity="0.6"/>
           <circle cx="130" cy="53" r="4" fill={color} opacity="0.7"/>
@@ -5353,7 +5356,7 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
 
     if (sport === 'Baseball' || sport === 'Softball') {
       // Accurate diamond with correct fielder positions
-      const DiamondField = () => (
+      function diamondSVG() { return (
         <>
           {/* Outfield arc */}
           <path d="M20,56 Q110,0 200,56" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
@@ -5373,11 +5376,12 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
           <circle cx="110" cy="34" r="3" fill={color} opacity="0.4"/>
         </>
       )
+      }
       if (isOff) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <DiamondField/>
+          {diamondSVG()}
           {/* Batter */}
-          <Dot cx={110} cy={54} r={4} fill={color} label="C" labelDy={-12}/>
+          {dot(110,54,4,color,undefined,'C',-12)}
           {/* Hit and run arrow */}
           <path d="M110,51 Q125,44 140,38" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.7"/>
           <polygon points="140,38 135,40 138,45" fill={color} opacity="0.7"/>
@@ -5386,24 +5390,24 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
       )
       if (isDef) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <DiamondField/>
-          <Dot cx={110} cy={34} r={3} fill={color} label="P" labelDy={-10}/>
-          <Dot cx={110} cy={54} r={3} fill={color} label="C" labelDy={-10}/>
-          <Dot cx={168} cy={42} r={3} fill={color} label="1B" labelDy={-10}/>
-          <Dot cx={52} cy={42} r={3} fill={color} label="3B" labelDy={-10}/>
-          <Dot cx={125} cy={30} r={3} fill={color} label="2B" labelDy={-10}/>
-          <Dot cx={95} cy={28} r={3} fill={color} label="SS" labelDy={-10}/>
-          <Dot cx={60} cy={16} r={3} fill={color} label="LF" labelDy={-10}/>
-          <Dot cx={110} cy={10} r={3} fill={color} label="CF" labelDy={-10}/>
-          <Dot cx={160} cy={16} r={3} fill={color} label="RF" labelDy={-10}/>
+          {diamondSVG()}
+          {dot(110,34,3,color,undefined,'P',-10)}
+          {dot(110,54,3,color,undefined,'C',-10)}
+          {dot(168,42,3,color,undefined,'1B',-10)}
+          {dot(52,42,3,color,undefined,'3B',-10)}
+          {dot(125,30,3,color,undefined,'2B',-10)}
+          {dot(95,28,3,color,undefined,'SS',-10)}
+          {dot(60,16,3,color,undefined,'LF',-10)}
+          {dot(110,10,3,color,undefined,'CF',-10)}
+          {dot(160,16,3,color,undefined,'RF',-10)}
         </svg>
       )
       if (isPrac) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <DiamondField/>
+          {diamondSVG()}
           {/* Batting practice — batter at home, toss from side */}
-          <Dot cx={110} cy={54} r={4} fill={color} label="Batter" labelDy={-12}/>
-          <Dot cx={90} cy={50} r={3} stroke={color} label="Toss" labelDy={-10}/>
+          {dot(110,54,4,color,undefined,'Batter',-12)}
+          {dot(90,50,3,undefined,color,'Toss',-10)}
           <path d="M90,50 L108,54" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
           <polygon points="108,54 104,50 106,56" fill={color} opacity="0.7"/>
           <text x="110" y="6" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">BATTING PRACTICE</text>
@@ -5411,7 +5415,7 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
       )
       return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <DiamondField/>
+          {diamondSVG()}
           <circle cx="110" cy="34" r="18" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
           <path d="M96,20 L126,50" stroke={color} strokeWidth="1.5" opacity="0.6"/>
           <circle cx="130" cy="52" r="4" fill={color} opacity="0.7"/>
@@ -5421,7 +5425,7 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
     }
 
     if (sport === 'Soccer') {
-      const Pitch = () => (
+      function pitchSVG() { return (
         <>
           {/* Half pitch */}
           <rect x="8" y="4" width="204" height="52" rx="2" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25"/>
@@ -5433,16 +5437,17 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
           <path d="M36,30 Q50,14 36,8" fill="none" stroke={color} strokeWidth="0.7" opacity="0.25"/>
         </>
       )
+      }
       if (isOff) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Pitch/>
+          {pitchSVG()}
           {/* 4-3-3 attacking shape */}
-          <Dot cx={170} cy={30} r={4} fill={color} label="ST" labelDy={-11}/>
-          <Dot cx={145} cy={18} r={4} fill={color} label="LW" labelDy={-11}/>
-          <Dot cx={145} cy={42} r={4} fill={color} label="RW" labelDy={-11}/>
-          <Dot cx={120} cy={24} r={3} stroke={color}/>
-          <Dot cx={120} cy={30} r={3} stroke={color}/>
-          <Dot cx={120} cy={36} r={3} stroke={color}/>
+          {dot(170,30,4,color,undefined,'ST',-11)}
+          {dot(145,18,4,color,undefined,'LW',-11)}
+          {dot(145,42,4,color,undefined,'RW',-11)}
+          {dot(120,24,3,undefined,color,undefined,0)}
+          {dot(120,30,3,undefined,color,undefined,0)}
+          {dot(120,36,3,undefined,color,undefined,0)}
           <path d="M170,30 L145,18" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
           <polygon points="145,18 149,23 143,22" fill={color} opacity="0.6"/>
           <text x="170" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-3-3</text>
@@ -5450,27 +5455,27 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
       )
       if (isDef) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Pitch/>
+          {pitchSVG()}
           {/* 4-4-2 defensive block */}
-          <Dot cx={100} cy={50} r={3} stroke={color} label="DM" labelDy={-10}/>
-          <Dot cx={70} cy={40} r={3} stroke={color}/>
-          <Dot cx={95} cy={36} r={3} stroke={color}/>
-          <Dot cx={120} cy={36} r={3} stroke={color}/>
-          <Dot cx={145} cy={40} r={3} stroke={color}/>
-          <Dot cx={75} cy={24} r={3} stroke={color}/>
-          <Dot cx={100} cy={20} r={3} stroke={color}/>
-          <Dot cx={125} cy={20} r={3} stroke={color}/>
-          <Dot cx={150} cy={24} r={3} stroke={color}/>
+          {dot(100,50,3,undefined,color,'DM',-10)}
+          {dot(70,40,3,undefined,color,undefined,0)}
+          {dot(95,36,3,undefined,color,undefined,0)}
+          {dot(120,36,3,undefined,color,undefined,0)}
+          {dot(145,40,3,undefined,color,undefined,0)}
+          {dot(75,24,3,undefined,color,undefined,0)}
+          {dot(100,20,3,undefined,color,undefined,0)}
+          {dot(125,20,3,undefined,color,undefined,0)}
+          {dot(150,24,3,undefined,color,undefined,0)}
           <text x="160" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-4-2 BLOCK</text>
         </svg>
       )
       if (isPrac) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Pitch/>
+          {pitchSVG()}
           {/* Passing drill — triangle */}
-          <Dot cx={80} cy={44} r={4} fill={color}/>
-          <Dot cx={130} cy={44} r={4} fill={color}/>
-          <Dot cx={105} cy={24} r={4} fill={color}/>
+          {dot(80,44,4,color,undefined,undefined,0)}
+          {dot(130,44,4,color,undefined,undefined,0)}
+          {dot(105,24,4,color,undefined,undefined,0)}
           <path d="M80,44 L105,24" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
           <path d="M105,24 L130,44" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
           <path d="M130,44 L80,44" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.5"/>
@@ -5480,7 +5485,7 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
       )
       return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
-          <Pitch/>
+          {pitchSVG()}
           <circle cx="120" cy="30" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.35"/>
           <path d="M106,16 L136,46" stroke={color} strokeWidth="1.5" opacity="0.6"/>
           <circle cx="140" cy="48" r="4" fill={color} opacity="0.7"/>
