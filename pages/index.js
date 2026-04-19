@@ -971,7 +971,7 @@ function FootballHoleDiagram({ P }) {
 
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
-  const [expanded, setExpanded] = useState(startExpanded)
+  const [expanded, setExpanded] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
   const [showAnim, setShowAnim] = useState(false)
   const [steps, setSteps] = useState(null)
