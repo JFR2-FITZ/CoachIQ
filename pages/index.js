@@ -971,13 +971,12 @@ function FootballHoleDiagram({ P }) {
 
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
-  const [showDiagram, setShowDiagram] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
+  const [showMore, setShowMore] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
   const [showRoles, setShowRoles] = useState(false)
   const [showVariations, setShowVariations] = useState(false)
   const [showNfl, setShowNfl] = useState(false)
-  const [showAnim, setShowAnim] = useState(false)
   const [steps, setSteps] = useState(null)
   const [stepsLoading, setStepsLoading] = useState(false)
   const [question, setQuestion] = useState('')
@@ -988,13 +987,6 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
   const [nflComp, setNflComp] = useState(null)
   const [nflLoading, setNflLoading] = useState(false)
 
-  // Keep expanded for backward compat — controls whether sub-sections can show
-  const expanded = showDiagram || showSummary || showBreakdown || showRoles || showVariations || showNfl
-
-  const pr = parseInt(P.slice(1,3),16)
-  const pg = parseInt(P.slice(3,5),16)
-  const pb = parseInt(P.slice(5,7),16)
-
   async function loadSteps() {
     if (steps) return
     setStepsLoading(true)
@@ -1002,8 +994,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
       const isBBPlay = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
       const isBSBPlay = !isBBPlay && play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN'))
       const sportLabel = isBBPlay ? 'basketball' : isBSBPlay ? 'baseball' : 'football'
-      const jsonSchema = '{"ballCarrier":"key player role","blockingScheme":"core concept","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this works tactically","playerRoles":[{"position":"pos1","job":"their job","whyTheyDoIt":"explain to a 12yr old why"},{"position":"pos2","job":"their job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"their job","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"QB","instruction":"one sentence","termNote":"explain jargon or empty string"},{"player":"RB","instruction":"one sentence","termNote":""},{"player":"WR","instruction":"one sentence","termNote":""},{"player":"OL","instruction":"one sentence","termNote":""}]}'
-      const raw = await callAI('You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' Return ONLY valid JSON matching this structure: ' + jsonSchema)
+      const raw = await callAI('You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' Return ONLY valid JSON with these exact keys: {"steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2"],"playerRoles":[{"position":"pos","job":"job","whyTheyDoIt":"explain why"},{"position":"pos2","job":"job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"job","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"QB","instruction":"one sentence","termNote":""},{"player":"RB","instruction":"one sentence","termNote":""},{"player":"WR","instruction":"one sentence","termNote":""},{"player":"OL","instruction":"one sentence","termNote":""}]}')
       setSteps(parseJSON(raw))
     } catch(e) { setSteps({ error: e.message }) }
     setStepsLoading(false)
@@ -1013,16 +1004,11 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
     if (variations) { setShowVariations(true); return }
     setVariationsLoading(true)
     try {
-      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY'))
-      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
+      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('SET PLAY'))
+      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING'))
       const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
-      const raw = await callAI('You are a ' + sportName + ' coordinator. The base play is: "' + play.name + '" (' + play.type + '). ' + play.note + ' Generate exactly 3 play variations that use the same core concept but change one element each time. Return ONLY valid JSON: {"variations":[{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"},{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"},{"name":"variation name","type":"' + play.type + '","note":"what is different and when to use it","changeFrom":"what changed"}]}')
-      let s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      s = s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/,\s*([\]}])/g,'$1')
-      const a2 = s.indexOf('{'), b2 = s.lastIndexOf('}')
-      if (a2 < 0 || b2 <= a2) throw new Error('No JSON')
-      const data = JSON.parse(s.slice(a2, b2+1))
-      setVariations(data.variations || [])
+      const raw = await callAI('You are a ' + sportName + ' coordinator. Base play: "' + play.name + '" (' + play.type + '). ' + play.note + ' Generate 3 variations. Return ONLY valid JSON: {"variations":[{"name":"name","note":"what differs and when","changeFrom":"what changed"},{"name":"name","note":"note","changeFrom":"changed"},{"name":"name","note":"note","changeFrom":"changed"}]}')
+      setVariations(parseJSON(raw).variations || [])
       setShowVariations(true)
     } catch(e) { setVariations([]) }
     setVariationsLoading(false)
@@ -1032,13 +1018,12 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
     if (nflComp) { setShowNfl(true); return }
     setNflLoading(true)
     try {
-      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY'))
-      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
+      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('SET PLAY'))
+      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING'))
       const league = isBB ? 'NBA' : isBSB ? 'MLB' : 'NFL'
       const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
-      const raw = await callAI('You are an expert ' + sportName + ' analyst. A youth coach is running: "' + play.name + '" (' + play.type + '). ' + play.note + ' Find the closest real ' + league + ' equivalent. Return ONLY valid JSON: {"proPlay":"exact name or closest equivalent","proTeam":"team most known for it","famousExample":"specific famous game moment","whatMatches":"what the youth version gets right","keyDifference":"the most important tactical difference","gapExplanation":"what the youth coach would need to change","proTip":"one concrete thing to develop toward the pro version","watchFor":"YouTube search term"}')
-      const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
-      setNflComp(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
+      const raw = await callAI('Expert ' + sportName + ' analyst. Youth play: "' + play.name + '" (' + play.type + '). ' + play.note + ' Closest ' + league + ' equivalent. Return ONLY valid JSON: {"proPlay":"name","proTeam":"team","whatMatches":"what matches","keyDifference":"key diff","proTip":"one tip","watchFor":"YouTube search"}')
+      setNflComp(parseJSON(raw))
       setShowNfl(true)
     } catch(e) { setNflComp({ error: e.message }); setShowNfl(true) }
     setNflLoading(false)
@@ -1047,59 +1032,59 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
   async function askQuestion() {
     if (!question.trim()) return
     setQALoading(true)
-    const q = question.trim()
-    setQuestion('')
+    const q = question.trim(); setQuestion('')
     try {
-      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY'))
-      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
+      const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('SET PLAY'))
+      const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING'))
       const sportCtx = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
-      const history = qaHistory.map(item => 'Q: ' + item.q + '\nA: ' + item.a).join('\n\n')
-      const context = history ? 'Previous questions:\n' + history + '\n\n' : ''
-      const raw = await callAI('You are a youth ' + sportCtx + ' coach educator discussing the play "' + play.name + '" (' + play.type + '). ' + play.note + '\n\n' + context + 'New question: "' + q + '"\n\nAnswer in 2-4 sentences. Be direct and practical.')
+      const hist = qaHistory.map(i => 'Q: ' + i.q + '\nA: ' + i.a).join('\n\n')
+      const raw = await callAI('Youth ' + sportCtx + ' coach on play "' + play.name + '" (' + play.type + '). ' + play.note + (hist ? '\n\nPrev:\n' + hist + '\n\n' : '\n\n') + 'Q: "' + q + '"\nAnswer in 2-4 sentences.')
       setQAHistory(prev => [...prev, { q, a: raw.trim() }])
-    } catch(e) {
-      setQAHistory(prev => [...prev, { q, a: 'Error: ' + e.message }])
-    }
+    } catch(e) { setQAHistory(prev => [...prev, { q, a: 'Error: ' + e.message }]) }
     setQALoading(false)
   }
 
-  // Collapse toggle row helper
-  const CollapseBtn = ({ label, icon, isOpen, onToggle, color='#6b7a96' }) => (
-    <button onClick={onToggle} style={{ display:'flex', alignItems:'center', gap:5, padding:'6px 10px', background:isOpen?`rgba(${pr},${pg},${pb},0.1)`:'transparent', border:`1px solid ${isOpen?P:'#1e2330'}`, borderRadius:5, color:isOpen?P:color, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:'0.5px', whiteSpace:'nowrap', touchAction:'manipulation' }}>
-      <span style={{ fontSize:12 }}>{icon}</span>{label}<span style={{ fontSize:9, opacity:0.6 }}>{isOpen?'▲':'▼'}</span>
-    </button>
-  )
+  function TabBtn({ label, active, onClick, color }) {
+    const c = color || P
+    return (
+      <button onClick={onClick} style={{ padding:'5px 10px', background:active?c:'transparent', border:'1px solid ' + (active?c:'#1e2330'), borderRadius:4, color:active?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:'0.5px', whiteSpace:'nowrap', touchAction:'manipulation' }}>
+        {label}
+      </button>
+    )
+  }
 
   return (
     <div style={{ borderBottom:'1px solid #1e2330', padding:'12px 0' }}>
 
-      {/* ── PLAY HEADER — always visible ── */}
-      <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+      {/* ── PLAY HEADER ── */}
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10, marginBottom:10 }}>
         <div style={{ width:24, height:24, minWidth:24, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', lineHeight:1.2 }}>{play.name}</div>
-          <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:2, letterSpacing:'0.5px' }}>{play.type}</div>
+          <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:2 }}>{play.type}</div>
           <div style={{ fontSize:12, color:'#9aa0b0', marginTop:4, lineHeight:1.5 }}>{play.note}</div>
         </div>
-        <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
-          {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
-        </div>
+        {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
       </div>
 
-      {/* ── ACTION BUTTONS ROW ── */}
-      <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap', paddingLeft:34 }}>
-        <CollapseBtn label="Summary" icon="📋" isOpen={showSummary} onToggle={()=>setShowSummary(v=>!v)} color={P} />
-        <CollapseBtn label="Diagram" icon="▶" isOpen={showDiagram} onToggle={()=>{ setShowDiagram(v=>!v); setShowAnim(v=>!v) }} color={P} />
-        <CollapseBtn label="Breakdown" icon="📖" isOpen={showBreakdown} onToggle={()=>{ const next=!showBreakdown; setShowBreakdown(next); if(next&&!steps) loadSteps() }} color='#6b9fff' />
-        <CollapseBtn label="Player Roles" icon="👥" isOpen={showRoles} onToggle={()=>{ const next=!showRoles; setShowRoles(next); if(next&&!steps) loadSteps() }} color='#f59e0b' />
-        <CollapseBtn label="Variations" icon="🔄" isOpen={showVariations} onToggle={()=>{ if(!showVariations) loadVariations(); else setShowVariations(false) }} color='#c084fc' />
-        <CollapseBtn label="Pro Look" icon="🏆" isOpen={showNfl} onToggle={()=>{ if(!showNfl) loadNflComp(); else setShowNfl(false) }} color='#4ade80' />
+      {/* ── DIAGRAM — primary, always shown, auto-loads ── */}
+      <div style={{ marginBottom:10 }}>
+        <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key={play.name} />
       </div>
 
-      {/* ── SUMMARY — pre-snap, audible, youth cue, mistake ── */}
+      {/* ── TOGGLE BUTTONS ── */}
+      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:(showSummary||showMore)?10:0 }}>
+        <button onClick={()=>setShowSummary(v=>!v)} style={{ padding:'5px 12px', background:showSummary?P:'transparent', border:'1px solid ' + (showSummary?P:'#1e2330'), borderRadius:4, color:showSummary?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+          📋 Summary {showSummary?'▲':'▼'}
+        </button>
+        <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+          More {showMore?'▲':'▼'}
+        </button>
+      </div>
+
+      {/* ── SUMMARY ── */}
       {showSummary && (
-        <div style={{ paddingLeft:34, marginTop:10, display:'flex', flexDirection:'column', gap:6, animation:'fadeIn 0.2s ease' }}>
-          <div style={{ fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:2 }}>— PLAY SUMMARY —</div>
+        <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:10, animation:'fadeIn 0.2s ease' }}>
           {play.presnap && (
             <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
               <div style={{ fontSize:8, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 Pre-Snap Read</div>
@@ -1124,88 +1109,69 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
               <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
             </div>
           )}
-          {play.nameExplanation && (
-            <div style={{ padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.06)`, borderLeft:`2px solid ${P}`, borderRadius:6 }}>
-              <div style={{ fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:2 }}>Why this name?</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.nameExplanation}</div>
-            </div>
-          )}
         </div>
       )}
 
-      {/* ── DIAGRAM ── */}
-      {showDiagram && (
-        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
-          <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key="anim" />
-        </div>
-      )}
-
-      {/* ── BREAKDOWN (Huddle Card + Steps) ── */}
-      {showBreakdown && (
-        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
-          {stepsLoading && <div style={{ background:'#161922', borderRadius:8, padding:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid #6b9fff`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:11, color:'#6b7a96' }}>Loading breakdown...</div></div>}
-          {steps && !steps.error && steps.huddleCard && (
-            <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:8, padding:12, marginBottom:10 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}><span style={{ fontSize:14 }}>📋</span><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card</div></div>
-              {steps.huddleCard.map((item, i) => (
-                <div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}>
-                  <div style={{ minWidth:32, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:5, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0, marginTop:1 }}>{item.player}</div>
-                  <div style={{ flex:1 }}><span style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{item.instruction}</span>{item.termNote && <span style={{ fontSize:11, color:'#6b7a96', fontStyle:'italic' }}> ({item.termNote})</span>}</div>
-                </div>
-              ))}
-            </div>
-          )}
-          {steps && !steps.error && steps.steps && (
-            <div style={{ background:'#161922', borderRadius:8, padding:12, marginBottom:10 }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Step-by-Step</div>
-              {steps.steps.map((step, i) => (
-                <div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i < steps.steps.length-1 ? '1px solid #1e2330' : 'none' }}>
-                  <div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${P}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:P, flexShrink:0, marginTop:1 }}>{i+1}</div>
-                  <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div>
-                </div>
-              ))}
-            </div>
-          )}
-          {steps && !steps.error && steps.keyCoachingPoints && (
-            <div style={{ background:al(P,0.06), border:`1px solid ${al(P,0.2)}`, borderRadius:8, padding:12, marginBottom:10 }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Key Coaching Points</div>
-              {steps.keyCoachingPoints.map((pt, i) => (
-                <div key={i} style={{ display:'flex', gap:8, marginBottom:4, alignItems:'flex-start' }}>
-                  <div style={{ width:5, height:5, borderRadius:'50%', background:P, marginTop:5, flexShrink:0 }} />
-                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{pt}</div>
-                </div>
-              ))}
-            </div>
-          )}
-          {/* Q&A */}
-          <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:10 }}>
-            <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Ask a question about this play</div>
-            {qaHistory.map((item, i) => (
-              <div key={i} style={{ marginBottom:8 }}>
-                <div style={{ fontSize:11, color:P, fontWeight:600, marginBottom:2 }}>Q: {item.q}</div>
-                <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5 }}>{item.a}</div>
-              </div>
-            ))}
-            <div style={{ display:'flex', gap:6 }}>
-              <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder="e.g. Who runs the ball?" style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:6, padding:'8px 10px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
-              <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':P, color:'white', border:'none', borderRadius:6, fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
-            </div>
+      {/* ── MORE ── */}
+      {showMore && (
+        <div style={{ animation:'fadeIn 0.2s ease' }}>
+          <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
+            <TabBtn label="Breakdown" active={showBreakdown} onClick={()=>{ const n=!showBreakdown; setShowBreakdown(n); if(n&&!steps) loadSteps() }} color='#6b9fff' />
+            <TabBtn label="Player Roles" active={showRoles} onClick={()=>{ const n=!showRoles; setShowRoles(n); if(n&&!steps) loadSteps() }} color='#f59e0b' />
+            <TabBtn label="Variations" active={showVariations} onClick={()=>{ if(!showVariations) loadVariations(); else setShowVariations(false) }} color='#c084fc' />
+            <TabBtn label="Pro Look" active={showNfl} onClick={()=>{ if(!showNfl) loadNflComp(); else setShowNfl(false) }} color='#4ade80' />
           </div>
-        </div>
-      )}
 
-      {/* ── PLAYER ROLES ── */}
-      {showRoles && (
-        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
-          {stepsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Loading player roles...</div>}
-          {steps && !steps.error && steps.playerRoles && steps.playerRoles.length > 0 && (
-            <div>
-              <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Player Roles — What to Tell Each Player</div>
-              {steps.playerRoles.map((role, i) => (
+          {/* Breakdown */}
+          {showBreakdown && (
+            <div style={{ marginBottom:10 }}>
+              {stepsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Loading...</div>}
+              {steps && !steps.error && steps.huddleCard && (
+                <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:8, padding:12, marginBottom:8 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>📋 Huddle Card</div>
+                  {steps.huddleCard.map((item,i) => (
+                    <div key={i} style={{ display:'flex', gap:8, marginBottom:5, alignItems:'flex-start' }}>
+                      <div style={{ minWidth:28, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:4, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0 }}>{item.player}</div>
+                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, flex:1 }}>{item.instruction}{item.termNote&&<span style={{ color:'#6b7a96', fontStyle:'italic' }}> ({item.termNote})</span>}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {steps && !steps.error && steps.steps && (
+                <div style={{ background:'#161922', borderRadius:8, padding:12, marginBottom:8 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:P, fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Step-by-Step</div>
+                  {steps.steps.map((step,i) => (
+                    <div key={i} style={{ display:'flex', gap:8, padding:'5px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}>
+                      <div style={{ width:16, height:16, minWidth:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, fontWeight:800, flexShrink:0, marginTop:2 }}>{i+1}</div>
+                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:10 }}>
+                <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:8 }}>Ask about this play</div>
+                {qaHistory.map((item,i) => (
+                  <div key={i} style={{ marginBottom:8 }}>
+                    <div style={{ fontSize:11, color:P, fontWeight:600, marginBottom:2 }}>Q: {item.q}</div>
+                    <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5 }}>{item.a}</div>
+                  </div>
+                ))}
+                <div style={{ display:'flex', gap:6 }}>
+                  <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder="e.g. Who runs the ball?" style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:5, padding:'7px 10px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
+                  <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':P, color:'white', border:'none', borderRadius:5, fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Player Roles */}
+          {showRoles && (
+            <div style={{ marginBottom:10 }}>
+              {stepsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'4px 0' }}>Loading roles...</div>}
+              {steps && !steps.error && steps.playerRoles && steps.playerRoles.map((role,i) => (
                 <div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}>
                   <div style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:4 }}>
-                    {/* Fixed position badge — no overflow */}
-                    <div style={{ background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, padding:'3px 6px', fontSize:9, fontWeight:800, flexShrink:0, maxWidth:72, lineHeight:1.3, textAlign:'center', wordBreak:'break-word' }}>{role.position}</div>
+                    <div style={{ background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:5, padding:'3px 6px', fontSize:9, fontWeight:800, flexShrink:0, maxWidth:72, lineHeight:1.3, textAlign:'center', wordBreak:'break-word' }}>{role.position}</div>
                     <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8', flex:1, lineHeight:1.4 }}>{role.job}</div>
                   </div>
                   <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, paddingLeft:80, fontStyle:'italic' }}>"{role.whyTheyDoIt}"</div>
@@ -1213,39 +1179,39 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
               ))}
             </div>
           )}
-        </div>
-      )}
 
-      {/* ── VARIATIONS ── */}
-      {showVariations && (
-        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
-          {variationsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Generating variations...</div>}
-          {variations && variations.length > 0 && variations.map((v, i) => (
-            <div key={i} style={{ padding:'10px 12px', background:al(P,0.06), border:`1px solid ${al(P,0.2)}`, borderRadius:8, marginBottom:8 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
-                <div style={{ width:18, height:18, minWidth:18, background:al(P,0.2), border:`1px solid ${al(P,0.4)}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:P, flexShrink:0 }}>{i+1}</div>
-                <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{v.name}</div>
-              </div>
-              {v.changeFrom && <div style={{ fontSize:10, color:P, marginBottom:3, paddingLeft:26 }}>Change: {v.changeFrom}</div>}
-              <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, paddingLeft:26 }}>{v.note}</div>
+          {/* Variations */}
+          {showVariations && (
+            <div style={{ marginBottom:10 }}>
+              {variationsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'4px 0' }}>Generating...</div>}
+              {variations && variations.map((v,i) => (
+                <div key={i} style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:6 }}>
+                  <div style={{ display:'flex', gap:8, marginBottom:3 }}>
+                    <div style={{ width:16, height:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, fontWeight:800, flexShrink:0 }}>{i+1}</div>
+                    <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{v.name}</div>
+                  </div>
+                  {v.changeFrom && <div style={{ fontSize:10, color:P, marginBottom:2, paddingLeft:24 }}>Changed: {v.changeFrom}</div>}
+                  <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, paddingLeft:24 }}>{v.note}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* ── PRO COMPARISON ── */}
-      {showNfl && (
-        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
-          {nflLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Finding pro comparison...</div>}
-          {nflComp && !nflComp.error && (
-            <div style={{ background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:12 }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>🏆 Pro Comparison</div>
-              <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{nflComp.proPlay}</div>
-              {nflComp.proTeam && <div style={{ fontSize:11, color:'#4ade80', marginBottom:8 }}>{nflComp.proTeam}</div>}
-              {nflComp.whatMatches && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:6 }}><span style={{ color:'#4ade80', fontWeight:600 }}>What matches: </span>{nflComp.whatMatches}</div>}
-              {nflComp.keyDifference && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:6 }}><span style={{ color:'#ef4444', fontWeight:600 }}>Key difference: </span>{nflComp.keyDifference}</div>}
-              {nflComp.proTip && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5 }}><span style={{ color:'#f59e0b', fontWeight:600 }}>Pro tip: </span>{nflComp.proTip}</div>}
-              {nflComp.watchFor && <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(nflComp.watchFor)} target="_blank" rel="noopener noreferrer" style={{ display:'block', marginTop:8, fontSize:10, color:'#ef4444', textDecoration:'none', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>▶ Watch on YouTube: {nflComp.watchFor}</a>}
+          {/* Pro Look */}
+          {showNfl && (
+            <div style={{ marginBottom:10 }}>
+              {nflLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'4px 0' }}>Finding pro comparison...</div>}
+              {nflComp && !nflComp.error && (
+                <div style={{ background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:12 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>🏆 Pro Comparison</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{nflComp.proPlay}</div>
+                  {nflComp.proTeam && <div style={{ fontSize:11, color:'#4ade80', marginBottom:6 }}>{nflComp.proTeam}</div>}
+                  {nflComp.whatMatches && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:4 }}><span style={{ color:'#4ade80', fontWeight:600 }}>Matches: </span>{nflComp.whatMatches}</div>}
+                  {nflComp.keyDifference && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:4 }}><span style={{ color:'#ef4444', fontWeight:600 }}>Difference: </span>{nflComp.keyDifference}</div>}
+                  {nflComp.proTip && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5 }}><span style={{ color:'#f59e0b', fontWeight:600 }}>Tip: </span>{nflComp.proTip}</div>}
+                  {nflComp.watchFor && <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(nflComp.watchFor)} target="_blank" rel="noopener noreferrer" style={{ display:'block', marginTop:8, fontSize:10, color:'#ef4444', textDecoration:'none', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>▶ Watch: {nflComp.watchFor}</a>}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1320,6 +1286,10 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
     const dur = parsed.duration || 3000
     const snap = parsed.snapPoint || 0.18
     let startTime = null
+    // Compute team color RGB components for canvas drawing
+    const pr = parseInt((P||'#C0392B').slice(1,3),16)||192
+    const pg = parseInt((P||'#C0392B').slice(3,5),16)||57
+    const pb = parseInt((P||'#C0392B').slice(5,7),16)||43
 
     function lerp(a, b, t) { return a + (b-a)*t }
     function getPos(player, t) {
