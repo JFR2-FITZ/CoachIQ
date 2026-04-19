@@ -4387,7 +4387,7 @@ function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI
     </>
   )
 }
-function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI, activeTeam, setTeams, scrollToLocation=false }) {
+function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI, activeTeam, setTeams, scrollToLocation=false, currentTeam }) {
   const [activeSection, setActiveSection] = useState('features')
   const locationRef = useRef(null)
   useEffect(() => {
@@ -4509,55 +4509,100 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
             </div>
           </Card>
 
-          {/* Team Colors */}
+          {/* Personal Colors — fallback when no team selected */}
           <Card>
-            <CardHead icon="🎨" title="Team Colors" accent={P} />
+            <CardHead icon="🎨" title="Your Personal Colors" accent={P} />
             <div style={{ padding:14 }}>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:12, lineHeight:1.5 }}>
-                Customize your team's color scheme. These colors apply across the entire app when this team is active.
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:4, lineHeight:1.5 }}>
+                These colors appear when no team is selected. When a team is active, that team's colors take over automatically.
               </div>
-              {true && (
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:10 }}>
-                  {[
-                    { key:'primary',   label:'Primary Color' },
-                    { key:'secondary', label:'Secondary Color' },
-                    { key:'accent1',   label:'Accent 1' },
-                    { key:'accent2',   label:'Accent 2' },
-                  ].map(({ key, label }) => (
-                    <div key={key} style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
-                      <input
-                        type="color"
-                        value={cfg[key] || '#C0392B'}
-                        onChange={e => {
-                          setCfg(c => ({ ...c, [key]: e.target.value }))
-                          // Also update the active team's colors in teams array
-                          if (activeTeam && setTeams && sport) {
-                            setTeams(prev => {
-                              const sportTeams = [...(prev[sport]||[])]
-                              const idx = sportTeams.findIndex(t => t.id === activeTeam[sport]?.id)
-                              if (idx >= 0) { sportTeams[idx] = { ...sportTeams[idx], [key]: e.target.value } }
-                              return { ...prev, [sport]: sportTeams }
-                            })
-                          }
-                        }}
-                        style={{ width:34, height:34, border:'none', borderRadius:4, cursor:'pointer', padding:0, flexShrink:0 }}
-                      />
-                      <div>
+              <div style={{ fontSize:10, color:P, fontWeight:700, marginBottom:12, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>
+                {currentTeam ? `Currently showing: ${currentTeam.name} colors` : 'Currently showing: your personal colors'}
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {[
+                  { key:'primary', label:'Primary Color', required:true },
+                  { key:'secondary', label:'Secondary Color', required:true },
+                  { key:'accent1', label:'Accent 1', required:false },
+                  { key:'accent2', label:'Accent 2', required:false },
+                ].map(({ key, label, required }) => {
+                  const hasValue = cfg[key] && cfg[key] !== ''
+                  const isNA = cfg[key] === 'na'
+                  return (
+                    <div key={key} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
+                      {!isNA ? (
+                        <input type="color" value={hasValue && cfg[key] !== 'na' ? cfg[key] : '#C0392B'} onChange={e=>setCfg(c=>({...c,[key]:e.target.value}))} style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0, flexShrink:0 }} />
+                      ) : (
+                        <div style={{ width:36, height:36, borderRadius:4, background:'#1e2330', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                          <span style={{ fontSize:9, color:'#3d4559', fontWeight:700 }}>N/A</span>
+                        </div>
+                      )}
+                      <div style={{ flex:1 }}>
                         <div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600 }}>{label}</div>
-                        <div style={{ fontSize:9, color:'#6b7a96', fontFamily:'monospace' }}>{cfg[key] || '#C0392B'}</div>
+                        <div style={{ fontSize:9, color:'#6b7a96', fontFamily:'monospace' }}>{isNA ? 'Not set' : (cfg[key] || 'Not set')}</div>
                       </div>
+                      {!required && (
+                        <button onClick={()=>setCfg(c=>({...c,[key]:isNA?'#f59e0b':'na'}))} style={{ padding:'4px 8px', background:'transparent', border:`1px solid ${isNA?'#3d4559':'rgba(239,68,68,0.3)'}`, borderRadius:4, color:isNA?'#6b7a96':'#ef4444', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, flexShrink:0 }}>
+                          {isNA ? 'SET COLOR' : 'N/A'}
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-              <div style={{ fontSize:10, color:'#3d4559', marginTop:10, lineHeight:1.5 }}>
-                💡 To edit a specific team's colors, go to the Team tab → tap the team → Edit.
+                  )
+                })}
               </div>
             </div>
           </Card>
 
-          {/* Team colors */}
-          <div ref={locationRef}><Card>
+          {/* Team Colors — edit active team's colors */}
+          {currentTeam && (
+            <Card>
+              <CardHead icon="🏆" title={`${currentTeam.name} Colors`} accent={P} />
+              <div style={{ padding:14 }}>
+                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:12, lineHeight:1.5 }}>
+                  Edit this team's colors. Changes apply immediately across the app.
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                  {[
+                    { key:'primary', label:'Primary Color' },
+                    { key:'secondary', label:'Secondary Color' },
+                    { key:'accent1', label:'Accent 1' },
+                    { key:'accent2', label:'Accent 2' },
+                  ].map(({ key, label }) => (
+                    <div key={key} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
+                      <input type="color" value={currentTeam[key] || '#C0392B'} onChange={e => {
+                        const val = e.target.value
+                        setTeams(prev => ({
+                          ...prev,
+                          [sport]: (prev[sport]||[]).map(t => t.id===currentTeam.id ? {...t,[key]:val} : t)
+                        }))
+                        if (key === 'primary' || key === 'secondary') {
+                          setCfg(c => ({...c, [key]:val}))
+                        }
+                      }} style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0, flexShrink:0 }} />
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600 }}>{label}</div>
+                        <div style={{ fontSize:9, color:'#6b7a96', fontFamily:'monospace' }}>{currentTeam[key] || 'Not set'}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Coach Name */}
+          <Card>
+            <CardHead icon="👤" title="Your Coach Name" accent={P} />
+            <div style={{ padding:14 }}>
+              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>This appears on your profile and throughout the app.</div>
+              <input
+                value={cfg.coach||''}
+                onChange={e=>setCfg(c=>({...c,coach:e.target.value}))}
+                placeholder="e.g. Coach Regisford"
+                style={{ width:'100%', background:'#161922', border:`1px solid ${P}`, borderRadius:4, padding:'11px 12px', fontSize:14, color:'#f2f4f8', outline:'none', fontFamily:'inherit' }}
+              />
+            </div>
+          </Card>
             <CardHead icon="📍" title="My Location" accent={P} />
             <div style={{ padding:14 }}>
               <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Used for home weather when no team is selected. Auto-detects via GPS or enter manually.</div>
@@ -4988,7 +5033,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
           </div>
         ) : (
           <div>
-            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
+            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning','All four']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
             <PhilQ label="How do you measure a good season?" options={['Every kid improved','Everyone had fun','Strong record','Mix of all three']} value={philosophy.measure} onChange={v=>setPhilosophy(p=>({...p,measure:v}))} />
             <PhilQ label="Who are you coaching?" options={['First-timers / Brand new','Mixed experience levels','Competitive / Experienced']} value={philosophy.who} onChange={v=>setPhilosophy(p=>({...p,who:v}))} />
             <button onClick={handleLaunch} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Enter CoachIQ</button>
@@ -5054,10 +5099,15 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
   const [postponeDate, setPostponeDate] = useState('')
   const greeting = getGreeting()
 
-  // Weather fetch for hub
+  // Weather fetch for hub — debounced + cached
   useEffect(() => {
     if (!homeLocation) return
-    async function fetchWeather() {
+    const cacheKey = 'coachiq_wx_' + homeLocation.trim().toLowerCase().slice(0,30)
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) { const d = JSON.parse(cached); if (Date.now()-d.ts < 30*60*1000) { setWeatherData(d.data); return } }
+    } catch(e) {}
+    const timer = setTimeout(async () => {
       try {
         const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(homeLocation)}&limit=1`)
         const geoData = await geoRes.json()
@@ -5065,10 +5115,12 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
         const { lat, lon } = geoData[0]
         const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&daily=weathercode,precipitation_probability_max,windspeed_10m_max,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7&temperature_unit=fahrenheit&windspeed_unit=mph`)
         const wx = await wxRes.json()
-        setWeatherData({ current: wx.current, daily: wx.daily, lat, lon })
+        const data = { current: wx.current, daily: wx.daily, lat, lon }
+        setWeatherData(data)
+        try { sessionStorage.setItem(cacheKey, JSON.stringify({ data, ts:Date.now() })) } catch(e) {}
       } catch(e) {}
-    }
-    fetchWeather()
+    }, 600)
+    return () => clearTimeout(timer)
   }, [homeLocation])
 
   // Weather code to description
@@ -5163,200 +5215,287 @@ function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook
     const isPrac = type === 'practice'
     const isScout = type === 'scout'
     const color = isOff ? '#C0392B' : isDef ? '#6b9fff' : isPrac ? '#4ade80' : '#f59e0b'
-    const opacity = 0.12
+
+    // Small labeled circle helper
+    const Dot = ({ cx, cy, r=4, fill, stroke, label, labelDy=0 }) => (
+      <g>
+        <circle cx={cx} cy={cy} r={r} fill={fill||'none'} stroke={stroke||color} strokeWidth="1.2"/>
+        {label && <text x={cx} y={cy+r+7+labelDy} textAnchor="middle" fontSize="5" fill={color} opacity="0.7">{label}</text>}
+      </g>
+    )
 
     if (sport === 'Football') {
+      // Simple spread formation: 5 OL, QB, 2 WR, 1 TE, routes
+      if (isOff) return (
+        <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
+          <line x1="0" y1="32" x2="220" y2="32" stroke={color} strokeWidth="0.6" strokeDasharray="4,3" opacity="0.3"/>
+          {/* OL */}
+          {[82,90,98,106,114].map((x,i)=><circle key={i} cx={x} cy={32} r={4} fill={color} opacity="0.6"/>)}
+          {/* QB */}
+          <circle cx={98} cy={44} r={5} fill={color} opacity="0.9"/>
+          {/* WR left */}
+          <circle cx={30} cy={32} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
+          <path d="M30,32 L20,16" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="20,16 17,21 23,21" fill={color} opacity="0.7"/>
+          {/* WR right */}
+          <circle cx={190} cy={32} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
+          <path d="M190,32 L195,16" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="195,16 192,21 198,21" fill={color} opacity="0.7"/>
+          {/* TE */}
+          <circle cx={130} cy={32} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
+          <path d="M130,32 Q145,20 150,14" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="150,14 147,19 153,19" fill={color} opacity="0.7"/>
+        </svg>
+      )
+      if (isDef) return (
+        <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
+          <line x1="0" y1="36" x2="220" y2="36" stroke={color} strokeWidth="0.6" strokeDasharray="4,3" opacity="0.3"/>
+          {/* DL — 4 across */}
+          {[72,90,108,126].map((x,i)=><g key={i}><rect x={x-5} y={29} width={10} height={10} rx="1" fill="none" stroke={color} strokeWidth="1.2" opacity="0.8"/></g>)}
+          {/* LB — 3 */}
+          {[81,98,115].map((x,i)=><g key={i}><rect x={x-4} y={20} width={9} height={9} rx="1" fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/></g>)}
+          {/* CB — 2 */}
+          <circle cx={35} cy={32} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
+          <circle cx={165} cy={32} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
+          {/* S — 2 */}
+          <circle cx={82} cy={12} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
+          <circle cx={118} cy={12} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
+        </svg>
+      )
+      if (isPrac) return (
+        <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
+          {/* Cone drill — triangle pattern */}
+          <circle cx={60} cy={44} r={4} fill={color} opacity="0.8"/>
+          <circle cx={110} cy={20} r={4} fill={color} opacity="0.8"/>
+          <circle cx={160} cy={44} r={4} fill={color} opacity="0.8"/>
+          <path d="M60,44 L110,20 L160,44" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="4,3" opacity="0.6"/>
+          {/* Player running */}
+          <circle cx={60} cy={44} r={6} fill="none" stroke={color} strokeWidth="1" opacity="0.4"/>
+          <path d="M60,44 L80,36" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+          <polygon points="80,36 76,39 82,41" fill={color} opacity="0.8"/>
+          <text x="110" y="52" textAnchor="middle" fontSize="7" fill={color} opacity="0.5">TRIANGLE DRILL</text>
+        </svg>
+      )
       return (
-        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
-          <rect x="0" y="0" width="200" height="48" fill="none"/>
-          {/* Field lines */}
-          <line x1="0" y1="24" x2="200" y2="24" stroke={color} strokeWidth="0.5" strokeDasharray="4,4"/>
-          {/* Line of scrimmage */}
-          <line x1="80" y1="0" x2="80" y2="48" stroke={color} strokeWidth="0.8" opacity="0.4"/>
-          {isOff && (<>
-            {/* Offensive formation - spread */}
-            <circle cx="100" cy="30" r="5" fill={color} opacity="0.9"/>{/* QB */}
-            <circle cx="80" cy="24" r="4" fill={color} opacity="0.7"/>{/* C */}
-            <circle cx="72" cy="24" r="4" fill={color} opacity="0.7"/>
-            <circle cx="88" cy="24" r="4" fill={color} opacity="0.7"/>
-            <circle cx="64" cy="24" r="4" fill={color} opacity="0.7"/>
-            <circle cx="96" cy="24" r="4" fill={color} opacity="0.7"/>
-            <circle cx="40" cy="26" r="4" fill={color} opacity="0.7"/>{/* WR left */}
-            <circle cx="160" cy="26" r="4" fill={color} opacity="0.7"/>{/* WR right */}
-            <circle cx="130" cy="26" r="4" fill={color} opacity="0.7"/>{/* TE */}
-            {/* Routes */}
-            <path d="M40,26 Q30,10 50,5" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <path d="M160,26 Q170,10 150,5" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <path d="M130,26 Q140,15 145,8" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-          </>)}
-          {isDef && (<>
-            {/* Defensive formation */}
-            <circle cx="80" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="90" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="70" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="100" cy="18" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="75" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
-            <circle cx="95" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
-            <circle cx="85" cy="5" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
-            <circle cx="50" cy="12" r="3" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
-            <circle cx="120" cy="12" r="3" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
-          </>)}
-          {isPrac && (<>
-            <circle cx="60" cy="24" r="5" fill={color} opacity="0.8"/>
-            <circle cx="100" cy="24" r="5" fill={color} opacity="0.8"/>
-            <circle cx="140" cy="24" r="5" fill={color} opacity="0.8"/>
-            <circle cx="80" cy="12" r="4" fill={color} opacity="0.6"/>
-            <circle cx="120" cy="12" r="4" fill={color} opacity="0.6"/>
-            <path d="M60,24 L100,24 L140,24" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,3" opacity="0.5"/>
-            <path d="M60,24 L80,12 L100,24" stroke={color} strokeWidth="1" fill="none" opacity="0.5"/>
-            <path d="M100,24 L120,12 L140,24" stroke={color} strokeWidth="1" fill="none" opacity="0.5"/>
-          </>)}
-          {isScout && (<>
-            <circle cx="100" cy="20" r="14" stroke={color} strokeWidth="1.5" fill="none" opacity="0.4"/>
-            <circle cx="100" cy="20" r="8" stroke={color} strokeWidth="1" fill="none" opacity="0.3"/>
-            <line x1="86" y1="6" x2="114" y2="34" stroke={color} strokeWidth="1.5" opacity="0.5"/>
-            <circle cx="118" cy="34" r="5" fill={color} opacity="0.7"/>
-          </>)}
+        <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
+          <circle cx="110" cy="28" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
+          <circle cx="110" cy="28" r="8" fill="none" stroke={color} strokeWidth="0.8" opacity="0.2"/>
+          <path d="M96,14 L128,44" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="132" cy="46" r="5" fill={color} opacity="0.7"/>
+          <text x="110" y="52" textAnchor="middle" fontSize="7" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
     if (sport === 'Basketball') {
-      return (
-        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
-          {/* Half court arc */}
-          <path d="M100,48 Q150,48 175,20 Q185,5 100,2 Q15,5 25,20 Q50,48 100,48" stroke={color} strokeWidth="0.8" fill="none" opacity="0.3"/>
+      // Accurate half court: arc, paint, hoop, labeled player circles
+      const Court = () => (
+        <>
+          {/* Half court outline */}
+          <rect x="10" y="4" width="200" height="52" rx="2" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25"/>
           {/* Three point arc */}
-          <path d="M60,48 Q60,15 100,10 Q140,15 140,48" stroke={color} strokeWidth="1" fill="none" opacity="0.4"/>
+          <path d="M38,56 L38,38 Q38,10 110,10 Q182,10 182,38 L182,56" fill="none" stroke={color} strokeWidth="0.8" opacity="0.3"/>
           {/* Paint */}
-          <rect x="80" y="30" width="40" height="18" stroke={color} strokeWidth="1" fill="none" opacity="0.4"/>
+          <rect x="78" y="32" width="64" height="24" fill="none" stroke={color} strokeWidth="0.8" opacity="0.35"/>
           {/* Hoop */}
-          <circle cx="100" cy="30" r="6" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
-          {isOff && (<>
-            <circle cx="100" cy="44" r="4" fill={color} opacity="0.9"/>{/* PG */}
-            <circle cx="65" cy="35" r="4" fill={color} opacity="0.7"/>
-            <circle cx="135" cy="35" r="4" fill={color} opacity="0.7"/>
-            <circle cx="75" cy="22" r="4" fill={color} opacity="0.7"/>
-            <circle cx="125" cy="22" r="4" fill={color} opacity="0.7"/>
-            <path d="M100,44 Q85,38 75,22" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7" strokeDasharray="3,2"/>
-            <path d="M65,35 Q60,20 75,12" stroke={color} strokeWidth="1.2" fill="none" opacity="0.6"/>
-          </>)}
-          {isDef && (<>
-            <circle cx="100" cy="44" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="65" cy="35" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="135" cy="35" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="82" cy="22" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
-            <circle cx="118" cy="22" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
-          </>)}
-          {isPrac && (<>
-            <circle cx="70" cy="38" r="4" fill={color} opacity="0.8"/>
-            <circle cx="100" cy="38" r="4" fill={color} opacity="0.8"/>
-            <circle cx="130" cy="38" r="4" fill={color} opacity="0.8"/>
-            <path d="M70,38 L100,38 L130,38" stroke={color} strokeWidth="1" strokeDasharray="3,3" opacity="0.5"/>
-            <path d="M100,38 L100,30" stroke={color} strokeWidth="1.5" opacity="0.6"/>
-          </>)}
-          {isScout && (<>
-            <circle cx="100" cy="25" r="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.4"/>
-            <line x1="88" y1="13" x2="115" y2="38" stroke={color} strokeWidth="1.5" opacity="0.5"/>
-            <circle cx="118" cy="40" r="4" fill={color} opacity="0.7"/>
-          </>)}
+          <circle cx="110" cy="35" r="5" fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
+          {/* Free throw circle */}
+          <path d="M78,44 Q110,30 142,44" fill="none" stroke={color} strokeWidth="0.6" strokeDasharray="2,2" opacity="0.3"/>
+        </>
+      )
+      if (isOff) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Court/>
+          <Dot cx={110} cy={54} r={5} fill={color} label="PG" labelDy={-12}/>
+          <Dot cx={50} cy={44} r={4} fill={color} label="SF" labelDy={-12}/>
+          <Dot cx={170} cy={44} r={4} fill={color} label="SG" labelDy={-12}/>
+          <Dot cx={82} cy={30} r={4} fill={color} label="PF" labelDy={-12}/>
+          <Dot cx={138} cy={30} r={4} fill={color} label="C" labelDy={-12}/>
+          <path d="M110,54 Q90,48 50,44" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.6"/>
+          <polygon points="50,44 55,41 54,47" fill={color} opacity="0.6"/>
+        </svg>
+      )
+      if (isDef) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Court/>
+          {/* 2-3 Zone */}
+          <Dot cx={90} cy={48} stroke={color} label="G" labelDy={-12}/>
+          <Dot cx={130} cy={48} stroke={color} label="G" labelDy={-12}/>
+          <Dot cx={70} cy={36} stroke={color} label="F" labelDy={-12}/>
+          <Dot cx={110} cy={34} stroke={color} label="C" labelDy={-12}/>
+          <Dot cx={150} cy={36} stroke={color} label="F" labelDy={-12}/>
+          <text x="110" y="10" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">2-3 ZONE</text>
+        </svg>
+      )
+      if (isPrac) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Court/>
+          {/* 3-man weave drill */}
+          <Dot cx={60} cy={54} r={4} fill={color}/>
+          <Dot cx={110} cy={54} r={4} fill={color}/>
+          <Dot cx={160} cy={54} r={4} fill={color}/>
+          <path d="M60,54 Q85,42 110,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+          <path d="M110,54 Q85,42 60,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+          <polygon points="110,30 106,35 113,35" fill={color} opacity="0.7"/>
+          <text x="110" y="10" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">3-MAN WEAVE</text>
+        </svg>
+      )
+      return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Court/>
+          <circle cx="110" cy="35" r="18" fill="none" stroke={color} strokeWidth="1" opacity="0.4"/>
+          <path d="M96,21 L126,51" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="130" cy="53" r="4" fill={color} opacity="0.7"/>
+          <text x="110" y="10" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
     if (sport === 'Baseball' || sport === 'Softball') {
-      return (
-        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
-          {/* Diamond */}
-          <path d="M100,4 L155,28 L100,46 L45,28 Z" stroke={color} strokeWidth="1.2" fill="none" opacity="0.5"/>
-          {/* Base paths */}
-          <line x1="100" y1="4" x2="155" y2="28" stroke={color} strokeWidth="0.8" opacity="0.3"/>
-          <line x1="155" y1="28" x2="100" y2="46" stroke={color} strokeWidth="0.8" opacity="0.3"/>
-          <line x1="100" y1="46" x2="45" y2="28" stroke={color} strokeWidth="0.8" opacity="0.3"/>
-          <line x1="45" y1="28" x2="100" y2="4" stroke={color} strokeWidth="0.8" opacity="0.3"/>
+      // Accurate diamond with correct fielder positions
+      const DiamondField = () => (
+        <>
+          {/* Outfield arc */}
+          <path d="M20,56 Q110,0 200,56" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
+          {/* Infield diamond — correct orientation */}
+          <path d="M110,14 L168,42 L110,54 L52,42 Z" fill="none" stroke={color} strokeWidth="1" opacity="0.5"/>
+          {/* Base lines */}
+          <line x1="110" y1="14" x2="168" y2="42" stroke={color} strokeWidth="0.6" opacity="0.3"/>
+          <line x1="168" y1="42" x2="110" y2="54" stroke={color} strokeWidth="0.6" opacity="0.3"/>
+          <line x1="110" y1="54" x2="52" y2="42" stroke={color} strokeWidth="0.6" opacity="0.3"/>
+          <line x1="52" y1="42" x2="110" y2="14" stroke={color} strokeWidth="0.6" opacity="0.3"/>
           {/* Bases */}
-          <rect x="97" y="1" width="6" height="6" fill={color} opacity="0.7"/>
-          <rect x="152" y="25" width="6" height="6" fill={color} opacity="0.7"/>
-          <rect x="97" y="43" width="6" height="6" fill={color} opacity="0.7"/>
-          <rect x="42" y="25" width="6" height="6" fill={color} opacity="0.7"/>
-          {isOff && (<>
-            {/* Batter and baserunners */}
-            <circle cx="100" cy="42" r="4" fill={color} opacity="0.9"/>
-            <path d="M100,42 Q120,40 154,28" stroke={color} strokeWidth="1.5" fill="none" strokeDasharray="3,2" opacity="0.7"/>
-          </>)}
-          {isDef && (<>
-            <circle cx="100" cy="26" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>{/* SS */}
-            <circle cx="120" cy="30" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>{/* 2B */}
-            <circle cx="80" cy="30" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>{/* 3B */}
-            <circle cx="100" cy="14" r="3" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>{/* P */}
-          </>)}
-          {isPrac && (<>
-            <circle cx="100" cy="44" r="4" fill={color} opacity="0.8"/>
-            <path d="M100,44 Q85,35 45,28" stroke={color} strokeWidth="1.5" fill="none" strokeDasharray="3,2" opacity="0.7"/>
-          </>)}
-          {isScout && (<>
-            <circle cx="100" cy="26" r="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.3"/>
-            <line x1="94" y1="14" x2="112" y2="40" stroke={color} strokeWidth="1.5" opacity="0.5"/>
-            <circle cx="115" cy="42" r="4" fill={color} opacity="0.7"/>
-          </>)}
+          <rect x="107" y="11" width="6" height="6" fill={color} opacity="0.6"/>{/* 2B */}
+          <rect x="165" y="39" width="6" height="6" fill={color} opacity="0.6"/>{/* 1B */}
+          <rect x="107" y="51" width="6" height="6" fill={color} opacity="0.6"/>{/* Home */}
+          <rect x="49" y="39" width="6" height="6" fill={color} opacity="0.6"/>{/* 3B */}
+          {/* Pitcher's mound */}
+          <circle cx="110" cy="34" r="3" fill={color} opacity="0.4"/>
+        </>
+      )
+      if (isOff) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <DiamondField/>
+          {/* Batter */}
+          <Dot cx={110} cy={54} r={4} fill={color} label="C" labelDy={-12}/>
+          {/* Hit and run arrow */}
+          <path d="M110,51 Q125,44 140,38" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+          <polygon points="140,38 135,40 138,45" fill={color} opacity="0.7"/>
+          <text x="110" y="6" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">HIT & RUN</text>
+        </svg>
+      )
+      if (isDef) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <DiamondField/>
+          <Dot cx={110} cy={34} r={3} fill={color} label="P" labelDy={-10}/>
+          <Dot cx={110} cy={54} r={3} fill={color} label="C" labelDy={-10}/>
+          <Dot cx={168} cy={42} r={3} fill={color} label="1B" labelDy={-10}/>
+          <Dot cx={52} cy={42} r={3} fill={color} label="3B" labelDy={-10}/>
+          <Dot cx={125} cy={30} r={3} fill={color} label="2B" labelDy={-10}/>
+          <Dot cx={95} cy={28} r={3} fill={color} label="SS" labelDy={-10}/>
+          <Dot cx={60} cy={16} r={3} fill={color} label="LF" labelDy={-10}/>
+          <Dot cx={110} cy={10} r={3} fill={color} label="CF" labelDy={-10}/>
+          <Dot cx={160} cy={16} r={3} fill={color} label="RF" labelDy={-10}/>
+        </svg>
+      )
+      if (isPrac) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <DiamondField/>
+          {/* Batting practice — batter at home, toss from side */}
+          <Dot cx={110} cy={54} r={4} fill={color} label="Batter" labelDy={-12}/>
+          <Dot cx={90} cy={50} r={3} stroke={color} label="Toss" labelDy={-10}/>
+          <path d="M90,50 L108,54" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="108,54 104,50 106,56" fill={color} opacity="0.7"/>
+          <text x="110" y="6" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">BATTING PRACTICE</text>
+        </svg>
+      )
+      return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <DiamondField/>
+          <circle cx="110" cy="34" r="18" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
+          <path d="M96,20 L126,50" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="130" cy="52" r="4" fill={color} opacity="0.7"/>
+          <text x="110" y="6" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
     if (sport === 'Soccer') {
-      return (
-        <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.6 }}>
+      const Pitch = () => (
+        <>
           {/* Half pitch */}
-          <rect x="10" y="4" width="180" height="40" rx="2" stroke={color} strokeWidth="1" fill="none" opacity="0.3"/>
-          {/* Center line */}
-          <line x1="10" y1="24" x2="190" y2="24" stroke={color} strokeWidth="0.8" opacity="0.2"/>
+          <rect x="8" y="4" width="204" height="52" rx="2" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25"/>
           {/* Goal area */}
-          <rect x="10" y="14" width="30" height="20" stroke={color} strokeWidth="1" fill="none" opacity="0.4"/>
+          <rect x="8" y="18" width="28" height="24" fill="none" stroke={color} strokeWidth="0.8" opacity="0.35"/>
           {/* Goal */}
-          <rect x="10" y="18" width="8" height="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
-          {isOff && (<>
-            {/* 4-3-3 attacking */}
-            <circle cx="80" cy="38" r="4" fill={color} opacity="0.9"/>
-            <circle cx="60" cy="30" r="4" fill={color} opacity="0.7"/>
-            <circle cx="100" cy="30" r="4" fill={color} opacity="0.7"/>
-            <circle cx="140" cy="30" r="4" fill={color} opacity="0.7"/>
-            <circle cx="50" cy="15" r="4" fill={color} opacity="0.8"/>
-            <circle cx="100" cy="12" r="4" fill={color} opacity="0.8"/>
-            <circle cx="150" cy="15" r="4" fill={color} opacity="0.8"/>
-            <path d="M80,38 L60,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.6"/>
-            <path d="M60,30 L50,15" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
-          </>)}
-          {isDef && (<>
-            <circle cx="110" cy="38" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="80" cy="26" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="110" cy="22" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="140" cy="26" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-            <circle cx="95" cy="15" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
-            <circle cx="125" cy="15" r="4" stroke={color} strokeWidth="1.5" fill="none" opacity="0.7"/>
-          </>)}
-          {isPrac && (<>
-            <circle cx="70" cy="30" r="4" fill={color} opacity="0.8"/>
-            <circle cx="100" cy="20" r="4" fill={color} opacity="0.8"/>
-            <circle cx="130" cy="30" r="4" fill={color} opacity="0.8"/>
-            <path d="M70,30 L100,20 L130,30" stroke={color} strokeWidth="1.2" strokeDasharray="3,3" opacity="0.5"/>
-            <path d="M130,30 L70,30" stroke={color} strokeWidth="1" strokeDasharray="4,4" opacity="0.4"/>
-          </>)}
-          {isScout && (<>
-            <circle cx="110" cy="24" r="12" stroke={color} strokeWidth="1.5" fill="none" opacity="0.4"/>
-            <line x1="100" y1="12" x2="122" y2="38" stroke={color} strokeWidth="1.5" opacity="0.5"/>
-            <circle cx="125" cy="40" r="4" fill={color} opacity="0.7"/>
-          </>)}
+          <rect x="8" y="22" width="8" height="16" fill="none" stroke={color} strokeWidth="1.2" opacity="0.55"/>
+          {/* Penalty arc */}
+          <path d="M36,30 Q50,14 36,8" fill="none" stroke={color} strokeWidth="0.7" opacity="0.25"/>
+        </>
+      )
+      if (isOff) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Pitch/>
+          {/* 4-3-3 attacking shape */}
+          <Dot cx={170} cy={30} r={4} fill={color} label="ST" labelDy={-11}/>
+          <Dot cx={145} cy={18} r={4} fill={color} label="LW" labelDy={-11}/>
+          <Dot cx={145} cy={42} r={4} fill={color} label="RW" labelDy={-11}/>
+          <Dot cx={120} cy={24} r={3} stroke={color}/>
+          <Dot cx={120} cy={30} r={3} stroke={color}/>
+          <Dot cx={120} cy={36} r={3} stroke={color}/>
+          <path d="M170,30 L145,18" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+          <polygon points="145,18 149,23 143,22" fill={color} opacity="0.6"/>
+          <text x="170" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-3-3</text>
+        </svg>
+      )
+      if (isDef) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Pitch/>
+          {/* 4-4-2 defensive block */}
+          <Dot cx={100} cy={50} r={3} stroke={color} label="DM" labelDy={-10}/>
+          <Dot cx={70} cy={40} r={3} stroke={color}/>
+          <Dot cx={95} cy={36} r={3} stroke={color}/>
+          <Dot cx={120} cy={36} r={3} stroke={color}/>
+          <Dot cx={145} cy={40} r={3} stroke={color}/>
+          <Dot cx={75} cy={24} r={3} stroke={color}/>
+          <Dot cx={100} cy={20} r={3} stroke={color}/>
+          <Dot cx={125} cy={20} r={3} stroke={color}/>
+          <Dot cx={150} cy={24} r={3} stroke={color}/>
+          <text x="160" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-4-2 BLOCK</text>
+        </svg>
+      )
+      if (isPrac) return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Pitch/>
+          {/* Passing drill — triangle */}
+          <Dot cx={80} cy={44} r={4} fill={color}/>
+          <Dot cx={130} cy={44} r={4} fill={color}/>
+          <Dot cx={105} cy={24} r={4} fill={color}/>
+          <path d="M80,44 L105,24" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <path d="M105,24 L130,44" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <path d="M130,44 L80,44" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+          <polygon points="105,24 101,30 108,30" fill={color} opacity="0.7"/>
+          <text x="105" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">TRIANGLE PASSING</text>
+        </svg>
+      )
+      return (
+        <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
+          <Pitch/>
+          <circle cx="120" cy="30" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.35"/>
+          <path d="M106,16 L136,46" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="140" cy="48" r="4" fill={color} opacity="0.7"/>
+          <text x="160" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
-    // Default generic dots
+    // Default
     return (
-      <svg width="100%" height="48" viewBox="0 0 200 48" style={{ opacity:0.5 }}>
-        <circle cx="60" cy="24" r="5" fill={color} opacity="0.7"/>
-        <circle cx="100" cy="24" r="5" fill={color} opacity="0.7"/>
-        <circle cx="140" cy="24" r="5" fill={color} opacity="0.7"/>
-        <path d="M60,24 L100,24 L140,24" stroke={color} strokeWidth="1.5" fill="none" opacity="0.5"/>
+      <svg width="100%" height="48" viewBox="0 0 220 48" style={{opacity:0.5}}>
+        <circle cx="70" cy="24" r="5" fill={color} opacity="0.7"/>
+        <circle cx="110" cy="24" r="5" fill={color} opacity="0.7"/>
+        <circle cx="150" cy="24" r="5" fill={color} opacity="0.7"/>
+        <path d="M70,24 L110,24 L150,24" stroke={color} strokeWidth="1.5" fill="none" opacity="0.5"/>
       </svg>
     )
   }
@@ -5775,8 +5914,8 @@ function NewsTicker({ sport, P }) {
   return (
     <div style={{ flex:1, overflow:'hidden', margin:'0 6px' }}>
       <div style={{ overflow:'hidden', whiteSpace:'nowrap' }}>
-        <div style={{ display:'inline-block', animation:'ticker 30s linear infinite', fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
-          {headlines.join('  ·  ')}  ·  {headlines.join('  ·  ')}
+        <div style={{ display:'inline-block', animation:'ticker 60s linear infinite', fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
+          {headlines.slice(0,5).join('   ·   ')}   ·   {headlines.slice(0,5).join('   ·   ')}
         </div>
       </div>
     </div>
@@ -5820,7 +5959,13 @@ export default function CoachIQ() {
     try { return !sessionStorage.getItem('coachiq_session_started') }
     catch(e) { return true }
   })
-  const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
+  const [cfg, setCfg] = useState(() => {
+    try {
+      const saved = localStorage.getItem('coachiq_cfg')
+      if (saved) return JSON.parse(saved)
+    } catch(e) {}
+    return { coach:'', team:'', primary:'#C0392B', secondary:'#002868', accent1:'', accent2:'' }
+  })
   const [brand, setBrand] = useState('Red — C+IQ colored')
   const [page, setPage] = useState('hub')
   const [activeMode, setActiveMode] = useState(null)
@@ -5849,14 +5994,16 @@ export default function CoachIQ() {
   // ── PERSISTENCE — must be before any early returns (React Rules of Hooks) ──
   useEffect(() => { try { localStorage.setItem('coachiq_teams', JSON.stringify(teams)) } catch(e){} }, [teams])
   useEffect(() => { try { localStorage.setItem('coachiq_activeTeam', JSON.stringify(activeTeam)) } catch(e){} }, [activeTeam])
+  useEffect(() => { try { localStorage.setItem('coachiq_cfg', JSON.stringify(cfg)) } catch(e){} }, [cfg])
 
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
   const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
-  const P = currentTeam?.primary || sportColors.primary
-  const S = currentTeam?.secondary || sportColors.secondary
+  // Color hierarchy: active team colors > personal colors from cfg > sport defaults
+  const P = currentTeam?.primary || cfg.primary || sportColors.primary
+  const S = currentTeam?.secondary || cfg.secondary || sportColors.secondary
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
   async function callAI(prompt, imageData) {
@@ -6094,7 +6241,7 @@ export default function CoachIQ() {
           {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
           {page==='news'  && <NewsPage  P={P} S={S} al={al} sport={sport} callAI={callAI} />}
           {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} />}
-          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} activeTeam={activeTeam} setTeams={setTeams} scrollToLocation={scrollToLocation} />}
+          {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} activeTeam={activeTeam} setTeams={setTeams} scrollToLocation={scrollToLocation} currentTeam={currentTeam} />}
         </div>
 
         {/* BOTTOM NAV */}
@@ -6386,9 +6533,26 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport, teams, 
   )
 }
 
-function AnalyticsSection({ team, P, al }) {
+function AnalyticsSection({ team, P, al, teams, setTeams, sport }) {
   const history = team?.gameHistory || []
   const schedule = team?.schedule || []
+  const [expandedGame, setExpandedGame] = useState(null)
+  const [editGame, setEditGame] = useState({})
+
+  function updateTeam(updates) {
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t,...updates} : t) }))
+  }
+
+  function saveGameEdit(gameId) {
+    const updated = history.map(g => g.id===gameId ? { ...g, ...editGame } : g)
+    updateTeam({ gameHistory: updated })
+    setExpandedGame(null); setEditGame({})
+  }
+
+  function deleteGame(gameId) {
+    updateTeam({ gameHistory: history.filter(g => g.id!==gameId) })
+    setExpandedGame(null)
+  }
 
   const wins   = history.filter(g => g.us > g.them).length
   const losses = history.filter(g => g.us < g.them).length
@@ -6427,7 +6591,6 @@ function AnalyticsSection({ team, P, al }) {
       <Card>
         <CardHead icon="📊" title="Season Record" tag={gamesPlayed ? `${gamesPlayed} games` : 'No games yet'} tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
-          {/* W/L Record big display */}
           <div style={{ background:'#0d1117', borderRadius:8, padding:'16px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:0 }}>
             <div style={{ textAlign:'center', flex:1 }}>
               <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:56, fontWeight:900, color:'#4ade80', lineHeight:1 }}>{wins}</div>
@@ -6445,7 +6608,6 @@ function AnalyticsSection({ team, P, al }) {
             )}
           </div>
 
-          {/* Win % bar */}
           {gamesPlayed > 0 && (
             <div style={{ marginBottom:14 }}>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
@@ -6458,7 +6620,6 @@ function AnalyticsSection({ team, P, al }) {
             </div>
           )}
 
-          {/* Stat grid */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:gamesPlayed?12:0 }}>
             {statCard('⚡', ppg, 'Points Per Game', P, gamesPlayed?`${ptsFor} total pts for`:null)}
             {statCard('🛡', papg, 'Points Allowed/Game', '#e74c3c', gamesPlayed?`${ptsAgainst} total pts against`:null)}
@@ -6472,21 +6633,55 @@ function AnalyticsSection({ team, P, al }) {
             )}
           </div>
 
-          {/* Game log */}
+          {/* Game log — inline editable */}
           {history.length > 0 && (
             <div>
-              <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:8 }}>GAME RESULTS</div>
+              <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:8 }}>GAME RESULTS <span style={{ color:'#3d4559', fontWeight:400 }}>· tap to edit</span></div>
               {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((g,i)=>{
                 const result = g.us>g.them?'W':g.us<g.them?'L':'T'
                 const rc = result==='W'?'#4ade80':result==='L'?'#e74c3c':'#f59e0b'
+                const isExpanded = expandedGame === g.id
                 return (
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#161922', border:`1px solid #1e2330`, borderRadius:6, marginBottom:6, borderLeft:`3px solid ${rc}` }}>
-                    <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:rc, width:16, textAlign:'center' }}>{result}</div>
-                    <div style={{ flex:1 }}>
-                      <div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{g.opponent}</div>
-                      <div style={{ fontSize:10, color:'#6b7a96' }}>{g.date ? new Date(g.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}) : ''}</div>
+                  <div key={g.id||i} style={{ background:'#161922', border:`1px solid #1e2330`, borderRadius:6, marginBottom:6, borderLeft:`3px solid ${rc}`, overflow:'hidden' }}>
+                    <div onClick={()=>{ setExpandedGame(isExpanded?null:g.id); setEditGame({ opponent:g.opponent, date:g.date, us:g.us, them:g.them }) }} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', cursor:'pointer' }}>
+                      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:rc, width:16, textAlign:'center' }}>{result}</div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{g.opponent}</div>
+                        <div style={{ fontSize:10, color:'#6b7a96' }}>{g.date ? new Date(g.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}) : ''}</div>
+                      </div>
+                      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8' }}>{g.us}–{g.them}</div>
+                      <span style={{ fontSize:10, color:'#3d4559', marginLeft:4 }}>{isExpanded?'▲':'✏️'}</span>
                     </div>
-                    <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8' }}>{g.us}–{g.them}</div>
+                    {isExpanded && (
+                      <div style={{ borderTop:'1px solid #1e2330', padding:'10px 12px', background:'rgba(255,255,255,0.02)' }}>
+                        <div style={{ fontSize:9, color:'#6b7a96', letterSpacing:2, fontWeight:700, marginBottom:8 }}>EDIT GAME</div>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
+                          <div style={{ gridColumn:'1/-1' }}>
+                            <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Opponent</label>
+                            <input value={editGame.opponent||''} onChange={e=>setEditGame(g=>({...g,opponent:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
+                          </div>
+                          <div>
+                            <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Date</label>
+                            <input type="date" value={editGame.date||''} onChange={e=>setEditGame(g=>({...g,date:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
+                          </div>
+                          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
+                            <div>
+                              <label style={{ fontSize:9, color:'#4ade80', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Us</label>
+                              <input type="number" min="0" value={editGame.us??''} onChange={e=>setEditGame(g=>({...g,us:Number(e.target.value)}))} style={{ width:'100%', background:'#0f1219', border:'1px solid rgba(74,222,128,0.3)', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none', textAlign:'center' }} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize:9, color:'#e74c3c', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Them</label>
+                              <input type="number" min="0" value={editGame.them??''} onChange={e=>setEditGame(g=>({...g,them:Number(e.target.value)}))} style={{ width:'100%', background:'#0f1219', border:'1px solid rgba(239,68,68,0.3)', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none', textAlign:'center' }} />
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display:'flex', gap:6 }}>
+                          <button onClick={()=>{ setExpandedGame(null); setEditGame({}) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
+                          <button onClick={()=>deleteGame(g.id)} style={{ flex:1, padding:'8px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:4, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>DELETE</button>
+                          <button onClick={()=>saveGameEdit(g.id)} style={{ flex:2, padding:'8px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SAVE CHANGES</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -6620,7 +6815,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
           {section==='schedule' && <ScheduleSection  team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
           {section==='scoring'  && <LiveScoringSection team={currentTeam} P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} callAI={callAI} parseJSON={parseJSON} />}
           {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} teams={teams} setTeams={setTeams} />}
-          {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} />}
+          {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
           {section==='print'    && <PrintSection     team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} />}
         </>
       )}
@@ -6850,8 +7045,10 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
   const [showMascotBuilder, setShowMascotBuilder] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [editingTeamId, setEditingTeamId] = useState(null)
+  const [editForm, setEditForm] = useState({})
   const [form, setForm] = useState({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
-    const [error, setError] = useState('')
+  const [error, setError] = useState('')
   const [showUpgrade, setShowUpgrade] = useState(false)
   const sportTeams = teams[sport] || []
   const current = activeTeam[sport]
@@ -6868,6 +7065,23 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
     setCfg(prev => ({ ...prev, primary:newTeam.primary, secondary:newTeam.secondary }))
     setForm({ name:'', season:'', mascot:'eagles', teamFont:'kalam', hometown:'', primary:'#C0392B', secondary:'#002868', accent1:'#f59e0b', accent2:'#1565C0' })
     setMode('view'); setError('')
+  }
+
+  function startEditTeam(team) {
+    setEditingTeamId(team.id)
+    setEditForm({ name:team.name, season:team.season, hometown:team.hometown||'', primary:team.primary, secondary:team.secondary, accent1:team.accent1||'', accent2:team.accent2||'' })
+  }
+
+  function saveEditTeam() {
+    setTeams(prev => ({
+      ...prev,
+      [sport]: (prev[sport]||[]).map(t => t.id===editingTeamId ? { ...t, ...editForm } : t)
+    }))
+    if (current?.id === editingTeamId) {
+      setActiveTeam(prev => ({ ...prev, [sport]: { ...current, ...editForm } }))
+      setCfg(prev => ({ ...prev, primary:editForm.primary, secondary:editForm.secondary }))
+    }
+    setEditingTeamId(null); setEditForm({})
   }
 
   function selectTeam(team) {
@@ -6950,16 +7164,60 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P,
                 {sportTeams.map(team => {
                   const m = (MASCOTS||[]).find(x=>x.id===team.mascot)
                   const fs = (TEAM_FONTS||[]).find(f=>f.id===team.teamFont)?.style||"'Barlow Condensed',sans-serif"
+                  const isEditing = editingTeamId === team.id
                   return (
-                    <div key={team.id} onClick={()=>{ switchTeam(team); if(onOpenTeamTab) onOpenTeamTab() }} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:current?.id===team.id?al(P,0.1):'#161922', border:`1px solid ${current?.id===team.id?al(P,0.4):'#1e2330'}`, borderRadius:6, marginBottom:6, cursor:'pointer' }}>
-                      <MascotAvatar mascotId={team.mascot} color={current?.id===team.id?P:'#607080'} size={32} />
-                      <div style={{ flex:1, cursor:'pointer' }} onClick={()=>{ selectTeam(team); setTimeout(()=>{ if(onOpenTeamTab) onOpenTeamTab() }, 50) }}>
-                        <div style={{ fontFamily:fs, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
-                        <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
-                      </div>
-                      {current?.id===team.id && <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>DESELECT</button>}
-                      {onOpenTeamTab && <button onClick={(e)=>{ e.stopPropagation(); switchTeam(team); onOpenTeamTab() }} style={{ padding:'5px 10px', background:P, border:'none', borderRadius:3, color:'white', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>VIEW →</button>}
-                      <button onClick={()=>setDeleteConfirm(team)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.7)', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
+                    <div key={team.id} style={{ background:current?.id===team.id?al(P,0.1):'#161922', border:`1px solid ${current?.id===team.id?al(P,0.4):'#1e2330'}`, borderRadius:6, marginBottom:6, overflow:'hidden' }}>
+                      {!isEditing ? (
+                        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', cursor:'pointer' }}>
+                          <MascotAvatar mascotId={team.mascot} color={current?.id===team.id?P:'#607080'} size={32} />
+                          <div style={{ flex:1 }} onClick={()=>{ selectTeam(team); setTimeout(()=>{ if(onOpenTeamTab) onOpenTeamTab() }, 50) }}>
+                            <div style={{ fontFamily:fs, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
+                            <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
+                          </div>
+                          <div style={{ display:'flex', gap:4, alignItems:'center' }}>
+                            {current?.id===team.id && <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>DESELECT</button>}
+                            <button onClick={()=>startEditTeam(team)} style={{ padding:'3px 7px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:3, color:'#f59e0b', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>EDIT</button>
+                            <button onClick={()=>setDeleteConfirm(team)} style={{ padding:'3px 7px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:3, color:'rgba(239,68,68,0.7)', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✕</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ padding:'12px' }}>
+                          <div style={{ fontSize:9, color:'#f59e0b', letterSpacing:2, fontWeight:700, marginBottom:10 }}>EDIT TEAM</div>
+                          <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:8 }}>
+                            <div>
+                              <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Team Name</label>
+                              <input value={editForm.name||''} onChange={e=>setEditForm(f=>({...f,name:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
+                            </div>
+                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                              <div>
+                                <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Season</label>
+                                <select value={editForm.season||''} onChange={e=>setEditForm(f=>({...f,season:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:13, outline:'none' }}>
+                                  {seasons.map(s=><option key={s} value={s}>{s}</option>)}
+                                </select>
+                              </div>
+                              <div>
+                                <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Hometown</label>
+                                <input value={editForm.hometown||''} onChange={e=>setEditForm(f=>({...f,hometown:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
+                              </div>
+                            </div>
+                            <div>
+                              <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Team Colors</label>
+                              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6 }}>
+                                {[{key:'primary',label:'Primary'},{key:'secondary',label:'Secondary'},{key:'accent1',label:'Accent 1'},{key:'accent2',label:'Accent 2'}].map(({key,label})=>(
+                                  <div key={key} style={{ textAlign:'center' }}>
+                                    <input type="color" value={editForm[key]||'#C0392B'} onChange={e=>setEditForm(f=>({...f,[key]:e.target.value}))} style={{ width:'100%', height:32, border:'none', borderRadius:4, cursor:'pointer', padding:0 }} />
+                                    <div style={{ fontSize:7, color:'#6b7a96', marginTop:2 }}>{label}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ display:'flex', gap:6 }}>
+                            <button onClick={()=>{ setEditingTeamId(null); setEditForm({}) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
+                            <button onClick={saveEditTeam} style={{ flex:2, padding:'8px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SAVE CHANGES</button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
