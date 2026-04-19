@@ -745,20 +745,25 @@ function CoachIQLogo({ size=22, brand='Red — C+IQ colored' }) {
 }
 
 // ─── SHARED UI ───────────────────────────────────────────────────────────────
+function safeHex(val, fallback='#C0392B') {
+  if (!val || typeof val !== 'string' || val === 'undefined' || val === 'null' || val.trim() === '') return fallback
+  if (val.startsWith('#') && (val.length === 4 || val.length === 7)) return val
+  return fallback
+}
 function al(hex, a) {
-  if (!hex || hex.length < 7) return `rgba(0,0,0,${a})`
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
+  const h = safeHex(hex, '#000000')
+  const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16)
   return `rgba(${r},${g},${b},${a})`
 }
 function dk(hex, amt) {
-  if (!hex || hex.length < 7) return hex
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
+  const h = safeHex(hex, '#C0392B')
+  const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16)
   return '#'+[r,g,b].map(x=>Math.max(0,x-amt).toString(16).padStart(2,'0')).join('')
 }
 function Card({ children, style={} }) {
   return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
 }
-function CardHead({ icon, title, tag, tagColor, accent }) {
+function CardHead({ icon, title, tag, tagColor, accent='#C0392B' }) {
   const tc = tagColor||'#C0392B'
   return (
     <div style={{ padding:'11px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:9, borderLeft:`3px solid ${accent||'#C0392B'}` }}>
@@ -769,8 +774,9 @@ function CardHead({ icon, title, tag, tagColor, accent }) {
   )
 }
 function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
+  const safeColor = color && color !== '' && color !== 'undefined' ? color : '#C0392B'
   return (
-    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':color, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
+    <button onClick={onClick} disabled={disabled} style={{ width:'100%', background:disabled?'#3d4559':safeColor, color:'white', border:'none', borderRadius:4, padding:12, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'2px', cursor:disabled?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, opacity:disabled?0.6:1, textTransform:'uppercase', ...style }}>{children}</button>
   )
 }
 function Sel({ label, value, onChange, options }) {
@@ -808,7 +814,7 @@ function ErrBox({ msg }) {
 }
 
 // ─── QUICK TOUR MODAL ─────────────────────────────────────────────────────────
-function QuickTourModal({ onDone, P, al, setPage }) {
+function QuickTourModal({ onDone, P='#C0392B', al, setPage }) {
   const [step, setStep] = useState(0)
   const current = TUTORIAL_STEPS[step]
   const isLast = step === TUTORIAL_STEPS.length - 1
@@ -870,7 +876,7 @@ function QuickTourModal({ onDone, P, al, setPage }) {
     </div>
   )
 }
-function FeatureGuide({ P, al, onClose }) {
+function FeatureGuide({ P='#C0392B', al, onClose }) {
   const [activeSection, setActiveSection] = useState(0)
 
   return (
@@ -970,7 +976,7 @@ function FootballHoleDiagram({ P }) {
 }
 
 
-function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
+function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extraAction }) {
   const [showSummary, setShowSummary] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
@@ -1222,7 +1228,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
 }
 
 // ─── PLAY ANIMATOR ────────────────────────────────────────────────────────────
-function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
+function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) {
   const canvasRef = useRef(null)
   const [parsed, setParsed] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -1555,7 +1561,7 @@ function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
 }
 
 
-function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) {
+function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON, sport }) {
   const [expanded, setExpanded] = useState(false)
   const [showAnim, setShowAnim] = useState(false)
   const [steps, setSteps] = useState(null)
@@ -1679,7 +1685,7 @@ function DefFormationCard({ formation: f, S, P, al, callAI, parseJSON, sport }) 
   )
 }
 
-function PlaybookCard({ play, packageName, packageIndex, P, S, al, callAI, parseJSON }) {
+function PlaybookCard({ play, packageName, packageIndex, P='#C0392B', S='#002868', al, callAI, parseJSON }) {
   const [showAnim, setShowAnim] = useState(false)
   return (
     <div style={{ background:'#0f1117', border:'1px solid #1e2330', borderRadius:10, overflow:'hidden', marginBottom:8 }}>
@@ -1702,7 +1708,7 @@ function PlaybookCard({ play, packageName, packageIndex, P, S, al, callAI, parse
 }
 
 
-function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
+function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) {
   const isFB = sport==='Football', isBB = sport==='Basketball', isBSB = sport==='Baseball'
   const fbFields = [
     {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option','Flexbone']},
@@ -1793,7 +1799,7 @@ function DefenseGen({ sport, P, S, al, callAI, parseJSON }) {
 }
 
 
-function SituationalPanel({ sport, P, S, al, callAI }) {
+function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball'
   const [soccerScore, setSoccerScore] = useState('Tied'), [situation, setSituation] = useState('Open Play'), [pressure, setPressure] = useState('Mid Block'), [soccerRecs, setSoccerRecs] = useState(null)
   const [sbCount, setSbCount] = useState('0-0'), [sbOuts, setSbOuts] = useState('0 Outs'), [sbInning, setSbInning] = useState('1st'), [sbRunners, setSbRunners] = useState('None on'), [sbScore, setSbScore] = useState('Tied'), [sbHalf, setSbHalf] = useState('1st Half'), [sbTimeLeft, setSbTimeLeft] = useState('45+ min'), [sbRecs, setSbRecs] = useState(null)
@@ -1978,7 +1984,7 @@ function SituationalPanel({ sport, P, S, al, callAI }) {
 }
 
 
-function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON }) {
+function GauntletPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON }) {
   const [difficulty, setDifficulty] = useState('Varsity')
   const [scenario, setScenario] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -2144,7 +2150,7 @@ function GauntletPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, cal
 }
 
 
-function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
+function FilmPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON }) {
   const [mode, setMode] = useState('describe')
   const [description, setDescription] = useState('')
   const [imageData, setImageData] = useState(null)
@@ -2254,7 +2260,7 @@ function FilmPage({ P, S, al, dk, sport, callAI, parseJSON }) {
 
 
 // ─── SCHEME PREVIEW (mini interactive diagrams for home card) ─────────────────
-function SchemePreviewMini({ type='offense', P, sport='Football' }) {
+function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
   const diagColor = (() => {
     if (!P || P === '#ffffff' || P === '#fff') return '#C0392B'
     const r = parseInt(P.slice(1,3)||'C0',16), g = parseInt(P.slice(3,5)||'39',16), b = parseInt(P.slice(5,7)||'2B',16)
@@ -2526,7 +2532,7 @@ function SchemePreviewMini({ type='offense', P, sport='Football' }) {
     </svg>
   )
 }
-function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ }) {
+function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
   const [offFields, setOffFields] = useState(initFields)
@@ -2647,7 +2653,7 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
 }
 
 // ─── PLAY CARD WITH SAVE TO PLAYBOOK ─────────────────────────────────────────
-function PlayCardWithSave({ play, P, S, al, callAI, parseJSON, sport, playbook, onAddToPlaybook, onCreateAndAdd }) {
+function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, sport, playbook, onAddToPlaybook, onCreateAndAdd }) {
   const [showSaveMenu, setShowSaveMenu] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const wrapRef = useRef(null)
@@ -2693,7 +2699,7 @@ function PlayCardWithSave({ play, P, S, al, callAI, parseJSON, sport, playbook, 
 }
 
 // ─── DEFENSIVE GEN COLLAPSIBLE ────────────────────────────────────────────────
-function DefenseGenCollapsible({ sport, P, S, al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook }) {
+function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook }) {
   const [open, setOpen] = useState(defaultOpen)
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball'
   const fbFields = [
@@ -2792,7 +2798,7 @@ function DefenseGenCollapsible({ sport, P, S, al, callAI, parseJSON, defaultOpen
   )
 }
 
-function DefFormationCardWithSave({ formation: f, S, P, al, callAI, parseJSON, sport, playbook, onAddToPlaybook }) {
+function DefFormationCardWithSave({ formation: f, S, P='#C0392B', al, callAI, parseJSON, sport, playbook, onAddToPlaybook }) {
   const [showSaveMenu, setShowSaveMenu] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const [saved, setSaved] = useState(false)
@@ -2830,7 +2836,7 @@ function DefFormationCardWithSave({ formation: f, S, P, al, callAI, parseJSON, s
 
 
 // ─── PLAYBOOK PAGE (restructured) ────────────────────────────────────────────
-function PlaybookPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlaybook }) {
+function PlaybookPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, playbook, setPlaybook }) {
   const sportFolders = playbook[sport] || {}
   const allFolderNames = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
   const [activeFolder, setActiveFolder] = useState(allFolderNames[0] || 'My Favorites')
@@ -2901,7 +2907,7 @@ function PlaybookPage({ P, S, al, sport, callAI, parseJSON, playbook, setPlayboo
 }
 
 // ─── SCOUT PAGE ────────────────────────────────────────────────────────────────
-function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
+function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
   const [opponents, setOpponents] = useState([])
   const [activeOpp, setActiveOpp] = useState(null)
   const [newOppName, setNewOppName] = useState('')
@@ -3055,7 +3061,7 @@ function ScoutPage({ P, S, al, sport, callAI, parseJSON }) {
 
 // ─── MORE PAGE (restructured) ─────────────────────────────────────────────────
 // ─── TEAM QUICK SWITCHER (top bar) ────────────────────────────────────────────
-function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, setPage, P, al, iq }) {
+function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, setPage, P='#C0392B', al, iq }) {
   const [open, setOpen] = useState(false)
   const sportTeams = teams[sport] || []
   const current = activeTeam[sport]
@@ -3121,7 +3127,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
     </div>
   )
 }
-function PlayNameBuilder({ P, S, al, sport }) {
+function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
   const [step, setStep] = useState(0)
   const [choices, setChoices] = useState({})
   const [result, setResult] = useState(null)
@@ -3934,7 +3940,7 @@ const RULEBOOK_LINKS = {
 }
 
 
-function RulebookPage({ sport, P, al, callAI }) {
+function RulebookPage({ sport, P='#C0392B', al, callAI }) {
   const [leagueSearch, setLeagueSearch] = useState('')
   const [leagueResult, setLeagueResult] = useState(null)
   const [searching, setSearching] = useState(false)
@@ -4014,7 +4020,7 @@ function RulebookPage({ sport, P, al, callAI }) {
   )
 }
 // ─── NEWS PAGE ────────────────────────────────────────────────────────────────
-function NewsPage({ P, S, al, sport, callAI }) {
+function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
   const [activeChannel, setActiveChannel] = useState('sport')
   const [newsItems, setNewsItems] = useState([])
   const [newsLoading, setNewsLoading] = useState(true)
@@ -4247,7 +4253,7 @@ function NewsPage({ P, S, al, sport, callAI }) {
     </div>
   )
 }
-function HelpPage({ P, al, setPage, sport }) {
+function HelpPage({ P='#C0392B', al, setPage, sport }) {
   const [openSection, setOpenSection] = useState(null)
 
   const sections = [
@@ -4303,7 +4309,7 @@ function HelpPage({ P, al, setPage, sport }) {
 }
 
 
-function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage }) {
+function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage }) {
   const [activeMode, setActiveMode] = useState(null)
 
   const categories = [
@@ -4387,7 +4393,7 @@ function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI
     </>
   )
 }
-function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI, activeTeam, setTeams, scrollToLocation=false, currentTeam }) {
+function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI, activeTeam, setTeams, scrollToLocation=false, currentTeam }) {
   const [activeSection, setActiveSection] = useState('features')
   const locationRef = useRef(null)
   useEffect(() => {
@@ -4635,7 +4641,7 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
 
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg, homeLocation, setPage }) {
+function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg, homeLocation, setPage }) {
   const [feed, setFeed] = useState(null)
   const [feedLoading, setFeedLoading] = useState(false)
   const [activeMode, setActiveMode] = useState('dashboard')
@@ -5048,7 +5054,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
 
 
 // ─── C·IQ HUB PAGE ────────────────────────────────────────────────────────────
-function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation, setTeams }) {
+function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation, setTeams }) {
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const gameHistory = currentTeam?.gameHistory || []
   const practicePlans = currentTeam?.practicePlans || []
@@ -5930,7 +5936,7 @@ function NewsTicker({ sport, P }) {
 }
 
 // ─── NAV BUTTON WITH LONG PRESS ──────────────────────────────────────────────
-function NavButton({ id, icon, label, isActive, P, al, setPage }) {
+function NavButton({ id, icon, label, isActive, P='#C0392B', al, setPage }) {
   return (
     <div style={{ flex:1, position:'relative' }}>
       <button
@@ -5969,7 +5975,15 @@ export default function CoachIQ() {
   const [cfg, setCfg] = useState(() => {
     try {
       const saved = localStorage.getItem('coachiq_cfg')
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Sanitize — ensure primary/secondary are always valid hex
+        return {
+          ...parsed,
+          primary: safeHex(parsed.primary, '#C0392B'),
+          secondary: safeHex(parsed.secondary, '#002868'),
+        }
+      }
     } catch(e) {}
     return { coach:'', team:'', primary:'#C0392B', secondary:'#002868', accent1:'', accent2:'' }
   })
@@ -5985,7 +5999,19 @@ export default function CoachIQ() {
   const [teams, setTeams] = useState(() => {
     try {
       const s = localStorage.getItem('coachiq_teams')
-      if (s) return JSON.parse(s)
+      if (s) {
+        const parsed = JSON.parse(s)
+        // Sanitize team colors
+        const sanitized = {}
+        Object.keys(parsed).forEach(sport => {
+          sanitized[sport] = (parsed[sport]||[]).map(t => ({
+            ...t,
+            primary: safeHex(t.primary, '#C0392B'),
+            secondary: safeHex(t.secondary, '#002868'),
+          }))
+        })
+        return sanitized
+      }
     } catch(e) {}
     return { Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] }
   })
@@ -6009,8 +6035,9 @@ export default function CoachIQ() {
   const sportColors = SPORT_COLORS[sport] || SPORT_COLORS.Football
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   // Color hierarchy: active team colors > personal colors from cfg > sport defaults
-  const P = currentTeam?.primary || cfg.primary || sportColors.primary
-  const S = currentTeam?.secondary || cfg.secondary || sportColors.secondary
+  // safeHex ensures we never get undefined/empty/invalid hex into the style system
+  const P = safeHex(currentTeam?.primary || cfg.primary || sportColors.primary, '#C0392B')
+  const S = safeHex(currentTeam?.secondary || cfg.secondary || sportColors.secondary, '#002868')
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
   async function callAI(prompt, imageData) {
@@ -6277,7 +6304,7 @@ export default function CoachIQ() {
 }
 
 // ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
-function RosterSection({ team, P, al, teams, setTeams, sport }) {
+function RosterSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
   const players = team?.players || []
   const [newFirstName, setNewFirstName] = useState('')
   const [newLastName, setNewLastName] = useState('')
@@ -6414,7 +6441,7 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
   )
 }
 
-function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport, teams, setTeams }) {
+function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parseJSON, sport, teams, setTeams }) {
   const plans = team?.practicePlans || []
 
   function updateTeam(updates) {
@@ -6540,7 +6567,7 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport, teams, 
   )
 }
 
-function AnalyticsSection({ team, P, al, teams, setTeams, sport }) {
+function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
   const history = team?.gameHistory || []
   const schedule = team?.schedule || []
   const [expandedGame, setExpandedGame] = useState(null)
@@ -6706,7 +6733,7 @@ function AnalyticsSection({ team, P, al, teams, setTeams, sport }) {
   )
 }
 
-function PrintSection({ team, P, S, al, callAI, sport }) {
+function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport }) {
   const [printType, setPrintType] = useState('wristband')
   const [generating, setGenerating] = useState(false)
   const [generated, setGenerated] = useState(null)
@@ -6777,7 +6804,7 @@ function PrintSection({ team, P, S, al, callAI, sport }) {
 
 
 // ─── TEAM PAGE ─────────────────────────────────────────────────────────────────
-function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, setPage }) {
+function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, setPage }) {
   const [section, setSection] = useState('roster')
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const mascotObj = currentTeam ? (MASCOTS||[]).find(m=>m.id===currentTeam.mascot) : null
@@ -6833,7 +6860,7 @@ function TeamPage({ P, S, al, sport, teams, setTeams, activeTeam, setActiveTeam,
 
 
 // ─── CREATE-A-MASCOT BUILDER ──────────────────────────────────────────────────
-function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
+function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
   const [step, setStep] = useState(0) // 0=pick animal, 1=pick shape, 2=pick colors, 3=preview
   const [selected, setSelected] = useState({
     animal: null,
@@ -7047,7 +7074,7 @@ function MascotBuilder({ P, al, onSave, onClose, currentColor }) {
 
 // ─── MASCOT BUILDER ───────────────────────────────────────────────────────────
 
-function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P, al, setCfg, onOpenTeamTab }) {
+function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P='#C0392B', al, setCfg, onOpenTeamTab }) {
   const [mode, setMode] = useState('view')
   const [showMascotBuilder, setShowMascotBuilder] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -7572,7 +7599,7 @@ const FIELD_POSITIONS = {
   },
 }
 
-function LineupBuilder({ team, sport, P, S, al, teams, setTeams }) {
+function LineupBuilder({ team, sport, P='#C0392B', S='#002868', al, teams, setTeams }) {
   const [lineups, setLineups] = useState(team.lineups || [])
   const [activeLineup, setActiveLineup] = useState(null)
   const [selectedSlot, setSelectedSlot] = useState(null)
@@ -7774,7 +7801,7 @@ function LineupBuilder({ team, sport, P, S, al, teams, setTeams }) {
 
 // ─── SCHEDULE SECTION ─────────────────────────────────────────────────────────
 // ─── LIVE SCORING SECTION ────────────────────────────────────────────────────
-function LiveScoringSection({ team, P, S, al, sport, teams, setTeams, callAI, parseJSON }) {
+function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, setTeams, callAI, parseJSON }) {
   const EMPTY_GAME = {
     id: null, opponent:'', date:'', quarter:1, clock:'',
     us:0, them:0, timeoutsUs:3, timeoutsThem:3,
@@ -8129,7 +8156,7 @@ function LiveScoringSection({ team, P, S, al, sport, teams, setTeams, callAI, pa
 
 
 // ─── SCHEDULE SECTION ────────────────────────────────────────────────────────
-function ScheduleSection({ team, P, al, teams, setTeams, sport }) {
+function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
   const [showAdd, setShowAdd] = useState(false)
   const [savedOpponents, setSavedOpponents] = useState([])
   const [expandedEvent, setExpandedEvent] = useState(null)
@@ -8414,7 +8441,7 @@ function useWeather(location) {
 }
 
 // ─── ROTATING INFO WIDGET ─────────────────────────────────────────────────────
-function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P, al, onSetLocation }) {
+function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P='#C0392B', al, onSetLocation }) {
   const [slot, setSlot] = useState(0)
   const [now, setNow] = useState(() => new Date())
   const [currentTip, setCurrentTip] = useState(() => getRandomTip(sport))
