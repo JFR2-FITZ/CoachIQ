@@ -971,21 +971,25 @@ function FootballHoleDiagram({ P }) {
 
 
 function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
-  const [expanded, setExpanded] = useState(false)
+  const [showDiagram, setShowDiagram] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
+  const [showRoles, setShowRoles] = useState(false)
+  const [showVariations, setShowVariations] = useState(false)
+  const [showNfl, setShowNfl] = useState(false)
   const [showAnim, setShowAnim] = useState(false)
   const [steps, setSteps] = useState(null)
   const [stepsLoading, setStepsLoading] = useState(false)
   const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState('')
   const [qaLoading, setQALoading] = useState(false)
   const [qaHistory, setQAHistory] = useState([])
   const [variations, setVariations] = useState(null)
   const [variationsLoading, setVariationsLoading] = useState(false)
-  const [showVariations, setShowVariations] = useState(false)
   const [nflComp, setNflComp] = useState(null)
   const [nflLoading, setNflLoading] = useState(false)
-  const [showNfl, setShowNfl] = useState(false)
+
+  // Keep expanded for backward compat — controls whether sub-sections can show
+  const expanded = showDiagram || showSummary || showBreakdown || showRoles || showVariations || showNfl
 
   const pr = parseInt(P.slice(1,3),16)
   const pg = parseInt(P.slice(3,5),16)
@@ -999,8 +1003,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
       const isBSBPlay = !isBBPlay && play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN'))
       const sportLabel = isBBPlay ? 'basketball' : isBSBPlay ? 'baseball' : 'football'
       const jsonSchema = '{"ballCarrier":"key player role","blockingScheme":"core concept","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this works tactically","playerRoles":[{"position":"pos1","job":"their job","whyTheyDoIt":"explain to a 12yr old why"},{"position":"pos2","job":"their job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"their job","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"QB","instruction":"one sentence","termNote":"explain jargon or empty string"},{"player":"RB","instruction":"one sentence","termNote":""},{"player":"WR","instruction":"one sentence","termNote":""},{"player":"OL","instruction":"one sentence","termNote":""}]}'
-      const breakdownPrompt = 'You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' Return ONLY valid JSON matching this structure: ' + jsonSchema
-      const raw = await callAI(breakdownPrompt)
+      const raw = await callAI('You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' Return ONLY valid JSON matching this structure: ' + jsonSchema)
       setSteps(parseJSON(raw))
     } catch(e) { setSteps({ error: e.message }) }
     setStepsLoading(false)
@@ -1033,7 +1036,7 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
       const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL'))
       const league = isBB ? 'NBA' : isBSB ? 'MLB' : 'NFL'
       const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
-      const raw = await callAI('You are an expert ' + sportName + ' analyst. A youth coach is running: "' + play.name + '" (' + play.type + '). ' + play.note + ' Find the closest real ' + league + ' equivalent. If there is no perfect match, explain exactly why it differs. Return ONLY valid JSON: {"proPlay":"exact name or closest equivalent","proTeam":"team most known for it","famousExample":"specific famous game moment","whatMatches":"what the youth version gets right","keyDifference":"the most important tactical difference between this play and the pro version","gapExplanation":"explain specifically what the youth coach would need to change or develop to run the true pro version — be honest if it cannot be replicated at youth level","proTip":"one concrete thing to develop toward the pro version","watchFor":"YouTube search term"}')
+      const raw = await callAI('You are an expert ' + sportName + ' analyst. A youth coach is running: "' + play.name + '" (' + play.type + '). ' + play.note + ' Find the closest real ' + league + ' equivalent. Return ONLY valid JSON: {"proPlay":"exact name or closest equivalent","proTeam":"team most known for it","famousExample":"specific famous game moment","whatMatches":"what the youth version gets right","keyDifference":"the most important tactical difference","gapExplanation":"what the youth coach would need to change","proTip":"one concrete thing to develop toward the pro version","watchFor":"YouTube search term"}')
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setNflComp(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
       setShowNfl(true)
@@ -1060,77 +1063,90 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
     setQALoading(false)
   }
 
+  // Collapse toggle row helper
+  const CollapseBtn = ({ label, icon, isOpen, onToggle, color='#6b7a96' }) => (
+    <button onClick={onToggle} style={{ display:'flex', alignItems:'center', gap:5, padding:'6px 10px', background:isOpen?`rgba(${pr},${pg},${pb},0.1)`:'transparent', border:`1px solid ${isOpen?P:'#1e2330'}`, borderRadius:5, color:isOpen?P:color, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:'0.5px', whiteSpace:'nowrap', touchAction:'manipulation' }}>
+      <span style={{ fontSize:12 }}>{icon}</span>{label}<span style={{ fontSize:9, opacity:0.6 }}>{isOpen?'▲':'▼'}</span>
+    </button>
+  )
+
   return (
-    <div style={{ borderBottom:'1px solid #1e2330' }}>
-      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { const newExp = !expanded; setExpanded(newExp); if (newExp) loadSteps() }}>
-        <div style={{ width:22, height:22, minWidth:22, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
-        <div style={{ flex:1 }}>
-          <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{play.name}</div>
-          <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:1 }}>{play.type}</div>
-          <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, lineHeight:1.4 }}>{play.note}</div>
-          {play.nameExplanation && (
-            <div style={{ marginTop:5, padding:'5px 8px', background:`rgba(${parseInt(P.slice(1,3),16)||192},${parseInt(P.slice(3,5),16)||57},${parseInt(P.slice(5,7),16)||43},0.08)`, borderRadius:4, borderLeft:`2px solid ${P}` }}>
-              <div style={{ fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:2 }}>Why this name?</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.nameExplanation}</div>
-              {(play.type||'').includes('RUN') && /\b[0-9]+\b/.test(play.nameExplanation||play.name||'') && (
-                <FootballHoleDiagram P={P} />
-              )}
-            </div>
-          )}
+    <div style={{ borderBottom:'1px solid #1e2330', padding:'12px 0' }}>
 
-          {/* Pre-snap read */}
-          {play.presnap && (
-            <div style={{ marginTop:6, padding:'6px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:5 }}>
-              <div style={{ fontSize:8, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>👁 Pre-Snap Read</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.presnap||'')}</div>
-            </div>
-          )}
-
-          {/* Audible */}
-          {play.audible && (
-            <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:5 }}>
-              <div style={{ fontSize:8, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>📣 Audible</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.audible||'')}</div>
-            </div>
-          )}
-
-          {/* Youth coaching cue */}
-          {play.youthCue && (
-            <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:5 }}>
-              <div style={{ fontSize:8, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>🧒 Youth Cue</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontStyle:'italic' }}>"{play.youthCue}"</div>
-            </div>
-          )}
-
-          {/* Common mistake */}
-          {play.mistake && (
-            <div style={{ marginTop:5, padding:'6px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:5 }}>
-              <div style={{ fontSize:8, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:2 }}>⚠️ Common Mistake</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
-            </div>
-          )}
-
-          <div style={{ display:'flex', gap:10, marginTop:5, flexWrap:'wrap' }}>
-            <span style={{ fontSize:10, color:P, cursor:'pointer' }} onClick={()=>setExpanded(e=>!e)}>{expanded?'▲ Collapse':'▼ Show diagram'}</span>
-            {expanded && <span style={{ fontSize:10, color:'#6b9fff', cursor:'pointer' }} onClick={e=>{e.stopPropagation();const nb=!showBreakdown;setShowBreakdown(nb);if(nb&&!steps)loadSteps()}}>{showBreakdown?'▲ Hide breakdown':'▼ Show breakdown'}</span>}
-          </div>
+      {/* ── PLAY HEADER — always visible ── */}
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+        <div style={{ width:24, height:24, minWidth:24, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', lineHeight:1.2 }}>{play.name}</div>
+          <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:2, letterSpacing:'0.5px' }}>{play.type}</div>
+          <div style={{ fontSize:12, color:'#9aa0b0', marginTop:4, lineHeight:1.5 }}>{play.note}</div>
         </div>
         <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
           {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
-          <button onClick={e => { e.stopPropagation(); setShowAnim(a => !a); if (!expanded) setExpanded(true) }} style={{ padding:'4px 9px', background:showAnim ? P : `rgba(${pr},${pg},${pb},0.12)`, border:`1px solid ${P}`, borderRadius:6, color:showAnim?'white':P, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap' }}>{showAnim ? 'HIDE PLAY' : 'SHOW PLAY'}</button>
-          <span style={{ fontSize:14, color:'#6b7a96', userSelect:'none' }}>{expanded ? '▲' : '▼'}</span>
         </div>
       </div>
 
-      {expanded && (
-        <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
-          {showAnim && <div style={{ marginBottom:12 }}><PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={showAnim} key={showAnim?'shown':'hidden'} /></div>}
+      {/* ── ACTION BUTTONS ROW ── */}
+      <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap', paddingLeft:34 }}>
+        <CollapseBtn label="Summary" icon="📋" isOpen={showSummary} onToggle={()=>setShowSummary(v=>!v)} color={P} />
+        <CollapseBtn label="Diagram" icon="▶" isOpen={showDiagram} onToggle={()=>{ setShowDiagram(v=>!v); setShowAnim(v=>!v) }} color={P} />
+        <CollapseBtn label="Breakdown" icon="📖" isOpen={showBreakdown} onToggle={()=>{ const next=!showBreakdown; setShowBreakdown(next); if(next&&!steps) loadSteps() }} color='#6b9fff' />
+        <CollapseBtn label="Player Roles" icon="👥" isOpen={showRoles} onToggle={()=>{ const next=!showRoles; setShowRoles(next); if(next&&!steps) loadSteps() }} color='#f59e0b' />
+        <CollapseBtn label="Variations" icon="🔄" isOpen={showVariations} onToggle={()=>{ if(!showVariations) loadVariations(); else setShowVariations(false) }} color='#c084fc' />
+        <CollapseBtn label="Pro Look" icon="🏆" isOpen={showNfl} onToggle={()=>{ if(!showNfl) loadNflComp(); else setShowNfl(false) }} color='#4ade80' />
+      </div>
 
-          {showBreakdown && stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Generating step-by-step breakdown...</div></div>}
+      {/* ── SUMMARY — pre-snap, audible, youth cue, mistake ── */}
+      {showSummary && (
+        <div style={{ paddingLeft:34, marginTop:10, display:'flex', flexDirection:'column', gap:6, animation:'fadeIn 0.2s ease' }}>
+          <div style={{ fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:2 }}>— PLAY SUMMARY —</div>
+          {play.presnap && (
+            <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
+              <div style={{ fontSize:8, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 Pre-Snap Read</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.presnap||'')}</div>
+            </div>
+          )}
+          {play.audible && (
+            <div style={{ padding:'8px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:6 }}>
+              <div style={{ fontSize:8, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>📣 Audible</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.audible||'')}</div>
+            </div>
+          )}
+          {play.youthCue && (
+            <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+              <div style={{ fontSize:8, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>🧒 Youth Cue</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontStyle:'italic' }}>"{play.youthCue}"</div>
+            </div>
+          )}
+          {play.mistake && (
+            <div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:6 }}>
+              <div style={{ fontSize:8, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
+            </div>
+          )}
+          {play.nameExplanation && (
+            <div style={{ padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.06)`, borderLeft:`2px solid ${P}`, borderRadius:6 }}>
+              <div style={{ fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:2 }}>Why this name?</div>
+              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{play.nameExplanation}</div>
+            </div>
+          )}
+        </div>
+      )}
 
-          {showBreakdown && steps && steps.huddleCard && steps.huddleCard.length > 0 && (
-            <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:10, padding:12, marginBottom:12 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}><span style={{ fontSize:14 }}>📋</span><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card — Read This in the Huddle</div></div>
+      {/* ── DIAGRAM ── */}
+      {showDiagram && (
+        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
+          <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key="anim" />
+        </div>
+      )}
+
+      {/* ── BREAKDOWN (Huddle Card + Steps) ── */}
+      {showBreakdown && (
+        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
+          {stepsLoading && <div style={{ background:'#161922', borderRadius:8, padding:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid #6b9fff`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:11, color:'#6b7a96' }}>Loading breakdown...</div></div>}
+          {steps && !steps.error && steps.huddleCard && (
+            <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:8, padding:12, marginBottom:10 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}><span style={{ fontSize:14 }}>📋</span><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card</div></div>
               {steps.huddleCard.map((item, i) => (
                 <div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}>
                   <div style={{ minWidth:32, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:5, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0, marginTop:1 }}>{item.player}</div>
@@ -1139,126 +1155,132 @@ function PlayCard({ play, P, S, al, callAI, parseJSON, extraAction }) {
               ))}
             </div>
           )}
-
-          {steps && !steps.error && (
-            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid ${al(P,0.2)}` }}>
-              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:P, fontWeight:700, marginBottom:10 }}>Step-by-Step Breakdown</div>
-              {steps.ballCarrier && <div style={{ display:'flex', gap:8, marginBottom:8, padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.1)`, borderRadius:8, border:`1px solid rgba(${pr},${pg},${pb},0.2)` }}><span style={{ fontSize:11, fontWeight:700, color:P, flexShrink:0 }}>Key Player:</span><span style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{steps.ballCarrier}</span></div>}
-              {steps.blockingScheme && <div style={{ display:'flex', gap:8, marginBottom:10, padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}><span style={{ fontSize:11, fontWeight:700, color:'#6b9fff', flexShrink:0 }}>Core Concept:</span><span style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{steps.blockingScheme}</span></div>}
-              {(steps.steps||[]).map((step, i) => (<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i < steps.steps.length-1 ? '1px solid #1e2330' : 'none' }}><div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${P}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:P, flexShrink:0, marginTop:1 }}>{i+1}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div></div>))}
-              {steps.keyCoachingPoints && steps.keyCoachingPoints.length > 0 && (<div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:6 }}>Key Coaching Points</div>{steps.keyCoachingPoints.map((pt,i) => <div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>)}</div>)}
-              {steps.whyItWorks && (<div style={{ marginTop:10, padding:'10px 12px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:5 }}>Why This Works</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{steps.whyItWorks}</div></div>)}
-              {steps.playerRoles && steps.playerRoles.length > 0 && (<div style={{ marginTop:10 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:8 }}>Player Roles — What to Tell Each Player</div>{steps.playerRoles.map((role, i) => (<div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800 }}>{role.position}</div><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{role.job}</div></div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, paddingLeft:34, fontStyle:'italic' }}>"Tell your player: {role.whyTheyDoIt}"</div></div>))}</div>)}
+          {steps && !steps.error && steps.steps && (
+            <div style={{ background:'#161922', borderRadius:8, padding:12, marginBottom:10 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Step-by-Step</div>
+              {steps.steps.map((step, i) => (
+                <div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i < steps.steps.length-1 ? '1px solid #1e2330' : 'none' }}>
+                  <div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${P}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:P, flexShrink:0, marginTop:1 }}>{i+1}</div>
+                  <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div>
+                </div>
+              ))}
             </div>
           )}
-
-          <div style={{ marginBottom:12 }}>
-            <button onClick={() => { if(showVariations) { setShowVariations(false) } else { loadVariations() } }} disabled={variationsLoading} style={{ width:'100%', padding:'10px 14px', background:showVariations?al(P,0.15):'#161922', border:`1px solid ${showVariations?P:'#1e2330'}`, borderRadius:10, color:showVariations?P:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, cursor:variationsLoading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <span>{variationsLoading ? 'GENERATING VARIATIONS...' : 'PLAY VARIATIONS & ADJUSTMENTS'}</span>
-              <span style={{ fontSize:11 }}>{showVariations ? '▲ HIDE' : '▼ SHOW 3 VARIATIONS'}</span>
-            </button>
-            {showVariations && variations && (
-              <div style={{ marginTop:8, display:'flex', flexDirection:'column', gap:10, animation:'fadeIn 0.2s ease' }}>
-                <div style={{ fontSize:10, color:'#6b7a96', letterSpacing:1, padding:'4px 2px' }}>Same concept — different look. Each variation keeps the core idea but changes one key element.</div>
-                {variations.map((v, i) => (
-                  <div key={i} style={{ background:'#0f1117', border:`1px solid ${al(P,0.2)}`, borderRadius:10, overflow:'hidden' }}>
-                    <div style={{ padding:'10px 13px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'flex-start', gap:10 }}>
-                      <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${P}`, color:P, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:1 }}>{i+1}</div>
-                      <div style={{ flex:1 }}>
-                        <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{v.name}</div>
-                        <div style={{ fontSize:10, color:P, fontFamily:"'DM Mono',monospace", marginBottom:3 }}>CHANGE: {v.changeFrom}</div>
-                        <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{v.note}</div>
-                      </div>
-                    </div>
-                    <PlayAnimator play={v} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={false} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginBottom:12 }}>
-            <button onClick={() => showNfl ? setShowNfl(false) : loadNflComp()} disabled={nflLoading} style={{ width:'100%', padding:'10px 14px', background:showNfl?'rgba(255,215,0,0.1)':'#161922', border:`1px solid ${showNfl?'rgba(255,215,0,0.5)':'#1e2330'}`, borderRadius:10, color:showNfl?'#f59e0b':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, cursor:nflLoading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <span style={{ display:'flex', alignItems:'center', gap:8 }}><span style={{ fontSize:16 }}>{play.type&&(play.type.includes('COURT')||play.type.includes('INBOUND')||play.type.includes('SET PLAY'))?'🏀':play.type&&(play.type.includes('BATTING')||play.type.includes('BASERUN')||play.type.includes('PITCHING'))?'⚾':'🏈'}</span>{nflLoading ? 'FINDING PRO EQUIVALENT...' : 'PRO COMPARISON'}</span>
-              <span style={{ fontSize:11 }}>{showNfl ? '▲ HIDE' : '▼ SEE NFL/NBA/MLB VERSION'}</span>
-            </button>
-            {showNfl && nflComp && !nflComp.error && (
-              <div style={{ marginTop:8, background:'linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,165,0,0.04))', border:'1px solid rgba(255,215,0,0.25)', borderRadius:10, padding:14, animation:'fadeIn 0.2s ease' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:3 }}>Pro Equivalent</div>
-                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:20, letterSpacing:1, color:'#f2f4f8' }}>{nflComp.proPlay}</div>
-                    <div style={{ fontSize:12, color:'#f59e0b', marginTop:2 }}>{nflComp.proTeam}</div>
-                  </div>
-                  <div style={{ width:44, height:44, background:'rgba(255,215,0,0.15)', border:'1px solid rgba(255,215,0,0.3)', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>⭐</div>
+          {steps && !steps.error && steps.keyCoachingPoints && (
+            <div style={{ background:al(P,0.06), border:`1px solid ${al(P,0.2)}`, borderRadius:8, padding:12, marginBottom:10 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Key Coaching Points</div>
+              {steps.keyCoachingPoints.map((pt, i) => (
+                <div key={i} style={{ display:'flex', gap:8, marginBottom:4, alignItems:'flex-start' }}>
+                  <div style={{ width:5, height:5, borderRadius:'50%', background:P, marginTop:5, flexShrink:0 }} />
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{pt}</div>
                 </div>
-                {nflComp.famousExample && (<div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.3)', borderRadius:8, marginBottom:10, borderLeft:'3px solid #f59e0b' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:3 }}>Famous Example</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.famousExample}</div></div>)}
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:10, background:'#07090d' }}>
-                  <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:4 }}>What Matches</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.whatMatches}</div></div>
-                  <div style={{ padding:'8px 10px', background:'rgba(208,2,27,0.06)', borderRadius:8, border:'1px solid rgba(208,2,27,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#ff6b6b', fontWeight:700, marginBottom:4 }}>Key Difference</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{nflComp.keyDifference}</div></div>
-                </div>
-                {nflComp.gapExplanation && (<div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.07)', borderRadius:8, border:'1px solid rgba(239,68,68,0.2)', marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f87171', fontWeight:700, marginBottom:4 }}>The Gap — What Needs to Change</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.gapExplanation}</div></div>)}
-                {nflComp.proTip && (<div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)', marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:4 }}>One Thing to Work Toward</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{nflComp.proTip}</div></div>)}
-                {nflComp.watchFor && (
-                  <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(nflComp.watchFor)} target="_blank" rel="noopener noreferrer" style={{ padding:'8px 10px', background:'rgba(239,68,68,0.08)', borderRadius:8, display:'flex', alignItems:'center', gap:8, textDecoration:'none', border:'1px solid rgba(239,68,68,0.2)', marginBottom:8 }}>
-                    <span style={{ fontSize:16 }}>▶</span>
-                    <div style={{ flex:1 }}>
-                      <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#ef4444', fontWeight:700, marginBottom:2 }}>Watch on YouTube</div>
-                      <div style={{ fontSize:12, color:'#f59e0b', fontWeight:600 }}>{nflComp.watchFor}</div>
-                    </div>
-                    <span style={{ fontSize:11, color:'#ef4444' }}>→</span>
-                  </a>
-                )}
+              ))}
+            </div>
+          )}
+          {/* Q&A */}
+          <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:10 }}>
+            <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Ask a question about this play</div>
+            {qaHistory.map((item, i) => (
+              <div key={i} style={{ marginBottom:8 }}>
+                <div style={{ fontSize:11, color:P, fontWeight:600, marginBottom:2 }}>Q: {item.q}</div>
+                <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5 }}>{item.a}</div>
               </div>
-            )}
-          </div>
-
-          <div style={{ background:'#161922', borderRadius:10, padding:12 }}>
-            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Ask About This Play</div>
-            {qaHistory.map((item, i) => (<div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:11, fontWeight:600, color:P, marginBottom:3 }}>Q: {item.q}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.6, padding:'6px 10px', background:'rgba(255,255,255,0.04)', borderRadius:6 }}>{item.a}</div></div>))}
-            {qaLoading && <div style={{ fontSize:11, color:'#6b7a96', marginBottom:8 }}>Getting answer...</div>}
-            <div style={{ display:'flex', gap:7 }}>
-              <input value={question} onChange={e => setQuestion(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && question.trim()) askQuestion() }} placeholder={qaHistory.length > 0 ? "Ask a follow-up question..." : "e.g. Who runs the ball? Why does the receiver go that way?"} style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:7, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
-              <button onClick={askQuestion} disabled={qaLoading || !question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':P, color:'white', border:'none', borderRadius:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
+            ))}
+            <div style={{ display:'flex', gap:6 }}>
+              <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder="e.g. Who runs the ball?" style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:6, padding:'8px 10px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
+              <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':P, color:'white', border:'none', borderRadius:6, fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
             </div>
           </div>
         </div>
       )}
+
+      {/* ── PLAYER ROLES ── */}
+      {showRoles && (
+        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
+          {stepsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Loading player roles...</div>}
+          {steps && !steps.error && steps.playerRoles && steps.playerRoles.length > 0 && (
+            <div>
+              <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Player Roles — What to Tell Each Player</div>
+              {steps.playerRoles.map((role, i) => (
+                <div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}>
+                  <div style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:4 }}>
+                    {/* Fixed position badge — no overflow */}
+                    <div style={{ background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, padding:'3px 6px', fontSize:9, fontWeight:800, flexShrink:0, maxWidth:72, lineHeight:1.3, textAlign:'center', wordBreak:'break-word' }}>{role.position}</div>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8', flex:1, lineHeight:1.4 }}>{role.job}</div>
+                  </div>
+                  <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, paddingLeft:80, fontStyle:'italic' }}>"{role.whyTheyDoIt}"</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── VARIATIONS ── */}
+      {showVariations && (
+        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
+          {variationsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Generating variations...</div>}
+          {variations && variations.length > 0 && variations.map((v, i) => (
+            <div key={i} style={{ padding:'10px 12px', background:al(P,0.06), border:`1px solid ${al(P,0.2)}`, borderRadius:8, marginBottom:8 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+                <div style={{ width:18, height:18, minWidth:18, background:al(P,0.2), border:`1px solid ${al(P,0.4)}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:P, flexShrink:0 }}>{i+1}</div>
+                <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{v.name}</div>
+              </div>
+              {v.changeFrom && <div style={{ fontSize:10, color:P, marginBottom:3, paddingLeft:26 }}>Change: {v.changeFrom}</div>}
+              <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, paddingLeft:26 }}>{v.note}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── PRO COMPARISON ── */}
+      {showNfl && (
+        <div style={{ paddingLeft:34, marginTop:10, animation:'fadeIn 0.2s ease' }}>
+          {nflLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Finding pro comparison...</div>}
+          {nflComp && !nflComp.error && (
+            <div style={{ background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:12 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>🏆 Pro Comparison</div>
+              <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{nflComp.proPlay}</div>
+              {nflComp.proTeam && <div style={{ fontSize:11, color:'#4ade80', marginBottom:8 }}>{nflComp.proTeam}</div>}
+              {nflComp.whatMatches && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:6 }}><span style={{ color:'#4ade80', fontWeight:600 }}>What matches: </span>{nflComp.whatMatches}</div>}
+              {nflComp.keyDifference && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:6 }}><span style={{ color:'#ef4444', fontWeight:600 }}>Key difference: </span>{nflComp.keyDifference}</div>}
+              {nflComp.proTip && <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5 }}><span style={{ color:'#f59e0b', fontWeight:600 }}>Pro tip: </span>{nflComp.proTip}</div>}
+              {nflComp.watchFor && <a href={'https://www.youtube.com/results?search_query='+encodeURIComponent(nflComp.watchFor)} target="_blank" rel="noopener noreferrer" style={{ display:'block', marginTop:8, fontSize:10, color:'#ef4444', textDecoration:'none', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>▶ Watch on YouTube: {nflComp.watchFor}</a>}
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   )
 }
 
-
+// ─── PLAY ANIMATOR ────────────────────────────────────────────────────────────
 function PlayAnimator({ play, P, callAI, parseJSON, autoLoad=false }) {
   const canvasRef = useRef(null)
-  const animRef = useRef(null)
   const [parsed, setParsed] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
-  const [showUpgrade, setShowUpgrade] = useState(false)
-  const [sportType, setSportType] = useState('football')
-  const cacheKey = 'anim_' + (play.name||'').replace(/[^a-z0-9]/gi,'_').toLowerCase().slice(0,40)
+  const cacheKey = 'coachiq_anim_' + (play?.name||'').replace(/\s/g,'_').slice(0,30)
 
-  const pr = parseInt(P.slice(1,3),16)
-  const pg = parseInt(P.slice(3,5),16)
-  const pb = parseInt(P.slice(5,7),16)
-
-  useEffect(() => { if (autoLoad && !parsed) generateAnim() }, [autoLoad])
-
-  async function generateAnim() {
+  useEffect(() => {
     try {
       const cached = sessionStorage.getItem(cacheKey)
-      if (cached) { const data = JSON.parse(cached); setParsed(data); setSportType(data._sportType || 'football'); return }
+      if (cached) { setParsed(JSON.parse(cached)); return }
     } catch(e) {}
-    setLoading(true); setError(''); setParsed(null); setPlaying(false)
-    const isBasketball = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('ZONE ATT') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK') || play.type.includes('HALF COURT'))
-    const isBaseball = play.type && (play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('INFIELD') || play.type.includes('BATTING') || play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN'))
-    setSportType(isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football')
+    if (autoLoad) generateAnim()
+  }, [play?.name])
 
-    const fbTemplate = '{"formation":"PLAYNAME","snapPoint":0.18,"duration":3000,"players":[{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[35,34]],"routeName":"Block","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":42,"y":38,"path":[[42,38],[40,34]],"routeName":"Block","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,34]],"routeName":"Block","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":58,"y":38,"path":[[58,38],[60,34]],"routeName":"Block","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[65,34]],"routeName":"Block","routeYards":0},{"id":"QB","label":"QB","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,44]],"routeName":"Handoff","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":50,"y":46,"path":[[50,46],[52,42],[58,36]],"routeName":"Run","routeYards":7},{"id":"X","label":"X","role":"off","routeType":"route","x":12,"y":38,"path":[[12,38],[12,30]],"routeName":"Go","routeYards":10},{"id":"Z","label":"Z","role":"off","routeType":"route","x":88,"y":38,"path":[[88,38],[88,30]],"routeName":"Go","routeYards":10},{"id":"TE","label":"Y","role":"off","routeType":"block","x":66,"y":38,"path":[[66,38],[66,34]],"routeName":"Block","routeYards":0},{"id":"D1","label":"D","role":"def","routeType":"block","x":42,"y":35,"path":[[42,35],[42,37]],"routeName":"","routeYards":0},{"id":"D2","label":"D","role":"def","routeType":"block","x":50,"y":35,"path":[[50,35],[50,37]],"routeName":"","routeYards":0},{"id":"D3","label":"D","role":"def","routeType":"block","x":58,"y":35,"path":[[58,35],[58,37]],"routeName":"","routeYards":0},{"id":"LB1","label":"LB","role":"def","routeType":"block","x":40,"y":30,"path":[[40,30],[40,32]],"routeName":"","routeYards":0},{"id":"LB2","label":"LB","role":"def","routeType":"block","x":60,"y":30,"path":[[60,30],[60,32]],"routeName":"","routeYards":0},{"id":"CB1","label":"CB","role":"def","routeType":"block","x":12,"y":30,"path":[[12,30],[12,32]],"routeName":"","routeYards":0},{"id":"CB2","label":"CB","role":"def","routeType":"block","x":88,"y":30,"path":[[88,30],[88,32]],"routeName":"","routeYards":0},{"id":"S1","label":"S","role":"def","routeType":"block","x":35,"y":22,"path":[[35,22],[35,24]],"routeName":"","routeYards":0},{"id":"S2","label":"S","role":"def","routeType":"block","x":65,"y":22,"path":[[65,22],[65,24]],"routeName":"","routeYards":0}]}'
+  const isBasketball = play?.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK') || play.type.includes('TRANSITION') || play.type.includes('QUICK HITTER') || play.type.includes('MOTION'))
+  const isBaseball = !isBasketball && play?.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('BUNT') || play.type.includes('HIT AND RUN') || play.type.includes('FIRST AND THIRD') || play.type.includes('STEAL') || play.type.includes('PITCHING') || play.type.includes('DEFENSE ALIGN') || play.type.includes('OFFENSIVE APPROACH'))
+
+  async function generateAnim() {
+    setLoading(true); setError(null)
+    const fbTemplate = '{"formation":"PLAYNAME","snapPoint":0.18,"duration":3000,"players":[{"id":"QB","label":"QB","role":"off","routeType":"route","x":50,"y":44,"path":[[50,44],[50,52]],"routeName":"Handoff","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":47,"y":47,"path":[[47,47],[44,50],[44,60]],"routeName":"Run","routeYards":8},{"id":"WR1","label":"WR","role":"off","routeType":"route","x":22,"y":42,"path":[[22,42],[22,34],[28,28]],"routeName":"Curl","routeYards":0},{"id":"WR2","label":"WR","role":"off","routeType":"route","x":78,"y":42,"path":[[78,42],[78,30]],"routeName":"Go","routeYards":0},{"id":"TE","label":"TE","role":"off","routeType":"block","x":64,"y":42,"path":[[64,42],[62,39]],"routeName":"Block","routeYards":0},{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":42,"path":[[38,42],[38,39]],"routeName":"","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":44,"y":42,"path":[[44,42],[44,39]],"routeName":"","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,39]],"routeName":"","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":56,"y":42,"path":[[56,42],[56,39]],"routeName":"","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":42,"path":[[62,42],[62,39]],"routeName":"","routeYards":0},{"id":"d1","label":"D","role":"def","routeType":"block","x":44,"y":36,"path":[[44,36],[44,37]],"routeName":"","routeYards":0},{"id":"d2","label":"D","role":"def","routeType":"block","x":50,"y":36,"path":[[50,36],[50,37]],"routeName":"","routeYards":0},{"id":"d3","label":"D","role":"def","routeType":"block","x":56,"y":36,"path":[[56,36],[56,37]],"routeName":"","routeYards":0},{"id":"d4","label":"LB","role":"def","routeType":"route","x":44,"y":30,"path":[[44,30],[44,36]],"routeName":"","routeYards":0},{"id":"d5","label":"LB","role":"def","routeType":"route","x":56,"y":30,"path":[[56,30],[56,36]],"routeName":"","routeYards":0},{"id":"d6","label":"CB","role":"def","routeType":"route","x":22,"y":38,"path":[[22,38],[22,32]],"routeName":"","routeYards":0},{"id":"d7","label":"CB","role":"def","routeType":"route","x":78,"y":38,"path":[[78,38],[78,32]],"routeName":"","routeYards":0},{"id":"d8","label":"S","role":"def","routeType":"route","x":50,"y":20,"path":[[50,20],[50,26]],"routeName":"","routeYards":0}]}'
     const bbTemplate = '{"formation":"PLAYNAME","snapPoint":0.15,"duration":3500,"players":[{"id":"PG","label":"1","role":"off","routeType":"route","x":50,"y":48,"path":[[50,48],[50,40]],"routeName":"BALL: Dribble","routeYards":0},{"id":"SG","label":"2","role":"off","routeType":"route","x":72,"y":44,"path":[[72,44],[78,32]],"routeName":"CUT: Wing","routeYards":0},{"id":"SF","label":"3","role":"off","routeType":"route","x":82,"y":38,"path":[[82,38],[85,26]],"routeName":"SHOOT: Corner","routeYards":0},{"id":"PF","label":"4","role":"off","routeType":"block","x":62,"y":22,"path":[[62,22],[62,22]],"routeName":"SCREEN: High","routeYards":0},{"id":"C5","label":"5","role":"off","routeType":"block","x":50,"y":17,"path":[[50,17],[50,17]],"routeName":"MOVE: Post","routeYards":0},{"id":"d1","label":"D","role":"def","routeType":"block","x":50,"y":50,"path":[[50,50],[50,51]],"routeName":"","routeYards":0},{"id":"d2","label":"D","role":"def","routeType":"block","x":72,"y":46,"path":[[72,46],[72,47]],"routeName":"","routeYards":0},{"id":"d3","label":"D","role":"def","routeType":"block","x":82,"y":40,"path":[[82,40],[82,41]],"routeName":"","routeYards":0},{"id":"d4","label":"D","role":"def","routeType":"block","x":62,"y":24,"path":[[62,24],[62,25]],"routeName":"","routeYards":0},{"id":"d5","label":"D","role":"def","routeType":"block","x":50,"y":19,"path":[[50,19],[50,20]],"routeName":"","routeYards":0}]}'
+
     const bsbTemplate = '{"formation":"PLAYNAME","snapPoint":0.2,"duration":3000,"players":[{"id":"P","label":"P","role":"off","routeType":"block","x":50,"y":30,"path":[[50,30],[50,30]],"routeName":"Pitch","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"Receive","routeYards":0},{"id":"1B","label":"1B","role":"off","routeType":"block","x":75,"y":42,"path":[[75,42],[75,42]],"routeName":"Hold","routeYards":0},{"id":"2B","label":"2B","role":"off","routeType":"block","x":65,"y":28,"path":[[65,28],[65,28]],"routeName":"Cover","routeYards":0},{"id":"SS","label":"SS","role":"off","routeType":"block","x":38,"y":30,"path":[[38,30],[38,30]],"routeName":"Cover","routeYards":0},{"id":"3B","label":"3B","role":"off","routeType":"block","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"Hold","routeYards":0},{"id":"LF","label":"LF","role":"off","routeType":"block","x":20,"y":12,"path":[[20,12],[20,12]],"routeName":"Pos","routeYards":0},{"id":"CF","label":"CF","role":"off","routeType":"block","x":50,"y":8,"path":[[50,8],[50,8]],"routeName":"Pos","routeYards":0},{"id":"RF","label":"RF","role":"off","routeType":"block","x":80,"y":12,"path":[[80,12],[80,12]],"routeName":"Pos","routeYards":0},{"id":"BAT","label":"B","role":"def","routeType":"route","x":50,"y":44,"path":[[50,44],[60,38]],"routeName":"Run","routeYards":0},{"id":"R1","label":"R","role":"def","routeType":"route","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"","routeYards":0}]}'
 
     const isDefense = play._isDefense === true
