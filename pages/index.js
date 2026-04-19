@@ -2557,10 +2557,17 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
     try {
       const raw = await callAI(cfg.buildPrompt(offFields))
       const data = parseJSON(raw)
-      if (!data.plays) throw new Error('No plays returned')
+      if (!data.plays || !data.plays.length) throw new Error('No plays returned — please try again.')
       setOffResult(data)
       setGenHistory(prev => ({ ...prev, [sport]: [{ ...data, _sport:sport, _ts:Date.now() }, ...(prev[sport]||[])].slice(0,20) }))
-    } catch(e) { setOffError(e.message) }
+    } catch(e) {
+      const msg = e.message || 'Generation failed'
+      if (msg.includes('timed out') || msg.includes('AbortError') || msg.includes('timeout')) {
+        setOffError('This took too long to respond. This can happen on slow connections. Tap "Try Again" — it usually works on the second attempt.')
+      } else {
+        setOffError(msg)
+      }
+    }
     setOffLoading(false)
   }
 
@@ -2596,7 +2603,7 @@ function SchemesPage({ P, S, al, dk, sport, callAI, parseJSON, playbook, setPlay
               {(() => { const skillVal = offFields['skill'] || offFields['teamSkill'] || (cfg.fields.find(x=>x.id==='skill'||x.id==='teamSkill')?.opts[0]||''); const isBeginner = skillVal.includes('First Year') || skillVal.includes('Beginner') || skillVal.includes('Recreational'); return cfg.fields.filter(f => !(f.id==='oppTendency' && isBeginner)).map(f => <Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />) })()} 
             </div>
             <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
-            {offLoading && (<div style={{ padding:'16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }}/><div style={{ fontSize:12, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Generating plays — this may take 15-30 seconds on mobile...</div></div>)}
+            {offLoading && (<div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your scheme...</div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>This takes 20–40 seconds. Please keep this screen open.</div></div>)}
             {offError && (
             <div style={{ marginTop:8, padding:'12px 14px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6 }}>
               <div style={{ fontSize:11, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Generation Failed</div>
@@ -2730,9 +2737,16 @@ function DefenseGenCollapsible({ sport, P, S, al, callAI, parseJSON, defaultOpen
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
-      if (!data.formations) throw new Error('No formations in response')
+      if (!data.formations || !data.formations.length) throw new Error('No formations returned — please try again.')
       setResult(data)
-    } catch(e) { setError(e.message) }
+    } catch(e) {
+      const msg = e.message || 'Generation failed'
+      if (msg.includes('timed out') || msg.includes('timeout')) {
+        setError('This took too long to respond. Tap "Retry" — it usually works on the second attempt.')
+      } else {
+        setError(msg)
+      }
+    }
     setLoading(false)
   }
 
@@ -2757,7 +2771,7 @@ function DefenseGenCollapsible({ sport, P, S, al, callAI, parseJSON, defaultOpen
             {activeCfg.map(f => (<Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
           </div>
           <PBtn onClick={generate} disabled={loading} color={S}>{loading ? 'BUILDING...' : isBSB ? 'BUILD DEFENSIVE PLAN' : 'BUILD DEFENSIVE SCHEME'}</PBtn>
-          {loading && <Shimmer />}
+          {loading && <div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${S}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your defensive scheme...</div><div style={{ fontSize:11, color:'#6b7a96' }}>This takes 20–40 seconds. Please keep this screen open.</div></div>}
           {error && <ErrBox msg={error} />}
           {result && (
             <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(S,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
@@ -4001,150 +4015,115 @@ function RulebookPage({ sport, P, al, callAI }) {
 // ─── NEWS PAGE ────────────────────────────────────────────────────────────────
 function NewsPage({ P, S, al, sport, callAI }) {
   const [activeChannel, setActiveChannel] = useState('sport')
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [loaded, setLoaded] = useState(false)
+  const [newsItems, setNewsItems] = useState([])
+  const [newsLoading, setNewsLoading] = useState(true)
+  const [newsError, setNewsError] = useState(null)
+  const [expandedDrill, setExpandedDrill] = useState(null)
 
   const CHANNELS = [
-    { id:'sport',     label:sport+' Coaching',  icon:'📋', desc:'Drills, schemes & tips for '+sport },
-    { id:'sportNews', label:sport+' News',       icon:'⚡', desc:'Pro + college '+sport+' news' },
+    { id:'sport',     label:sport+' Coaching', icon:'📋' },
+    { id:'sportNews', label:sport+' News',      icon:'⚡' },
   ]
 
-  // RSS feed URLs per sport and channel
+  // ── STATIC COACHING CONTENT — loads instantly, no AI needed ──
+  const COACHING_CONTENT = {
+    Football: [
+      { title:'The 3-Step Drop', category:'DRILL', body:'QB takes a 3-step drop on short routes. Count 1-2-3 out loud, plant on the third step, and throw. Practice daily with targets at 5-7 yards. Builds rhythm and timing.', diagram:'🏈→QB steps back 3 times→throw to receiver at 6 yards' },
+      { title:'Angle Tackling Drill', category:'DRILL', body:'Set up cones in a channel 5 yards wide. Ball carrier runs straight, defender attacks at an angle — not straight on. Focus on wrapping up with both arms, never leading with the head.', diagram:'📐Defender at 45° angle→wrap tackle→secure' },
+      { title:'Run Blocking Fundamentals', category:'STRATEGY', body:'First step is the most important — it should always be toward the defender. Drive block: explode out of stance, aim for defender\'s numbers, drive feet on contact. Teach leverage before power.', diagram:'OL→short first step→hands inside→drive' },
+      { title:'Cover 2 Explanation', category:'STRATEGY', body:'Two safeties split the deep field into halves. Corners jam receivers at the line and drop to the flat. Attack Cover 2 with corner routes and seam throws between the safety and linebacker.', diagram:'S  S\nCB  LB LB LB  CB\n——Cover 2——' },
+      { title:'Red Zone Mindset', category:'GAME DAY', body:'In the red zone, the field is compressed. Switch from vertical to horizontal routes. Motion and misdirection create confusion. Pick plays that stress defenders laterally, not vertically.', diagram:'📍10 yards to endzone→spread the field→horizontal stress' },
+      { title:'Pre-Snap Reads for QBs', category:'DEVELOPMENT', body:'Before the snap, find the safeties first. One high safety = Cover 1 or 3. Two high = Cover 2 or 4. Then identify the Mike linebacker — he sets the protection. Teach this at every age level.', diagram:'1 Safety high=Cover 1/3 | 2 Safeties high=Cover 2/4' },
+      { title:'Zone Blocking Scheme', category:'STRATEGY', body:'All linemen step playside and block the area around them, not a specific person. Running back reads the first down lineman and cuts off his block. Great for youth teams because mistakes are less costly.', diagram:'OL all step right→RB reads cut lane→burst through' },
+      { title:'Flat-Footed Stance', category:'DEVELOPMENT', body:'Youth players often default to standing straight up. Teach the athletic position: feet shoulder-width, slight bend in knees, weight on balls of feet, hands ready. Use it at every position, every play.' },
+    ],
+    Basketball: [
+      { title:'Defensive Slide Drill', category:'DRILL', body:'Players start in defensive stance, slide laterally without crossing feet. Coach points left or right. Add a tennis ball toss to force heads up. 30 seconds on, 15 off. Never let feet touch.', diagram:'←Slide→←Slide→heads up, feet apart' },
+      { title:'Pick and Roll Coverage', category:'STRATEGY', body:'Three options: go under (for poor shooters), go over (for shooters), or switch. Youth teams: default to switching to avoid confusion. Practice the verbal communication — "SCREEN LEFT!" every time.', diagram:'Ball handler + screener→defender goes over or switches' },
+      { title:'Triple Threat Position', category:'DEVELOPMENT', body:'Every player who catches the ball should land in triple threat: one foot ahead, ball at hip, eyes up. From here you can shoot, pass, or drive. Make it a habit before anything else.', diagram:'Catch ball→feet set→ball at hip→read defense' },
+      { title:'Motion Offense Basics', category:'STRATEGY', body:'No set plays — players read and react. Rule 1: if your defender helps on a drive, cut backdoor. Rule 2: if you pass, cut or screen. Rule 3: space the floor — never stand next to a teammate.', diagram:'Pass→cut or screen→space→read→repeat' },
+      { title:'Free Throw Routine', category:'DEVELOPMENT', body:'Same routine every time: take the ball, two dribbles, spin it, one breath, shoot. The routine triggers muscle memory under pressure. Practice the routine as much as the shot itself.', diagram:'2 dribbles→spin→breath→bend→follow through' },
+    ],
+    Baseball: [
+      { title:'Fielding Ground Balls', category:'DRILL', body:'Charge the ball — never wait for it to come to you. Get in front, low glove (thumb down for slow rollers), and field out front. Crow hop to throw. Practice 20 ground balls before every practice.', diagram:'Charge→glove low→field out front→crow hop→throw' },
+      { title:'Two-Strike Approach', category:'STRATEGY', body:'With two strikes, shorten the swing. Choke up one inch, protect the outer half, put the ball in play. Strikeouts help nobody — groundouts and line outs keep innings alive.', diagram:'2 strikes→choke up→compact swing→contact focus' },
+      { title:'Pitcher Fielding Practice', category:'DRILL', body:'After every pitch, the pitcher is a fielder. Practice comebackers, covering first on groundouts, and backing up bases. Run PFP drills for 10 minutes every practice — most youth teams skip this.', diagram:'Pitch→comebacker→throw to first→cover and back up' },
+      { title:'First and Third Situation', category:'STRATEGY', body:'Runner on first steals second. Runner on third reads the catcher\'s throw. If throw goes to second, runner on third breaks. Defense must decide: let the steal happen or throw and risk a run.', diagram:'Runner 1st breaks→catcher throws?→runner 3rd reads and goes' },
+    ],
+    Soccer: [
+      { title:'Rondo Passing Drill', category:'DRILL', body:'4v1 or 5v2 in a small grid. Defenders try to win the ball, attackers keep possession. One-touch or two-touch limit. Best drill for passing accuracy, movement, and decision speed. 10 minutes daily.', diagram:'4 players outside→1 inside→keep ball→switch on turnover' },
+      { title:'Defensive Shape — 4-4-2', category:'STRATEGY', body:'Two banks of four stay compact. When ball is on one side, the opposite winger tucks in. Midfielders never ball-chase — they hold their line. No gaps between lines is the goal.', diagram:'GK\n4 defenders\n4 midfielders\n2 forwards — stay compact' },
+      { title:'Corner Kick Attack', category:'STRATEGY', body:'Near post runner, far post runner, and a player at the top of the box for clearances. Near post flick-on is the most dangerous — practice the timing between the corner taker and near post attacker.', diagram:'Corner→near post flick or far post run→top of box cleanup' },
+      { title:'1v1 Defending', category:'DRILL', body:'Stay on your feet. Jockey — delay and slow the attacker. Force them to their weak foot. Never dive in unless sure. Practice patience: let your teammates recover before committing to the tackle.' },
+    ],
+    Softball: [
+      { title:'Windmill Pitching Mechanics', category:'DEVELOPMENT', body:'Full arm circle — wrist snap at release is the key to speed. Drive off the rubber with the push leg. Follow through across the body. Practice the wrist snap separately with a light ball before full throws.', diagram:'Wind up→full circle→snap wrist at hip→follow through' },
+      { title:'Slap Hitting', category:'STRATEGY', body:'Left-handed hitters can use the running slap — start moving toward first base mid-swing. Contact point is out front, ball goes to the left side of the infield. Forces infield in and opens gaps.', diagram:'LHH steps→slap contact out front→ball to 3rd/SS→run' },
+      { title:'Outfield Communication', category:'DRILL', body:'Any ball between two outfielders: center fielder has priority over all. Call "I got it!" twice, loudly. Practice fly ball communication daily — more errors come from miscommunication than misplays.', diagram:'CF calls twice→other OF peels off→CF catches' },
+    ],
+  }
+
+  const drills = COACHING_CONTENT[sport] || COACHING_CONTENT.Football
+
+  // RSS feed URLs
   const RSS_FEEDS = {
-    sport: {
-      Football:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.footballscoop.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://americanfootballcoaches.com/feed'],
-      Basketball: ['https://api.rss2json.com/v1/api.json?rss_url=https://www.coachesinsider.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://hoopscoach.org/feed'],
-      Baseball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://blogs.usabaseball.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://www.baseballcoachingdigest.com/feed'],
-      Soccer:     ['https://api.rss2json.com/v1/api.json?rss_url=https://www.soccercoachweekly.com/feed','https://api.rss2json.com/v1/api.json?rss_url=https://www.soccerspecific.com/feed'],
-      Softball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://blogs.usasoftball.com/feed'],
-    },
-    sportNews: {
-      Football:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nfl/news','https://api.rss2json.com/v1/api.json?rss_url=https://feeds.nfl.com/feeds-rs/news.json'],
-      Basketball: ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nba/news'],
-      Baseball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news'],
-      Soccer:     ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/soccer/news'],
-      Softball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news'],
-    }
+    Football:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nfl/news'],
+    Basketball: ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/nba/news'],
+    Baseball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news'],
+    Soccer:     ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/soccer/news'],
+    Softball:   ['https://api.rss2json.com/v1/api.json?rss_url=https://www.espn.com/espn/rss/mlb/news'],
   }
 
-  // Cache key includes sport and channel
-  function getCacheKey(ch) { return `coachiq_rss_${ch}_${sport}` }
+  function getCacheKey() { return `coachiq_rss_news_${sport}` }
 
-  // Load channel - coaching uses AI, news uses RSS
-  async function loadChannel(channelId) {
-    setLoading(true)
-    setError(null)
-    setLoaded(false)
-
-    // Check session cache (30 min)
+  // Load news RSS — called on mount
+  async function loadNews() {
+    // Check cache first
     try {
-      const cached = sessionStorage.getItem(getCacheKey(channelId))
+      const cached = sessionStorage.getItem(getCacheKey())
       if (cached) {
-        const { items: cachedItems, ts } = JSON.parse(cached)
-        if (Date.now() - ts < 30 * 60 * 1000) {
-          setItems(cachedItems)
-          setLoading(false)
-          setLoaded(true)
-          return
+        const { items: ci, ts } = JSON.parse(cached)
+        if (Date.now() - ts < 30 * 60 * 1000 && ci?.length) {
+          setNewsItems(ci); setNewsLoading(false); return
         }
       }
     } catch(e) {}
 
-    if (channelId === 'sport') {
-      // Coaching channel: use AI for high-quality, sport-specific coaching content
-      await loadCoachingAI()
-    } else {
-      // News channel: use RSS for real breaking news
-      await loadNewsRSS(channelId)
-    }
-    setLoading(false)
-  }
-
-  async function loadCoachingAI() {
+    setNewsLoading(true)
+    setNewsError(null)
+    const urls = RSS_FEEDS[sport] || RSS_FEEDS.Football
     try {
-      const prompt = `You are a youth ${sport} coaching expert. Generate 8 practical coaching insights for today. Mix drills, strategy tips, player development advice, and game management tips. Focus on youth coaches with beginner to intermediate players. Return ONLY valid JSON: {"items":[{"title":"coaching tip title","body":"2-3 sentence explanation with actionable detail","category":"DRILL|STRATEGY|DEVELOPMENT|GAME DAY","sport":"${sport}"},...]}`
-      const raw = await callAI(prompt)
-      let s = raw.replace(/\`\`\`[\w]*\n?/gi,'').replace(/\`\`\`/g,'').trim()
-      const a = s.indexOf('{'), b = s.lastIndexOf('}')
-      if (a < 0 || b <= a) throw new Error('No content returned')
-      const data = JSON.parse(s.slice(a, b+1))
-      const tips = (data.items || []).filter(i => i && i.title && i.body)
-      if (!tips.length) throw new Error('No coaching tips returned')
-      // Format as article-like items for consistent display
-      const formatted = tips.map((t, i) => ({
-        title: t.title,
-        description: t.body,
-        author: t.category || 'CoachIQ',
-        pubDate: new Date(Date.now() - i * 300000).toISOString(),
-        link: null,
-        isAI: true
-      }))
-      setItems(formatted)
-      setLoaded(true)
-      try { sessionStorage.setItem(getCacheKey('sport'), JSON.stringify({ items: formatted, ts: Date.now() })) } catch(e){}
-    } catch(e) {
-      setError(e.message || 'Could not load coaching content. Please try again.')
-    }
-  }
-
-  async function loadNewsRSS(channelId) {
-    const urls = (RSS_FEEDS[channelId] || {})[sport] || (RSS_FEEDS[channelId] || {}).Football || []
-    if (!urls.length) {
-      setError('No news feed available for this sport.')
-      return
-    }
-    try {
-      const results = await Promise.allSettled(
-        urls.map(url => fetch(url, { headers: { 'Accept': 'application/json' } }).then(r => r.json()))
-      )
-      const allItems = []
+      const results = await Promise.allSettled(urls.map(url => fetch(url).then(r=>r.json())))
+      const all = []
       for (const r of results) {
-        if (r.status === 'fulfilled' && r.value?.items?.length) {
-          allItems.push(...r.value.items)
-        }
+        if (r.status==='fulfilled' && r.value?.items?.length) all.push(...r.value.items)
       }
-      if (!allItems.length) throw new Error('No articles found. Try again later.')
+      if (!all.length) throw new Error('No articles found.')
       const seen = new Set()
-      const deduped = allItems
-        .filter(it => { const key = it.title?.trim(); if(!key||seen.has(key)){return false} seen.add(key); return true })
+      const deduped = all
+        .filter(it => { const k=it.title?.trim(); if(!k||seen.has(k))return false; seen.add(k); return true })
         .sort((a,b) => new Date(b.pubDate||0) - new Date(a.pubDate||0))
-        .slice(0, 15)
-      setItems(deduped)
-      setLoaded(true)
-      try { sessionStorage.setItem(getCacheKey(channelId), JSON.stringify({ items: deduped, ts: Date.now() })) } catch(e){}
+        .slice(0,15)
+      setNewsItems(deduped)
+      try { sessionStorage.setItem(getCacheKey(), JSON.stringify({ items: deduped, ts: Date.now() })) } catch(e){}
     } catch(e) {
-      setError(e.message || 'Failed to load news feed.')
+      setNewsError('Could not load news. Check your connection.')
     }
+    setNewsLoading(false)
   }
 
-  // Reset when sport changes
-  useEffect(() => {
-    setItems([])
-    setLoaded(false)
-    setError(null)
-    try {
-      sessionStorage.removeItem(getCacheKey('sport'))
-      sessionStorage.removeItem(getCacheKey('sportNews'))
-    } catch(e) {}
-  }, [sport])
-
-  function switchChannel(id) {
-    if (id === activeChannel && loaded) return
-    setActiveChannel(id)
-    setItems([])
-    setLoaded(false)
-    setError(null)
-    loadChannel(id)
-  }
+  // Load news on mount and sport change — coaching content is instant/static
+  useEffect(() => { loadNews() }, [sport])
 
   function formatDate(dateStr) {
     if (!dateStr) return ''
-    const d = new Date(dateStr)
-    if (isNaN(d)) return ''
+    // RSS2JSON returns dates like "2025-04-18 14:30:00" — treat as UTC
+    const normalized = typeof dateStr === 'string' ? dateStr.replace(' ', 'T').replace(/([^Z])$/, '$1Z') : dateStr
+    const d = new Date(normalized)
+    if (isNaN(d.getTime())) return ''
     const now = new Date()
     const diff = now - d
+    if (diff < 0) return d.toLocaleDateString([],{month:'short',day:'numeric'}) // future date — show date
     if (diff < 3600000) return Math.floor(diff/60000) + 'm ago'
     if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago'
     if (diff < 604800000) return Math.floor(diff/86400000) + 'd ago'
@@ -4155,107 +4134,113 @@ function NewsPage({ P, S, al, sport, callAI }) {
     return (str||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&quot;/g,'"').trim()
   }
 
-  const activeChData = CHANNELS.find(c=>c.id===activeChannel)
+  const categoryColors = { DRILL:'#4ade80', STRATEGY:P, DEVELOPMENT:'#f59e0b', 'GAME DAY':'#c084fc' }
 
   return (
     <div style={{ padding:'16px 0 8px' }}>
       {/* Header */}
       <div style={{ marginBottom:14 }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} Coaching Intelligence</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} · News + Coaching</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:28, lineHeight:1, color:'#f2f4f8' }}>News + Feed</div>
       </div>
 
       {/* Channel tabs */}
       <div style={{ display:'flex', gap:8, marginBottom:14, overflowX:'auto', WebkitOverflowScrolling:'touch', paddingBottom:2 }}>
         {CHANNELS.map(ch => (
-          <button key={ch.id} onClick={()=>switchChannel(ch.id)}
+          <button key={ch.id} onClick={()=>setActiveChannel(ch.id)}
             style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:20, border:`1px solid ${activeChannel===ch.id?P:'#1e2330'}`, background:activeChannel===ch.id?P:'#0f1219', color:activeChannel===ch.id?'white':'#9aa0b0', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px', WebkitTapHighlightColor:'transparent', flexShrink:0, touchAction:'manipulation' }}>
             <span>{ch.icon}</span>{ch.label}
           </button>
         ))}
-        <button onClick={()=>loadChannel(activeChannel)}
-          style={{ padding:'7px 10px', borderRadius:20, border:'1px solid #1e2330', background:'#0f1219', color:'#6b7a96', fontSize:14, cursor:'pointer', WebkitTapHighlightColor:'transparent', flexShrink:0, touchAction:'manipulation' }}>⟳</button>
+        {activeChannel === 'sportNews' && (
+          <button onClick={loadNews} style={{ padding:'7px 10px', borderRadius:20, border:'1px solid #1e2330', background:'#0f1219', color:'#6b7a96', fontSize:14, cursor:'pointer', WebkitTapHighlightColor:'transparent', flexShrink:0, touchAction:'manipulation' }}>⟳</button>
+        )}
       </div>
 
-      {/* Channel description */}
-      {activeChData && (
-        <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, fontStyle:'italic' }}>{activeChData.desc}</div>
-      )}
-
-      {/* Loading state */}
-      {loading && (
-        <div style={{ padding:'40px 20px', textAlign:'center' }}>
-          <div style={{ width:24, height:24, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }}/>
-          <div style={{ fontSize:12, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Loading {activeChData?.label}...</div>
-        </div>
-      )}
-
-      {/* Error state */}
-      {!loading && error && (
-        <div style={{ padding:'20px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, marginBottom:12 }}>
-          <div style={{ fontSize:11, color:'#ef4444', marginBottom:8, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Feed Error</div>
-          <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:10 }}>{error}</div>
-          <button onClick={()=>loadChannel(activeChannel)} style={{ padding:'6px 14px', background:P, border:'none', borderRadius:4, color:'white', fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Retry</button>
-        </div>
-      )}
-
-      {/* Empty/not loaded state */}
-      {!loading && !error && !loaded && (
-        <div style={{ padding:'50px 20px', textAlign:'center' }}>
-          <div style={{ fontSize:36, marginBottom:12 }}>📰</div>
-          <div style={{ fontSize:13, color:'#3d4559', marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>No content loaded yet</div>
-          <div style={{ fontSize:11, color:'#3d4559', marginBottom:16 }}>Tap a channel above to load real-time news</div>
-          <button onClick={()=>loadChannel(activeChannel)} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:6, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>LOAD FEED</button>
-        </div>
-      )}
-
-      {/* Articles */}
-      {!loading && loaded && items.length > 0 && (
+      {/* ── COACHING TAB — static, instant, expandable ── */}
+      {activeChannel === 'sport' && (
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-          {items.map((item, i) => (
-            <div key={i}
-              onClick={()=>{ if(item.link) window.open(item.link,'_blank','noopener') }}
-              style={{ display:'block', background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'12px 14px', textDecoration:'none', WebkitTapHighlightColor:'transparent', cursor:item.link?'pointer':'default' }}>
-              {/* Source + date */}
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>
-                  {item.author || (item.link ? new URL(item.link).hostname.replace('www.','') : 'News')}
-                </span>
-                <span style={{ fontSize:9, color:'#3d4559' }}>{formatDate(item.pubDate)}</span>
-              </div>
-              {/* Title */}
-              <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', lineHeight:1.4, marginBottom:item.description?6:0 }}>
-                {stripHtml(item.title)}
-              </div>
-              {/* Excerpt */}
-              {item.description && (
-                <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
-                  {stripHtml(item.description).slice(0,180)}
+          {drills.map((drill, i) => {
+            const isOpen = expandedDrill === i
+            const catColor = categoryColors[drill.category] || P
+            return (
+              <div key={i} onClick={()=>setExpandedDrill(isOpen ? null : i)}
+                style={{ background:'#0f1219', border:`1px solid ${isOpen ? al(catColor,0.4) : '#1e2330'}`, borderRadius:8, overflow:'hidden', cursor:'pointer', borderLeft:`3px solid ${catColor}` }}>
+                {/* Header row */}
+                <div style={{ padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+                      <span style={{ fontSize:8, fontWeight:700, padding:'2px 6px', borderRadius:3, background:al(catColor,0.15), color:catColor, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>{drill.category}</span>
+                    </div>
+                    <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', lineHeight:1.3 }}>{drill.title}</div>
+                  </div>
+                  <div style={{ fontSize:12, color:'#3d4559', flexShrink:0 }}>{isOpen ? '▲' : '▼'}</div>
                 </div>
-              )}
-              {/* Read more or AI badge */}
-              {item.link ? (
-                <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>READ ARTICLE →</div>
-              ) : (
-                <div style={{ marginTop:8, fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>✦ COACHING INSIGHT</div>
-              )}
+                {/* Expanded content */}
+                {isOpen && (
+                  <div style={{ padding:'0 14px 14px', borderTop:`1px solid ${al(catColor,0.15)}` }}>
+                    <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.7, marginTop:10, marginBottom:drill.diagram?12:0 }}>
+                      {drill.body}
+                    </div>
+                    {drill.diagram && (
+                      <div style={{ background:'#161922', border:`1px solid ${al(catColor,0.25)}`, borderRadius:6, padding:'10px 12px', marginTop:4 }}>
+                        <div style={{ fontSize:9, color:catColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>📐 DIAGRAM</div>
+                        <div style={{ fontSize:11, color:'#a0aec0', fontFamily:'monospace', lineHeight:1.8, whiteSpace:'pre-wrap' }}>{drill.diagram}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          <div style={{ marginTop:4, fontSize:9, color:'#3d4559', textAlign:'center' }}>Tap any card to expand · More content coming</div>
+        </div>
+      )}
+
+      {/* ── NEWS TAB — RSS, pre-loaded ── */}
+      {activeChannel === 'sportNews' && (
+        <div>
+          {newsLoading && (
+            <div style={{ padding:'40px 20px', textAlign:'center' }}>
+              <div style={{ width:24, height:24, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }}/>
+              <div style={{ fontSize:12, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Loading {sport} news...</div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Empty results */}
-      {!loading && loaded && items.length === 0 && (
-        <div style={{ padding:'40px 20px', textAlign:'center' }}>
-          <div style={{ fontSize:13, color:'#3d4559' }}>No articles found. Try refreshing.</div>
-          <button onClick={()=>loadChannel(activeChannel)} style={{ marginTop:12, padding:'8px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>REFRESH</button>
-        </div>
-      )}
-
-      {/* Footer note */}
-      {loaded && items.length > 0 && (
-        <div style={{ marginTop:14, fontSize:9, color:'#3d4559', textAlign:'center', lineHeight:1.5 }}>
-          Real-time news from trusted coaching sources · Tap any article to read in full
+          )}
+          {!newsLoading && newsError && (
+            <div style={{ padding:'20px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, marginBottom:12 }}>
+              <div style={{ fontSize:11, color:'#ef4444', marginBottom:8, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Feed Error</div>
+              <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:10 }}>{newsError}</div>
+              <button onClick={loadNews} style={{ padding:'6px 14px', background:P, border:'none', borderRadius:4, color:'white', fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Retry</button>
+            </div>
+          )}
+          {!newsLoading && !newsError && newsItems.length > 0 && (
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {newsItems.map((item, i) => (
+                <div key={i}
+                  onClick={()=>{ if(item.link) window.open(item.link,'_blank','noopener') }}
+                  style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'12px 14px', cursor:item.link?'pointer':'default', WebkitTapHighlightColor:'transparent' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                    <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>
+                      {item.author || (item.link ? (() => { try { return new URL(item.link).hostname.replace('www.','') } catch(e) { return 'News' } })() : 'News')}
+                    </span>
+                    <span style={{ fontSize:9, color:'#3d4559' }}>{formatDate(item.pubDate)}</span>
+                  </div>
+                  <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', lineHeight:1.4, marginBottom:item.description?6:0 }}>
+                    {stripHtml(item.title)}
+                  </div>
+                  {item.description && (
+                    <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+                      {stripHtml(item.description).slice(0,180)}
+                    </div>
+                  )}
+                  {item.link && (
+                    <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>READ ARTICLE →</div>
+                  )}
+                </div>
+              ))}
+              <div style={{ marginTop:4, fontSize:9, color:'#3d4559', textAlign:'center' }}>Real-time news · Tap any article to read in full</div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -5072,7 +5057,7 @@ export default function CoachIQ() {
       ? { prompt, image: imageData }
       : { prompt }
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 45000) // 45s timeout for slow mobile
+    const timeout = setTimeout(() => controller.abort(), 90000) // 90s timeout — scheme generation needs time
     try {
       const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify(body), signal:controller.signal })
       clearTimeout(timeout)
