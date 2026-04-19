@@ -4706,7 +4706,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
                 nextEvent={nextEvt}
                 P={P}
                 al={al}
-                onSetLocation={()=>{ setScrollToLocation(true); setPage('more'); setTimeout(()=>setScrollToLocation(false),500) }}
+                onSetLocation={()=>{ setPage('more'); setScrollToLocation(true); setTimeout(()=>setScrollToLocation(false),1000) }}
               />
             </div>
           </div>
@@ -5213,32 +5213,60 @@ export default function CoachIQ() {
           @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
           @keyframes logoReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
           @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
-          /* Mobile responsive */
-          input, select, textarea { font-size:16px; }
-          @media (min-width:768px) {
-            input, select, textarea { font-size:13px !important; }
+          /* ── GLOBAL INPUT RESET — applies on ALL devices ── */
+          input, select, textarea {
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            background-color: #161922 !important;
+            color: #f2f4f8 !important;
+            color-scheme: dark !important;
+            border-radius: 4px;
+            font-size: 16px;
+          }
+          input:focus, select:focus, textarea:focus {
+            background-color: #161922 !important;
+            color: #f2f4f8 !important;
+            outline: none;
+          }
+          input:-webkit-autofill,
+          input:-webkit-autofill:hover,
+          input:-webkit-autofill:focus,
+          input:-webkit-autofill:active,
+          select:-webkit-autofill,
+          textarea:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 1000px #161922 inset !important;
+            -webkit-text-fill-color: #f2f4f8 !important;
+            caret-color: #f2f4f8 !important;
+          }
+          select option {
+            background-color: #161922 !important;
+            color: #f2f4f8 !important;
+          }
+          /* Desktop: reduce font size (mobile keeps 16px to prevent zoom) */
+          @media (min-width: 768px) {
+            input, select, textarea { font-size: 13px !important; }
             .scheme-grid { grid-template-columns: 1fr 1fr !important; }
           }
-          @media (min-width:768px) { input, select, textarea { font-size:13px !important; } }
-          button { -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; -webkit-user-select:none; } a { -webkit-tap-highlight-color:transparent; } input, textarea { -webkit-appearance:none; border-radius:0; }
-          * { -webkit-text-size-adjust:100%; }
-          /* Prevent horizontal overflow everywhere */
-          html, body, #__next { max-width:100vw; overflow-x:hidden; }
-          img, svg, video { max-width:100%; height:auto; }
-          /* Responsive grid adjustments */
-          @media (max-width:480px) {
+          button {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+          }
+          a { -webkit-tap-highlight-color: transparent; }
+          * { -webkit-text-size-adjust: 100%; }
+          html, body, #__next { max-width: 100vw; overflow-x: hidden; }
+          img, svg, video { max-width: 100%; height: auto; }
+          @media (max-width: 480px) {
             .scheme-grid { grid-template-columns: 1fr !important; }
             .two-col { grid-template-columns: 1fr !important; }
-          }
-          /* iOS input zoom prevention */
-          @media (max-width:480px) {
-            input, select, textarea { font-size:16px !important; background-color:#161922 !important; color:#f2f4f8 !important; color-scheme:dark !important; border-color:#1e2330; }
           }
         `}</style>
 
         {/* TOP BAR */}
         <div style={{ background:'#07090d', borderBottom:'1px solid #0e1220', padding:'10px 14px', display:'flex', alignItems:'center', gap:8, position:'relative', flexShrink:0 }}>
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${P} 55%,${cfg.secondary||'#002868'} 55%)` }} />
+          {/* Smooth gradient blend using team colors */}
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg, ${P}, ${S || '#002868'}, ${P}22)` }} />
           <CoachIQLogo size={22} brand={brand} />
           <div style={{ position:'relative', marginLeft:4 }}>
             <select value={sport} onChange={e=>setSport(e.target.value)} style={{ background:'#161922', border:`1px solid ${al(P,0.35)}`, borderRadius:3, padding:'4px 22px 4px 6px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'0.3px', outline:'none', appearance:'none', cursor:'pointer', maxWidth:130 }}>
@@ -5335,12 +5363,15 @@ export default function CoachIQ() {
 
 // ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
 function RosterSection({ team, P, al, teams, setTeams, sport }) {
-  const [players, setPlayers] = useState(team.players || [])
+  const players = team?.players || []
   const [newFirstName, setNewFirstName] = useState('')
   const [newLastName, setNewLastName] = useState('')
   const [newPos, setNewPos] = useState('')
   const [newNum, setNewNum] = useState('')
   const [posOpen, setPosOpen] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [editPosOpen, setEditPosOpen] = useState(false)
 
   const positions = {
     Football:   ['QB','RB','FB','WR','TE','OL','LT','LG','C','RG','RT','DL','DE','DT','NT','LB','MLB','OLB','CB','S','FS','SS','K','P','LS','H','KR','PR','Gunner','Upback','Personal Protector'],
@@ -5350,20 +5381,49 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
     Softball:   ['P','C','1B','2B','3B','SS','LF','CF','RF','DP','FLEX','Utility'],
   }
 
+  function updatePlayers(updated) {
+    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, players:updated} : t) }))
+  }
+
   function addPlayer() {
     if (!newFirstName.trim() && !newLastName.trim()) return
     const p = { id: Date.now(), firstName: newFirstName.trim(), lastName: newLastName.trim(), name: [newFirstName.trim(), newLastName.trim()].filter(Boolean).join(' '), position: newPos, number: newNum }
-    const updated = [...players, p]
-    setPlayers(updated)
-    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, players:updated} : t) }))
+    updatePlayers([...players, p])
     setNewFirstName(''); setNewLastName(''); setNewPos(''); setNewNum('')
   }
 
-  function removePlayer(id) {
-    const updated = players.filter(p=>p.id!==id)
-    setPlayers(updated)
-    setTeams(prev => ({ ...prev, [sport]: (prev[sport]||[]).map(t => t.id===team.id ? {...t, players:updated} : t) }))
+  function removePlayer(id) { updatePlayers(players.filter(p=>p.id!==id)) }
+
+  function startEdit(p) {
+    setEditingId(p.id)
+    setEditForm({ firstName:p.firstName||'', lastName:p.lastName||'', position:p.position||'', number:p.number||'' })
   }
+
+  function saveEdit() {
+    updatePlayers(players.map(p => p.id===editingId ? { ...p, ...editForm, name:[editForm.firstName,editForm.lastName].filter(Boolean).join(' ') } : p))
+    setEditingId(null)
+  }
+
+  const posDropdown = (val, onChange, open, setOpen) => (
+    <div onClick={()=>setOpen(o=>!o)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:val?'#f2f4f8':'#3d4559', fontFamily:'inherit', fontSize:12, cursor:'pointer', position:'relative', userSelect:'none' }}>
+      {val||'—'}
+      {open && (
+        <div onClick={e=>e.stopPropagation()} style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:50, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
+          {(positions[sport]||[]).map(pos => {
+            const sel = val.split(',').map(s=>s.trim()).filter(Boolean)
+            const isOn = sel.includes(pos)
+            return (
+              <div key={pos} onClick={()=>{ const cur=val.split(',').map(s=>s.trim()).filter(Boolean); onChange(isOn?cur.filter(p=>p!==pos).join(', '):[...cur,pos].slice(0,3).join(', ')) }} style={{ padding:'7px 12px', cursor:'pointer', display:'flex', alignItems:'center', gap:8, background:isOn?al(P,0.12):'transparent', borderBottom:'1px solid #1a1f2e' }}>
+                <div style={{ width:13, height:13, borderRadius:3, border:`2px solid ${isOn?P:'#3d4559'}`, background:isOn?P:'#0f1219', flexShrink:0 }}/>
+                <span style={{ fontSize:12, color:isOn?P:'#f2f4f8' }}>{pos}</span>
+              </div>
+            )
+          })}
+          <div onClick={()=>setOpen(false)} style={{ padding:'7px 12px', cursor:'pointer', fontSize:11, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', borderTop:'1px solid #1e2330' }}>✓ DONE</div>
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <Card>
@@ -5371,33 +5431,16 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
       <div style={{ padding:14 }}>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr auto', gap:7, marginBottom:12, alignItems:'end' }}>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>First Name</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>First</label>
             <input value={newFirstName||''} onChange={e=>setNewFirstName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addPlayer()} placeholder="First" style={{ width:'100%', background:'#161922', border:`1px solid ${newFirstName?P:'#1e2330'}`, borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
           </div>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Last Name</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Last</label>
             <input value={newLastName||''} onChange={e=>setNewLastName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addPlayer()} placeholder="Last" style={{ width:'100%', background:'#161922', border:`1px solid ${newLastName?P:'#1e2330'}`, borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
           </div>
           <div>
             <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Pos</label>
-            <div onClick={()=>setPosOpen(o=>!o)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:newPos?'#f2f4f8':'#3d4559', fontFamily:'inherit', fontSize:12, cursor:'pointer', position:'relative', userSelect:'none' }}>
-              {newPos||'—'}
-              {posOpen && (
-                <div onClick={e=>e.stopPropagation()} style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:50, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
-                  {(positions[sport]||[]).map(pos => {
-                    const sel = newPos.split(',').map(s=>s.trim()).filter(Boolean)
-                    const isOn = sel.includes(pos)
-                    return (
-                      <div key={pos} onClick={()=>{ const cur=newPos.split(',').map(s=>s.trim()).filter(Boolean); if(isOn){ setNewPos(cur.filter(p=>p!==pos).join(', ')) } else if(cur.length<3){ setNewPos([...cur,pos].join(', ')) }}} style={{ padding:'7px 12px', cursor:'pointer', display:'flex', alignItems:'center', gap:8, background:isOn?al(P,0.12):'transparent', borderBottom:'1px solid #1a1f2e' }}>
-                        <div style={{ width:13, height:13, borderRadius:3, border:`2px solid ${isOn?P:'#3d4559'}`, background:isOn?P:'#0f1219', flexShrink:0 }}/>
-                        <span style={{ fontSize:12, color:isOn?P:'#f2f4f8' }}>{pos}</span>
-                      </div>
-                    )
-                  })}
-                  <div onClick={()=>setPosOpen(false)} style={{ padding:'7px 12px', cursor:'pointer', fontSize:11, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', borderTop:'1px solid #1e2330' }}>✓ DONE</div>
-                </div>
-              )}
-            </div>
+            {posDropdown(newPos, setNewPos, posOpen, setPosOpen)}
           </div>
           <div>
             <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>#</label>
@@ -5410,10 +5453,43 @@ function RosterSection({ team, P, al, teams, setTeams, sport }) {
         ) : (
           <div>
             {players.map(p => (
-              <div key={p.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:6 }}>
-                {p.number && <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, flexShrink:0 }}>{p.number}</div>}
-                <div style={{ flex:1 }}><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:500 }}>{p.lastName ? p.lastName+', '+p.firstName : p.name}</div>{p.position&&<div style={{ fontSize:10, color:'#6b7a96' }}>{p.position}</div>}</div>
-                <button onClick={()=>removePlayer(p.id)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>×</button>
+              <div key={p.id}>
+                {editingId === p.id ? (
+                  <div style={{ background:'#161922', border:`1px solid ${P}`, borderRadius:6, padding:'10px 12px', marginBottom:6 }}>
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:6, marginBottom:8 }}>
+                      <div>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>First</label>
+                        <input value={editForm.firstName} onChange={e=>setEditForm(f=>({...f,firstName:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
+                      </div>
+                      <div>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Last</label>
+                        <input value={editForm.lastName} onChange={e=>setEditForm(f=>({...f,lastName:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
+                      </div>
+                      <div>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Pos</label>
+                        {posDropdown(editForm.position, v=>setEditForm(f=>({...f,position:v})), editPosOpen, setEditPosOpen)}
+                      </div>
+                      <div>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>#</label>
+                        <input value={editForm.number} onChange={e=>setEditForm(f=>({...f,number:e.target.value}))} maxLength={2} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', color:'#f2f4f8', fontSize:12, outline:'none', textAlign:'center' }} />
+                      </div>
+                    </div>
+                    <div style={{ display:'flex', gap:6 }}>
+                      <button onClick={()=>setEditingId(null)} style={{ flex:1, padding:'7px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
+                      <button onClick={saveEdit} style={{ flex:2, padding:'7px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SAVE CHANGES</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:6 }}>
+                    {p.number && <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, flexShrink:0 }}>{p.number}</div>}
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:500 }}>{p.lastName ? p.lastName+', '+p.firstName : p.name}</div>
+                      {p.position&&<div style={{ fontSize:10, color:'#6b7a96' }}>{p.position}</div>}
+                    </div>
+                    <button onClick={()=>startEdit(p)} style={{ background:'transparent', border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, cursor:'pointer', fontSize:10, padding:'4px 8px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>EDIT</button>
+                    <button onClick={()=>removePlayer(p.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, padding:'0 4px' }}>×</button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -5529,6 +5605,19 @@ function PracticePlanSection({ team, P, S, al, callAI, parseJSON, sport, teams, 
             ))}
             {plan.teamPeriod && <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Team Period — {plan.teamPeriod.time}</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600, marginBottom:3 }}>{plan.teamPeriod.activity}</div><div style={{ fontSize:11, color:'#6b7a96' }}>{plan.teamPeriod.notes}</div></div>}
             {plan.coachNote && <div style={{ padding:'8px 12px', background:'rgba(0,0,0,0.3)', borderRadius:8, borderLeft:`3px solid ${P}` }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Coach's Note</div><div style={{ fontSize:12, color:'#f2f4f8', fontStyle:'italic' }}>"{plan.coachNote}"</div></div>}
+            {/* Print button */}
+            <button onClick={()=>{
+              const win = window.open('','_blank')
+              const html = `<html><head><title>${plan.title}</title><style>body{font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto;color:#111}h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;color:#666;margin-bottom:16px;font-weight:normal}.section{margin-bottom:16px;padding:12px;border:1px solid #ddd;border-radius:6px}.section-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:6px;font-weight:bold}.drill{font-size:13px;font-weight:bold;margin-bottom:3px}.detail{font-size:12px;color:#555;margin-bottom:2px}.num{display:inline-block;width:22px;height:22px;background:#C0392B;color:white;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:bold;margin-right:8px}.footer{margin-top:20px;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:8px}@media print{body{padding:12px}}</style></head><body>
+              <h1>${plan.title}</h1><h2>${plan.date} · ${plan.duration}${team?.name?' · '+team.name:''}</h2>
+              ${plan.warmup?`<div class="section"><div class="section-title">Warmup — ${plan.warmup.time}</div>${(plan.warmup.activities||[]).map(a=>`<div class="detail">• ${a}</div>`).join('')}</div>`:''}
+              ${(plan.segments||[]).map((seg,i)=>`<div class="section"><div class="section-title">Segment ${i+1} — ${seg.time}</div><div class="drill"><span class="num">${i+1}</span>${seg.drill}</div><div class="detail">Purpose: ${seg.purpose}</div><div class="detail">Reps: ${seg.reps}</div><div class="detail" style="color:#C0392B">Coach: "${seg.coaching}"</div></div>`).join('')}
+              ${plan.teamPeriod?`<div class="section"><div class="section-title">Team Period — ${plan.teamPeriod.time}</div><div class="drill">${plan.teamPeriod.activity}</div><div class="detail">${plan.teamPeriod.notes}</div></div>`:''}
+              ${plan.coachNote?`<div class="section" style="border-left:3px solid #C0392B"><div class="section-title">Coach's Note</div><div class="detail" style="font-style:italic">"${plan.coachNote}"</div></div>`:''}
+              <div class="footer">Generated by CoachIQ · ${new Date().toLocaleDateString()}</div>
+              <script>window.onload=()=>window.print()</script></body></html>`
+              win.document.write(html); win.document.close()
+            }} style={{ width:'100%', marginTop:12, padding:'10px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:6, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>🖨 PRINT PRACTICE PLAN</button>
           </div>
         </Card>
       ))}
