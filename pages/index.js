@@ -747,8 +747,15 @@ function CoachIQLogo({ size=22, brand='Red — C+IQ colored' }) {
 // ─── SHARED UI ───────────────────────────────────────────────────────────────
 function safeHex(val, fallback='#C0392B') {
   if (!val || typeof val !== 'string' || val === 'undefined' || val === 'null' || val.trim() === '') return fallback
-  if (val.startsWith('#') && (val.length === 4 || val.length === 7)) return val
-  return fallback
+  const v = val.trim()
+  if (!v.startsWith('#')) return fallback
+  if (v.length !== 4 && v.length !== 7) return fallback
+  const full = v.length === 4 ? '#' + v[1]+v[1]+v[2]+v[2]+v[3]+v[3] : v
+  const r = parseInt(full.slice(1,3),16)
+  const g = parseInt(full.slice(3,5),16)
+  const b = parseInt(full.slice(5,7),16)
+  if ((r*299 + g*587 + b*114) / 1000 > 220) return fallback
+  return full
 }
 function al(hex, a) {
   const h = safeHex(hex, '#000000')
@@ -3068,7 +3075,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
 
   function switchTeam(t) {
     setActiveTeam(prev => ({ ...prev, [sport]: t }))
-    const SPORT_DEFAULTS = { Football:{primary:'#C0392B',secondary:'#002868'}, Basketball:{primary:'#C0392B',secondary:'#002868'}, Baseball:{primary:'#003087',secondary:'#C0392B'}, Soccer:{primary:'#2d7a2d',secondary:'#f5f5f5'}, Softball:{primary:'#8B2FC9',secondary:'#FFD700'} }
+    const SPORT_DEFAULTS = { Football:{primary:'#C0392B',secondary:'#002868'}, Basketball:{primary:'#C0392B',secondary:'#002868'}, Baseball:{primary:'#003087',secondary:'#C0392B'}, Soccer:{primary:'#2d7a2d',secondary:'#f5c518'}, Softball:{primary:'#8B2FC9',secondary:'#FFD700'} }
     const def = SPORT_DEFAULTS[sport] || {primary:'#C0392B',secondary:'#002868'}
     setCfg(prev => ({ ...prev, primary:t.primary||def.primary, secondary:t.secondary||def.secondary, accent1:t.accent1||def.primary, accent2:t.accent2||def.secondary, teamId:t.id, teamName:t.name }))
     setOpen(false)
@@ -5041,8 +5048,8 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
           </div>
         ) : (
           <div>
-            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning','All four']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
-            <PhilQ label="How do you measure a good season?" options={['Every kid improved','Everyone had fun','Strong record','Mix of all three']} value={philosophy.measure} onChange={v=>setPhilosophy(p=>({...p,measure:v}))} />
+            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning','A mix of all four']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
+            <PhilQ label="How do you measure a good season?" options={['Every kid improved','Everyone had fun','Strong record','A mix of all three']} value={philosophy.measure} onChange={v=>setPhilosophy(p=>({...p,measure:v}))} />
             <PhilQ label="Who are you coaching?" options={['First-timers / Brand new','Mixed experience levels','Competitive / Experienced']} value={philosophy.who} onChange={v=>setPhilosophy(p=>({...p,who:v}))} />
             <button onClick={handleLaunch} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Enter CoachIQ</button>
           </div>
@@ -5221,288 +5228,255 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
     const isOff = type === 'offense'
     const isDef = type === 'defense'
     const isPrac = type === 'practice'
-    const isScout = type === 'scout'
     const color = isOff ? '#C0392B' : isDef ? '#6b9fff' : isPrac ? '#4ade80' : '#f59e0b'
 
-    // Inline SVG dot helper — not a component, just a function returning SVG elements
+    // Plain function returning SVG group — not a component
     function dot(cx, cy, r, fill, stroke, label, labelDy=0) {
       return (
-        <g key={cx+','+cy}>
+        <g key={cx+'-'+cy}>
           <circle cx={cx} cy={cy} r={r||4} fill={fill||'none'} stroke={stroke||color} strokeWidth="1.2"/>
-          {label && <text x={cx} y={cy+(r||4)+7+labelDy} textAnchor="middle" fontSize="5" fill={color} opacity="0.7">{label}</text>}
+          {label && <text x={cx} y={cy+(r||4)+8+labelDy} textAnchor="middle" fontSize="5" fill={color} opacity="0.75">{label}</text>}
         </g>
       )
     }
 
     if (sport === 'Football') {
-      // Simple spread formation: 5 OL, QB, 2 WR, 1 TE, routes
+      // Offense: 5 OL (12px apart), QB behind center, 2 WR wide, 1 TE
       if (isOff) return (
         <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
-          <line x1="0" y1="32" x2="220" y2="32" stroke={color} strokeWidth="0.6" strokeDasharray="4,3" opacity="0.3"/>
-          {/* OL */}
-          {[82,90,98,106,114].map((x,i)=><circle key={i} cx={x} cy={32} r={4} fill={color} opacity="0.6"/>)}
-          {/* QB */}
-          <circle cx={98} cy={44} r={5} fill={color} opacity="0.9"/>
-          {/* WR left */}
-          <circle cx={30} cy={32} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
-          <path d="M30,32 L20,16" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
-          <polygon points="20,16 17,21 23,21" fill={color} opacity="0.7"/>
-          {/* WR right */}
-          <circle cx={190} cy={32} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
-          <path d="M190,32 L195,16" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
-          <polygon points="195,16 192,21 198,21" fill={color} opacity="0.7"/>
-          {/* TE */}
-          <circle cx={130} cy={32} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
-          <path d="M130,32 Q145,20 150,14" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
-          <polygon points="150,14 147,19 153,19" fill={color} opacity="0.7"/>
+          <line x1="0" y1="30" x2="220" y2="30" stroke={color} strokeWidth="0.6" strokeDasharray="4,3" opacity="0.3"/>
+          {[74,86,98,110,122].map((x,i)=><circle key={i} cx={x} cy={30} r={4} fill={color} opacity="0.6"/>)}
+          <circle cx={98} cy={43} r={5} fill={color} opacity="0.9"/>
+          <circle cx={22} cy={30} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
+          <path d="M22,30 Q18,18 26,10" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="26,10 22,15 28,15" fill={color} opacity="0.7"/>
+          <circle cx={198} cy={30} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
+          <path d="M198,30 Q202,18 196,10" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="196,10 192,15 198,15" fill={color} opacity="0.7"/>
+          <circle cx={138} cy={30} r={4} stroke={color} strokeWidth="1.2" fill="none" opacity="0.8"/>
+          <path d="M138,30 Q148,18 154,10" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="154,10 150,15 156,15" fill={color} opacity="0.7"/>
         </svg>
       )
+      // Defense: 4-3 base, spaced 20px apart, CBs wide, 2 safeties deep
       if (isDef) return (
         <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
-          <line x1="0" y1="36" x2="220" y2="36" stroke={color} strokeWidth="0.6" strokeDasharray="4,3" opacity="0.3"/>
-          {/* DL — 4 across */}
-          {[72,90,108,126].map((x,i)=><g key={i}><rect x={x-5} y={29} width={10} height={10} rx="1" fill="none" stroke={color} strokeWidth="1.2" opacity="0.8"/></g>)}
-          {/* LB — 3 */}
-          {[81,98,115].map((x,i)=><g key={i}><rect x={x-4} y={20} width={9} height={9} rx="1" fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/></g>)}
-          {/* CB — 2 */}
-          <circle cx={35} cy={32} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
-          <circle cx={165} cy={32} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
-          {/* S — 2 */}
-          <circle cx={82} cy={12} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
-          <circle cx={118} cy={12} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
+          <line x1="0" y1="34" x2="220" y2="34" stroke={color} strokeWidth="0.6" strokeDasharray="4,3" opacity="0.3"/>
+          {[70,90,110,130].map((x,i)=><g key={i}><rect x={x-5} y={27} width={10} height={10} rx="1" fill="none" stroke={color} strokeWidth="1.2" opacity="0.8"/></g>)}
+          {[80,100,120].map((x,i)=><g key={i}><rect x={x-4} y={16} width={9} height={9} rx="1" fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/></g>)}
+          <circle cx={28} cy={30} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
+          <circle cx={172} cy={30} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
+          <circle cx={82} cy={8} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
+          <circle cx={128} cy={8} r={4} fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
         </svg>
       )
       if (isPrac) return (
         <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
-          {/* Cone drill — triangle pattern */}
-          <circle cx={60} cy={44} r={4} fill={color} opacity="0.8"/>
-          <circle cx={110} cy={20} r={4} fill={color} opacity="0.8"/>
-          <circle cx={160} cy={44} r={4} fill={color} opacity="0.8"/>
-          <path d="M60,44 L110,20 L160,44" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="4,3" opacity="0.6"/>
-          {/* Player running */}
-          <circle cx={60} cy={44} r={6} fill="none" stroke={color} strokeWidth="1" opacity="0.4"/>
-          <path d="M60,44 L80,36" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
-          <polygon points="80,36 76,39 82,41" fill={color} opacity="0.8"/>
-          <text x="110" y="52" textAnchor="middle" fontSize="7" fill={color} opacity="0.5">TRIANGLE DRILL</text>
+          <circle cx={55} cy={44} r={4} fill={color} opacity="0.8"/>
+          <circle cx={110} cy={18} r={4} fill={color} opacity="0.8"/>
+          <circle cx={165} cy={44} r={4} fill={color} opacity="0.8"/>
+          <path d="M55,44 L110,18 L165,44" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="4,3" opacity="0.6"/>
+          <path d="M55,44 L78,36" stroke={color} strokeWidth="1.5" fill="none" opacity="0.8"/>
+          <polygon points="78,36 73,39 79,42" fill={color} opacity="0.8"/>
+          <text x="110" y="54" textAnchor="middle" fontSize="7" fill={color} opacity="0.5">TRIANGLE DRILL</text>
         </svg>
       )
       return (
         <svg width="100%" height="56" viewBox="0 0 220 56" preserveAspectRatio="xMidYMid meet" style={{opacity:0.75}}>
-          <circle cx="110" cy="28" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
-          <circle cx="110" cy="28" r="8" fill="none" stroke={color} strokeWidth="0.8" opacity="0.2"/>
-          <path d="M96,14 L128,44" stroke={color} strokeWidth="1.5" opacity="0.6"/>
-          <circle cx="132" cy="46" r="5" fill={color} opacity="0.7"/>
+          <circle cx="110" cy="26" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
+          <circle cx="110" cy="26" r="8" fill="none" stroke={color} strokeWidth="0.8" opacity="0.2"/>
+          <path d="M96,12 L128,42" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="131" cy="44" r="5" fill={color} opacity="0.7"/>
           <text x="110" y="52" textAnchor="middle" fontSize="7" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
     if (sport === 'Basketball') {
-      // Accurate half court: arc, paint, hoop, labeled player circles
+      // Half court: basket at TOP (y=10), players attack from BOTTOM (y=50+)
       function courtSVG() { return (
         <>
-          {/* Half court outline */}
-          <rect x="10" y="4" width="200" height="52" rx="2" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25"/>
-          {/* Three point arc */}
-          <path d="M38,56 L38,38 Q38,10 110,10 Q182,10 182,38 L182,56" fill="none" stroke={color} strokeWidth="0.8" opacity="0.3"/>
-          {/* Paint */}
-          <rect x="78" y="32" width="64" height="24" fill="none" stroke={color} strokeWidth="0.8" opacity="0.35"/>
-          {/* Hoop */}
-          <circle cx="110" cy="35" r="5" fill="none" stroke={color} strokeWidth="1.2" opacity="0.6"/>
-          {/* Free throw circle */}
-          <path d="M78,44 Q110,30 142,44" fill="none" stroke={color} strokeWidth="0.6" strokeDasharray="2,2" opacity="0.3"/>
+          <rect x="8" y="4" width="204" height="52" rx="1" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
+          <rect x="80" y="4" width="60" height="22" fill="none" stroke={color} strokeWidth="0.8" opacity="0.35"/>
+          <line x1="96" y1="4" x2="124" y2="4" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+          <circle cx="110" cy="11" r="5" fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
+          <line x1="80" y1="26" x2="140" y2="26" stroke={color} strokeWidth="0.8" opacity="0.3"/>
+          <path d="M80,26 Q110,14 140,26" fill="none" stroke={color} strokeWidth="0.6" strokeDasharray="2,2" opacity="0.25"/>
+          <path d="M24,56 L24,36 Q24,4 110,4 Q196,4 196,36 L196,56" fill="none" stroke={color} strokeWidth="0.7" opacity="0.22"/>
         </>
       )
       }
+      // 5-out motion: PG at top of key, wings wide, bigs at elbows — all clearly spaced
       if (isOff) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {courtSVG()}
-          {dot(110,54,5,color,undefined,'PG',-12)}
-          {dot(50,44,4,color,undefined,'SF',-12)}
-          {dot(170,44,4,color,undefined,'SG',-12)}
-          {dot(82,30,4,color,undefined,'PF',-12)}
-          {dot(138,30,4,color,undefined,'C',-12)}
-          <path d="M110,54 Q90,48 50,44" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.6"/>
-          <polygon points="50,44 55,41 54,47" fill={color} opacity="0.6"/>
+          {dot(110,50,5,color,undefined,'PG',0)}
+          {dot(38,42,4,color,undefined,'SF',0)}
+          {dot(182,42,4,color,undefined,'SG',0)}
+          {dot(74,32,4,color,undefined,'PF',0)}
+          {dot(146,32,4,color,undefined,'C',0)}
+          <path d="M105,50 L44,44" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.6"/>
+          <polygon points="44,44 50,41 49,47" fill={color} opacity="0.6"/>
         </svg>
       )
+      // 2-3 Zone: 2 guards near FT line, 3 across lane — correct positions
       if (isDef) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {courtSVG()}
-          {/* 2-3 Zone */}
-          {dot(90,48,4,undefined,color,'G',-12)}
-          {dot(130,48,4,undefined,color,'G',-12)}
-          {dot(70,36,4,undefined,color,'F',-12)}
-          {dot(110,34,4,undefined,color,'C',-12)}
-          {dot(150,36,4,undefined,color,'F',-12)}
-          <text x="110" y="10" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">2-3 ZONE</text>
+          {dot(86,40,4,undefined,color,'G',0)}
+          {dot(134,40,4,undefined,color,'G',0)}
+          {dot(52,28,4,undefined,color,'F',0)}
+          {dot(110,26,4,undefined,color,'C',0)}
+          {dot(168,28,4,undefined,color,'F',0)}
+          <text x="110" y="58" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">2-3 ZONE</text>
         </svg>
       )
       if (isPrac) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {courtSVG()}
-          {/* 3-man weave drill */}
-          {dot(60,54,4,color,undefined,undefined,0)}
+          {dot(46,54,4,color,undefined,undefined,0)}
           {dot(110,54,4,color,undefined,undefined,0)}
-          {dot(160,54,4,color,undefined,undefined,0)}
-          <path d="M60,54 Q85,42 110,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.7"/>
-          <path d="M110,54 Q85,42 60,30" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
-          <polygon points="110,30 106,35 113,35" fill={color} opacity="0.7"/>
-          <text x="110" y="10" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">3-MAN WEAVE</text>
+          {dot(174,54,4,color,undefined,undefined,0)}
+          <path d="M50,54 Q80,40 110,28" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+          <path d="M110,54 Q80,42 46,34" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+          <polygon points="110,28 106,34 113,34" fill={color} opacity="0.7"/>
+          <text x="110" y="58" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">3-MAN WEAVE</text>
         </svg>
       )
       return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {courtSVG()}
-          <circle cx="110" cy="35" r="18" fill="none" stroke={color} strokeWidth="1" opacity="0.4"/>
-          <path d="M96,21 L126,51" stroke={color} strokeWidth="1.5" opacity="0.6"/>
-          <circle cx="130" cy="53" r="4" fill={color} opacity="0.7"/>
-          <text x="110" y="10" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
+          <circle cx="110" cy="30" r="14" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
+          <path d="M98,18 L124,44" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="126" cy="46" r="4" fill={color} opacity="0.7"/>
+          <text x="110" y="58" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
     if (sport === 'Baseball' || sport === 'Softball') {
-      // Accurate diamond with correct fielder positions
+      // Diamond: Home at bottom-center, 1B right, 2B top, 3B left
       function diamondSVG() { return (
         <>
-          {/* Outfield arc */}
-          <path d="M20,56 Q110,0 200,56" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
-          {/* Infield diamond — correct orientation */}
-          <path d="M110,14 L168,42 L110,54 L52,42 Z" fill="none" stroke={color} strokeWidth="1" opacity="0.5"/>
-          {/* Base lines */}
-          <line x1="110" y1="14" x2="168" y2="42" stroke={color} strokeWidth="0.6" opacity="0.3"/>
-          <line x1="168" y1="42" x2="110" y2="54" stroke={color} strokeWidth="0.6" opacity="0.3"/>
-          <line x1="110" y1="54" x2="52" y2="42" stroke={color} strokeWidth="0.6" opacity="0.3"/>
-          <line x1="52" y1="42" x2="110" y2="14" stroke={color} strokeWidth="0.6" opacity="0.3"/>
-          {/* Bases */}
-          <rect x="107" y="11" width="6" height="6" fill={color} opacity="0.6"/>{/* 2B */}
-          <rect x="165" y="39" width="6" height="6" fill={color} opacity="0.6"/>{/* 1B */}
-          <rect x="107" y="51" width="6" height="6" fill={color} opacity="0.6"/>{/* Home */}
-          <rect x="49" y="39" width="6" height="6" fill={color} opacity="0.6"/>{/* 3B */}
-          {/* Pitcher's mound */}
-          <circle cx="110" cy="34" r="3" fill={color} opacity="0.4"/>
+          <path d="M15,58 Q110,2 205,58" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
+          <path d="M110,8 L176,38 L110,54 L44,38 Z" fill="none" stroke={color} strokeWidth="1" opacity="0.45"/>
+          <rect x="107" y="5" width="6" height="6" rx="1" fill={color} opacity="0.55"/>
+          <rect x="173" y="35" width="6" height="6" rx="1" fill={color} opacity="0.55"/>
+          <rect x="107" y="51" width="6" height="6" rx="1" fill={color} opacity="0.55"/>
+          <rect x="41" y="35" width="6" height="6" rx="1" fill={color} opacity="0.55"/>
+          <circle cx="110" cy="31" r="3" fill={color} opacity="0.35"/>
         </>
       )
       }
       if (isOff) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {diamondSVG()}
-          {/* Batter */}
-          {dot(110,54,4,color,undefined,'C',-12)}
-          {/* Hit and run arrow */}
-          <path d="M110,51 Q125,44 140,38" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.7"/>
-          <polygon points="140,38 135,40 138,45" fill={color} opacity="0.7"/>
+          {dot(110,54,4,color,undefined,'C',0)}
+          <path d="M116,51 Q148,40 173,38" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.7"/>
+          <polygon points="173,38 167,36 168,42" fill={color} opacity="0.7"/>
           <text x="110" y="6" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">HIT & RUN</text>
         </svg>
       )
+      // All 9 fielders — placed at correct positions, NOT on top of bases
       if (isDef) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {diamondSVG()}
-          {dot(110,34,3,color,undefined,'P',-10)}
-          {dot(110,54,3,color,undefined,'C',-10)}
-          {dot(168,42,3,color,undefined,'1B',-10)}
-          {dot(52,42,3,color,undefined,'3B',-10)}
-          {dot(125,30,3,color,undefined,'2B',-10)}
-          {dot(95,28,3,color,undefined,'SS',-10)}
-          {dot(60,16,3,color,undefined,'LF',-10)}
-          {dot(110,10,3,color,undefined,'CF',-10)}
-          {dot(160,16,3,color,undefined,'RF',-10)}
+          {dot(110,31,3,color,undefined,'P',0)}
+          {dot(110,54,3,color,undefined,'C',0)}
+          {dot(182,30,3,color,undefined,'1B',0)}
+          {dot(40,30,3,color,undefined,'3B',0)}
+          {dot(132,22,3,color,undefined,'2B',0)}
+          {dot(90,20,3,color,undefined,'SS',0)}
+          {dot(50,10,3,color,undefined,'LF',0)}
+          {dot(110,6,3,color,undefined,'CF',0)}
+          {dot(170,10,3,color,undefined,'RF',0)}
         </svg>
       )
       if (isPrac) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {diamondSVG()}
-          {/* Batting practice — batter at home, toss from side */}
-          {dot(110,54,4,color,undefined,'Batter',-12)}
-          {dot(90,50,3,undefined,color,'Toss',-10)}
-          <path d="M90,50 L108,54" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
-          <polygon points="108,54 104,50 106,56" fill={color} opacity="0.7"/>
+          {dot(110,54,4,color,undefined,'Batter',0)}
+          {dot(88,47,3,undefined,color,'Toss',0)}
+          <path d="M93,48 L106,52" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <polygon points="106,52 101,50 103,56" fill={color} opacity="0.7"/>
           <text x="110" y="6" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">BATTING PRACTICE</text>
         </svg>
       )
       return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {diamondSVG()}
-          <circle cx="110" cy="34" r="18" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
-          <path d="M96,20 L126,50" stroke={color} strokeWidth="1.5" opacity="0.6"/>
-          <circle cx="130" cy="52" r="4" fill={color} opacity="0.7"/>
+          <circle cx="110" cy="31" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
+          <path d="M98,19 L124,46" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="126" cy="48" r="4" fill={color} opacity="0.7"/>
           <text x="110" y="6" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
     if (sport === 'Soccer') {
+      // Half pitch: goal at LEFT, players attack right-to-left
       function pitchSVG() { return (
         <>
-          {/* Half pitch */}
-          <rect x="8" y="4" width="204" height="52" rx="2" fill="none" stroke={color} strokeWidth="0.8" opacity="0.25"/>
-          {/* Goal area */}
-          <rect x="8" y="18" width="28" height="24" fill="none" stroke={color} strokeWidth="0.8" opacity="0.35"/>
-          {/* Goal */}
-          <rect x="8" y="22" width="8" height="16" fill="none" stroke={color} strokeWidth="1.2" opacity="0.55"/>
-          {/* Penalty arc */}
-          <path d="M36,30 Q50,14 36,8" fill="none" stroke={color} strokeWidth="0.7" opacity="0.25"/>
+          <rect x="8" y="4" width="204" height="52" rx="1" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
+          <rect x="8" y="14" width="36" height="32" fill="none" stroke={color} strokeWidth="0.8" opacity="0.3"/>
+          <rect x="8" y="20" width="14" height="20" fill="none" stroke={color} strokeWidth="0.8" opacity="0.35"/>
+          <rect x="3" y="22" width="5" height="16" rx="0" fill="none" stroke={color} strokeWidth="1.4" opacity="0.55"/>
+          <circle cx="30" cy="30" r="1.5" fill={color} opacity="0.4"/>
         </>
       )
       }
       if (isOff) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {pitchSVG()}
-          {/* 4-3-3 attacking shape */}
-          {dot(170,30,4,color,undefined,'ST',-11)}
-          {dot(145,18,4,color,undefined,'LW',-11)}
-          {dot(145,42,4,color,undefined,'RW',-11)}
-          {dot(120,24,3,undefined,color,undefined,0)}
-          {dot(120,30,3,undefined,color,undefined,0)}
-          {dot(120,36,3,undefined,color,undefined,0)}
-          <path d="M170,30 L145,18" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.5"/>
-          <polygon points="145,18 149,23 143,22" fill={color} opacity="0.6"/>
-          <text x="170" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-3-3</text>
+          {dot(54,30,4,color,undefined,'ST',0)}
+          {dot(90,12,4,color,undefined,'LW',0)}
+          {dot(90,48,4,color,undefined,'RW',0)}
+          {dot(124,18,4,color,undefined,'CM',0)}
+          {dot(124,30,4,color,undefined,'CM',0)}
+          {dot(124,42,4,color,undefined,'CM',0)}
+          <path d="M90,12 Q70,20 58,28" stroke={color} strokeWidth="1" fill="none" strokeDasharray="3,2" opacity="0.6"/>
+          <polygon points="58,28 64,25 63,31" fill={color} opacity="0.6"/>
+          <text x="172" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-3-3 ATTACK</text>
         </svg>
       )
       if (isDef) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {pitchSVG()}
-          {/* 4-4-2 defensive block */}
-          {dot(100,50,3,undefined,color,'DM',-10)}
-          {dot(70,40,3,undefined,color,undefined,0)}
-          {dot(95,36,3,undefined,color,undefined,0)}
-          {dot(120,36,3,undefined,color,undefined,0)}
-          {dot(145,40,3,undefined,color,undefined,0)}
-          {dot(75,24,3,undefined,color,undefined,0)}
-          {dot(100,20,3,undefined,color,undefined,0)}
-          {dot(125,20,3,undefined,color,undefined,0)}
-          {dot(150,24,3,undefined,color,undefined,0)}
-          <text x="160" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-4-2 BLOCK</text>
+          {dot(162,30,4,undefined,color,'DM',0)}
+          {dot(130,12,4,undefined,color,undefined,0)}
+          {dot(130,26,4,undefined,color,undefined,0)}
+          {dot(130,40,4,undefined,color,undefined,0)}
+          {dot(98,6,4,undefined,color,undefined,0)}
+          {dot(98,20,4,undefined,color,undefined,0)}
+          {dot(98,36,4,undefined,color,undefined,0)}
+          {dot(98,52,4,undefined,color,undefined,0)}
+          <text x="175" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">4-4-2 BLOCK</text>
         </svg>
       )
       if (isPrac) return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {pitchSVG()}
-          {/* Passing drill — triangle */}
-          {dot(80,44,4,color,undefined,undefined,0)}
-          {dot(130,44,4,color,undefined,undefined,0)}
-          {dot(105,24,4,color,undefined,undefined,0)}
-          <path d="M80,44 L105,24" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
-          <path d="M105,24 L130,44" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
-          <path d="M130,44 L80,44" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.5"/>
-          <polygon points="105,24 101,30 108,30" fill={color} opacity="0.7"/>
-          <text x="105" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">TRIANGLE PASSING</text>
+          {dot(98,50,4,color,undefined,undefined,0)}
+          {dot(150,50,4,color,undefined,undefined,0)}
+          {dot(124,18,4,color,undefined,undefined,0)}
+          <path d="M102,48 L146,48" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <path d="M150,46 L128,22" stroke={color} strokeWidth="1.2" fill="none" opacity="0.7"/>
+          <path d="M120,22 L102,46" stroke={color} strokeWidth="1.2" fill="none" strokeDasharray="3,2" opacity="0.5"/>
+          <polygon points="146,48 140,45 140,51" fill={color} opacity="0.7"/>
+          <text x="160" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">TRIANGLE PASSING</text>
         </svg>
       )
       return (
         <svg width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="xMidYMid meet" style={{opacity:0.8}}>
           {pitchSVG()}
-          <circle cx="120" cy="30" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.35"/>
-          <path d="M106,16 L136,46" stroke={color} strokeWidth="1.5" opacity="0.6"/>
-          <circle cx="140" cy="48" r="4" fill={color} opacity="0.7"/>
-          <text x="160" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
+          <circle cx="130" cy="30" r="16" fill="none" stroke={color} strokeWidth="1" opacity="0.3"/>
+          <path d="M118,18 L144,44" stroke={color} strokeWidth="1.5" opacity="0.6"/>
+          <circle cx="146" cy="46" r="4" fill={color} opacity="0.7"/>
+          <text x="175" y="56" textAnchor="middle" fontSize="6" fill={color} opacity="0.5">SCOUT REPORT</text>
         </svg>
       )
     }
 
-    // Default
     return (
       <svg width="100%" height="48" viewBox="0 0 220 48" style={{opacity:0.5}}>
         <circle cx="70" cy="24" r="5" fill={color} opacity="0.7"/>
@@ -5512,6 +5486,8 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
       </svg>
     )
   }
+
+
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
