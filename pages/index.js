@@ -4926,6 +4926,8 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
 
 function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
   const [coachName, setCoachName] = useState('')
+  const [step, setStep] = useState(1)
+  const [philosophy, setPhilosophy] = useState({ priority:'Player development', measure:'Growth', who:'Mixed experience' })
   const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red — C+IQ colored']
   const accent = p.accent
   const CIQ = p.accentOn === 'CIQ'
@@ -4934,48 +4936,379 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
   const cIQ = CIQ ? p.accent : '#f2f4f8'
 
   function handleStart() {
-    onLaunch({ coach: coachName.trim() || 'Coach', team:'', primary:'#C0392B', secondary:'#002868', sport:'Football' })
+    if (!coachName.trim()) return
+    setStep(2)
   }
 
+  function handleLaunch() {
+    onLaunch({ coach: coachName.trim() || 'Coach', team:'', primary:'#C0392B', secondary:'#002868', sport:'Football', philosophy })
+  }
+
+  const PhilQ = ({ label, options, value, onChange }) => (
+    <div style={{ marginBottom:16 }}>
+      <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', marginBottom:8 }}>{label}</div>
+      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+        {options.map(opt => (
+          <button key={opt} onClick={()=>onChange(opt)} style={{ width:'100%', padding:'10px 14px', background:value===opt?accent:'#161922', border:`1px solid ${value===opt?accent:'#1e2330'}`, borderRadius:6, color:value===opt?'white':'#9aa0b0', fontFamily:"'DM Sans',sans-serif", fontSize:13, cursor:'pointer', textAlign:'left', transition:'all 0.15s' }}>
+            {value===opt ? '→ ' : ''}{opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
-    <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'32px 28px', fontFamily:"'DM Sans',sans-serif" }}>
+    <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'32px 28px', fontFamily:"'DM Sans',sans-serif", overflowY:'auto' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
 
-      {/* Back button — top left */}
-      {onBack && (
-        <button onClick={onBack} style={{ position:'absolute', top:20, left:20, background:'transparent', border:'none', color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'1px', cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'8px 4px' }}>
-          ← Back
-        </button>
-      )}
+      {/* Back button */}
+      <button onClick={step===1?onBack:()=>setStep(1)} style={{ position:'absolute', top:20, left:20, background:'transparent', border:'none', color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'1px', cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'8px 4px' }}>
+        ← Back
+      </button>
 
-      <div style={{ textAlign:'center', marginBottom:36 }}>
-        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:44, lineHeight:1, marginBottom:8 }}>
-          <span style={{ color:cC }}>C</span>
-          <span style={{ color:cOach }}>oach</span>
-          <span style={{ color:cIQ }}>IQ</span>
+      <div style={{ textAlign:'center', marginBottom:28 }}>
+        <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:40, lineHeight:1, marginBottom:8 }}>
+          <span style={{ color:cC }}>C</span><span style={{ color:cOach }}>oach</span><span style={{ color:cIQ }}>IQ</span>
         </div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>Set up your profile</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>
+          {step===1 ? 'Set up your profile' : 'Your coaching philosophy'}
+        </div>
+        {step===2 && <div style={{ fontSize:11, color:'#3d4559', marginTop:6, maxWidth:280, margin:'6px auto 0' }}>This stays private. It helps CoachIQ understand what matters to you.</div>}
       </div>
-      <div style={{ width:'100%', maxWidth:380, display:'flex', flexDirection:'column', gap:12 }}>
-        <div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', marginBottom:6 }}>Your name</div>
-          <input
-            value={coachName}
-            onChange={e=>setCoachName(e.target.value)}
-            onKeyDown={e=>e.key==='Enter'&&handleStart()}
-            placeholder="e.g. Coach Regisford"
-            style={{ width:'100%', background:'#161922', border:`1px solid ${accent}`, borderRadius:4, padding:'13px 14px', fontSize:14, color:'#f2f4f8', outline:'none', fontFamily:'inherit' }}
-          />
-        </div>
-        <button onClick={handleStart} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase', marginTop:6 }}>Enter CoachIQ</button>
-        <div style={{ textAlign:'center' }}>
-          <span style={{ fontSize:11, color:'#3d4559' }}>You can create and manage teams from the home screen</span>
-        </div>
+
+      <div style={{ width:'100%', maxWidth:380 }}>
+        {step === 1 ? (
+          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+            <div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', marginBottom:6 }}>Your name</div>
+              <input value={coachName} onChange={e=>setCoachName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleStart()} placeholder="e.g. Coach Regisford" style={{ width:'100%', background:'#161922', border:`1px solid ${accent}`, borderRadius:4, padding:'13px 14px', fontSize:14, color:'#f2f4f8', outline:'none', fontFamily:'inherit' }} />
+            </div>
+            <button onClick={handleStart} disabled={!coachName.trim()} style={{ width:'100%', background:coachName.trim()?accent:'#3d4559', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:coachName.trim()?'pointer':'not-allowed', textTransform:'uppercase', marginTop:6 }}>Next →</button>
+            <div style={{ textAlign:'center' }}><span style={{ fontSize:11, color:'#3d4559' }}>You can create and manage teams from the home screen</span></div>
+          </div>
+        ) : (
+          <div>
+            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning','All three']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
+            <PhilQ label="How do you measure a good season?" options={['Every kid improved','Everyone had fun','Strong record','Mix of all three']} value={philosophy.measure} onChange={v=>setPhilosophy(p=>({...p,measure:v}))} />
+            <PhilQ label="Who are you coaching?" options={['First-timers / Brand new','Mixed experience levels','Competitive / Experienced']} value={philosophy.who} onChange={v=>setPhilosophy(p=>({...p,who:v}))} />
+            <button onClick={handleLaunch} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Enter CoachIQ</button>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
+
+// ─── C·IQ HUB PAGE ────────────────────────────────────────────────────────────
+function HubPage({ P, S, al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation }) {
+  const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
+  const gameHistory = currentTeam?.gameHistory || []
+  const practicePlans = currentTeam?.practicePlans || []
+  const schedule = currentTeam?.schedule || []
+  const sportGenHistory = genHistory[sport] || []
+
+  // Stats derived from real data
+  const wins = gameHistory.filter(g=>g.us>g.them).length
+  const losses = gameHistory.filter(g=>g.us<=g.them).length
+  const record = gameHistory.length > 0 ? `${wins}-${losses}` : '0-0'
+  const ppg = gameHistory.length > 0 ? Math.round(gameHistory.reduce((s,g)=>s+g.us,0)/gameHistory.length) : null
+  const papg = gameHistory.length > 0 ? Math.round(gameHistory.reduce((s,g)=>s+g.them,0)/gameHistory.length) : null
+
+  // Last offensive and defensive scheme names from genHistory
+  const offSchemes = sportGenHistory.filter(h=>h.plays&&h.plays.length)
+  const defSchemes = sportGenHistory.filter(h=>h.formations&&h.formations.length)
+  const lastOffScheme = offSchemes[0]?.packageName || null
+  const lastDefScheme = defSchemes[0]?.packageName || null
+
+  // Next game and next practice from schedule
+  const now = new Date()
+  const upcoming = schedule.filter(e=>new Date(e.date+'T23:59:59')>=now).sort((a,b)=>new Date(a.date)-new Date(b.date))
+  const nextGame = upcoming.find(e=>e.type==='Game')
+  const nextPractice = upcoming.find(e=>e.type==='Practice')
+
+  function daysUntil(dateStr) {
+    if (!dateStr) return null
+    const d = new Date(dateStr+'T23:59:59')
+    const diff = Math.ceil((d-now)/(1000*60*60*24))
+    return diff <= 0 ? 'Today' : diff === 1 ? '1d' : diff+'d'
+  }
+
+  // Daily ritual greeting
+  function getGreeting() {
+    const day = now.getDay() // 0=Sun, 1=Mon...
+    const nextGameDays = nextGame ? Math.ceil((new Date(nextGame.date+'T23:59:59')-now)/(1000*60*60*24)) : null
+    if (nextGameDays !== null && nextGameDays <= 0) return { label:'Game day', msg:'"It\'s game day, Coach. You\'ve prepared. Trust your players."', actions:['SCORING','LINEUP'] }
+    if (nextGameDays !== null && nextGameDays <= 2) return { label:`${nextGameDays}d to game day`, msg:'"Almost time. Is your scheme locked in and your lineup set?"', actions:['SCHEME','LINEUP'] }
+    if (nextGameDays !== null && nextGameDays <= 4) return { label:`${nextGameDays}d to game day`, msg:'"Game week. Good time to run through your scheme with your players."', actions:['SCHEME','PRACTICE'] }
+    if (nextPractice) return { label:'Practice coming up', msg:'"Have you built your practice plan yet? Sharp practices make sharp teams."', actions:['PRACTICE','DRILLS'] }
+    if (day === 1) return { label:'New week', msg:'"New week, new opportunity. What will you build this week?"', actions:['SCHEME','PRACTICE'] }
+    return { label:'Keep building', msg:'"No game on the calendar. Great time to explore a new scheme or run the Gauntlet."', actions:['SCHEME','GAUNTLET'] }
+  }
+
+  const [showGreeting, setShowGreeting] = useState(true)
+  const greeting = getGreeting()
+
+  // Coach name display
+  const coachName = cfg?.coach || 'Coach'
+
+  // Saved plays count
+  const totalPlays = Object.values(playbook[sport]||{}).reduce((s,folder)=>s+(folder?.length||0),0)
+
+  // Days since last practice
+  const lastPlan = practicePlans[0]
+  const daysSincePractice = lastPlan ? Math.floor((now-new Date(lastPlan.id))/(1000*60*60*24)) : null
+
+  // Next opponent from schedule
+  const nextOpponent = nextGame?.opponent || null
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+
+      {/* DAILY GREETING */}
+      {showGreeting && (
+        <div style={{ background:'#0f1219', border:'1px solid rgba(192,57,43,0.3)', borderLeft:`3px solid #C0392B`, borderRadius:10, padding:'12px 14px', marginBottom:12, position:'relative' }}>
+          <button onClick={()=>setShowGreeting(false)} style={{ position:'absolute', top:8, right:10, background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:4 }}>✕</button>
+          <div style={{ fontSize:8, letterSpacing:2, color:'#C0392B', fontWeight:700, textTransform:'uppercase', marginBottom:4 }}>{greeting.label}</div>
+          <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5, marginBottom:10, paddingRight:20 }}>{greeting.msg}</div>
+          <div style={{ display:'flex', gap:6 }}>
+            <button onClick={()=>{ setPage('schemes'); setActiveMode('schemes_offense') }} style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', fontSize:9, fontWeight:700, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>SCHEMES</button>
+            <button onClick={()=>{ setPage('team') }} style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', fontSize:9, fontWeight:700, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>TEAM</button>
+          </div>
+        </div>
+      )}
+
+      {/* COACH PROFILE CARD */}
+      <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:10, padding:'12px 14px', marginBottom:12 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+          <div style={{ width:38, height:38, borderRadius:'50%', background:'#C0392B', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:900, color:'white', flexShrink:0 }}>{(coachName||'C')[0].toUpperCase()}</div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{coachName}</div>
+            <div style={{ fontSize:10, color:'#6b7a96' }}>{currentTeam?.name || 'No team yet'} · {sport}</div>
+          </div>
+          <div style={{ background:'rgba(192,57,43,0.15)', border:'1px solid rgba(192,57,43,0.4)', borderRadius:4, padding:'3px 8px' }}>
+            <div style={{ fontSize:8, fontWeight:700, color:'#C0392B', letterSpacing:1 }}>FREE</div>
+          </div>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:6 }}>
+          <div style={{ background:'#161922', borderRadius:6, padding:'7px', textAlign:'center' }}>
+            <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8' }}>{iq}</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginTop:1 }}>IQ SCORE</div>
+          </div>
+          <div style={{ background:'#161922', borderRadius:6, padding:'7px', textAlign:'center' }}>
+            <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8' }}>{record}</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginTop:1 }}>RECORD</div>
+          </div>
+          <div style={{ background:'#161922', borderRadius:6, padding:'7px', textAlign:'center' }}>
+            <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8' }}>{totalPlays}</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginTop:1 }}>PLAYS SAVED</div>
+          </div>
+        </div>
+      </div>
+
+      {/* TICKER BAR — Record · Next Game · Next Practice */}
+      <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, display:'flex', height:52, marginBottom:12, overflow:'hidden' }}>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', borderRight:'1px solid #1e2330', padding:'0 6px' }}>
+          <div style={{ fontSize:22, fontWeight:900, color:'#f2f4f8', lineHeight:1, letterSpacing:-1 }}>{record}</div>
+          <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginTop:2 }}>Record</div>
+        </div>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', borderRight:'1px solid #1e2330', padding:'0 6px' }}>
+          <div style={{ fontSize:22, fontWeight:900, color: nextGame ? '#4ade80' : '#3d4559', lineHeight:1, letterSpacing:-1 }}>{nextGame ? daysUntil(nextGame.date) : '—'}</div>
+          <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginTop:2 }}>{nextGame ? `Game · ${new Date(nextGame.date+'T12:00:00').toLocaleDateString([],{weekday:'short'})}` : 'No game'}</div>
+        </div>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 6px' }}>
+          <div style={{ fontSize:22, fontWeight:900, color: nextPractice ? '#6b9fff' : '#3d4559', lineHeight:1, letterSpacing:-1 }}>{nextPractice ? daysUntil(nextPractice.date) : '—'}</div>
+          <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginTop:2 }}>{nextPractice ? `Practice · ${new Date(nextPractice.date+'T12:00:00').toLocaleDateString([],{weekday:'short'})}` : 'No practice'}</div>
+        </div>
+      </div>
+
+      {/* BEFORE THE GAME */}
+      <div style={{ fontSize:8, letterSpacing:2, color:'#3d4559', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Before the game</div>
+
+      {/* OFFENSE CARD */}
+      <div style={{ background:'linear-gradient(135deg,#1a0a08,#0f1219)', border:'1px solid rgba(192,57,43,0.5)', borderTop:'3px solid #C0392B', borderRadius:12, marginBottom:8, overflow:'hidden' }}>
+        <div onClick={()=>{ setPage('schemes'); setActiveMode('schemes_offense') }} style={{ padding:'12px 14px 10px', display:'flex', alignItems:'flex-start', gap:10, cursor:'pointer' }}>
+          <div style={{ width:42, height:42, borderRadius:10, background:'rgba(192,57,43,0.2)', border:'1px solid rgba(192,57,43,0.4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:21, flexShrink:0 }}>⚔️</div>
+          <div style={{ flex:1 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
+              <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>Offense</div>
+              {nextGame && daysUntil(nextGame.date) !== null && <div style={{ background:'#C0392B', borderRadius:3, padding:'1px 6px', fontSize:7, fontWeight:700, color:'white', letterSpacing:1 }}>GAME WEEK</div>}
+            </div>
+            <div style={{ fontSize:9, color:'rgba(192,57,43,0.9)', fontWeight:700 }}>Build your attack →</div>
+          </div>
+        </div>
+        <div style={{ display:'flex', borderTop:'1px solid rgba(192,57,43,0.15)', borderBottom:'1px solid rgba(192,57,43,0.15)' }}>
+          <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
+            <div style={{ fontSize:17, fontWeight:700, color: ppg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{ppg!==null?ppg:'—'}</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Off. PPG</div>
+          </div>
+          <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
+            <div style={{ fontSize:17, fontWeight:700, color:'#3d4559', lineHeight:1 }}>—</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Yds/play</div>
+          </div>
+          <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
+            <div style={{ fontSize:lastOffScheme?9:14, fontWeight:700, color:lastOffScheme?'#C0392B':'#3d4559', lineHeight:1.2 }}>{lastOffScheme ? lastOffScheme.slice(0,14) : '—'}</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
+          </div>
+        </div>
+        <div style={{ padding:'7px 14px', borderBottom:'1px solid rgba(192,57,43,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>Track offensive yards in Live Scoring to see this</div>
+          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#C0392B', fontWeight:700, cursor:'pointer' }}>Scoring →</div>
+        </div>
+        <div onClick={()=>setPage('team')} style={{ padding:'7px 14px', display:'flex', justifyContent:'flex-end', cursor:'pointer' }}>
+          <div style={{ fontSize:9, color:'#C0392B', fontWeight:700, letterSpacing:'0.5px' }}>Full analytics →</div>
+        </div>
+      </div>
+
+      {/* DEFENSE CARD */}
+      <div style={{ background:'linear-gradient(135deg,#080d1a,#0f1219)', border:'1px solid rgba(107,154,255,0.35)', borderTop:'3px solid #6b9fff', borderRadius:12, marginBottom:8, overflow:'hidden' }}>
+        <div onClick={()=>{ setPage('schemes'); setActiveMode('schemes_defense') }} style={{ padding:'12px 14px 10px', display:'flex', alignItems:'flex-start', gap:10, cursor:'pointer' }}>
+          <div style={{ width:42, height:42, borderRadius:10, background:'rgba(107,154,255,0.12)', border:'1px solid rgba(107,154,255,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:21, flexShrink:0 }}>🛡</div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Defense</div>
+            <div style={{ fontSize:9, color:'rgba(107,154,255,0.9)', fontWeight:700 }}>Shut them down →</div>
+          </div>
+        </div>
+        <div style={{ display:'flex', borderTop:'1px solid rgba(107,154,255,0.15)', borderBottom:'1px solid rgba(107,154,255,0.15)' }}>
+          <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
+            <div style={{ fontSize:17, fontWeight:700, color: papg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{papg!==null?papg:'—'}</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Pts allowed avg</div>
+          </div>
+          <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
+            <div style={{ fontSize:17, fontWeight:700, color:'#3d4559', lineHeight:1 }}>—</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Yds allowed/play</div>
+          </div>
+          <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
+            <div style={{ fontSize:lastDefScheme?9:14, fontWeight:700, color:lastDefScheme?'#6b9fff':'#3d4559', lineHeight:1.2 }}>{lastDefScheme ? lastDefScheme.slice(0,14) : '—'}</div>
+            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
+          </div>
+        </div>
+        <div style={{ padding:'7px 14px', borderBottom:'1px solid rgba(107,154,255,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>Track yards allowed in Live Scoring to see this</div>
+          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#6b9fff', fontWeight:700, cursor:'pointer' }}>Scoring →</div>
+        </div>
+        <div onClick={()=>setPage('team')} style={{ padding:'7px 14px', display:'flex', justifyContent:'flex-end', cursor:'pointer' }}>
+          <div style={{ fontSize:9, color:'#6b9fff', fontWeight:700, letterSpacing:'0.5px' }}>Full analytics →</div>
+        </div>
+      </div>
+
+      {/* PRACTICE + SCOUT 2-col */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
+
+        {/* Practice Plan */}
+        <div onClick={()=>setPage('team')} style={{ background:'linear-gradient(135deg,#081a0d,#0f1219)', border:'1px solid rgba(74,222,128,0.3)', borderTop:'3px solid #4ade80', borderRadius:12, overflow:'hidden', cursor:'pointer' }}>
+          <div style={{ padding:'12px 12px 8px' }}>
+            <div style={{ fontSize:22, marginBottom:5 }}>🏃</div>
+            <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Practice Plan</div>
+            <div style={{ fontSize:9, color:'rgba(74,222,128,0.8)', fontWeight:700 }}>Run a sharp session →</div>
+          </div>
+          <div style={{ borderTop:'1px solid rgba(74,222,128,0.15)', padding:'8px 12px' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
+              <div style={{ fontSize:8, color:'#6b7a96' }}>Plans saved</div>
+              <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8' }}>{practicePlans.length}</div>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
+              <div style={{ fontSize:8, color:'#6b7a96' }}>Last focus</div>
+              <div style={{ fontSize:9, fontWeight:700, color:'#f2f4f8', textAlign:'right', maxWidth:70, lineHeight:1.2 }}>{lastPlan?.focus || '—'}</div>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+              <div style={{ fontSize:8, color:'#6b7a96' }}>Since last</div>
+              <div style={{ fontSize:13, fontWeight:700, color: daysSincePractice!==null&&daysSincePractice>5?'#f59e0b':'#f2f4f8' }}>{daysSincePractice!==null?daysSincePractice+'d':'—'}</div>
+            </div>
+            <div style={{ fontSize:8, color:'#4ade80', fontWeight:700 }}>View all plans →</div>
+          </div>
+        </div>
+
+        {/* Scout */}
+        <div onClick={()=>{ setPage('scout') }} style={{ background:'linear-gradient(135deg,#150f08,#0f1219)', border:'1px solid rgba(245,158,11,0.3)', borderTop:'3px solid #f59e0b', borderRadius:12, overflow:'hidden', cursor:'pointer' }}>
+          <div style={{ padding:'12px 12px 8px' }}>
+            <div style={{ fontSize:22, marginBottom:5 }}>🔍</div>
+            <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Scout</div>
+            <div style={{ fontSize:9, color:'rgba(245,158,11,0.8)', fontWeight:700 }}>Know your opponent →</div>
+          </div>
+          <div style={{ borderTop:'1px solid rgba(245,158,11,0.15)', padding:'8px 12px' }}>
+            {nextOpponent ? (
+              <>
+                <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginBottom:3 }}>NEXT OPPONENT</div>
+                <div style={{ fontSize:11, fontWeight:700, color:'#f2f4f8', lineHeight:1.3, marginBottom:5 }}>{nextOpponent}</div>
+                <div style={{ background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:4, padding:'3px 6px', textAlign:'center', marginBottom:6 }}>
+                  <div style={{ fontSize:7, color:'#f59e0b', fontWeight:700, letterSpacing:'0.5px' }}>NO SCOUT BUILT YET</div>
+                </div>
+                <div style={{ fontSize:8, color:'#f59e0b', fontWeight:700 }}>Build one now →</div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginBottom:6 }}>NO UPCOMING GAME</div>
+                <div style={{ fontSize:10, color:'#3d4559', lineHeight:1.4, marginBottom:6 }}>Add a game to your schedule to prep a scout report</div>
+                <div style={{ fontSize:8, color:'#f59e0b', fontWeight:700 }}>Add to schedule →</div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* GAME DAY */}
+      <div style={{ fontSize:8, letterSpacing:2, color:'#3d4559', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Game day</div>
+      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+        {[
+          { icon:'🏟', label:'Scoring', sub:'Track live', action:()=>setPage('team') },
+          { icon:'👥', label:'Lineup', sub:'Set positions', action:()=>setPage('team') },
+          { icon:'✏️', label:'Play Builder', sub:'Name plays', action:()=>{ setPage('learn'); setActiveMode('playbuilder') } },
+        ].map(item => (
+          <div key={item.label} onClick={item.action} style={{ flex:1, background:'#0f1219', border:'1px solid rgba(107,154,255,0.2)', borderTop:'2px solid #6b9fff', borderRadius:10, padding:'10px 6px', textAlign:'center', cursor:'pointer' }}>
+            <div style={{ fontSize:20, marginBottom:3 }}>{item.icon}</div>
+            <div style={{ fontSize:10, fontWeight:700, color:'#6b9fff', marginBottom:1 }}>{item.label}</div>
+            <div style={{ fontSize:7, color:'#3d4559' }}>{item.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* AFTER THE GAME */}
+      <div style={{ fontSize:8, letterSpacing:2, color:'#3d4559', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>After the game</div>
+      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+        {[
+          { icon:'📊', label:'Analytics', sub: record, action:()=>setPage('team') },
+          { icon:'📖', label:'Playbook', sub: totalPlays+' plays', action:()=>{ setPage('schemes'); setActiveMode('playbook') } },
+          { icon:'🎉', label:'Post-Game', sub: gameHistory.length>0 ? `Last: ${gameHistory[gameHistory.length-1].us}-${gameHistory[gameHistory.length-1].them}` : 'No games yet', action:()=>setPage('team') },
+        ].map(item => (
+          <div key={item.label} onClick={item.action} style={{ flex:1, background:'#0f1219', border:'1px solid rgba(74,222,128,0.2)', borderTop:'2px solid #4ade80', borderRadius:10, padding:'10px 6px', textAlign:'center', cursor:'pointer' }}>
+            <div style={{ fontSize:20, marginBottom:3 }}>{item.icon}</div>
+            <div style={{ fontSize:10, fontWeight:700, color:'#4ade80', marginBottom:1 }}>{item.label}</div>
+            <div style={{ fontSize:7, color:'#3d4559' }}>{item.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* WHAT'S COMING */}
+      <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:12, padding:'12px 14px', marginBottom:8 }}>
+        <div style={{ fontSize:8, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:10 }}>What's coming</div>
+        {[
+          { color:'#4ade80', label:'Just added', items:'Live scoring · Practice plans · Post-game summary · Player editing · Collapsible play cards' },
+          { color:'#f59e0b', label:'In progress', items:'Full play breakdown · Flag football · Position tracker · Yards tracking in live scoring' },
+          { color:'#3d4559', label:'Planned', items:'Film room · Wristbands · AthleteIQ · Coach network · Season manager' },
+        ].map(row => (
+          <div key={row.label} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:8 }}>
+            <div style={{ width:7, height:7, borderRadius:'50%', background:row.color, flexShrink:0, marginTop:3 }}></div>
+            <div><span style={{ fontSize:9, fontWeight:700, color:row.color }}>{row.label} · </span><span style={{ fontSize:9, color:row.color==='#3d4559'?'#3d4559':'#6b7a96' }}>{row.items}</span></div>
+          </div>
+        ))}
+      </div>
+
+      {/* SETTINGS + HELP */}
+      <div style={{ display:'flex', gap:8 }}>
+        <div onClick={()=>setPage('more')} style={{ flex:1, background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
+          <span style={{ fontSize:15 }}>⚙️</span>
+          <span style={{ fontSize:11, fontWeight:700, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>SETTINGS</span>
+        </div>
+        <div onClick={()=>setPage('learn')} style={{ flex:1, background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
+          <span style={{ fontSize:15 }}>❓</span>
+          <span style={{ fontSize:11, fontWeight:700, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>HELP + TOUR</span>
+        </div>
+      </div>
+
+    </div>
+  )
+}
 
 // ─── NAV BUTTON WITH LONG PRESS ──────────────────────────────────────────────
 function NavButton({ id, icon, label, isActive, P, al, setPage }) {
@@ -5016,9 +5349,8 @@ export default function CoachIQ() {
   })
   const [cfg, setCfg] = useState({ coach:'', team:'', primary:'#C0392B', secondary:'#002868' })
   const [brand, setBrand] = useState('Red — C+IQ colored')
-  const [page, setPage] = useState('home')
+  const [page, setPage] = useState('hub')
   const [activeMode, setActiveMode] = useState(null)
-  const [showAllGrid, setShowAllGrid] = useState(false)
   const [scrollToLocation, setScrollToLocation] = useState(false)
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(500)
@@ -5129,7 +5461,7 @@ export default function CoachIQ() {
   )
 
   const NAV_ITEMS = [
-    { id:'home',    icon:'🏠', label:'HOME'    },
+    { id:'hub',     label:'HUB'     },
     { id:'schemes', icon:'📋', label:'SCHEMES' },
     { id:'team',    icon:'🏆', label:'TEAM'    },
     { id:'learn',   icon:'🎓', label:'LEARN'   },
@@ -5291,6 +5623,7 @@ export default function CoachIQ() {
 
         {/* PAGE CONTENT */}
         <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14, background:'#07090d', overflowX:'hidden', boxSizing:'border-box' }}>
+          {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={teams} activeTeam={activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} callAI={callAI} homeLocation={homeLocation} />}
           {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} homeLocation={homeLocation} setPage={setPage} />}
           {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
           {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
@@ -5303,52 +5636,22 @@ export default function CoachIQ() {
 
         {/* BOTTOM NAV */}
         <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:'min(640px,100%)', zIndex:50, background:'#07090d' }}>
-          {/* ALL Features Grid */}
-          {showAllGrid && (
-            <>
-              <div onClick={()=>setShowAllGrid(false)} style={{ position:'fixed', inset:0, zIndex:48, background:'rgba(0,0,0,0.5)' }} onTouchStart={()=>setShowAllGrid(false)} />
-              <div style={{ position:'relative', zIndex:49, background:'#0d1117', borderTop:'1px solid #1e2330', padding:'10px 10px 6px', maxHeight:'60vh', overflowY:'auto', WebkitOverflowScrolling:'touch' }}>
-                {ALL_FEATURES.map(cat => (
-                  <div key={cat.category} style={{ marginBottom:8 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:5 }}>
-                      <div style={{ width:6, height:6, borderRadius:'50%', background:cat.color, flexShrink:0 }} />
-                      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:cat.color }}>{cat.category}</span>
-                      {cat.soon && <span style={{ fontSize:7, color:'#f59e0b', fontWeight:700, background:'rgba(245,158,11,0.1)', borderRadius:3, padding:'1px 4px' }}>🏒 More sports + features coming</span>}
-                    </div>
-                    <div style={{ display:'grid', gridTemplateColumns:'repeat(4,minmax(0,1fr))', gap:4 }}>
-                      {cat.items.map((item, i) => (
-                        <div key={i}
-                          onClick={cat.soon ? undefined : ()=>{ item.action && item.action(); setShowAllGrid(false) }}
-                          onTouchEnd={cat.soon ? undefined : (e)=>{ e.preventDefault(); item.action && item.action(); setShowAllGrid(false) }}
-                          style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, padding:'10px 4px 8px', borderRadius:8, border:`1px solid ${cat.soon?'rgba(245,158,11,0.25)':al(cat.color,0.3)}`, background:cat.soon?'rgba(245,158,11,0.05)':al(cat.color,0.06), cursor:cat.soon?'default':'pointer', opacity:cat.soon?0.75:1, WebkitTapHighlightColor:'transparent', minHeight:64 }}>
-                          <span style={{ fontSize:20 }}>{item.icon}</span>
-                          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'0.3px', color:cat.soon?'rgba(245,158,11,0.7)':cat.color==='#C0392B'?'#ef8070':cat.color==='#6b9fff'?'#6b9fff':cat.color==='#4ade80'?'#4ade80':'#9aa0b0', textAlign:'center', lineHeight:1.2 }}>{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-          {/* Nav bar */}
+          {/* Nav bar — 4 tabs, Hub first */}
           <div style={{ borderTop:'1px solid #0e1220', display:'flex', paddingBottom:'env(safe-area-inset-bottom,0px)' }}>
-          {/* 4 main nav tabs */}
-            {NAV_ITEMS.map(({ id, icon, label }) => (
-              <NavButton key={id} id={id} icon={icon} label={label} isActive={page===id} P={P} al={al} setPage={(pg) => { setPage(pg); setShowAllGrid(false) }} />
-            ))}
-            {/* ALL button */}
+            {/* C·IQ Hub button */}
             <div style={{ flex:1, position:'relative' }}>
-              <button
-                onClick={()=>setShowAllGrid(g=>!g)}
-                style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'10px 2px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation' }}>
-                {showAllGrid && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:'#f59e0b', borderRadius:1 }} />}
-                <div style={{ width:26, height:26, borderRadius:6, background:showAllGrid?'#f59e0b':'rgba(245,158,11,0.15)', border:'1.5px solid rgba(245,158,11,0.5)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s' }}>
-                  <span style={{ fontSize:14, filter:showAllGrid?'none':'opacity(0.8)' }}>⊞</span>
+              <button onClick={()=>setPage('hub')} style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 2px 5px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation' }}>
+                {page==='hub' && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:28, height:2, background:'#C0392B', borderRadius:1 }} />}
+                <div style={{ background:page==='hub'?'#C0392B':'#161922', border:`1px solid ${page==='hub'?'#C0392B':'#1e2330'}`, borderRadius:5, padding:'2px 7px', marginBottom:1 }}>
+                  <span style={{ fontSize:11, fontWeight:900, color:'white', letterSpacing:'-0.5px', fontFamily:"'Barlow Condensed',sans-serif" }}>C·IQ</span>
                 </div>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#f59e0b', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>ALL</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page==='hub'?'#C0392B':'#3d4559', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>HUB</span>
               </button>
             </div>
+            {/* Other tabs */}
+            {NAV_ITEMS.filter(n=>n.id!=='hub').map(({ id, icon, label }) => (
+              <NavButton key={id} id={id} icon={icon} label={label} isActive={page===id} P={P} al={al} setPage={setPage} />
+            ))}
           </div>
         </div>
       </div>
