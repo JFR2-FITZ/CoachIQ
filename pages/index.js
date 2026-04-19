@@ -557,7 +557,7 @@ function getRandomTip(sport) {
 // ─── TUTORIAL DATA ────────────────────────────────────────────────────────────
 const TUTORIAL_STEPS = [
   { tab:'home', icon:'\u{1F3E0}', title:'Welcome to CoachIQ', action:null, actionLabel:null,
-    desc:'Your AI coaching assistant. This tour walks you through every feature. Tap Next to continue or Exit Tour anytime.',
+    desc:'Your coaching assistant. This tour walks you through every feature. Tap Next to continue or Exit Tour anytime.',
     tip:'CoachIQ works for Football, Basketball, Baseball, Soccer, and Softball. Switch sports with the dropdown at the top left.' },
   { tab:'team', icon:'\u{1F3C6}', title:'Step 1 - Create Your Team', action:'team', actionLabel:'Go to Team Tab',
     desc:'Everything in CoachIQ is built around your team. Open the Team tab, fill in your team name, pick a mascot, choose your colors, and add your hometown.',
@@ -4237,7 +4237,7 @@ function NewsPage({ P, S, al, sport, callAI }) {
               {item.link ? (
                 <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>READ ARTICLE →</div>
               ) : (
-                <div style={{ marginTop:8, fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>✦ AI COACHING INSIGHT</div>
+                <div style={{ marginTop:8, fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>✦ COACHING INSIGHT</div>
               )}
             </div>
           ))}
@@ -4328,7 +4328,7 @@ function LearnPage({ P, S, al, sport, iq, setIQ, gauntlets, setGauntlets, callAI
       color: P,
       tools: [
         { id:'playnames', icon:'✏️', title: sport==='Baseball'||sport==='Softball' ? 'Signal Creator' : 'Play Name Builder', desc:'Build pro-level play calls step by step with live diagrams', tag: sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'INTERACTIVE' },
-        { id:'gauntlet',  icon:'⚡', title:'Coaching Gauntlet',   desc:'AI-powered scenario challenges. Test your IQ every session', tag:'IQ: '+iq },
+        { id:'gauntlet',  icon:'⚡', title:'Coaching Gauntlet',   desc:'Scenario challenges that test your coaching IQ every session', tag:'IQ: '+iq },
       ]
     },
     {
@@ -4423,7 +4423,7 @@ function MorePage({ P, S, al, cfg, setCfg, brand, setBrand, sport, homeLocation,
     { icon:'📆', title:'Practice Planner', desc:'AI-generated week-by-week practice schedules tailored to your upcoming opponent and team needs.', status:'COMING SOON', color:'#f59e0b' },
     { icon:'🤝', title:'Coach Network & Play Sharing', desc:'Share packages with other coaches, discover trending schemes, and follow elite youth coordinators.', status:'COMING SOON', color:'#6b9fff' },
     { icon:'🏆', title:'League & Season Manager', desc:'Track standings, schedule games, and manage your full season across multiple teams from one dashboard.', status:'COMING SOON', color:'#f87171' },
-    { icon:'🎓', title:'Coaching Certification Path', desc:'AI-powered coursework with nationally recognized youth coaching certifications built in.', status:'COMING SOON', color:'#4ade80' },
+    { icon:'🎓', title:'Coaching Certification Path', desc:'Coursework with nationally recognized youth coaching certifications built in.', status:'COMING SOON', color:'#4ade80' },
   ]
 
   const bpDot = (color) => (
@@ -4716,7 +4716,7 @@ function HomePage({ P, S, al, dk, lastName, sport, iq, setIQ, gauntlets, setGaun
       {/* Ticker */}
       <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
         <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
-        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — AI Coaching Intelligence · Generate schemes · Scout opponents · Build your playbook`}</div></div>
+        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — Prepare. Lead. Inspire. · Generate schemes · Scout opponents · Build your playbook`}</div></div>
       </div>
 
       {/* Next Event Card — only shown when there's an upcoming event */}
@@ -4921,7 +4921,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
           <span style={{ color:cOach }}>oach</span>
           <span style={{ color:cIQ }}>IQ</span>
         </div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'5px', color:'#3a4260', textTransform:'uppercase' }}>AI Coaching Intelligence</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'5px', color:'#3a4260', textTransform:'uppercase' }}>Prepare. Lead. Inspire.</div>
       </div>
 
       {phase === 'cta' && (
@@ -4937,7 +4937,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
   )
 }
 
-function Onboarding({ onLaunch, brand='Red — C+IQ colored' }) {
+function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
   const [coachName, setCoachName] = useState('')
   const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red — C+IQ colored']
   const accent = p.accent
@@ -4953,6 +4953,14 @@ function Onboarding({ onLaunch, brand='Red — C+IQ colored' }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'#07090d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'32px 28px', fontFamily:"'DM Sans',sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
+
+      {/* Back button — top left */}
+      {onBack && (
+        <button onClick={onBack} style={{ position:'absolute', top:20, left:20, background:'transparent', border:'none', color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'1px', cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'8px 4px' }}>
+          ← Back
+        </button>
+      )}
+
       <div style={{ textAlign:'center', marginBottom:36 }}>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:44, lineHeight:1, marginBottom:8 }}>
           <span style={{ color:cC }}>C</span>
@@ -5119,7 +5127,7 @@ export default function CoachIQ() {
     }} alreadyAuthed={launched} brand={brand} />
   )
   if (!launched) return (
-    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} brand={brand} />
+    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} onBack={()=>setShowSplash(true)} brand={brand} />
   )
 
   // First-time tutorial flow
@@ -5187,7 +5195,7 @@ export default function CoachIQ() {
         <meta name="apple-mobile-web-app-title" content="CoachIQ" />
         <meta name="application-name" content="CoachIQ" />
         <meta name="theme-color" content="#07090d" />
-        <meta name="description" content="AI-powered coaching intelligence for youth sports coaches" />
+        <meta name="description" content="CoachIQ — Prepare. Lead. Inspire. The coaching platform built for youth sports." />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </Head>
