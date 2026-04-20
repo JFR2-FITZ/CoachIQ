@@ -1,5 +1,47 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-// ─── RESPONSIVE HOOK ─────────────────────────────────────────────────────────
+
+// ─── APP VERSION & FEATURE FLAGS ─────────────────────────────────────────────
+// Update APP_VERSION with each major push.
+// STATUS: 'live' | 'beta' | 'coming_soon' | 'planned'
+// TIER: 'free' | 'founding' | 'pro' | 'league'
+const APP_VERSION = '1.5.0'
+const FEATURES = {
+  hub:               { status:'live',        name:'C·IQ Hub',                  tier:'free'     },
+  schemes_offense:   { status:'live',        name:'Offense Scheme Generator',  tier:'free'     },
+  schemes_defense:   { status:'live',        name:'Defense Scheme Generator',  tier:'free'     },
+  play_name_builder: { status:'live',        name:'Play Name Builder',         tier:'free'     },
+  gauntlet:          { status:'live',        name:'Coaching Gauntlet',         tier:'free'     },
+  rulebook:          { status:'live',        name:'Rulebook',                  tier:'free'     },
+  news_feed:         { status:'live',        name:'Sport News Feed',           tier:'free'     },
+  weather:           { status:'live',        name:'Weather Intelligence',      tier:'free'     },
+  situational:       { status:'live',        name:'Situational Advisor',       tier:'free'     },
+  film_room:         { status:'live',        name:'Film Room',                 tier:'free'     },
+  team_management:   { status:'live',        name:'Team Management',           tier:'free'     },
+  roster:            { status:'live',        name:'Roster',                    tier:'free'     },
+  schedule:          { status:'live',        name:'Schedule',                  tier:'free'     },
+  live_scoring:      { status:'live',        name:'Live Scoring',              tier:'free'     },
+  analytics:         { status:'live',        name:'Analytics',                 tier:'free'     },
+  practice_plans:    { status:'live',        name:'Practice Plans',            tier:'free'     },
+  post_game:         { status:'live',        name:'Post-Game Summary',         tier:'free'     },
+  playbook:          { status:'live',        name:'Playbook',                  tier:'free'     },
+  scout:             { status:'live',        name:'Scout Reports',             tier:'free'     },
+  lineup_builder:    { status:'live',        name:'Lineup Builder',            tier:'free'     },
+  print_wristbands:  { status:'live',        name:'Print / Wristbands',        tier:'free'     },
+  sport_football:    { status:'live',        name:'Football',                  tier:'free'     },
+  sport_basketball:  { status:'live',        name:'Basketball',                tier:'free'     },
+  sport_baseball:    { status:'live',        name:'Baseball',                  tier:'free'     },
+  sport_soccer:      { status:'live',        name:'Soccer',                    tier:'free'     },
+  sport_softball:    { status:'live',        name:'Softball',                  tier:'free'     },
+  sport_flag:        { status:'coming_soon', name:'Flag Football',             tier:'free'     },
+  athlete_iq:        { status:'planned',     name:'AthleteIQ',                 tier:'pro'      },
+  coach_network:     { status:'planned',     name:'Coach Network',             tier:'pro'      },
+  league_manager:    { status:'planned',     name:'League Manager',            tier:'league'   },
+  certifications:    { status:'planned',     name:'Coaching Certifications',   tier:'pro'      },
+  advanced_analytics:{ status:'planned',     name:'Advanced Analytics',        tier:'founding' },
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+
 function useWindowSize() {
   const [size, setSize] = useState({ w: 375, h: 812 })
   useEffect(() => {
@@ -4501,8 +4543,8 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
 }
 
 
-function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage, guestMode=false, guestGauntletDone=false, setGuestGauntletDone, onGuestSignUp }) {
-  const [activeMode, setActiveMode] = useState(null)
+function LearnPage({ P='#C0392B', S='#002868', al, dk, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage, guestMode=false, guestGauntletDone=false, setGuestGauntletDone, onGuestSignUp, initialMode=null }) {
+  const [activeMode, setActiveMode] = useState(initialMode)
 
   const categories = [
     {
@@ -4511,8 +4553,10 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
       desc: 'Learn by doing — hands-on coaching simulators',
       color: P,
       tools: [
-        { id:'playnames', icon:'✏️', title: sport==='Baseball'||sport==='Softball' ? 'Signal Creator' : 'Play Name Builder', desc:'Build pro-level play calls step by step with live diagrams', tag: sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'INTERACTIVE' },
-        { id:'gauntlet',  icon:'⚡', title:'Coaching Gauntlet',   desc:'Scenario challenges that test your coaching IQ every session', tag:'IQ: '+iq },
+        { id:'playnames',   icon:'✏️', title: sport==='Baseball'||sport==='Softball' ? 'Signal Creator' : 'Play Name Builder', desc:'Build pro-level play calls step by step with live diagrams', tag: sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'INTERACTIVE' },
+        { id:'gauntlet',    icon:'⚡', title:'Coaching Gauntlet', desc:'Scenario challenges that test your coaching IQ every session', tag:'IQ: '+iq },
+        { id:'situational', icon:'🎯', title:sport==='Football'?'Situational Play Caller':sport==='Basketball'?'Live Game Adjustments':'Count & Situation Advisor', desc:'Real-time AI play recommendations based on score, down, and game situation', tag:'GAME DAY' },
+        { id:'film',        icon:'🎥', title:'Film Room', desc:'Upload game footage notes, tag plays, and get AI breakdown of what you see', tag:'ANALYSIS' },
       ]
     },
     {
@@ -4545,6 +4589,10 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
   if (activeMode === 'playnames') return (
     <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <PlayNameBuilder P={P} S={S} al={al} sport={sport} /> </>
+  )
+  if (activeMode === 'film') return (
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} /> </>
   )
   if (activeMode === 'rulebook') return (
     <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
@@ -5258,7 +5306,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
 
 
 // ─── C·IQ HUB PAGE ────────────────────────────────────────────────────────────
-function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation, setTeams, guestMode=false, guestDemoTeam, setGuestDemoTeam, onGuestSignUp }) {
+function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, setLearnMode, callAI, homeLocation, setTeams, guestMode=false, guestDemoTeam, setGuestDemoTeam, onGuestSignUp }) {
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const gameHistory = currentTeam?.gameHistory || []
   const practicePlans = currentTeam?.practicePlans || []
@@ -6011,13 +6059,14 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
 
       {/* GAME DAY */}
       <div style={{ fontSize:10, letterSpacing:2, color:'#8a94b0', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Game day</div>
-      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:14 }}>
         {[
           { icon:'🏟', label:'Scoring', sub:'Track live', action:()=>setPage('team') },
           { icon:'👥', label:'Lineup', sub:'Set positions', action:()=>setPage('team') },
-          { icon:'✏️', label:'Play Builder', sub:'Name plays', action:()=>{ setPage('learn'); setActiveMode('playbuilder') } },
+          { icon:'🎯', label:'Situational', sub:'Play advisor', action:()=>{ setLearnMode('situational'); setPage('learn') } },
+          { icon:'✏️', label:'Play Builder', sub:'Name plays', action:()=>{ setLearnMode('playnames'); setPage('learn') } },
         ].map(item => (
-          <div key={item.label} onClick={item.action} style={{ flex:1, background:'#0f1219', border:'1px solid rgba(107,154,255,0.2)', borderTop:'2px solid #6b9fff', borderRadius:10, padding:'12px 8px', textAlign:'center', cursor:'pointer' }}>
+          <div key={item.label} onClick={item.action} style={{ background:'#0f1219', border:'1px solid rgba(107,154,255,0.2)', borderTop:'2px solid #6b9fff', borderRadius:10, padding:'12px 8px', textAlign:'center', cursor:'pointer' }}>
             <div style={{ fontSize:20, marginBottom:3 }}>{item.icon}</div>
             <div style={{ fontSize:11, fontWeight:700, color:'#6b9fff', marginBottom:2 }}>{item.label}</div>
             <div style={{ fontSize:9, color:'#5a6480' }}>{item.sub}</div>
@@ -6045,9 +6094,9 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
       <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:12, padding:'12px 14px', marginBottom:8 }}>
         <div style={{ fontSize:10, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:10 }}>What's coming</div>
         {[
-          { color:'#4ade80', label:'Just added', items:'Live scoring · Practice plans · Post-game summary · Player editing · CoachIQ Hub' },
-          { color:'#f59e0b', label:'In progress', items:'Full play breakdown · Flag football · Position tracker · Yards tracking' },
-          { color:'#5a6480', label:'Planned', items:'Film room · Wristbands · AthleteIQ · Coach network · Season manager' },
+          { color:'#4ade80', label:'Just added', items:'Live scoring · Practice plans · Post-game summary · Player editing · CoachIQ Hub · Film analysis · Wristband printing · Situational Advisor' },
+          { color:'#f59e0b', label:'In progress', items:'Flag football · Full play breakdown · Position tracker · Yards tracking in live scoring' },
+          { color:'#5a6480', label:'Planned', items:'AthleteIQ · Coach Network · League Manager · Advanced Analytics · Coaching Certifications' },
         ].map(row => (
           <div key={row.label} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:8 }}>
             <div style={{ width:7, height:7, borderRadius:'50%', background:row.color, flexShrink:0, marginTop:3 }}></div>
@@ -6117,6 +6166,143 @@ function GuestGate({ feature, onSignUp, children }) {
       </div>
       <button onClick={onSignUp} style={{ width:'100%', maxWidth:280, padding:'13px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Account →</button>
       <div style={{ marginTop:10, fontSize:10, color:'#5a6480' }}>No credit card required</div>
+    </div>
+  )
+}
+
+// ─── GUEST TEAM PREVIEW (read-only demo team view for guest mode) ─────────────
+function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp }) {
+  const [tab, setTab] = useState('roster')
+  const players = team?.players || []
+  const schedule = team?.schedule || []
+  const gameHistory = team?.gameHistory || []
+  const wins = gameHistory.filter(g=>g.us>g.them).length
+  const losses = gameHistory.filter(g=>g.us<=g.them).length
+  const ppg = gameHistory.length ? Math.round(gameHistory.reduce((s,g)=>s+g.us,0)/gameHistory.length) : 0
+  const papg = gameHistory.length ? Math.round(gameHistory.reduce((s,g)=>s+g.them,0)/gameHistory.length) : 0
+  const now = new Date()
+  const upcoming = schedule.filter(e=>new Date(e.date+'T23:59:59')>=now)
+  const typeIcons = { Game:'🏆', Practice:'📋', Scrimmage:'⚡', Tournament:'🥇' }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+      {/* Preview banner */}
+      <div style={{ background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:8, padding:'10px 14px', marginBottom:12, display:'flex', alignItems:'center', gap:10 }}>
+        <span style={{ fontSize:16 }}>👁</span>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:10, fontWeight:700, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, marginBottom:2 }}>PREVIEW MODE — {team.name}</div>
+          <div style={{ fontSize:11, color:'#8a94b0' }}>This is a demo team. Create a free account to build your own.</div>
+        </div>
+        <button onClick={onSignUp} style={{ flexShrink:0, padding:'7px 10px', background:'#C0392B', border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1 }}>JOIN FREE</button>
+      </div>
+
+      {/* Tab switcher */}
+      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+        {[['roster','👥 Roster'],['schedule','📅 Schedule'],['analytics','📊 Analytics']].map(([id,label])=>(
+          <button key={id} onClick={()=>setTab(id)} style={{ flex:1, padding:'9px 4px', borderRadius:6, fontSize:11, border:`1px solid ${tab===id?P:'#1e2330'}`, background:tab===id?al(P,0.15):'#0f1219', color:tab===id?P:'#8a94b0', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Roster tab */}
+      {tab === 'roster' && (
+        <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, overflow:'hidden' }}>
+          <div style={{ padding:'10px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', letterSpacing:1 }}>ROSTER — {players.length} PLAYERS</div>
+            <div style={{ fontSize:9, color:'#5a6480', fontStyle:'italic' }}>Read-only preview</div>
+          </div>
+          <div style={{ padding:'8px 0' }}>
+            {players.map((p,i) => (
+              <div key={p.id||i} style={{ display:'flex', alignItems:'center', gap:12, padding:'9px 14px', borderBottom:i<players.length-1?'1px solid #1e2330':'none' }}>
+                <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, color:P, flexShrink:0 }}>#{p.number||'—'}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
+                  <div style={{ fontSize:10, color:'#8a94b0' }}>{p.position}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ padding:'10px 14px', borderTop:'1px solid #1e2330', textAlign:'center' }}>
+            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Create Your Roster — Free →</button>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule tab */}
+      {tab === 'schedule' && (
+        <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, overflow:'hidden' }}>
+          <div style={{ padding:'10px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', letterSpacing:1 }}>SCHEDULE — {upcoming.length} UPCOMING</div>
+            <div style={{ fontSize:9, color:'#5a6480', fontStyle:'italic' }}>Read-only preview</div>
+          </div>
+          <div style={{ padding:'8px 0' }}>
+            {upcoming.length === 0 && <div style={{ padding:'18px 14px', fontSize:12, color:'#5a6480', textAlign:'center' }}>No upcoming events</div>}
+            {upcoming.map((e,i)=>{
+              const d = new Date(e.date+'T12:00:00')
+              return (
+                <div key={e.id||i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderBottom:i<upcoming.length-1?'1px solid #1e2330':'none' }}>
+                  <span style={{ fontSize:16, flexShrink:0 }}>{typeIcons[e.type]||'📅'}</span>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{e.opponent||e.type}</div>
+                    <div style={{ fontSize:10, color:'#8a94b0' }}>{d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}{e.time?' · '+e.time:''}</div>
+                  </div>
+                  <div style={{ fontSize:10, fontWeight:700, color:P, fontFamily:"'Barlow Condensed',sans-serif" }}>{e.homeAway}</div>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ padding:'10px 14px', borderTop:'1px solid #1e2330', textAlign:'center' }}>
+            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Build Your Schedule — Free →</button>
+          </div>
+        </div>
+      )}
+
+      {/* Analytics tab */}
+      {tab === 'analytics' && (
+        <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, overflow:'hidden' }}>
+          <div style={{ padding:'10px 14px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', letterSpacing:1 }}>SEASON ANALYTICS</div>
+            <div style={{ fontSize:9, color:'#5a6480', fontStyle:'italic' }}>Read-only preview</div>
+          </div>
+          <div style={{ padding:'16px 14px' }}>
+            {/* W/L display */}
+            <div style={{ display:'flex', gap:0, background:'#161922', borderRadius:8, marginBottom:12, overflow:'hidden' }}>
+              <div style={{ flex:1, padding:'14px 10px', textAlign:'center', borderRight:'1px solid #1e2330' }}>
+                <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:40, fontWeight:900, color:'#4ade80', lineHeight:1 }}>{wins}</div>
+                <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2 }}>WINS</div>
+              </div>
+              <div style={{ flex:1, padding:'14px 10px', textAlign:'center' }}>
+                <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:40, fontWeight:900, color:'#e74c3c', lineHeight:1 }}>{losses}</div>
+                <div style={{ fontSize:10, color:'#e74c3c', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2 }}>LOSSES</div>
+              </div>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+              <div style={{ background:'#161922', borderRadius:6, padding:'12px', textAlign:'center' }}>
+                <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:28, fontWeight:900, color:P, lineHeight:1 }}>{ppg}</div>
+                <div style={{ fontSize:9, color:'#8a94b0', marginTop:2 }}>Pts Per Game</div>
+              </div>
+              <div style={{ background:'#161922', borderRadius:6, padding:'12px', textAlign:'center' }}>
+                <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:28, fontWeight:900, color:'#e74c3c', lineHeight:1 }}>{papg}</div>
+                <div style={{ fontSize:9, color:'#8a94b0', marginTop:2 }}>Allowed/Game</div>
+              </div>
+            </div>
+            <div style={{ fontSize:9, color:'#5a6480', marginBottom:8 }}>GAME RESULTS</div>
+            {[...gameHistory].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((g,i)=>{
+              const r = g.us>g.them?'W':g.us<g.them?'L':'T'
+              const rc = r==='W'?'#4ade80':r==='L'?'#e74c3c':'#f59e0b'
+              return (
+                <div key={g.id||i} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 10px', background:'#161922', borderRadius:5, marginBottom:5, borderLeft:`3px solid ${rc}` }}>
+                  <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:rc, width:14 }}>{r}</div>
+                  <div style={{ flex:1, fontSize:11, color:'#f2f4f8' }}>{g.opponent}</div>
+                  <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{g.us}–{g.them}</div>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ padding:'10px 14px', borderTop:'1px solid #1e2330', textAlign:'center' }}>
+            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Track Your Own Stats — Free →</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -6219,7 +6405,9 @@ export default function CoachIQ() {
   const [brand, setBrand] = useState('Red — C+IQ colored')
   const [page, setPage] = useState('hub')
   const [activeMode, setActiveMode] = useState(null)
-  const [scrollToLocation, setScrollToLocation] = useState(false)
+  const [learnMode, setLearnMode] = useState(null) // deep-link into Learn sub-sections
+  // Reset learnMode when navigating away from Learn so it doesn't persist
+  useEffect(() => { if (page !== 'learn') setLearnMode(null) }, [page])
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(500)
   const [gauntlets, setGauntlets] = useState(0)
@@ -6491,7 +6679,7 @@ export default function CoachIQ() {
         <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14, background:'#07090d', overflowX:'hidden', boxSizing:'border-box' }}>
           {/* Guest banner — shown on every page in guest mode */}
           {guestMode && <GuestBanner onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
-          {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={guestMode&&guestDemoTeam?{...teams,[sport]:[guestDemoTeam]}:teams} activeTeam={guestMode&&guestDemoTeam?{...activeTeam,[sport]:guestDemoTeam}:activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} callAI={callAI} homeLocation={homeLocation} setTeams={setTeams} guestMode={guestMode} guestDemoTeam={guestDemoTeam} setGuestDemoTeam={setGuestDemoTeam} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
+          {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={guestMode&&guestDemoTeam?{...teams,[sport]:[guestDemoTeam]}:teams} activeTeam={guestMode&&guestDemoTeam?{...activeTeam,[sport]:guestDemoTeam}:activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} setLearnMode={setLearnMode} callAI={callAI} homeLocation={homeLocation} setTeams={setTeams} guestMode={guestMode} guestDemoTeam={guestDemoTeam} setGuestDemoTeam={setGuestDemoTeam} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
           {page==='schemes' && (guestMode && guestSchemeCount >= 2
             ? <GuestGate feature="Scheme Generator" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
             : <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} guestMode={guestMode} guestSchemeCount={guestSchemeCount} setGuestSchemeCount={setGuestSchemeCount} />
@@ -6501,7 +6689,9 @@ export default function CoachIQ() {
             : <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />
           )}
           {page==='team' && (guestMode
-            ? <GuestGate feature="Team Management" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
+            ? guestDemoTeam
+              ? <GuestTeamPreview team={guestDemoTeam} sport={sport} P={P} S={S} al={al} onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
+              : <GuestGate feature="Team Management" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
             : <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} setPage={setPage} />
           )}
           {page==='playbook' && (guestMode
@@ -6509,7 +6699,7 @@ export default function CoachIQ() {
             : <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />
           )}
           {page==='news'  && <NewsPage  P={P} S={S} al={al} sport={sport} callAI={callAI} />}
-          {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} guestMode={guestMode} guestGauntletDone={guestGauntletDone} setGuestGauntletDone={setGuestGauntletDone} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
+          {page==='learn' && <LearnPage P={P} S={S} al={al} dk={dk} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} guestMode={guestMode} guestGauntletDone={guestGauntletDone} setGuestGauntletDone={setGuestGauntletDone} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} initialMode={learnMode} key={learnMode} />}
           {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} activeTeam={activeTeam} setTeams={setTeams} scrollToLocation={scrollToLocation} currentTeam={currentTeam} />}
         </div>
 
@@ -6524,7 +6714,7 @@ export default function CoachIQ() {
                 <div style={{ background:page==='hub'?'#C0392B':'#161922', border:`1px solid ${page==='hub'?'#C0392B':'#1e2330'}`, borderRadius:5, padding:'2px 7px', marginBottom:1 }}>
                   <span style={{ fontSize:11, fontWeight:900, color:'white', letterSpacing:'-0.5px', fontFamily:"'Barlow Condensed',sans-serif" }}>C·IQ</span>
                 </div>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:page==='hub'?'#C0392B':'#3d4559', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>HUB</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:page==='hub'?'#C0392B':'#5a6480', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>HUB</span>
               </button>
             </div>
             {/* Other tabs */}
