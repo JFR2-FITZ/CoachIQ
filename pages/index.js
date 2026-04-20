@@ -959,7 +959,7 @@ function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
 function Sel({ label, value, onChange, options }) {
   return (
     <div style={{ position:'relative', background:'#161922', border:'1px solid #1e2330', borderRadius:4 }}>
-      <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, display:'block', paddingTop:6, paddingLeft:11, paddingRight:11 }}>{label}</label>
+      <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, display:'block', paddingTop:6, paddingLeft:11, paddingRight:11 }}>{label}</label>
       <div style={{ position:'relative' }}>
         <select
           value={value}
@@ -985,7 +985,7 @@ function Sel({ label, value, onChange, options }) {
             <option key={o} value={o} style={{ background:'#161922', color:'#f2f4f8' }}>{o}</option>
           ))}
         </select>
-        <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:9, color:'#6b7a96', pointerEvents:'none' }}>▾</span>
+        <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:9, color:'#8a94b0', pointerEvents:'none' }}>▾</span>
       </div>
     </div>
   )
@@ -994,7 +994,7 @@ function Shimmer() {
   return <div style={{ width:'100%', height:3, background:'linear-gradient(90deg,#C0392B,#002868,#C0392B)', backgroundSize:'200% 100%', borderRadius:0, margin:'10px 0', animation:'shimmer 1.2s linear infinite' }} />
 }
 function ErrBox({ msg }) {
-  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#6b7a96', wordBreak:'break-all' }}>Error: {msg}</div>
+  return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#8a94b0', wordBreak:'break-all' }}>Error: {msg}</div>
 }
 
 // ─── QUICK TOUR MODAL ─────────────────────────────────────────────────────────
@@ -1020,7 +1020,7 @@ function QuickTourModal({ onDone, P='#C0392B', al, setPage }) {
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Step {step + 1} of {TUTORIAL_STEPS.length}</div>
             <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:'#f2f4f8', lineHeight:1.1 }}>{current.title}</div>
           </div>
-          <button onClick={onDone} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:18, padding:4, flexShrink:0 }}>✕</button>
+          <button onClick={onDone} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:18, padding:4, flexShrink:0 }}>✕</button>
         </div>
 
         {/* Progress bar */}
@@ -1048,13 +1048,13 @@ function QuickTourModal({ onDone, P='#C0392B', al, setPage }) {
           )}
           <div style={{ display:'flex', gap:8 }}>
             {step > 0 && (
-              <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← Back</button>
+              <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← Back</button>
             )}
             <button onClick={()=>{ if(isLast) onDone(); else setStep(s=>s+1) }} style={{ flex:2, padding:'9px', background:current.action?'#0f1219':P, border:current.action?'1px solid #1e2330':'none', borderRadius:5, color:current.action?'#6b7a96':'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
               {isLast ? 'Start Coaching! 🏈' : current.action ? 'Skip this step →' : 'Next →'}
             </button>
           </div>
-          <button onClick={onDone} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:11, fontFamily:"'Barlow Condensed',sans-serif", padding:'4px', textAlign:'center' }}>Exit tour</button>
+          <button onClick={onDone} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:11, fontFamily:"'Barlow Condensed',sans-serif", padding:'4px', textAlign:'center' }}>Exit tour</button>
         </div>
       </div>
     </div>
@@ -1066,7 +1066,7 @@ function FeatureGuide({ P='#C0392B', al, onClose }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:500, display:'flex', flexDirection:'column' }}>
       <div style={{ background:'#07090d', borderBottom:'1px solid #1e2330', padding:'14px 16px', display:'flex', alignItems:'center', gap:10 }}>
-        <button onClick={onClose} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
+        <button onClick={onClose} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#8a94b0', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
         <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', flex:1 }}>FEATURE GUIDE</div>
       </div>
       <div style={{ display:'flex', gap:0, overflowX:'auto', background:'#0a0c14', borderBottom:'1px solid #1e2330', padding:'8px 12px', flexShrink:0 }}>
@@ -1080,7 +1080,7 @@ function FeatureGuide({ P='#C0392B', al, onClose }) {
         {FEATURE_GUIDE[activeSection].items.map((item,i) => (
           <div key={i} style={{ padding:'12px 14px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:6, marginBottom:8, borderLeft:`3px solid ${P}` }}>
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#f2f4f8', marginBottom:4 }}>{item.name}</div>
-            <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6 }}>{item.desc}</div>
+            <div style={{ fontSize:12, color:'#8a94b0', lineHeight:1.6 }}>{item.desc}</div>
           </div>
         ))}
       </div>
@@ -1096,11 +1096,11 @@ function FirstTimeWelcome({ onChoice, P, al }) {
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:32, marginBottom:6 }}>
           <span style={{ color:P }}>C</span><span style={{ color:'#f2f4f8' }}>oach</span><span style={{ color:P }}>IQ</span>
         </div>
-        <div style={{ fontSize:13, color:'#6b7a96', lineHeight:1.6, marginBottom:24 }}>Welcome! How would you like to get started?</div>
+        <div style={{ fontSize:13, color:'#8a94b0', lineHeight:1.6, marginBottom:24 }}>Welcome! How would you like to get started?</div>
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           <button onClick={()=>onChoice('tour')} style={{ width:'100%', padding:'14px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px' }}>⚡ QUICK TOUR — 6 steps</button>
           <button onClick={()=>onChoice('guide')} style={{ width:'100%', padding:'13px', background:'#0f1219', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px' }}>📖 BROWSE FEATURE GUIDE</button>
-          <button onClick={()=>onChoice('skip')} style={{ width:'100%', padding:'11px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>Skip — I'll explore myself</button>
+          <button onClick={()=>onChoice('skip')} style={{ width:'100%', padding:'11px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>Skip — I'll explore myself</button>
         </div>
       </div>
     </div>
@@ -1154,7 +1154,7 @@ function FootballHoleDiagram({ P }) {
         <text x={220} y={12} textAnchor="middle" fill="#6b9fff" fontSize={7} fontFamily="sans-serif" opacity={0.8}>EVEN = RIGHT</text>
         <text x={142} y={12} textAnchor="middle" fill="#f59e0b" fontSize={7} fontFamily="sans-serif" opacity={0.8}>0=QB SNEAK</text>
       </svg>
-      <div style={{ fontSize:9, color:'#3d4559', marginTop:4, lineHeight:1.5 }}>Odd numbers run left, even numbers run right. The number tells the ball carrier which gap to hit.</div>
+      <div style={{ fontSize:9, color:'#5a6480', marginTop:4, lineHeight:1.5 }}>Odd numbers run left, even numbers run right. The number tells the ball carrier which gap to hit.</div>
     </div>
   )
 }
@@ -1251,7 +1251,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         <div style={{ width:24, height:24, minWidth:24, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', lineHeight:1.2 }}>{play.name}</div>
-          <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace", marginTop:2 }}>{play.type}</div>
+          <div style={{ fontSize:10, color:'#8a94b0', fontFamily:"'DM Mono',monospace", marginTop:2 }}>{play.type}</div>
           <div style={{ fontSize:12, color:'#9aa0b0', marginTop:4, lineHeight:1.5 }}>{play.note}</div>
         </div>
         {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
@@ -1267,7 +1267,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         <button onClick={()=>setShowSummary(v=>!v)} style={{ padding:'5px 12px', background:showSummary?P:'transparent', border:'1px solid ' + (showSummary?P:'#1e2330'), borderRadius:4, color:showSummary?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
           📋 Summary {showSummary?'▲':'▼'}
         </button>
-        <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+        <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
           More {showMore?'▲':'▼'}
         </button>
       </div>
@@ -1277,25 +1277,25 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:10, animation:'fadeIn 0.2s ease' }}>
           {play.presnap && (
             <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
-              <div style={{ fontSize:8, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 Pre-Snap Read</div>
+              <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 Pre-Snap Read</div>
               <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.presnap||'')}</div>
             </div>
           )}
           {play.audible && (
             <div style={{ padding:'8px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:6 }}>
-              <div style={{ fontSize:8, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>📣 Audible</div>
+              <div style={{ fontSize:10, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>📣 Audible</div>
               <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.audible||'')}</div>
             </div>
           )}
           {play.youthCue && (
             <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
-              <div style={{ fontSize:8, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>🧒 Youth Cue</div>
+              <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>🧒 Youth Cue</div>
               <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontStyle:'italic' }}>"{play.youthCue}"</div>
             </div>
           )}
           {play.mistake && (
             <div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:6 }}>
-              <div style={{ fontSize:8, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
+              <div style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
               <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
             </div>
           )}
@@ -1315,14 +1315,14 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           {/* Breakdown */}
           {showBreakdown && (
             <div style={{ marginBottom:10 }}>
-              {stepsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'8px 0' }}>Loading...</div>}
+              {stepsLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'8px 0' }}>Loading...</div>}
               {steps && !steps.error && steps.huddleCard && (
                 <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:8, padding:12, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>📋 Huddle Card</div>
                   {steps.huddleCard.map((item,i) => (
                     <div key={i} style={{ display:'flex', gap:8, marginBottom:5, alignItems:'flex-start' }}>
                       <div style={{ minWidth:28, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:4, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0 }}>{item.player}</div>
-                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, flex:1 }}>{item.instruction}{item.termNote&&<span style={{ color:'#6b7a96', fontStyle:'italic' }}> ({item.termNote})</span>}</div>
+                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, flex:1 }}>{item.instruction}{item.termNote&&<span style={{ color:'#8a94b0', fontStyle:'italic' }}> ({item.termNote})</span>}</div>
                     </div>
                   ))}
                 </div>
@@ -1332,14 +1332,14 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
                   <div style={{ fontSize:9, letterSpacing:2, color:P, fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Step-by-Step</div>
                   {steps.steps.map((step,i) => (
                     <div key={i} style={{ display:'flex', gap:8, padding:'5px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}>
-                      <div style={{ width:16, height:16, minWidth:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, fontWeight:800, flexShrink:0, marginTop:2 }}>{i+1}</div>
+                      <div style={{ width:16, height:16, minWidth:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{i+1}</div>
                       <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div>
                     </div>
                   ))}
                 </div>
               )}
               <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:10 }}>
-                <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:8 }}>Ask about this play</div>
+                <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:8 }}>Ask about this play</div>
                 {qaHistory.map((item,i) => (
                   <div key={i} style={{ marginBottom:8 }}>
                     <div style={{ fontSize:11, color:P, fontWeight:600, marginBottom:2 }}>Q: {item.q}</div>
@@ -1357,14 +1357,14 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           {/* Player Roles */}
           {showRoles && (
             <div style={{ marginBottom:10 }}>
-              {stepsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'4px 0' }}>Loading roles...</div>}
+              {stepsLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'4px 0' }}>Loading roles...</div>}
               {steps && !steps.error && steps.playerRoles && steps.playerRoles.map((role,i) => (
                 <div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}>
                   <div style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:4 }}>
                     <div style={{ background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:5, padding:'3px 6px', fontSize:9, fontWeight:800, flexShrink:0, maxWidth:72, lineHeight:1.3, textAlign:'center', wordBreak:'break-word' }}>{role.position}</div>
                     <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8', flex:1, lineHeight:1.4 }}>{role.job}</div>
                   </div>
-                  <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, paddingLeft:80, fontStyle:'italic' }}>"{role.whyTheyDoIt}"</div>
+                  <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.6, paddingLeft:80, fontStyle:'italic' }}>"{role.whyTheyDoIt}"</div>
                 </div>
               ))}
             </div>
@@ -1373,11 +1373,11 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           {/* Variations */}
           {showVariations && (
             <div style={{ marginBottom:10 }}>
-              {variationsLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'4px 0' }}>Generating...</div>}
+              {variationsLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'4px 0' }}>Generating...</div>}
               {variations && variations.map((v,i) => (
                 <div key={i} style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:6 }}>
                   <div style={{ display:'flex', gap:8, marginBottom:3 }}>
-                    <div style={{ width:16, height:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, fontWeight:800, flexShrink:0 }}>{i+1}</div>
+                    <div style={{ width:16, height:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0 }}>{i+1}</div>
                     <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{v.name}</div>
                   </div>
                   {v.changeFrom && <div style={{ fontSize:10, color:P, marginBottom:2, paddingLeft:24 }}>Changed: {v.changeFrom}</div>}
@@ -1390,7 +1390,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           {/* Pro Look */}
           {showNfl && (
             <div style={{ marginBottom:10 }}>
-              {nflLoading && <div style={{ fontSize:11, color:'#6b7a96', padding:'4px 0' }}>Finding pro comparison...</div>}
+              {nflLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'4px 0' }}>Finding pro comparison...</div>}
               {nflComp && !nflComp.error && (
                 <div style={{ background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:12 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>🏆 Pro Comparison</div>
@@ -1733,7 +1733,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
     <div style={{ marginTop:10, background:'#0f1219', borderRadius:10, border:`1px solid rgba(${pr},${pg},${pb},0.3)`, overflow:'hidden' }}>
       <div style={{ padding:'9px 13px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:8, background:'#161922' }}>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{play.name}</span>
-        <span style={{ fontSize:10, color:'#6b7a96', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
+        <span style={{ fontSize:10, color:'#8a94b0', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
         {!parsed && !loading && !autoLoad && (<button onClick={generateAnim} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:1 }}>ANIMATE</button>)}
         {parsed && (<button onClick={replay} disabled={playing} style={{ padding:'4px 12px', background:playing?'#ccc':P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:playing?'not-allowed':'pointer', fontFamily:'inherit', letterSpacing:1 }}>{playing?'PLAYING':'REPLAY'}</button>)}
       </div>
@@ -1806,7 +1806,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
           <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{f.name}</div>
           <div style={{ fontSize:10, color:S, fontFamily:"'DM Mono',monospace", marginTop:1 }}>{f.type}</div>
           <div style={{ fontSize:11, color:'#f2f4f8', marginTop:3, lineHeight:1.4 }}>{f.assignment}</div>
-          <div style={{ fontSize:11, color:'#6b7a96', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
+          <div style={{ fontSize:11, color:'#8a94b0', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
           <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Expand breakdown + diagram'}</div>
         </div>
         <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true);loadSteps()}} style={{ padding:'4px 9px', background:showAnim?S:`rgba(${pr},${pg},${pb},0.12)`, border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
@@ -1814,11 +1814,11 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
       {expanded && (
         <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
           {showAnim && <div style={{ marginBottom:12 }}><PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} /></div>}
-          {stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${S}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Generating breakdown...</div></div>}
+          {stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${S}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#8a94b0' }}>Generating breakdown...</div></div>}
           {steps && steps.huddleCard && steps.huddleCard.length > 0 && (
             <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:10, padding:12, marginBottom:12 }}>
               <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}><span style={{ fontSize:14 }}>📋</span><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card</div></div>
-              {steps.huddleCard.map((item,i) => (<div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}><div style={{ minWidth:32, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:5, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0, marginTop:1 }}>{item.player}</div><div style={{ flex:1 }}><span style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{item.instruction}</span>{item.termNote&&<span style={{ fontSize:11, color:'#6b7a96', fontStyle:'italic' }}> ({item.termNote})</span>}</div></div>))}
+              {steps.huddleCard.map((item,i) => (<div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}><div style={{ minWidth:32, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:5, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0, marginTop:1 }}>{item.player}</div><div style={{ flex:1 }}><span style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{item.instruction}</span>{item.termNote&&<span style={{ fontSize:11, color:'#8a94b0', fontStyle:'italic' }}> ({item.termNote})</span>}</div></div>))}
             </div>
           )}
           {steps && !steps.error && (
@@ -1829,13 +1829,13 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
               {(steps.steps||[]).map((step,i) => (<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}><div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${S}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:S, flexShrink:0, marginTop:1 }}>{i+1}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div></div>))}
               {steps.keyCoachingPoints&&steps.keyCoachingPoints.length>0&&(<div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:6 }}>Key Coaching Points</div>{steps.keyCoachingPoints.map((pt,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>)}</div>)}
               {steps.whyItWorks&&(<div style={{ marginTop:10, padding:'10px 12px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:5 }}>Why This Works</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{steps.whyItWorks}</div></div>)}
-              {steps.playerRoles&&steps.playerRoles.length>0&&(<div style={{ marginTop:10 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:8 }}>What to Tell Each Player</div>{steps.playerRoles.map((role,i)=>(<div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800 }}>{role.position}</div><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{role.job}</div></div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.6, paddingLeft:34, fontStyle:'italic' }}>"Tell your player: {role.whyTheyDoIt}"</div></div>))}</div>)}
+              {steps.playerRoles&&steps.playerRoles.length>0&&(<div style={{ marginTop:10 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:8 }}>What to Tell Each Player</div>{steps.playerRoles.map((role,i)=>(<div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800 }}>{role.position}</div><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{role.job}</div></div><div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.6, paddingLeft:34, fontStyle:'italic' }}>"Tell your player: {role.whyTheyDoIt}"</div></div>))}</div>)}
             </div>
           )}
           <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12 }}>
-            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:8 }}>Ask About This Formation</div>
+            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:8 }}>Ask About This Formation</div>
             {qaHistory.map((item,i)=>(<div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:11, fontWeight:600, color:S, marginBottom:3 }}>Q: {item.q}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.6, padding:'6px 10px', background:'rgba(255,255,255,0.04)', borderRadius:6 }}>{item.a}</div></div>))}
-            {qaLoading&&<div style={{ fontSize:11, color:'#6b7a96', marginBottom:8 }}>Getting answer...</div>}
+            {qaLoading&&<div style={{ fontSize:11, color:'#8a94b0', marginBottom:8 }}>Getting answer...</div>}
             <div style={{ display:'flex', gap:7 }}>
               <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder="e.g. What is the CB responsible for?" style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:7, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
               <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':S, color:'white', border:'none', borderRadius:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
@@ -1857,7 +1857,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
                     <div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.25)', borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>At Snap</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{disguise.snapTrigger}</div></div>
                   </div>
                   {disguise.qbReads&&(<div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, marginBottom:10, border:'1px solid rgba(74,222,128,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#4ade80', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>What the QB Sees</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{disguise.qbReads}</div></div>)}
-                  {disguise.techniques&&disguise.techniques.length>0&&(<div style={{ marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:6, textTransform:'uppercase' }}>Player-by-Player Disguise Moves</div>{disguise.techniques.map((t,i)=>(<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<disguise.techniques.length-1?'1px solid rgba(180,0,220,0.15)':'none' }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(180,0,220,0.15)', border:'1px solid rgba(180,0,220,0.3)', color:'#c084fc', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, flexShrink:0 }}>{t.player}</div><div style={{ flex:1 }}><div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600, marginBottom:2 }}>{t.action}</div><div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.4 }}>{t.purpose}</div></div></div>))}</div>)}
+                  {disguise.techniques&&disguise.techniques.length>0&&(<div style={{ marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:6, textTransform:'uppercase' }}>Player-by-Player Disguise Moves</div>{disguise.techniques.map((t,i)=>(<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<disguise.techniques.length-1?'1px solid rgba(180,0,220,0.15)':'none' }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(180,0,220,0.15)', border:'1px solid rgba(180,0,220,0.3)', color:'#c084fc', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, flexShrink:0 }}>{t.player}</div><div style={{ flex:1 }}><div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600, marginBottom:2 }}>{t.action}</div><div style={{ fontSize:10, color:'#8a94b0', lineHeight:1.4 }}>{t.purpose}</div></div></div>))}</div>)}
                   {disguise.coachingCue&&(<div style={{ padding:'8px 10px', background:'rgba(180,0,220,0.08)', borderRadius:8, borderLeft:'3px solid rgba(180,0,220,0.5)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Coaching Cue</div><div style={{ fontSize:12, color:'#f2f4f8', fontStyle:'italic' }}>"{disguise.coachingCue}"</div></div>)}
                 </div>
               )}
@@ -1879,10 +1879,10 @@ function PlaybookCard({ play, packageName, packageIndex, P='#C0392B', S='#002868
           <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}>
             <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{play.name}</div>
             <span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:al(P,0.15), color:P }}>{play.type}</span>
-            <span style={{ fontSize:9, color:'#3d4559' }}>Pkg #{packageIndex}</span>
+            <span style={{ fontSize:9, color:'#5a6480' }}>Pkg #{packageIndex}</span>
           </div>
-          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4, marginBottom:3 }}>{play.note}</div>
-          <div style={{ fontSize:10, color:'#3d4559' }}>{packageName}</div>
+          <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4, marginBottom:3 }}>{play.note}</div>
+          <div style={{ fontSize:10, color:'#5a6480' }}>{packageName}</div>
         </div>
         <button onClick={()=>setShowAnim(a=>!a)} style={{ padding:'4px 9px', background:showAnim?P:al(P,0.12), border:`1px solid ${P}`, borderRadius:6, color:showAnim?'white':P, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
       </div>
@@ -1956,7 +1956,7 @@ function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) 
         <span style={{ fontSize:15 }}>🛡</span>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{title}</span>
         <span style={{ fontSize:9, fontWeight:700, letterSpacing:1, padding:'2px 7px', borderRadius:10, background:al(S,0.15), color:S }}>DEFENSIVE</span>
-        <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded?'▲':'▼'}</span>
+        <span style={{ fontSize:12, color:'#8a94b0' }}>{expanded?'▲':'▼'}</span>
       </div>
       {expanded && (
         <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
@@ -1969,10 +1969,10 @@ function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) 
           {result && (
             <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(S,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:17, letterSpacing:1, color:S, marginBottom:8 }}>{result.packageName}</div>
-              <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
+              <p style={{ fontSize:12, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
               {result.keyStop&&(<div style={{ padding:'8px 12px', background:al(S,0.1), border:`1px solid ${al(S,0.25)}`, borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Primary Assignment</div><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{result.keyStop}</div></div>)}
               {(result.formations||[]).map(f => (<DefFormationCard key={f.number} formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} />))}
-              {result.adjustmentTip&&(<div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div></div>)}
+              {result.adjustmentTip&&(<div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div></div>)}
               {result.coachingCue&&(<div style={{ marginTop:8, padding:10, background:al(S,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defensive Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic', fontWeight:500 }}>"{result.coachingCue}"</div></div>)}
             </div>
           )}
@@ -2025,7 +2025,7 @@ function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
 
   const statBox = (label,value,onChange,opts) => (
     <div key={label} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'9px 11px' }}>
-      <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#3d4559', fontWeight:600, marginBottom:3 }}>{label}</div>
+      <div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#5a6480', fontWeight:600, marginBottom:3 }}>{label}</div>
       {opts ? (
         <select value={value} onChange={e=>onChange(e.target.value)} style={{ background:'#161922', border:'none', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, outline:'none', width:'100%', cursor:'pointer' }}>{opts.map(o=><option key={o} style={{background:'#161922'}}>{o}</option>)}</select>
       ) : (
@@ -2048,7 +2048,7 @@ function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
             <button onClick={getFbRec} disabled={fbLoading} style={{ background:fbLoading?'#3d4559':P, border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, padding:'6px 14px', cursor:fbLoading?'not-allowed':'pointer', width:'100%' }}>{fbLoading?'THINKING...':'GET RECS'}</button>
           </div>
         </div>
-        {fbRec.map(r => (<div key={r.n} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:23, width:22, textAlign:'center', lineHeight:1, color:r.top?P:'#6b7a96' }}>{r.n}</div><div style={{ flex:1 }}><div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{r.name}</div><div style={{ fontSize:11, color:'#6b7a96', marginTop:2 }}>{r.why}</div></div><div style={{ fontFamily:"'DM Mono',monospace", fontSize:12, color:r.top?P:'#6b7a96' }}>{r.pct}</div></div>))}
+        {fbRec.map(r => (<div key={r.n} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:23, width:22, textAlign:'center', lineHeight:1, color:r.top?P:'#6b7a96' }}>{r.n}</div><div style={{ flex:1 }}><div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{r.name}</div><div style={{ fontSize:11, color:'#8a94b0', marginTop:2 }}>{r.why}</div></div><div style={{ fontFamily:"'DM Mono',monospace", fontSize:12, color:r.top?P:'#6b7a96' }}>{r.pct}</div></div>))}
       </div>
     </Card>
   )
@@ -2072,7 +2072,7 @@ function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
             <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}><div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{bbRec.calls[0].name}</div><span style={{ fontSize:9, fontWeight:700, padding:'2px 8px', borderRadius:4, background:bbRec.calls[0].urgency==='HIGH'?al(P,0.25):al(S,0.2), color:bbRec.calls[0].urgency==='HIGH'?P:S }}>{bbRec.calls[0].urgency}</span></div>
             <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{bbRec.calls[0].why}</div>
           </div>
-          {bbRec.calls.slice(1).map((c,i)=>(<div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, width:20, textAlign:'center', lineHeight:1, color:'#6b7a96', marginTop:2, flexShrink:0 }}>{i+2}</div><div style={{ flex:1 }}><div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{c.name}</div><span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:c.urgency==='HIGH'?al(P,0.2):al(S,0.15), color:c.urgency==='HIGH'?P:S }}>{c.urgency}</span></div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{c.why}</div></div></div>))}
+          {bbRec.calls.slice(1).map((c,i)=>(<div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, width:20, textAlign:'center', lineHeight:1, color:'#8a94b0', marginTop:2, flexShrink:0 }}>{i+2}</div><div style={{ flex:1 }}><div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{c.name}</div><span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:c.urgency==='HIGH'?al(P,0.2):al(S,0.15), color:c.urgency==='HIGH'?P:S }}>{c.urgency}</span></div><div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4 }}>{c.why}</div></div></div>))}
         </>)}
       </div>
     </Card>
@@ -2086,19 +2086,19 @@ function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
       <CardHead icon="⚽" title="Match Situation" tag="LIVE" tagColor={P} accent={P} />
       <div style={{ padding:14 }}>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginBottom:12 }}>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Score</label><select value={soccerScore} onChange={e=>setSoccerScore(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['UP 2','UP 1','Tied','DOWN 1','DOWN 2'].map(o=><option key={o}>{o}</option>)}</select></div>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Half</label><select value={sbHalf} onChange={e=>setSbHalf(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['1st Half','2nd Half','Extra Time','Penalty Kicks'].map(o=><option key={o}>{o}</option>)}</select></div>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Time Left</label><select value={sbTimeLeft} onChange={e=>setSbTimeLeft(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['45+ min','30 min','15 min','5 min','Stoppage'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Score</label><select value={soccerScore} onChange={e=>setSoccerScore(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['UP 2','UP 1','Tied','DOWN 1','DOWN 2'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Half</label><select value={sbHalf} onChange={e=>setSbHalf(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['1st Half','2nd Half','Extra Time','Penalty Kicks'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Time Left</label><select value={sbTimeLeft} onChange={e=>setSbTimeLeft(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['45+ min','30 min','15 min','5 min','Stoppage'].map(o=><option key={o}>{o}</option>)}</select></div>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:12 }}>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Situation</label><select value={situation} onChange={e=>setSituation(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['Open Play','Corner Kick','Free Kick','Throw-In','Goal Kick','Penalty Kick','Kickoff'].map(o=><option key={o}>{o}</option>)}</select></div>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Pressure</label><select value={pressure} onChange={e=>setPressure(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['High Press','Mid Block','Low Block','Mixed'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Situation</label><select value={situation} onChange={e=>setSituation(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['Open Play','Corner Kick','Free Kick','Throw-In','Goal Kick','Penalty Kick','Kickoff'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Pressure</label><select value={pressure} onChange={e=>setPressure(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['High Press','Mid Block','Low Block','Mixed'].map(o=><option key={o}>{o}</option>)}</select></div>
         </div>
         <PBtn onClick={async()=>{ const r=await callAI('Soccer situational advice: Score '+score+', situation: '+situation+'. Give 3 specific tactical adjustments. Return JSON: {"recommendations":[{"name":"tactic","why":"reason","detail":"1 sentence"}]}'); try { const d=JSON.parse(r.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim().slice(r.indexOf('{'),r.lastIndexOf('}')+1)); setSoccerRecs(d.recommendations||[]) } catch(e){} }} color={P}>GET TACTICAL ADVICE</PBtn>
         {soccerRecs && soccerRecs.map((rec,i)=>(
           <div key={i} style={{ marginTop:8, padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, borderLeft:`3px solid ${P}` }}>
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', marginBottom:3 }}>{rec.name}</div>
-            <div style={{ fontSize:11, color:'#6b7a96' }}>{rec.why}</div>
+            <div style={{ fontSize:11, color:'#8a94b0' }}>{rec.why}</div>
             <div style={{ fontSize:11, color:'#dde1f0', marginTop:3 }}>{rec.detail}</div>
           </div>
         ))}
@@ -2111,19 +2111,19 @@ function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
       <CardHead icon="🥎" title="Count and Situation" tag="AT-BAT" tagColor={P} accent={P} />
       <div style={{ padding:14 }}>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:12 }}>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Count</label><select value={sbCount} onChange={e=>setSbCount(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['0-0','1-0','2-0','3-0','0-1','1-1','2-1','3-1','0-2','1-2','2-2','3-2'].map(o=><option key={o}>{o}</option>)}</select></div>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Outs</label><select value={sbOuts} onChange={e=>setSbOuts(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['0 Outs','1 Out','2 Outs'].map(o=><option key={o}>{o}</option>)}</select></div>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Inning</label><select value={sbInning} onChange={e=>setSbInning(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['1st','2nd','3rd','4th','5th','6th','7th','Extra'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Count</label><select value={sbCount} onChange={e=>setSbCount(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['0-0','1-0','2-0','3-0','0-1','1-1','2-1','3-1','0-2','1-2','2-2','3-2'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Outs</label><select value={sbOuts} onChange={e=>setSbOuts(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['0 Outs','1 Out','2 Outs'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Inning</label><select value={sbInning} onChange={e=>setSbInning(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['1st','2nd','3rd','4th','5th','6th','7th','Extra'].map(o=><option key={o}>{o}</option>)}</select></div>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:12 }}>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Runners</label><select value={sbRunners} onChange={e=>setSbRunners(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['None on','Runner 1st','Runner 2nd','Runner 3rd','1st and 2nd','1st and 3rd','2nd and 3rd','Bases Loaded'].map(o=><option key={o}>{o}</option>)}</select></div>
-          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Score</label><select value={sbScore} onChange={e=>setSbScore(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['UP 3+','UP 2','UP 1','Tied','DOWN 1','DOWN 2','DOWN 3+'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Runners</label><select value={sbRunners} onChange={e=>setSbRunners(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['None on','Runner 1st','Runner 2nd','Runner 3rd','1st and 2nd','1st and 3rd','2nd and 3rd','Bases Loaded'].map(o=><option key={o}>{o}</option>)}</select></div>
+          <div><label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Score</label><select value={sbScore} onChange={e=>setSbScore(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 8px', color:'#f2f4f8', fontSize:12, outline:'none', colorScheme:'dark' }}>{['UP 3+','UP 2','UP 1','Tied','DOWN 1','DOWN 2','DOWN 3+'].map(o=><option key={o}>{o}</option>)}</select></div>
         </div>
         <PBtn onClick={async()=>{ const r=await callAI('Softball situational advice per ASA/USA Softball rules: Count '+count+', Runners: '+runners+', Outs: '+outs+'. Give 3 recommendations. Return JSON: {"recommendations":[{"name":"play","why":"reason","pct":"success %"}]}'); try { const d=JSON.parse(r.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim().slice(r.indexOf('{'),r.lastIndexOf('}')+1)); setSbRecs(d.recommendations||[]) } catch(e){} }} color={P}>GET RECOMMENDATION</PBtn>
         {sbRecs && sbRecs.map((rec,i)=>(
           <div key={i} style={{ marginTop:8, padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, borderLeft:`3px solid ${P}` }}>
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', marginBottom:2 }}>{rec.name}</div>
-            <div style={{ fontSize:11, color:'#6b7a96' }}>{rec.why}</div>
+            <div style={{ fontSize:11, color:'#8a94b0' }}>{rec.why}</div>
             {rec.pct && <div style={{ fontSize:10, color:P, marginTop:2, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{rec.pct} success rate</div>}
           </div>
         ))}
@@ -2137,9 +2137,9 @@ function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
       <div style={{ padding:14 }}>
         <div style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:10, padding:'12px 14px', marginBottom:11 }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
-            <div style={{ textAlign:'center' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', marginBottom:4 }}>Balls</div><div style={{ display:'flex', gap:5 }}>{[0,1,2,3].map(i=><div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(balls)?'#4ade80':'#1e2330', border:'1px solid #3d4559' }} />)}</div></div>
-            <div style={{ textAlign:'center' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', marginBottom:4 }}>Strikes</div><div style={{ display:'flex', gap:5 }}>{[0,1,2].map(i=><div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(strikes)?P:'#1e2330', border:'1px solid #3d4559' }} />)}</div></div>
-            <div style={{ textAlign:'center' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', marginBottom:4 }}>Outs</div><div style={{ display:'flex', gap:5 }}>{[0,1,2].map(i=><div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(outs)?'#f59e0b':'#1e2330', border:'1px solid #3d4559' }} />)}</div></div>
+            <div style={{ textAlign:'center' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#8a94b0', marginBottom:4 }}>Balls</div><div style={{ display:'flex', gap:5 }}>{[0,1,2,3].map(i=><div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(balls)?'#4ade80':'#1e2330', border:'1px solid #3d4559' }} />)}</div></div>
+            <div style={{ textAlign:'center' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#8a94b0', marginBottom:4 }}>Strikes</div><div style={{ display:'flex', gap:5 }}>{[0,1,2].map(i=><div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(strikes)?P:'#1e2330', border:'1px solid #3d4559' }} />)}</div></div>
+            <div style={{ textAlign:'center' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#8a94b0', marginBottom:4 }}>Outs</div><div style={{ display:'flex', gap:5 }}>{[0,1,2].map(i=><div key={i} style={{ width:16, height:16, borderRadius:'50%', background:i<parseInt(outs)?'#f59e0b':'#1e2330', border:'1px solid #3d4559' }} />)}</div></div>
           </div>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:7, marginBottom:11 }}>
@@ -2158,7 +2158,7 @@ function SituationalPanel({ sport, P='#C0392B', S='#002868', al, callAI }) {
             <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5, marginBottom:6 }}>{bsbRec.moves[0].reason}</div>
             <span style={{ fontSize:9, fontWeight:700, padding:'2px 8px', borderRadius:4, background:al(S,0.25), color:S }}>{bsbRec.moves[0].type}</span>
           </div>
-          {bsbRec.moves.slice(1).map((m,i)=>(<div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, width:20, textAlign:'center', lineHeight:1, color:'#6b7a96', marginTop:2, flexShrink:0 }}>{i+2}</div><div style={{ flex:1 }}><div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{m.action}</div><span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:'rgba(107,154,255,0.15)', color:'#6b9fff' }}>{m.type}</span></div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{m.reason}</div></div></div>))}
+          {bsbRec.moves.slice(1).map((m,i)=>(<div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', borderRadius:8, border:'1px solid #1e2330', marginBottom:7 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, width:20, textAlign:'center', lineHeight:1, color:'#8a94b0', marginTop:2, flexShrink:0 }}>{i+2}</div><div style={{ flex:1 }}><div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3, flexWrap:'wrap' }}><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{m.action}</div><span style={{ fontSize:9, fontWeight:700, padding:'1px 6px', borderRadius:4, background:'rgba(107,154,255,0.15)', color:'#6b9fff' }}>{m.type}</span></div><div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4 }}>{m.reason}</div></div></div>))}
         </>)}
       </div>
     </Card>
@@ -2262,7 +2262,7 @@ function GauntletPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlet
               <div style={{ background:'#161922', border:`1px solid ${al(P,0.2)}`, borderRadius:10, padding:13, marginBottom:10 }}>
                 <div style={{ display:'flex', gap:10, marginBottom:8 }}>
                   <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, padding:'3px 9px', background:al(P,0.15), color:P, borderRadius:4, letterSpacing:1 }}>{scenario.situation}</span>
-                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, padding:'3px 9px', background:'#0f1117', color:'#6b7a96', borderRadius:4 }}>{scenario.phase}</span>
+                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, padding:'3px 9px', background:'#0f1117', color:'#8a94b0', borderRadius:4 }}>{scenario.phase}</span>
                 </div>
                 <div style={{ fontSize:13, color:'#f2f4f8', lineHeight:1.6 }}>{scenario.question}</div>
               </div>
@@ -2295,8 +2295,8 @@ function GauntletPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlet
           {scenario?.error && <ErrBox msg={scenario.error} />}
           {score.total > 0 && (
             <div style={{ marginTop:12, padding:'10px 12px', background:'#161922', borderRadius:8, display:'flex', gap:12, alignItems:'center' }}>
-              <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:P, lineHeight:1 }}>{score.correct}/{score.total}</div><div style={{ fontSize:9, color:'#6b7a96', textTransform:'uppercase', letterSpacing:1 }}>Correct</div></div>
-              <div style={{ flex:1 }}>{iqBars.map(bar => (<div key={bar.label} style={{ marginBottom:5 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:2 }}><span style={{ fontSize:9, color:'#6b7a96' }}>{bar.label}</span><span style={{ fontSize:9, color:P }}>{bar.val}%</span></div><div style={{ height:3, background:'#1e2330', borderRadius:2 }}><div style={{ height:3, width:`${bar.val}%`, background:P, borderRadius:2, transition:'width 0.5s ease' }} /></div></div>))}</div>
+              <div style={{ textAlign:'center' }}><div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:22, color:P, lineHeight:1 }}>{score.correct}/{score.total}</div><div style={{ fontSize:9, color:'#8a94b0', textTransform:'uppercase', letterSpacing:1 }}>Correct</div></div>
+              <div style={{ flex:1 }}>{iqBars.map(bar => (<div key={bar.label} style={{ marginBottom:5 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:2 }}><span style={{ fontSize:9, color:'#8a94b0' }}>{bar.label}</span><span style={{ fontSize:9, color:P }}>{bar.val}%</span></div><div style={{ height:3, background:'#1e2330', borderRadius:2 }}><div style={{ height:3, width:`${bar.val}%`, background:P, borderRadius:2, transition:'width 0.5s ease' }} /></div></div>))}</div>
             </div>
           )}
         </div>
@@ -2307,7 +2307,7 @@ function GauntletPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlet
         <div style={{ padding:14 }}>
           {!battleStarted ? (
             <>
-              <p style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6, marginBottom:12 }}>Go head-to-head with an AI {oppTitle}. Defend your scheme, counter their tactics, and prove your football IQ.</p>
+              <p style={{ fontSize:12, color:'#8a94b0', lineHeight:1.6, marginBottom:12 }}>Go head-to-head with an AI {oppTitle}. Defend your scheme, counter their tactics, and prove your football IQ.</p>
               <PBtn onClick={startBattle} disabled={battleLoading} color="#f59e0b">{battleLoading ? 'LOADING...' : `START BATTLE vs ${oppTitle.toUpperCase()}`}</PBtn>
             </>
           ) : (
@@ -2315,11 +2315,11 @@ function GauntletPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlet
               <div style={{ maxHeight:320, overflowY:'auto', display:'flex', flexDirection:'column', gap:8, marginBottom:10 }}>
                 {battleHistory.map((msg, i) => (
                   <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:msg.role==='user'?'flex-end':'flex-start' }}>
-                    <div style={{ fontSize:9, letterSpacing:1, color:'#3d4559', marginBottom:2 }}>{msg.role==='user'?'YOU':oppTitle.toUpperCase()}</div>
+                    <div style={{ fontSize:9, letterSpacing:1, color:'#5a6480', marginBottom:2 }}>{msg.role==='user'?'YOU':oppTitle.toUpperCase()}</div>
                     <div style={{ maxWidth:'85%', padding:'9px 12px', borderRadius:10, background:msg.role==='user'?al(P,0.15):'#161922', border:`1px solid ${msg.role==='user'?al(P,0.3):'#1e2330'}`, fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{msg.text}</div>
                   </div>
                 ))}
-                {battleLoading && <div style={{ fontSize:11, color:'#6b7a96', textAlign:'left', padding:'4px 8px' }}>...</div>}
+                {battleLoading && <div style={{ fontSize:11, color:'#8a94b0', textAlign:'left', padding:'4px 8px' }}>...</div>}
               </div>
               <div style={{ display:'flex', gap:7 }}>
                 <input value={battleInput} onChange={e=>setBattleInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&battleInput.trim())sendBattle()}} placeholder="Counter their argument..." style={{ flex:1, background:'#161922', border:'1px solid #1e2330', borderRadius:7, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
@@ -2393,11 +2393,11 @@ function FilmPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON }
         {mode === 'describe' && (
           <>
             <div style={{ marginBottom:10 }}>
-              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6 }}>Describe the Problem</div>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:6 }}>Describe the Problem</div>
               <textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder={`e.g. "${problemExamples[0]}"`} rows={3} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:7, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', resize:'vertical' }} />
             </div>
             <div style={{ marginBottom:12 }}>
-              <div style={{ fontSize:9, color:'#6b7a96', marginBottom:6 }}>Quick examples:</div>
+              <div style={{ fontSize:9, color:'#8a94b0', marginBottom:6 }}>Quick examples:</div>
               <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
                 {problemExamples.slice(0,3).map((ex,i) => (<div key={i} onClick={() => setDescription(ex)} style={{ fontSize:11, color:'#4a5470', cursor:'pointer', padding:'5px 8px', background:'#0f1117', borderRadius:4, border:'1px solid #1e2330' }}>{ex}</div>))}
               </div>
@@ -2408,7 +2408,7 @@ function FilmPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON }
         {mode === 'upload' && (
           <div style={{ marginBottom:12 }}>
             <div onClick={() => fileRef.current?.click()} style={{ border:`2px dashed ${al(P,0.3)}`, borderRadius:10, padding:'20px', textAlign:'center', cursor:'pointer', background:al(P,0.05), marginBottom:10 }}>
-              {imagePreview ? (<img src={imagePreview} alt="preview" style={{ maxWidth:'100%', maxHeight:200, borderRadius:7, objectFit:'contain' }} />) : (<><div style={{ fontSize:28, marginBottom:6 }}>📎</div><div style={{ fontSize:12, color:'#6b7a96' }}>Tap to upload image or video frame</div><div style={{ fontSize:10, color:'#3d4559', marginTop:3 }}>JPG, PNG, or MP4 (first frame used)</div></>)}
+              {imagePreview ? (<img src={imagePreview} alt="preview" style={{ maxWidth:'100%', maxHeight:200, borderRadius:7, objectFit:'contain' }} />) : (<><div style={{ fontSize:28, marginBottom:6 }}>📎</div><div style={{ fontSize:12, color:'#8a94b0' }}>Tap to upload image or video frame</div><div style={{ fontSize:10, color:'#5a6480', marginTop:3 }}>JPG, PNG, or MP4 (first frame used)</div></>)}
             </div>
             <input ref={fileRef} type="file" accept="image/*,video/*" onChange={handleFile} style={{ display:'none' }} />
             <textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder="Optional: add context about what you're seeing..." rows={2} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:7, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', resize:'none' }} />
@@ -2426,7 +2426,7 @@ function FilmPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON }
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, letterSpacing:1, color:'#f2f4f8', lineHeight:1.2 }}>{analysis.headline}</div>
             </div>
             {(analysis.rootCause || analysis.situation) && (<div style={{ background:'rgba(239,68,68,0.07)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:10, padding:12, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f87171', fontWeight:700, marginBottom:4 }}>Root Cause</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{analysis.rootCause || analysis.situation}</div></div>)}
-            {analysis.whatYouSee && (<div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:10, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4 }}>What You See on Film</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{analysis.whatYouSee}</div></div>)}
+            {analysis.whatYouSee && (<div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:10, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4 }}>What You See on Film</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{analysis.whatYouSee}</div></div>)}
             <div style={{ background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:10, padding:12, marginBottom:10 }}>
               <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:4 }}>The Fix</div>
               <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6, marginBottom:8 }}>{analysis.coachingFix}</div>
@@ -2778,7 +2778,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
           <span style={{ fontSize:15 }}>📋</span>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{{ Football:'Offensive Scheme Generator', Basketball:'Offensive Scheme Generator', Baseball:'Game Plan Generator', Soccer:'Attacking Scheme Builder', Softball:'Game Plan Generator' }[sport] || 'Offensive Scheme Generator'}</span>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(P,0.15), color:P, textTransform:'uppercase' }}>{{ Football:'OFFENSE', Basketball:'OFFENSE', Baseball:'OFFENSE', Soccer:'ATTACK', Softball:'OFFENSE' }[sport]||'OFFENSE'}</span>
-          <span style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{offOpen ? '▲' : '▼'}</span>
+          <span style={{ fontSize:12, color:'#8a94b0', marginLeft:4 }}>{offOpen ? '▲' : '▼'}</span>
         </div>
         {offOpen && (
           <div style={{ padding:14, animation:'fadeIn 0.2s ease', background:'#0f1219' }}>
@@ -2788,11 +2788,11 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
             {guestMode && guestSchemeCount === 1 && (
               <div style={{ padding:'8px 12px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:6, marginBottom:8 }}>
                 <div style={{ fontSize:10, color:'#f59e0b', fontWeight:700, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>1 GENERATION REMAINING</div>
-                <div style={{ fontSize:10, color:'#6b7a96', marginTop:2 }}>Create a free account to generate unlimited schemes.</div>
+                <div style={{ fontSize:10, color:'#8a94b0', marginTop:2 }}>Create a free account to generate unlimited schemes.</div>
               </div>
             )}
             <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
-            {offLoading && (<div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your scheme...</div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>This takes 20–40 seconds. Please keep this screen open.</div></div>)}
+            {offLoading && (<div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your scheme...</div><div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5 }}>This takes 20–40 seconds. Please keep this screen open.</div></div>)}
             {offError && (
             <div style={{ marginTop:8, padding:'12px 14px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6 }}>
               <div style={{ fontSize:11, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Generation Failed</div>
@@ -2803,7 +2803,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
             {offResult && (
               <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
                 <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:17, letterSpacing:1, color:P, marginBottom:6 }}>{offResult.packageName}</div>
-                <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{offResult.summary}</p>
+                <p style={{ fontSize:12, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>{offResult.summary}</p>
                 {offResult.defenseTip && (<div style={{ padding:'8px 12px', background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Defensive Context</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{offResult.defenseTip}</div></div>)}
                 {(offResult.plays||[]).map(play => (
                   <PlayCardWithSave key={play.number} play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addToPlaybook} onCreateAndAdd={createAndAdd} />
@@ -2814,7 +2814,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
                   <span style={{ fontSize:18, flexShrink:0 }}>📖</span>
                   <div>
                     <div style={{ fontSize:10, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:2 }}>COMING SOON — FULL PLAY BREAKDOWN</div>
-                    <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>Audible triggers, pre-snap reads, youth coaching cues, and mistake breakdowns — streaming live for every play.</div>
+                    <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4 }}>Audible triggers, pre-snap reads, youth coaching cues, and mistake breakdowns — streaming live for every play.</div>
                   </div>
                 </div>
               </div>
@@ -2822,10 +2822,10 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
             {/* Recent generations */}
             {sportHistory.length > 0 && (
               <div style={{ marginTop:14 }}>
-                <div style={{ fontSize:9, letterSpacing:2, color:'#3d4559', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Recent Generations</div>
+                <div style={{ fontSize:9, letterSpacing:2, color:'#5a6480', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Recent Generations</div>
                 {sportHistory.slice(0,5).map((h,i) => (
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#0f1117', border:'1px solid #1e2330', borderRadius:6, marginBottom:6 }}>
-                    <div style={{ flex:1 }}><div style={{ fontSize:12, fontWeight:600, color:'#dde1f0' }}>{h.packageName}</div><div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{h.plays?.length} plays</div></div>
+                    <div style={{ flex:1 }}><div style={{ fontSize:12, fontWeight:600, color:'#dde1f0' }}>{h.packageName}</div><div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{h.plays?.length} plays</div></div>
                     <button onClick={() => setOffResult(h)} style={{ fontSize:9, color:P, background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:3, padding:'3px 8px', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>VIEW</button>
                   </div>
                 ))}
@@ -2869,7 +2869,7 @@ function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSO
           )}
           {showSaveMenu && (
             <div style={{ position:'absolute', right:0, top:'100%', marginTop:4, background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:8, zIndex:50, minWidth:180, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
-              <div style={{ fontSize:9, color:'#6b7a96', letterSpacing:1.5, textTransform:'uppercase', fontWeight:700, marginBottom:6, padding:'0 4px' }}>Add to folder</div>
+              <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:1.5, textTransform:'uppercase', fontWeight:700, marginBottom:6, padding:'0 4px' }}>Add to folder</div>
               {existingFolders.map(f => (
                 <div key={f} onClick={()=>handleAdd(f)} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5, display:'flex', alignItems:'center', gap:6 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='#161922'}>
                   <span style={{ fontSize:11 }}>📁</span> {f}
@@ -2962,7 +2962,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
         <span style={{ fontSize:15 }}>🛡</span>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{{ Football:'Defensive Scheme Generator', Basketball:'Defensive Scheme Generator', Baseball:'Defensive Positioning', Soccer:'Defensive Shape Builder', Softball:'Defensive Positioning' }[sport] || 'Defensive Scheme Generator'}</span>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, letterSpacing:'1px', padding:'2px 7px', borderRadius:2, background:al(S,0.15), color:S, textTransform:'uppercase' }}>DEFENSIVE</span>
-        <span style={{ fontSize:12, color:'#6b7a96', marginLeft:4 }}>{open ? '▲' : '▼'}</span>
+        <span style={{ fontSize:12, color:'#8a94b0', marginLeft:4 }}>{open ? '▲' : '▼'}</span>
       </div>
       {open && (
         <div style={{ padding:14, animation:'fadeIn 0.2s ease' }}>
@@ -2970,17 +2970,17 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
             {activeCfg.map(f => (<Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
           </div>
           <PBtn onClick={generate} disabled={loading} color={S}>{loading ? 'BUILDING...' : isBSB ? 'BUILD DEFENSIVE PLAN' : 'BUILD DEFENSIVE SCHEME'}</PBtn>
-          {loading && <div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${S}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your defensive scheme...</div><div style={{ fontSize:11, color:'#6b7a96' }}>This takes 20–40 seconds. Please keep this screen open.</div></div>}
+          {loading && <div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${S}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your defensive scheme...</div><div style={{ fontSize:11, color:'#8a94b0' }}>This takes 20–40 seconds. Please keep this screen open.</div></div>}
           {error && <ErrBox msg={error} />}
           {result && (
             <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(S,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:17, letterSpacing:1, color:S, marginBottom:6 }}>{result.packageName}</div>
-              <p style={{ fontSize:12, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
+              <p style={{ fontSize:12, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
               {result.keyStop && (<div style={{ padding:'8px 12px', background:al(S,0.1), border:`1px solid ${al(S,0.25)}`, borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Primary Assignment</div><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{result.keyStop}</div></div>)}
               {(result.formations||[]).map(f => (
                 <DefFormationCardWithSave key={f.number} formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addDefToPlaybook} />
               ))}
-              {result.adjustmentTip && (<div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div></div>)}
+              {result.adjustmentTip && (<div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div></div>)}
               {result.coachingCue && (<div style={{ marginTop:8, padding:10, background:al(S,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defensive Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{result.coachingCue}"</div></div>)}
             </div>
           )}
@@ -3052,7 +3052,7 @@ function PlaybookPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, 
   return (
     <>
       <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Your saved plays</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Your saved plays</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Playbook</div>
       </div>
 
@@ -3063,7 +3063,7 @@ function PlaybookPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, 
             {f} <span style={{ opacity:0.6, marginLeft:3 }}>{(sportFolders[f]||[]).length}</span>
           </button>
         ))}
-        <button onClick={()=>setShowNewFolder(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'#161922', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Folder</button>
+        <button onClick={()=>setShowNewFolder(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'#161922', color:'#5a6480', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Folder</button>
       </div>
 
       {showNewFolder && (
@@ -3077,13 +3077,13 @@ function PlaybookPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, 
         <Card>
           <div style={{ padding:'32px 20px', textAlign:'center' }}>
             <div style={{ fontSize:32, marginBottom:8 }}>📁</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:6 }}>{activeFolder} is empty</div>
-            <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Generate a scheme in the Schemes tab and tap "+ Playbook" to add plays here.</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#8a94b0', letterSpacing:'1px', marginBottom:6 }}>{activeFolder} is empty</div>
+            <div style={{ fontSize:12, color:'#5a6480', lineHeight:1.6 }}>Generate a scheme in the Schemes tab and tap "+ Playbook" to add plays here.</div>
           </div>
         </Card>
       ) : (
         <div>
-          <div style={{ fontSize:10, color:'#6b7a96', marginBottom:8 }}>{folderPlays.length} play{folderPlays.length!==1?'s':''} in {activeFolder}</div>
+          <div style={{ fontSize:10, color:'#8a94b0', marginBottom:8 }}>{folderPlays.length} play{folderPlays.length!==1?'s':''} in {activeFolder}</div>
           {folderPlays.map((play, i) => (
             <div key={i} style={{ marginBottom:8, position:'relative' }}>
               <div style={{ position:'absolute', top:8, right:8, zIndex:10 }}>
@@ -3148,7 +3148,7 @@ function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
   return (
     <>
       <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Game preparation</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Game preparation</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Scout</div>
       </div>
 
@@ -3157,7 +3157,7 @@ function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
         {opponents.map(o => (
           <button key={o.id} onClick={()=>{setActiveOpp(o.id);setScoutResult(null)}} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:`1px solid ${activeOpp===o.id?P:'#1e2330'}`, background:activeOpp===o.id?al(P,0.15):'transparent', color:activeOpp===o.id?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>{o.name}</button>
         ))}
-        <button onClick={()=>setShowAddOpp(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'#161922', color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ Add Opponent</button>
+        <button onClick={()=>setShowAddOpp(s=>!s)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:4, fontSize:10, border:'1px dashed #1e2330', background:'#161922', color:'#5a6480', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ Add Opponent</button>
       </div>
 
       {showAddOpp && (
@@ -3172,8 +3172,8 @@ function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
         <Card>
           <div style={{ padding:'40px 20px', textAlign:'center' }}>
             <div style={{ fontSize:36, marginBottom:10 }}>🔍</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Opponents Added Yet</div>
-            <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6, marginBottom:16 }}>Add an upcoming opponent to build a full AI scouting report, track their tendencies, and create a game plan.</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#8a94b0', letterSpacing:'1px', marginBottom:8 }}>No Opponents Added Yet</div>
+            <div style={{ fontSize:12, color:'#5a6480', lineHeight:1.6, marginBottom:16 }}>Add an upcoming opponent to build a full AI scouting report, track their tendencies, and create a game plan.</div>
             <button onClick={()=>setShowAddOpp(true)} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', cursor:'pointer' }}>ADD FIRST OPPONENT</button>
           </div>
         </Card>
@@ -3184,17 +3184,17 @@ function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
             <div style={{ padding:14 }}>
               {/* Notes */}
               <div style={{ marginBottom:12 }}>
-                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6 }}>Coach Notes</div>
+                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:6 }}>Coach Notes</div>
                 <textarea value={notes[activeOpp]||''} onChange={e=>setNotes(prev=>({...prev,[activeOpp]:e.target.value}))} placeholder="Add what you know about this team — formation tendencies, key players, things you've seen on film..." rows={3} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', resize:'vertical' }} />
               </div>
               {/* Tendencies */}
               <div style={{ marginBottom:12 }}>
-                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6 }}>Observed Tendencies</div>
+                <div style={{ fontSize:10, letterSpacing:1.5, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:6 }}>Observed Tendencies</div>
                 {(tendencies[activeOpp]||[]).map((t,i) => (
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5 }}>
                     <div style={{ width:6, height:6, borderRadius:'50%', background:P, flexShrink:0 }} />
                     <div style={{ flex:1, fontSize:12, color:'#f2f4f8' }}>{t}</div>
-                    <button onClick={()=>removeTendency(i)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
+                    <button onClick={()=>removeTendency(i)} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
                   </div>
                 ))}
                 <div style={{ display:'flex', gap:7 }}>
@@ -3206,7 +3206,7 @@ function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
             </div>
           </Card>
 
-          {scoutLoading && <div style={{ padding:16, textAlign:'center' }}><div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }} /><div style={{ fontSize:12, color:'#6b7a96' }}>Building scouting report...</div></div>}
+          {scoutLoading && <div style={{ padding:16, textAlign:'center' }}><div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }} /><div style={{ fontSize:12, color:'#8a94b0' }}>Building scouting report...</div></div>}
 
           {scoutResult && !scoutResult.error && (
             <div style={{ display:'flex', flexDirection:'column', gap:10, animation:'fadeIn 0.3s ease' }}>
@@ -3280,15 +3280,15 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
           <>
             <MascotAvatar mascotId={current.mascot} color={current.primary||P} size={22} />
             <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, letterSpacing:'0.5px', maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1, minWidth:0 }}>{current.name}</span>
-            <span style={{ fontSize:8, color:'#6b7a96', marginLeft:'auto' }}>▾</span>
+            <span style={{ fontSize:10, color:'#8a94b0', marginLeft:'auto' }}>▾</span>
           </>
         ) : sportTeams.length === 0 ? (
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:P, fontWeight:700, display:'flex', alignItems:'center', gap:5 }}>
             <span>➕</span> Create Team
           </span>
         ) : (
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b7a96', fontWeight:700, display:'flex', alignItems:'center', gap:5 }}>
-            <span>🏆</span> Select Team <span style={{ fontSize:8 }}>▾</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#8a94b0', fontWeight:700, display:'flex', alignItems:'center', gap:5 }}>
+            <span>🏆</span> Select Team <span style={{ fontSize:10 }}>▾</span>
           </span>
         )}
       </div>
@@ -3303,7 +3303,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
               <MascotAvatar mascotId={t.mascot} color={t.primary||P} size={28} />
               <div style={{ flex:1 }}>
                 <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, color:current?.id===t.id?P:'#f2f4f8' }}>{t.name}</div>
-                <div style={{ fontSize:9, color:'#6b7a96' }}>{t.season}{t.hometown?' · '+t.hometown:''}</div>
+                <div style={{ fontSize:9, color:'#8a94b0' }}>{t.season}{t.hometown?' · '+t.hometown:''}</div>
               </div>
               {current?.id===t.id && <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>ACTIVE</span>}
             </div>
@@ -3311,7 +3311,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
           {/* Actions */}
           <div style={{ padding:'6px 8px', display:'flex', gap:6 }}>
             <button onClick={()=>{ setOpen(false); setPage('team') }} style={{ flex:1, padding:'7px', background:al(P,0.1), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Team</button>
-            {current && <button onClick={deselect} style={{ padding:'7px 10px', background:'rgba(255,255,255,0.05)', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Deselect</button>}
+            {current && <button onClick={deselect} style={{ padding:'7px 10px', background:'rgba(255,255,255,0.05)', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Deselect</button>}
           </div>
         </div>
       )}
@@ -3731,12 +3731,12 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                 <div style={{ width:44, height:44, borderRadius:'50%', background: s.type==='indicator'?'rgba(245,158,11,0.2)':s.type==='live'?al(P,0.2):'rgba(255,255,255,0.06)', border: s.type==='indicator'?'2px solid #f59e0b':s.type==='live'?`2px solid ${P}`:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column' }}>
                   <span style={{ fontSize:9, color: s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', lineHeight:1.2 }}>{s.touch.toUpperCase()}</span>
                 </div>
-                <span style={{ fontSize:7, color: s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', maxWidth:44 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</span>
-                {i < sig.sequence.length-1 && <div style={{ position:'absolute', right:-8, top:14, color:'#3d4559', fontSize:10 }}>→</div>}
+                <span style={{ fontSize:9, color: s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', maxWidth:44 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</span>
+                {i < sig.sequence.length-1 && <div style={{ position:'absolute', right:-8, top:14, color:'#5a6480', fontSize:10 }}>→</div>}
               </div>
             ))}
           </div>
-          <div style={{ textAlign:'center', marginTop:6, fontSize:9, color:'#6b7a96' }}>
+          <div style={{ textAlign:'center', marginTop:6, fontSize:9, color:'#8a94b0' }}>
             After <span style={{ color:'#f59e0b', fontWeight:700 }}>{choices.indicator?.toUpperCase()}</span> → next touch is live → wipe-off: <span style={{ color:'#ef4444', fontWeight:700 }}>{choices.wipeoff}</span>
           </div>
         </div>
@@ -3975,7 +3975,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
     <Card>
       <CardHead icon="✏️" title={sport==='Baseball'||sport==='Softball'?'Signal Creator':'Play Name Builder'} tag={sport==='Baseball'||sport==='Softball'?'SIGNAL CREATOR':'LEARN'} tagColor={P} accent={P} />
       <div style={{ padding:14 }}>
-        <p style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6, marginBottom:10 }}>{sport==='Baseball'||sport==='Softball'?'Define the situation, choose the play, and generate a real third-base coach signal sequence.':'Build a professional play call step by step. The diagram updates with every choice you make.'}</p>
+        <p style={{ fontSize:12, color:'#8a94b0', lineHeight:1.6, marginBottom:10 }}>{sport==='Baseball'||sport==='Softball'?'Define the situation, choose the play, and generate a real third-base coach signal sequence.':'Build a professional play call step by step. The diagram updates with every choice you make.'}</p>
 
         {!result ? (
           <>
@@ -3984,7 +3984,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
             </div>
 
             <div style={{ background:'#0a1a0a', borderRadius:6, border:'1px solid #1e2330', overflow:'hidden', marginBottom:10 }}>
-              <div style={{ fontSize:7, letterSpacing:1.5, color:'#3d4559', textTransform:'uppercase', fontWeight:700, padding:'4px 10px', borderBottom:'1px solid #1e2330' }}>
+              <div style={{ fontSize:9, letterSpacing:1.5, color:'#5a6480', textTransform:'uppercase', fontWeight:700, padding:'4px 10px', borderBottom:'1px solid #1e2330' }}>
                 {sport==='Baseball'||sport==='Softball'?'Signal Preview — builds as you choose':'Live Diagram — updates with each selection'}
               </div>
               <div style={{ padding:'6px' }}><LiveDiagram /></div>
@@ -3993,11 +3993,11 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
             <div style={{ marginBottom:10 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
                 <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700 }}>Step {step+1} of {steps.length} — {currentStep.label}</div>
-                {currentStep.optional && <span style={{ fontSize:8, color:'#6b7a96', padding:'1px 6px', background:'#1e2330', borderRadius:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>OPTIONAL</span>}
+                {currentStep.optional && <span style={{ fontSize:10, color:'#8a94b0', padding:'1px 6px', background:'#1e2330', borderRadius:3, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>OPTIONAL</span>}
               </div>
               <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.5, marginBottom:6 }}>{currentStep.desc}</div>
               {currentStep.note && (
-                <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.5, padding:'6px 10px', background:'rgba(107,154,255,0.06)', borderRadius:4, borderLeft:'2px solid rgba(107,154,255,0.3)', marginBottom:8 }}>
+                <div style={{ fontSize:10, color:'#8a94b0', lineHeight:1.5, padding:'6px 10px', background:'rgba(107,154,255,0.06)', borderRadius:4, borderLeft:'2px solid rgba(107,154,255,0.3)', marginBottom:8 }}>
                   💡 {currentStep.note}
                 </div>
               )}
@@ -4012,7 +4012,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                       <div style={{ width:14, height:14, borderRadius:'50%', border:`2px solid ${isSelected?P:'#3d4559'}`, background:isSelected?P:'#0f1219', flexShrink:0 }}/>
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:12, color:isSelected?P:'#f2f4f8', fontWeight:isSelected?700:400 }}>{label}</div>
-                        {ex && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{ex}</div>}
+                        {ex && <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{ex}</div>}
                       </div>
                       {isSelected && <span style={{ fontSize:12, color:P }}>✓</span>}
                     </div>
@@ -4023,13 +4023,13 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
 
             {choices[currentStep?.id] !== undefined && choices[currentStep?.id] !== null && (
               <div style={{ marginTop:4, padding:'5px 10px', background:al(P,0.07), borderRadius:4, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif" }}>
-                {step > 0 ? <span style={{ color:'#6b7a96' }}>Built: </span> : null}
+                {step > 0 ? <span style={{ color:'#8a94b0' }}>Built: </span> : null}
                 {steps.slice(0,step+1).map(s=>choices[s.id]).filter(Boolean).join(' · ')}
               </div>
             )}
 
             <div style={{ display:'flex', gap:8, marginTop:10 }}>
-              {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
+              {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
               {!isLastStep && (
                 <button onClick={()=>{ if(canAdvance||currentStep.optional) setStep(s=>s+1) }} style={{ flex:2, padding:'10px', background:canAdvance?P:currentStep.optional?al(P,0.4):'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:(canAdvance||currentStep.optional)?'pointer':'not-allowed', letterSpacing:'1px' }}>
                   {currentStep.optional && !canAdvance ? 'SKIP →' : 'NEXT →'}
@@ -4053,9 +4053,9 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                       <div key={i} style={{ display:'flex', alignItems:'center', gap:4 }}>
                         <div style={{ padding:'8px 10px', borderRadius:6, background: s.type==='indicator'?'rgba(245,158,11,0.15)':s.type==='live'?al(P,0.15):'#161922', border: s.type==='indicator'?'2px solid #f59e0b':s.type==='live'?`2px solid ${P}`:'1px solid #1e2330', textAlign:'center', minWidth:52 }}>
                           <div style={{ fontSize:11, fontWeight:700, color:s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>{s.touch.toUpperCase()}</div>
-                          <div style={{ fontSize:8, color:s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:2 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</div>
+                          <div style={{ fontSize:10, color:s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:2 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</div>
                         </div>
-                        {i < result.signalData.sequence.length-1 && <span style={{ color:'#3d4559', fontSize:14 }}>→</span>}
+                        {i < result.signalData.sequence.length-1 && <span style={{ color:'#5a6480', fontSize:14 }}>→</span>}
                       </div>
                     ))}
                   </div>
@@ -4065,7 +4065,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                   </div>
                 </div>
                 <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:10 }}>
-                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>How It Works</div>
+                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>How It Works</div>
                   <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.7 }}>{result.explanation}</div>
                 </div>
               </>
@@ -4076,7 +4076,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                   <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:900, fontSize:20, color:'#f2f4f8', letterSpacing:0.5, lineHeight:1.4 }}>{result.name}</div>
                 </div>
                 <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:10 }}>
-                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Why It Is Called This</div>
+                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:6 }}>Why It Is Called This</div>
                   <div style={{ fontSize:12, color:'#dde1f0', lineHeight:1.7 }}>{result.explanation}</div>
                 </div>
               </>
@@ -4086,7 +4086,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                 <span style={{ fontSize:16 }}>▶</span>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WATCH ON YOUTUBE</div>
-                  <div style={{ fontSize:11, color:'#6b7a96' }}>{result.ytSearch}</div>
+                  <div style={{ fontSize:11, color:'#8a94b0' }}>{result.ytSearch}</div>
                 </div>
                 <span style={{ fontSize:11, color:'#ef4444' }}>→</span>
               </a>
@@ -4157,18 +4157,18 @@ function RulebookPage({ sport, P='#C0392B', al, callAI }) {
       <Card>
         <CardHead icon="📜" title={sport+' Official Resources'} tag="RULES" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
-          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:12, padding:'8px 10px', background:'rgba(245,158,11,0.06)', borderRadius:4, border:'1px solid rgba(245,158,11,0.15)' }}>⚠️ Links open official org homepages. Use Search for specific documents.</div>
+          <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5, marginBottom:12, padding:'8px 10px', background:'rgba(245,158,11,0.06)', borderRadius:4, border:'1px solid rgba(245,158,11,0.15)' }}>⚠️ Links open official org homepages. Use Search for specific documents.</div>
           {safeLinks.map((link,i) => (
             <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 12px', background:'#161922', border:`1px solid ${al(P,0.2)}`, borderRadius:6, marginBottom:8, borderLeft:`3px solid ${P}` }}>
               <span style={{ fontSize:16, flexShrink:0 }}>📋</span>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:2 }}>{link.name}</div>
-                <div style={{ fontSize:10, color:'#6b7a96' }}>{link.org}</div>
+                <div style={{ fontSize:10, color:'#8a94b0' }}>{link.org}</div>
                 <div style={{ fontSize:9, color:P, marginTop:2, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{link.level}</div>
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:4, flexShrink:0 }}>
                 <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:`1px solid ${al(P,0.4)}`, borderRadius:3, textDecoration:'none', textAlign:'center' }}>VISIT →</a>
-                <a href={'https://www.google.com/search?q='+encodeURIComponent(link.search)} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:'1px solid #1e2330', borderRadius:3, textDecoration:'none', textAlign:'center' }}>SEARCH</a>
+                <a href={'https://www.google.com/search?q='+encodeURIComponent(link.search)} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:'1px solid #1e2330', borderRadius:3, textDecoration:'none', textAlign:'center' }}>SEARCH</a>
               </div>
             </div>
           ))}
@@ -4177,23 +4177,23 @@ function RulebookPage({ sport, P='#C0392B', al, callAI }) {
       <Card>
         <CardHead icon="🔍" title="Find Your League Rules" tag="AI SEARCH" tagColor={P} accent={P} />
         <div style={{ padding:14 }}>
-          <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Enter your league name to find rule modifications and governing body info.</div>
+          <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5, marginBottom:10 }}>Enter your league name to find rule modifications and governing body info.</div>
           <div style={{ display:'flex', gap:8, marginBottom:12 }}>
             <input value={leagueSearch} onChange={e=>setLeagueSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchLeague()} placeholder={'e.g. Tolland Youth '+sport} style={{ flex:1, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
             <button onClick={searchLeague} disabled={searching||!leagueSearch.trim()} style={{ padding:'9px 14px', background:leagueSearch.trim()&&!searching?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:leagueSearch.trim()&&!searching?'pointer':'not-allowed', whiteSpace:'nowrap' }}>{searching?'..':'SEARCH'}</button>
           </div>
-          {searching && <div style={{ textAlign:'center', padding:'14px', color:'#6b7a96', fontSize:12 }}>Searching for {leagueSearch} rules...</div>}
+          {searching && <div style={{ textAlign:'center', padding:'14px', color:'#8a94b0', fontSize:12 }}>Searching for {leagueSearch} rules...</div>}
           {leagueResult && !searching && (
             <div style={{ animation:'fadeIn 0.3s ease' }}>
               <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:6, marginBottom:8 }}>
                 <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Governing Body</div>
                 <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600, marginBottom:6 }}>{leagueResult.governingBody}</div>
                 <a href={'https://www.google.com/search?q='+encodeURIComponent((leagueResult.governingBody||'')+(sport ? ' '+sport : '')+' official rules')} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:P, display:'inline-block', padding:'4px 10px', background:al(P,0.1), borderRadius:3, textDecoration:'none' }}>🔍 Search official rules →</a>
-                <div style={{ fontSize:9, color:'#3d4559', marginTop:4, fontStyle:'italic' }}>Opens Google. CoachIQ is not responsible for third-party results.</div>
+                <div style={{ fontSize:9, color:'#5a6480', marginTop:4, fontStyle:'italic' }}>Opens Google. CoachIQ is not responsible for third-party results.</div>
               </div>
               {leagueResult.commonModifications && leagueResult.commonModifications.length > 0 && (
                 <div style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, marginBottom:8 }}>
-                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Common Youth Rule Modifications</div>
+                  <div style={{ fontSize:9, letterSpacing:1.5, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Common Youth Rule Modifications</div>
                   {leagueResult.commonModifications.map((m,i) => <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'3px 0', borderBottom:i<leagueResult.commonModifications.length-1?'1px solid #1e2330':'none' }}>• {m}</div>)}
                 </div>
               )}
@@ -4203,7 +4203,7 @@ function RulebookPage({ sport, P='#C0392B', al, callAI }) {
                   {leagueResult.safetyRules.map((r,i) => <div key={i} style={{ fontSize:11, color:'#dde1f0', lineHeight:1.6, padding:'3px 0' }}>✓ {r}</div>)}
                 </div>
               )}
-              {leagueResult.note && <div style={{ fontSize:10, color:'#6b7a96', fontStyle:'italic', lineHeight:1.5, padding:'8px 10px', background:'#161922', borderRadius:4 }}>Note: {leagueResult.note}</div>}
+              {leagueResult.note && <div style={{ fontSize:10, color:'#8a94b0', fontStyle:'italic', lineHeight:1.5, padding:'8px 10px', background:'#161922', borderRadius:4 }}>Note: {leagueResult.note}</div>}
             </div>
           )}
         </div>
@@ -4339,7 +4339,7 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
     <div style={{ padding:'16px 0 8px' }}>
       {/* Header */}
       <div style={{ marginBottom:14 }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} · News + Coaching</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} · News + Coaching</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:28, lineHeight:1, color:'#f2f4f8' }}>News + Feed</div>
       </div>
 
@@ -4352,7 +4352,7 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
           </button>
         ))}
         {activeChannel === 'sportNews' && (
-          <button onClick={loadNews} style={{ padding:'7px 10px', borderRadius:20, border:'1px solid #1e2330', background:'#0f1219', color:'#6b7a96', fontSize:14, cursor:'pointer', WebkitTapHighlightColor:'transparent', flexShrink:0, touchAction:'manipulation' }}>⟳</button>
+          <button onClick={loadNews} style={{ padding:'7px 10px', borderRadius:20, border:'1px solid #1e2330', background:'#0f1219', color:'#8a94b0', fontSize:14, cursor:'pointer', WebkitTapHighlightColor:'transparent', flexShrink:0, touchAction:'manipulation' }}>⟳</button>
         )}
       </div>
 
@@ -4369,11 +4369,11 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
                 <div style={{ padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
                   <div style={{ flex:1 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
-                      <span style={{ fontSize:8, fontWeight:700, padding:'2px 6px', borderRadius:3, background:al(catColor,0.15), color:catColor, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>{drill.category}</span>
+                      <span style={{ fontSize:10, fontWeight:700, padding:'2px 6px', borderRadius:3, background:al(catColor,0.15), color:catColor, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>{drill.category}</span>
                     </div>
                     <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', lineHeight:1.3 }}>{drill.title}</div>
                   </div>
-                  <div style={{ fontSize:12, color:'#3d4559', flexShrink:0 }}>{isOpen ? '▲' : '▼'}</div>
+                  <div style={{ fontSize:12, color:'#5a6480', flexShrink:0 }}>{isOpen ? '▲' : '▼'}</div>
                 </div>
                 {/* Expanded content */}
                 {isOpen && (
@@ -4392,7 +4392,7 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
               </div>
             )
           })}
-          <div style={{ marginTop:4, fontSize:9, color:'#3d4559', textAlign:'center' }}>Tap any card to expand · More content coming</div>
+          <div style={{ marginTop:4, fontSize:9, color:'#5a6480', textAlign:'center' }}>Tap any card to expand · More content coming</div>
         </div>
       )}
 
@@ -4402,7 +4402,7 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
           {newsLoading && (
             <div style={{ padding:'40px 20px', textAlign:'center' }}>
               <div style={{ width:24, height:24, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }}/>
-              <div style={{ fontSize:12, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>Loading {sport} news...</div>
+              <div style={{ fontSize:12, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif" }}>Loading {sport} news...</div>
             </div>
           )}
           {!newsLoading && newsError && (
@@ -4422,13 +4422,13 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
                     <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px', textTransform:'uppercase' }}>
                       {item.author || (item.link ? (() => { try { return new URL(item.link).hostname.replace('www.','') } catch(e) { return 'News' } })() : 'News')}
                     </span>
-                    <span style={{ fontSize:9, color:'#3d4559' }}>{formatDate(item.pubDate)}</span>
+                    <span style={{ fontSize:9, color:'#5a6480' }}>{formatDate(item.pubDate)}</span>
                   </div>
                   <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8', lineHeight:1.4, marginBottom:item.description?6:0 }}>
                     {stripHtml(item.title)}
                   </div>
                   {item.description && (
-                    <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+                    <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
                       {stripHtml(item.description).slice(0,180)}
                     </div>
                   )}
@@ -4437,7 +4437,7 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
                   )}
                 </div>
               ))}
-              <div style={{ marginTop:4, fontSize:9, color:'#3d4559', textAlign:'center' }}>Real-time news · Tap any article to read in full</div>
+              <div style={{ marginTop:4, fontSize:9, color:'#5a6480', textAlign:'center' }}>Real-time news · Tap any article to read in full</div>
             </div>
           )}
         </div>
@@ -4472,16 +4472,16 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
       <div style={{ padding:'14px 0 12px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>documentation</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>documentation</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#dde1f0', lineHeight:1 }}>Help + Features</div>
-        <div style={{ fontSize:11, color:'#3d4559', marginTop:6 }}>Tap any section to expand. Every feature explained.</div>
+        <div style={{ fontSize:11, color:'#5a6480', marginTop:6 }}>Tap any section to expand. Every feature explained.</div>
       </div>
       {sections.map((sec, i) => (
         <div key={sec.id} style={{ borderBottom:'1px solid #1e2330' }}>
           <div onClick={()=>setOpenSection(openSection===sec.id?null:sec.id)} style={{ display:'flex', alignItems:'center', gap:10, padding:'14px 4px', cursor:'pointer' }}>
             <span style={{ fontSize:18, flexShrink:0 }}>{sec.icon}</span>
             <span style={{ flex:1, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:openSection===sec.id?P:'#f2f4f8', textTransform:'uppercase', letterSpacing:'0.5px' }}>{sec.title}</span>
-            <span style={{ fontSize:12, color:'#3d4559', transition:'transform 0.2s', transform:openSection===sec.id?'rotate(180deg)':'rotate(0deg)', display:'inline-block' }}>▼</span>
+            <span style={{ fontSize:12, color:'#5a6480', transition:'transform 0.2s', transform:openSection===sec.id?'rotate(180deg)':'rotate(0deg)', display:'inline-block' }}>▼</span>
           </div>
           {openSection === sec.id && (
             <div style={{ padding:'0 4px 16px 32px', animation:'fadeIn 0.2s ease' }}>
@@ -4517,11 +4517,12 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
     },
     {
       id: 'reference',
-      label: '📚 Reference & Rules',
-      desc: 'Official rules, guides, and app resources',
+      label: '📚 Reference & Resources',
+      desc: 'Official rules, guides, news, and app resources',
       color: '#6b9fff',
       tools: [
         { id:'rulebook', icon:'📜', title:'Rulebook',       desc:'Official rules for '+sport+' with league search', tag:'RULES' },
+        { id:'news',     icon:'📰', title:sport+' News Feed', desc:'Latest '+sport+' coaching tips, drills, and news', tag:'NEWS' },
         { id:'guide',    icon:'📖', title:'Feature Guide',  desc:'Complete walkthrough of every feature in CoachIQ', tag:'GUIDE' },
         { id:'tour',     icon:'🗺️', title:'App Tour',       desc:'Interactive tour of the entire app — great for new coaches', tag:'TOUR' },
         { id:'help',     icon:'❓', title:'Help + FAQ',     desc:'Answers to common questions and detailed feature explanations', tag:'HELP' },
@@ -4532,34 +4533,34 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
   if (activeMode === 'gauntlet') {
     if (guestMode && guestGauntletDone) return (
       <>
-        <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+        <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
         <GuestGate feature="Coaching Gauntlet" onSignUp={onGuestSignUp} />
       </>
     )
     return (
-      <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+      <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
       <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={(n)=>{ setGauntlets(n); if(guestMode && setGuestGauntletDone) setGuestGauntletDone(true) }} callAI={callAI} parseJSON={parseJSON} /> </>
     )
   }
   if (activeMode === 'playnames') return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <PlayNameBuilder P={P} S={S} al={al} sport={sport} /> </>
   )
   if (activeMode === 'rulebook') return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <RulebookPage sport={sport} P={P} al={al} callAI={callAI} /> </>
   )
   if (activeMode === 'guide') return ( <FeatureGuide P={P} al={al} onClose={()=>setActiveMode(null)} /> )
   if (activeMode === 'tour')  return ( <QuickTourModal onDone={()=>setActiveMode(null)} P={P} al={al} setPage={setPage} /> )
   if (activeMode === 'help')  return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <HelpPage P={P} al={al} setPage={setPage} sport={sport} /> </>
   )
 
   return (
     <>
       <div style={{ padding:'14px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>coaching education</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>coaching education</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:24, color:'#dde1f0', lineHeight:1 }}>Learn</div>
       </div>
       {categories.map(cat => (
@@ -4568,10 +4569,10 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, color:cat.color, textTransform:'uppercase', letterSpacing:'1px' }}>{cat.label}</div>
             <div style={{ flex:1, height:1, background:`${cat.color}22` }}/>
           </div>
-          <div style={{ fontSize:10, color:'#3d4559', marginBottom:8 }}>{cat.desc}</div>
+          <div style={{ fontSize:10, color:'#5a6480', marginBottom:8 }}>{cat.desc}</div>
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {cat.tools.map(tool => (
-              <div key={tool.id} onClick={()=>setActiveMode(tool.id)}
+              <div key={tool.id} onClick={()=>tool.id==='news' ? setPage('news') : setActiveMode(tool.id)}
                 style={{ padding:'14px 16px', background:'#0f1219', border:`1px solid ${al(cat.color,0.2)}`, borderRadius:6, cursor:'pointer', display:'flex', alignItems:'center', gap:12, borderLeft:`3px solid ${cat.color}` }}
                 onMouseEnter={e=>e.currentTarget.style.background=al(cat.color,0.06)}
                 onMouseLeave={e=>e.currentTarget.style.background='#0f1219'}
@@ -4579,11 +4580,11 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
                 <span style={{ fontSize:22, flexShrink:0 }}>{tool.icon}</span>
                 <div style={{ flex:1 }}>
                   <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#f2f4f8', marginBottom:2 }}>{tool.title}</div>
-                  <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.4 }}>{tool.desc}</div>
+                  <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4 }}>{tool.desc}</div>
                 </div>
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0 }}>
-                  <span style={{ fontSize:8, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, color:cat.color, padding:'2px 6px', background:al(cat.color,0.1), borderRadius:3 }}>{tool.tag}</span>
-                  <span style={{ fontSize:13, color:'#3d4559' }}>→</span>
+                  <span style={{ fontSize:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, color:cat.color, padding:'2px 6px', background:al(cat.color,0.1), borderRadius:3 }}>{tool.tag}</span>
+                  <span style={{ fontSize:13, color:'#5a6480' }}>→</span>
                 </div>
               </div>
             ))}
@@ -4626,29 +4627,29 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
   return (
     <>
       <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Platform & settings</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Platform & settings</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>More</div>
       </div>
 
       {/* Section switcher */}
       <div style={{ display:'flex', gap:6, marginBottom:14 }}>
-        {[['features','🚀 Features'],['rulebook','📜 Rules'],['help','❓ Help'],['settings','⚙️ Settings']].map(([k,lbl]) => (
+        {[['features','🚀 Features'],['rulebook','📜 Rulebook'],['help','❓ Help'],['settings','⚙️ Settings']].map(([k,lbl]) => (
           <button key={k} onClick={()=>setActiveSection(k)} style={{ flex:1, padding:'9px', borderRadius:4, fontSize:11, border:`1px solid ${activeSection===k?P:'#1e2330'}`, background:activeSection===k?al(P,0.15):'transparent', color:activeSection===k?P:'#6b7a96', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>{lbl}</button>
         ))}
       </div>
 
       {activeSection === 'features' && (
         <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-          <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.6, marginBottom:4 }}>CoachIQ is being built for coaches. Here's what's coming next on the roadmap — tap any feature to learn more.</div>
+          <div style={{ fontSize:10, color:'#8a94b0', lineHeight:1.6, marginBottom:4 }}>CoachIQ is being built for coaches. Here's what's coming next on the roadmap — tap any feature to learn more.</div>
           {coachFeatures.map((f,i) => (
             <div key={i} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'13px 14px', display:'flex', gap:12, alignItems:'flex-start' }}>
               <div style={{ fontSize:26, flexShrink:0, marginTop:2 }}>{f.icon}</div>
               <div style={{ flex:1 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:4, flexWrap:'wrap' }}>
                   <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:'#f2f4f8' }}>{f.title}</div>
-                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(f.color.slice(1,3),16)},${parseInt(f.color.slice(3,5),16)},${parseInt(f.color.slice(5,7),16)},0.15)`, color:f.color, letterSpacing:'0.5px' }}>{f.status}</span>
+                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, padding:'2px 7px', borderRadius:2, background:`rgba(${parseInt(f.color.slice(1,3),16)},${parseInt(f.color.slice(3,5),16)},${parseInt(f.color.slice(5,7),16)},0.15)`, color:f.color, letterSpacing:'0.5px' }}>{f.status}</span>
                 </div>
-                <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.5 }}>{f.desc}</div>
+                <div style={{ fontSize:12, color:'#8a94b0', lineHeight:1.5 }}>{f.desc}</div>
               </div>
             </div>
           ))}
@@ -4666,22 +4667,22 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
             <div onClick={()=>setHelpMode('tour')} style={{ padding:'18px 12px', background:'#0f1219', border:`1px solid ${al(P,0.3)}`, borderRadius:6, cursor:'pointer', textAlign:'center' }}>
               <div style={{ fontSize:28, marginBottom:8 }}>⚡</div>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:P, marginBottom:4 }}>Quick Tour</div>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>6-step walkthrough of every tab</div>
+              <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5 }}>6-step walkthrough of every tab</div>
             </div>
             <div onClick={()=>setHelpMode('guide')} style={{ padding:'18px 12px', background:'#0f1219', border:`1px solid ${al(P,0.3)}`, borderRadius:6, cursor:'pointer', textAlign:'center' }}>
               <div style={{ fontSize:28, marginBottom:8 }}>📖</div>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, color:P, marginBottom:4 }}>Feature Guide</div>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>Deep dive into every feature</div>
+              <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5 }}>Deep dive into every feature</div>
             </div>
           </div>
           <div style={{ padding:'12px 14px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
-            <div style={{ fontSize:9, letterSpacing:1.5, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Feature Overview</div>
+            <div style={{ fontSize:9, letterSpacing:1.5, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Feature Overview</div>
             {TUTORIAL_STEPS.map((step,i) => (
               <div key={i} style={{ display:'flex', gap:10, padding:'8px 0', borderBottom:i<TUTORIAL_STEPS.length-1?'1px solid #1e2330':'none' }}>
                 <span style={{ fontSize:16, flexShrink:0 }}>{step.icon}</span>
                 <div>
                   <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8', marginBottom:2 }}>{step.title}</div>
-                  <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>{step.desc}</div>
+                  <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5 }}>{step.desc}</div>
                 </div>
               </div>
             ))}
@@ -4695,7 +4696,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
           <Card>
             <CardHead icon="🎨" title="CoachIQ Logo Style" accent={P} />
             <div style={{ padding:14 }}>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>Choose your brand palette for the CoachIQ logo across the app.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>Choose your brand palette for the CoachIQ logo across the app.</div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                 {Object.entries(BRAND_PALETTES).map(([key, palette]) => {
                   const isCIQ = palette.accentOn === 'CIQ'
@@ -4706,7 +4707,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
                         <span style={{ color:isCIQ?'#f2f4f8':palette.accent }}>oach</span>
                         <span style={{ color:isCIQ?palette.accent:'#f2f4f8' }}>IQ</span>
                       </div>
-                      <div style={{ flex:1, fontSize:12, color:'#6b7a96' }}>{palette.name}</div>
+                      <div style={{ flex:1, fontSize:12, color:'#8a94b0' }}>{palette.name}</div>
                       {brand===key && <span style={{ fontSize:14, color:'#4ade80' }}>✓</span>}
                     </div>
                   )
@@ -4719,7 +4720,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
           <Card>
             <CardHead icon="🎨" title="Your Personal Colors" accent={P} />
             <div style={{ padding:14 }}>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:4, lineHeight:1.5 }}>
+              <div style={{ fontSize:11, color:'#8a94b0', marginBottom:4, lineHeight:1.5 }}>
                 These colors appear when no team is selected. When a team is active, that team's colors take over automatically.
               </div>
               <div style={{ fontSize:10, color:P, fontWeight:700, marginBottom:12, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>
@@ -4740,12 +4741,12 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
                         <input type="color" value={hasValue && cfg[key] !== 'na' ? cfg[key] : '#C0392B'} onChange={e=>setCfg(c=>({...c,[key]:e.target.value}))} style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0, flexShrink:0 }} />
                       ) : (
                         <div style={{ width:36, height:36, borderRadius:4, background:'#1e2330', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                          <span style={{ fontSize:9, color:'#3d4559', fontWeight:700 }}>N/A</span>
+                          <span style={{ fontSize:9, color:'#5a6480', fontWeight:700 }}>N/A</span>
                         </div>
                       )}
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600 }}>{label}</div>
-                        <div style={{ fontSize:9, color:'#6b7a96', fontFamily:'monospace' }}>{isNA ? 'Not set' : (cfg[key] || 'Not set')}</div>
+                        <div style={{ fontSize:9, color:'#8a94b0', fontFamily:'monospace' }}>{isNA ? 'Not set' : (cfg[key] || 'Not set')}</div>
                       </div>
                       {!required && (
                         <button onClick={()=>setCfg(c=>({...c,[key]:isNA?'#f59e0b':'na'}))} style={{ padding:'4px 8px', background:'transparent', border:`1px solid ${isNA?'#3d4559':'rgba(239,68,68,0.3)'}`, borderRadius:4, color:isNA?'#6b7a96':'#ef4444', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, flexShrink:0 }}>
@@ -4764,7 +4765,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
             <Card>
               <CardHead icon="🏆" title={`${currentTeam.name} Colors`} accent={P} />
               <div style={{ padding:14 }}>
-                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:12, lineHeight:1.5 }}>
+                <div style={{ fontSize:11, color:'#8a94b0', marginBottom:12, lineHeight:1.5 }}>
                   Edit this team's colors. Changes apply immediately across the app.
                 </div>
                 <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
@@ -4787,7 +4788,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
                       }} style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0, flexShrink:0 }} />
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600 }}>{label}</div>
-                        <div style={{ fontSize:9, color:'#6b7a96', fontFamily:'monospace' }}>{currentTeam[key] || 'Not set'}</div>
+                        <div style={{ fontSize:9, color:'#8a94b0', fontFamily:'monospace' }}>{currentTeam[key] || 'Not set'}</div>
                       </div>
                     </div>
                   ))}
@@ -4800,7 +4801,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
           <Card>
             <CardHead icon="👤" title="Your Coach Name" accent={P} />
             <div style={{ padding:14 }}>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:10, lineHeight:1.5 }}>This appears on your profile and throughout the app.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>This appears on your profile and throughout the app.</div>
               <input
                 value={cfg.coach||''}
                 onChange={e=>setCfg(c=>({...c,coach:e.target.value}))}
@@ -4813,7 +4814,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
           <div ref={locationRef}><Card>
             <CardHead icon="📍" title="My Location" accent={P} />
             <div style={{ padding:14 }}>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Used for home weather when no team is selected. Auto-detects via GPS or enter manually.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5, marginBottom:10 }}>Used for home weather when no team is selected. Auto-detects via GPS or enter manually.</div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                 <AddressSearch
                   value={homeLocation||''}
@@ -4831,7 +4832,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
           {/* App info */}
           <div style={{ padding:'12px 14px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, textAlign:'center' }}>
             <CoachIQLogo size={20} brand={brand} />
-            <div style={{ fontSize:10, color:'#3d4559', marginTop:6 }}>v1.0 · Built for youth coaches</div>
+            <div style={{ fontSize:10, color:'#5a6480', marginTop:6 }}>v1.0 · Built for youth coaches</div>
           </div>
         </div>
       )}
@@ -4871,7 +4872,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
   if (activeMode === 'schemes_offense' || activeMode === 'schemes_defense') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#8a94b0', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} {activeMode==='schemes_offense'?'Offensive':'Defensive'} Schemes</span>
       </div>
       <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={{Football:{},Basketball:{},Baseball:{}}} setPlaybook={()=>{}} genHistory={{Football:[],Basketball:[],Baseball:[]}} setGenHistory={()=>{}} iq={iq} setIQ={setIQ} defaultOpenOff={activeMode==='schemes_offense'} defaultOpenDef={activeMode==='schemes_defense'} />
@@ -4881,7 +4882,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
   if (activeMode === 'gauntlet') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#8a94b0', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} Gauntlet</span>
       </div>
       <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} />
@@ -4891,7 +4892,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
   if (activeMode === 'film') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#8a94b0', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Film Room</span>
       </div>
       <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />
@@ -4901,7 +4902,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
   if (activeMode === 'situational') return (
     <>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingTop:16 }}>
-        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#6b7a96', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
+        <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#8a94b0', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport==='Football'?'Situational Play Caller':sport==='Basketball'?'Live Game Adjustments':'Count & Situation Manager'}</span>
       </div>
       <SituationalPanel sport={sport} P={P} S={S} al={al} callAI={callAI} />
@@ -4934,10 +4935,10 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
             )}
             <div style={{ padding: ct ? '14px 16px' : '10px 16px', display:'flex', alignItems:'center', gap:12, position:'relative', zIndex:1 }}>
               <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:1 }}>Welcome back</div>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:1 }}>Welcome back</div>
                 <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:ct?22:20, color:'#f2f4f8', lineHeight:1, marginBottom:ct?3:0 }}>Coach {lastName||'—'}</div>
                 {ct && <div style={{ fontFamily:teamFont, fontStyle:'italic', fontSize:13, color:ct.primary, letterSpacing:'0.5px', marginBottom:2 }}>{mascotObj?.emoji} {ct.name}</div>}
-                {ct?.season && <div style={{ fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif" }}>{ct.season}{ct.hometown?' · '+ct.hometown:''}</div>}
+                {ct?.season && <div style={{ fontSize:9, color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif" }}>{ct.season}{ct.hometown?' · '+ct.hometown:''}</div>}
               </div>
               <RotatingInfoWidget
                 sport={sport}
@@ -4955,7 +4956,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
 
       {/* Ticker */}
       <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
-        <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
+        <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
         <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 90s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — Prepare. Lead. Inspire. · Generate schemes · Scout opponents · Build your playbook`}</div></div>
       </div>
 
@@ -4982,7 +4983,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontSize:9, color:typeColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:2 }}>{next.type.toUpperCase()} · {next.homeAway?.toUpperCase()}</div>
                 <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8', lineHeight:1.1, marginBottom:2 }}>{next.opponent || next.type}</div>
-                <div style={{ fontSize:10, color:'#6b7a96' }}>
+                <div style={{ fontSize:10, color:'#8a94b0' }}>
                   {new Date(next.date+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
                   {next.time && ' · ' + next.time}
                   {next.location && ' · 📍 ' + next.location.split(',')[0]}
@@ -4990,8 +4991,8 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
               </div>
               <div style={{ textAlign:'right', flexShrink:0 }}>
                 <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:18, color:isUrgent?typeColor:'#f2f4f8', lineHeight:1 }}>{countdown}</div>
-                {rsvpColor && <div style={{ fontSize:8, color:rsvpColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:2 }}>{next.rsvp==='yes'?'✓ Going':next.rsvp==='no'?'✗ Out':'? Maybe'}</div>}
-                {upcoming.length > 1 && <div style={{ fontSize:8, color:'#3d4559', marginTop:2 }}>+{upcoming.length-1} more</div>}
+                {rsvpColor && <div style={{ fontSize:10, color:rsvpColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:2 }}>{next.rsvp==='yes'?'✓ Going':next.rsvp==='no'?'✗ Out':'? Maybe'}</div>}
+                {upcoming.length > 1 && <div style={{ fontSize:10, color:'#5a6480', marginTop:2 }}>+{upcoming.length-1} more</div>}
               </div>
             </div>
           </div>
@@ -5026,11 +5027,11 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
           {/* Interactive mini diagrams — click to navigate */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:10 }}>
             <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_offense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:`1px solid ${al(P,0.2)}`, position:'relative', cursor:'pointer' }}>
-              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE ›</div>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, color:P, letterSpacing:'1px', zIndex:1 }}>OFFENSE ›</div>
               <div style={{ height:64, display:'flex', alignItems:'center', justifyContent:'center', padding:'4px', overflow:'hidden' }}><SchemePreviewMini type="offense" P={P} sport={sport} /></div>
             </div>
             <div onClick={e=>{e.stopPropagation();setActiveMode('schemes_defense')}} style={{ background:'rgba(0,0,0,0.3)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(107,154,255,0.2)', position:'relative', cursor:'pointer' }}>
-              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE ›</div>
+              <div style={{ position:'absolute', top:5, left:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, color:'#6b9fff', letterSpacing:'1px', zIndex:1 }}>DEFENSE ›</div>
               <div style={{ height:64, display:'flex', alignItems:'center', justifyContent:'center', padding:'4px', overflow:'hidden' }}><SchemePreviewMini type="defense" P={P} sport={sport} /></div>
             </div>
           </div>
@@ -5045,7 +5046,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
         <div onClick={()=>setActiveMode('gauntlet')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>⚡</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Gauntlet</div></div>
           <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470', lineHeight:1.4, marginBottom:8 }}>Test your coaching IQ with live AI scenarios</div>
-          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}><span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3a4260', textTransform:'uppercase' }}>IQ</span></div>
+          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}><span style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f59e0b', lineHeight:1 }}>{iq}</span><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#5a6480', textTransform:'uppercase' }}>IQ</span></div>
         </div>
         <div onClick={()=>setActiveMode('situational')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'12px', cursor:'pointer' }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}><span style={{ fontSize:16 }}>🎯</span><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Situational</div></div>
@@ -5057,7 +5058,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
         <div onClick={()=>setActiveMode('film')} style={{ background:'#0f1219', border:'1px solid #1c2235', borderRadius:4, padding:'11px 14px', display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
           <span style={{ fontSize:16 }}>🎥</span>
           <div style={{ flex:1 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#dde1f0' }}>Film Room</div><div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'#4a5470' }}>Describe a problem or upload a clip — AI diagnoses it</div></div>
-          <div style={{ fontSize:12, color:'#3a4260' }}>›</div>
+          <div style={{ fontSize:12, color:'#5a6480' }}>›</div>
         </div>
       </div>
 
@@ -5065,16 +5066,16 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
       <div style={{ marginTop:14 }}>
         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
           <div style={{ width:3, height:10, background:'#4ade80', transform:'skewX(-15deg)', flexShrink:0 }} />
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
-          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', background:'#161922', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, letterSpacing:'2px', textTransform:'uppercase', color:'#4ade80' }}>Coaching Feed</span>
+          <button onClick={loadFeed} style={{ marginLeft:'auto', fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#8a94b0', background:'#161922', border:'0.5px solid #1e2330', borderRadius:2, padding:'2px 8px', cursor:'pointer' }}>Refresh</button>
         </div>
-        {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96' }}>Loading {sport} coaching feed...</div></div>}
-        {!feedLoading && !feed && <div style={{ padding:'20px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ fontSize:11, color:'#3d4559', marginBottom:10 }}>Coaching content for {sport} coaches</div><button onClick={loadFeed} style={{ padding:'7px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>LOAD FEED</button></div>}
+        {feedLoading && <div style={{ padding:'16px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 6px' }} /><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#8a94b0' }}>Loading {sport} coaching feed...</div></div>}
+        {!feedLoading && !feed && <div style={{ padding:'20px', background:'#0f1219', borderRadius:4, border:'0.5px solid #1e2330', textAlign:'center' }}><div style={{ fontSize:11, color:'#5a6480', marginBottom:10 }}>Coaching content for {sport} coaches</div><button onClick={loadFeed} style={{ padding:'7px 16px', background:P, border:'none', borderRadius:4, color:'white', fontSize:12, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1px' }}>LOAD FEED</button></div>}
         {feed && (feed.items||[]).map((item,i) => (
           <div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:8, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{item.type==='drill'?'Drill of the Day':item.type==='science'?'Coaching Science':item.type==='play'?'Play Concept':item.type==='practice'?'Practice Drill':'Coaching Concept'}</span>
-              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559' }}>· {item.source}</span>}
+              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{item.type==='drill'?'Drill of the Day':item.type==='science'?'Coaching Science':item.type==='play'?'Play Concept':item.type==='practice'?'Practice Drill':'Coaching Concept'}</span>
+              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#5a6480' }}>· {item.source}</span>}
             </div>
             <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div>
             <div style={{ display:'flex', gap:6, marginTop:6, flexWrap:'wrap' }}>
@@ -5161,7 +5162,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red — C+IQ colored' }) {
           <span style={{ color:cOach }}>oach</span>
           <span style={{ color:cIQ }}>IQ</span>
         </div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'5px', color:'#3a4260', textTransform:'uppercase' }}>Prepare. Lead. Inspire.</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, letterSpacing:'5px', color:'#5a6480', textTransform:'uppercase' }}>Prepare. Lead. Inspire.</div>
       </div>
 
       {phase === 'cta' && (
@@ -5199,7 +5200,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
 
   const PhilQ = ({ label, options, value, onChange }) => (
     <div style={{ marginBottom:16 }}>
-      <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', marginBottom:8 }}>{label}</div>
+      <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#8a94b0', marginBottom:8 }}>{label}</div>
       <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
         {options.map(opt => (
           <button key={opt} onClick={()=>onChange(opt)} style={{ width:'100%', padding:'10px 14px', background:value===opt?accent:'#161922', border:`1px solid ${value===opt?accent:'#1e2330'}`, borderRadius:6, color:value===opt?'white':'#9aa0b0', fontFamily:"'DM Sans',sans-serif", fontSize:13, cursor:'pointer', textAlign:'left', transition:'all 0.15s' }}>
@@ -5215,7 +5216,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Barlow+Condensed:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap'); * { box-sizing:border-box; margin:0; padding:0; }`}</style>
 
       {/* Back button */}
-      <button onClick={step===1?onBack:()=>setStep(1)} style={{ position:'absolute', top:20, left:20, background:'transparent', border:'none', color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'1px', cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'8px 4px' }}>
+      <button onClick={step===1?onBack:()=>setStep(1)} style={{ position:'absolute', top:20, left:20, background:'transparent', border:'none', color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, letterSpacing:'1px', cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'8px 4px' }}>
         ← Back
       </button>
 
@@ -5223,23 +5224,23 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:40, lineHeight:1, marginBottom:8 }}>
           <span style={{ color:cC }}>C</span><span style={{ color:cOach }}>oach</span><span style={{ color:cIQ }}>IQ</span>
         </div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#3a4260', textTransform:'uppercase' }}>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#5a6480', textTransform:'uppercase' }}>
           {step===1 ? 'Set up your profile' : 'Your coaching philosophy'}
         </div>
-        {step===2 && <div style={{ fontSize:11, color:'#3d4559', marginTop:6, maxWidth:280, margin:'6px auto 0' }}>This stays private. It helps CoachIQ understand what matters to you.</div>}
+        {step===2 && <div style={{ fontSize:11, color:'#5a6480', marginTop:6, maxWidth:280, margin:'6px auto 0' }}>This stays private. It helps CoachIQ understand what matters to you.</div>}
       </div>
 
       <div style={{ width:'100%', maxWidth:380 }}>
         {step === 1 ? (
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             <div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#6b7a96', marginBottom:6 }}>Your name</div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#8a94b0', marginBottom:6 }}>Your name</div>
               <input value={coachName} onChange={e=>setCoachName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleStart()} placeholder="e.g. Coach Regisford" style={{ width:'100%', background:'#161922', border:`1px solid ${accent}`, borderRadius:4, padding:'13px 14px', fontSize:14, color:'#f2f4f8', outline:'none', fontFamily:'inherit' }} />
             </div>
             <button onClick={handleStart} disabled={!coachName.trim()} style={{ width:'100%', background:coachName.trim()?accent:'#3d4559', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:coachName.trim()?'pointer':'not-allowed', textTransform:'uppercase', marginTop:6 }}>Next →</button>
-            <div style={{ textAlign:'center' }}><span style={{ fontSize:11, color:'#3d4559' }}>You can create and manage teams from the home screen</span></div>
+            <div style={{ textAlign:'center' }}><span style={{ fontSize:11, color:'#5a6480' }}>You can create and manage teams from the home screen</span></div>
             <div style={{ textAlign:'center', paddingTop:4 }}>
-              <span onClick={()=>onLaunch({ guest:true, sport:'Football' })} style={{ fontSize:11, color:'#3d4559', cursor:'pointer', letterSpacing:'0.5px' }}>Just exploring → limited access</span>
+              <span onClick={()=>onLaunch({ guest:true, sport:'Football' })} style={{ fontSize:11, color:'#5a6480', cursor:'pointer', letterSpacing:'0.5px' }}>Just exploring → limited access</span>
             </div>
           </div>
         ) : (
@@ -5698,17 +5699,17 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
             <>
               <div style={{ fontSize:20, marginBottom:2 }}>{wxEmoji(weatherData.current.weathercode)}</div>
               <div style={{ fontSize:18, fontWeight:900, color:'#f2f4f8', lineHeight:1 }}>{Math.round(weatherData.current.temperature_2m)}°</div>
-              <div style={{ fontSize:8, color:'#6b7a96', marginTop:2, lineHeight:1.3 }}>{homeLocation ? homeLocation.split(',')[0] : 'Set location'}</div>
+              <div style={{ fontSize:10, color:'#8a94b0', marginTop:2, lineHeight:1.3 }}>{homeLocation ? homeLocation.split(',')[0] : 'Set location'}</div>
               {pred && (
-                <div style={{ marginTop:6, fontSize:8, color:pred.riskColor, fontWeight:700, lineHeight:1.3 }}>{pred.riskLabel}</div>
+                <div style={{ marginTop:6, fontSize:10, color:pred.riskColor, fontWeight:700, lineHeight:1.3 }}>{pred.riskLabel}</div>
               )}
-              <div style={{ fontSize:7, color:'#3d4559', marginTop:4 }}>Tap for details</div>
+              <div style={{ fontSize:9, color:'#5a6480', marginTop:4 }}>Tap for details</div>
             </>
           ) : (
             <>
               <div style={{ fontSize:20, marginBottom:4 }}>🌡️</div>
-              <div style={{ fontSize:10, fontWeight:700, color:'#6b7a96', lineHeight:1.4 }}>Set your location for weather</div>
-              <div style={{ fontSize:7, color:'#3d4559', marginTop:4 }}>Settings → Location</div>
+              <div style={{ fontSize:10, fontWeight:700, color:'#8a94b0', lineHeight:1.4 }}>Set your location for weather</div>
+              <div style={{ fontSize:9, color:'#5a6480', marginTop:4 }}>Settings → Location</div>
             </>
           )}
         </div>
@@ -5716,19 +5717,19 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
         {/* GREETING CARD */}
         {showGreeting && (
           <div style={{ background:'#0f1219', border:'1px solid rgba(192,57,43,0.3)', borderLeft:'3px solid #C0392B', borderRadius:10, padding:'10px 12px', position:'relative' }}>
-            <button onClick={()=>setShowGreeting(false)} style={{ position:'absolute', top:6, right:8, background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:12, padding:2 }}>✕</button>
-            <div style={{ fontSize:7, letterSpacing:2, color:'#C0392B', fontWeight:700, textTransform:'uppercase', marginBottom:4 }}>{greeting.label}</div>
+            <button onClick={()=>setShowGreeting(false)} style={{ position:'absolute', top:6, right:8, background:'transparent', border:'none', color:'#5a6480', cursor:'pointer', fontSize:12, padding:2 }}>✕</button>
+            <div style={{ fontSize:9, letterSpacing:2, color:'#C0392B', fontWeight:700, textTransform:'uppercase', marginBottom:4 }}>{greeting.label}</div>
             <div style={{ fontSize:10, color:'#f2f4f8', lineHeight:1.4, marginBottom:8, paddingRight:12 }}>{greeting.msg}</div>
             <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
-              <button onClick={greeting.btn1.action} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 6px', fontSize:8, fontWeight:700, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>{greeting.btn1.label}</button>
-              <button onClick={greeting.btn2.action} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 6px', fontSize:8, fontWeight:700, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>{greeting.btn2.label}</button>
+              <button onClick={greeting.btn1.action} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 6px', fontSize:10, fontWeight:700, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>{greeting.btn1.label}</button>
+              <button onClick={greeting.btn2.action} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'5px 6px', fontSize:10, fontWeight:700, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, cursor:'pointer' }}>{greeting.btn2.label}</button>
             </div>
           </div>
         )}
         {!showGreeting && (
           <div onClick={()=>setShowGreeting(true)} style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:10, padding:'10px 12px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
             <div style={{ fontSize:16, marginBottom:4 }}>💬</div>
-            <div style={{ fontSize:8, color:'#3d4559', fontWeight:700, letterSpacing:1, textAlign:'center' }}>DAILY TIP</div>
+            <div style={{ fontSize:10, color:'#5a6480', fontWeight:700, letterSpacing:1, textAlign:'center' }}>DAILY TIP</div>
           </div>
         )}
       </div>
@@ -5739,7 +5740,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           <div onClick={e=>e.stopPropagation()} style={{ background:'#0d1117', borderRadius:'16px 16px 0 0', padding:'20px 16px 32px', width:'100%', maxWidth:480, maxHeight:'80vh', overflowY:'auto' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:2, textTransform:'uppercase' }}>Weather Intelligence</div>
-              <button onClick={()=>{ setWeatherExpanded(false); setWeatherAction(null) }} style={{ background:'transparent', border:'none', color:'#6b7a96', cursor:'pointer', fontSize:18 }}>✕</button>
+              <button onClick={()=>{ setWeatherExpanded(false); setWeatherAction(null) }} style={{ background:'transparent', border:'none', color:'#8a94b0', cursor:'pointer', fontSize:18 }}>✕</button>
             </div>
 
             {weatherData && (
@@ -5750,8 +5751,8 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                     <div style={{ fontSize:32 }}>{wxEmoji(weatherData.current.weathercode)}</div>
                     <div>
                       <div style={{ fontSize:28, fontWeight:900, color:'#f2f4f8', lineHeight:1 }}>{Math.round(weatherData.current.temperature_2m)}°F</div>
-                      <div style={{ fontSize:11, color:'#6b7a96' }}>{wxDesc(weatherData.current.weathercode)} · Wind {Math.round(weatherData.current.windspeed_10m)}mph</div>
-                      <div style={{ fontSize:10, color:'#3d4559' }}>{homeLocation}</div>
+                      <div style={{ fontSize:11, color:'#8a94b0' }}>{wxDesc(weatherData.current.weathercode)} · Wind {Math.round(weatherData.current.windspeed_10m)}mph</div>
+                      <div style={{ fontSize:10, color:'#5a6480' }}>{homeLocation}</div>
                     </div>
                   </div>
                 </div>
@@ -5765,12 +5766,12 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                     <div style={{ display:'flex', gap:10, marginBottom:8 }}>
                       <div style={{ textAlign:'center' }}>
                         <div style={{ fontSize:22 }}>{pred.emoji}</div>
-                        <div style={{ fontSize:9, color:'#6b7a96' }}>{pred.desc}</div>
+                        <div style={{ fontSize:9, color:'#8a94b0' }}>{pred.desc}</div>
                       </div>
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:13, fontWeight:700, color:pred.riskColor, marginBottom:3 }}>{pred.riskLabel}</div>
-                        <div style={{ fontSize:11, color:'#6b7a96' }}>Rain chance: {pred.precip}% · Wind: {Math.round(pred.wind)}mph</div>
-                        <div style={{ fontSize:11, color:'#6b7a96' }}>Hi {Math.round(pred.maxTemp)}° Lo {Math.round(pred.minTemp)}°</div>
+                        <div style={{ fontSize:11, color:'#8a94b0' }}>Rain chance: {pred.precip}% · Wind: {Math.round(pred.wind)}mph</div>
+                        <div style={{ fontSize:11, color:'#8a94b0' }}>Hi {Math.round(pred.maxTemp)}° Lo {Math.round(pred.minTemp)}°</div>
                       </div>
                     </div>
                     {pred.sportNote && <div style={{ fontSize:10, color:'#f59e0b', fontStyle:'italic', lineHeight:1.4 }}>🏅 {pred.sportNote}</div>}
@@ -5778,7 +5779,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                     {/* Action buttons - only show if risk is medium or high */}
                     {pred.risk !== 'low' && !weatherAction && (
                       <div style={{ marginTop:12 }}>
-                        <div style={{ fontSize:8, color:'#6b7a96', letterSpacing:2, textTransform:'uppercase', marginBottom:8 }}>What do you want to do?</div>
+                        <div style={{ fontSize:10, color:'#8a94b0', letterSpacing:2, textTransform:'uppercase', marginBottom:8 }}>What do you want to do?</div>
                         <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                           {sport !== 'Basketball' && (
                             <button onClick={()=>setWeatherAction('indoor')} style={{ width:'100%', padding:'10px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:6, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1, textAlign:'left' }}>
@@ -5801,7 +5802,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                         <div style={{ fontSize:10, color:'#6b9fff', fontWeight:700, marginBottom:4 }}>Moving Indoors</div>
                         <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5, marginBottom:8 }}>{wxCfg.indoorNote}</div>
                         <div style={{ display:'flex', gap:6 }}>
-                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
                           <button onClick={()=>{ setWeatherExpanded(false); setWeatherAction(null) }} style={{ flex:2, padding:'8px', background:'#6b9fff', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>GOT IT — STAYING ON SCHEDULE</button>
                         </div>
                       </div>
@@ -5814,7 +5815,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                         <div style={{ fontSize:11, color:'#9aa0b0', marginBottom:8 }}>Pick a new date now, or leave blank to reschedule later.</div>
                         <input type="date" value={postponeDate} onChange={e=>setPostponeDate(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, marginBottom:8, outline:'none' }} />
                         <div style={{ display:'flex', gap:6 }}>
-                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
                           <button onClick={()=>postponeEvent(nextEvent.id, postponeDate)} style={{ flex:2, padding:'8px', background:'#f59e0b', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>{postponeDate ? 'MOVE TO NEW DATE' : 'MARK NEEDS RESCHEDULE'}</button>
                         </div>
                       </div>
@@ -5826,7 +5827,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                         <div style={{ fontSize:10, color:'#ef4444', fontWeight:700, marginBottom:4 }}>Cancel {nextEvent.type}?</div>
                         <div style={{ fontSize:11, color:'#9aa0b0', marginBottom:8 }}>This permanently removes the event from your schedule. This cannot be undone.</div>
                         <div style={{ display:'flex', gap:6 }}>
-                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                          <button onClick={()=>setWeatherAction(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
                           <button onClick={()=>cancelEvent(nextEvent.id)} style={{ flex:2, padding:'8px', background:'#ef4444', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>YES, CANCEL IT</button>
                         </div>
                       </div>
@@ -5836,7 +5837,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
 
                 {!nextEvent && (
                   <div style={{ background:'#161922', borderRadius:8, padding:'10px 12px', marginBottom:12 }}>
-                    <div style={{ fontSize:10, color:'#6b7a96' }}>No upcoming events to predict. Add a game or practice to your schedule to see weather impact.</div>
+                    <div style={{ fontSize:10, color:'#8a94b0' }}>No upcoming events to predict. Add a game or practice to your schedule to see weather impact.</div>
                   </div>
                 )}
               </>
@@ -5844,7 +5845,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
 
             {!weatherData && (
               <div style={{ textAlign:'center', padding:'20px 0' }}>
-                <div style={{ fontSize:13, color:'#6b7a96', marginBottom:8 }}>Set your location in Settings to enable weather forecasts and game-day predictions.</div>
+                <div style={{ fontSize:13, color:'#8a94b0', marginBottom:8 }}>Set your location in Settings to enable weather forecasts and game-day predictions.</div>
                 <button onClick={()=>{ setWeatherExpanded(false); setPage('more') }} style={{ padding:'10px 20px', background:P, border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>GO TO SETTINGS</button>
               </div>
             )}
@@ -5858,30 +5859,30 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           <div style={{ width:38, height:38, borderRadius:'50%', background:'#C0392B', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:900, color:'white', flexShrink:0 }}>{(coachName||'C')[0].toUpperCase()}</div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{coachName}</div>
-            <div style={{ fontSize:10, color:'#6b7a96' }}>{currentTeam?.name || 'No team yet'} · {sport}</div>
+            <div style={{ fontSize:10, color:'#8a94b0' }}>{currentTeam?.name || <span style={{color:'#f59e0b',cursor:'pointer'}} onClick={()=>setPage('team')}>+ Create your first team</span>} · {sport}</div>
           </div>
           <div style={{ background:'rgba(192,57,43,0.15)', border:'1px solid rgba(192,57,43,0.4)', borderRadius:4, padding:'3px 8px' }}>
-            <div style={{ fontSize:8, fontWeight:700, color:'#C0392B', letterSpacing:1 }}>FREE</div>
+            <div style={{ fontSize:10, fontWeight:700, color:'#C0392B', letterSpacing:1 }}>FREE</div>
           </div>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:6 }}>
           <div style={{ background:'#161922', borderRadius:6, padding:'7px', textAlign:'center' }}>
             <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8' }}>{iq}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginTop:1 }}>IQ SCORE</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:1, marginTop:1 }}>IQ SCORE</div>
           </div>
           <div style={{ background:'#161922', borderRadius:6, padding:'7px', textAlign:'center' }}>
             <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8' }}>{record}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginTop:1 }}>RECORD</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:1, marginTop:1 }}>RECORD</div>
           </div>
           <div style={{ background:'#161922', borderRadius:6, padding:'7px', textAlign:'center' }}>
             <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8' }}>{totalPlays}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginTop:1 }}>PLAYS SAVED</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:1, marginTop:1 }}>PLAYS SAVED</div>
           </div>
         </div>
       </div>
 
       {/* BEFORE THE GAME */}
-      <div style={{ fontSize:8, letterSpacing:2, color:'#3d4559', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Before the game</div>
+      <div style={{ fontSize:10, letterSpacing:2, color:'#8a94b0', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Before the game</div>
 
       {/* OFFENSE CARD */}
       <div style={{ background:'linear-gradient(135deg,#1a0a08,#0f1219)', border:'1px solid rgba(192,57,43,0.5)', borderTop:'3px solid #C0392B', borderRadius:12, marginBottom:8, overflow:'hidden' }}>
@@ -5894,7 +5895,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
             <div style={{ flex:1 }}>
               <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
                 <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{{ Football:'Offense', Basketball:'Offense', Baseball:'Game Plan', Soccer:'Attack', Softball:'Game Plan' }[sport]||'Offense'}</div>
-                {nextGame && <div style={{ background:'#C0392B', borderRadius:3, padding:'1px 6px', fontSize:7, fontWeight:700, color:'white', letterSpacing:1 }}>GAME WEEK</div>}
+                {nextGame && <div style={{ background:'#C0392B', borderRadius:3, padding:'1px 6px', fontSize:9, fontWeight:700, color:'white', letterSpacing:1 }}>GAME WEEK</div>}
               </div>
               <div style={{ fontSize:9, color:'rgba(192,57,43,0.9)', fontWeight:700 }}>{{ Football:'Build your attack →', Basketball:'Build your offense →', Baseball:'Build your game plan →', Soccer:'Build your attack →', Softball:'Build your game plan →' }[sport]||'Build your attack →'}</div>
             </div>
@@ -5903,19 +5904,19 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
         <div style={{ display:'flex', borderTop:'1px solid rgba(192,57,43,0.15)', borderBottom:'1px solid rgba(192,57,43,0.15)' }}>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
             <div style={{ fontSize:17, fontWeight:700, color: ppg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{ppg!==null?ppg:'—'}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Off. PPG', Basketball:'Off. PPG', Baseball:'Runs/game', Soccer:'Goals/game', Softball:'Runs/game' }[sport]||'PPG'}</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Off. PPG', Basketball:'Off. PPG', Baseball:'Runs/game', Soccer:'Goals/game', Softball:'Runs/game' }[sport]||'PPG'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
-            <div style={{ fontSize:17, fontWeight:700, color:'#3d4559', lineHeight:1 }}>—</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds/play', Basketball:'Pts/poss', Baseball:'Hits/game', Soccer:'Shots/game', Softball:'Hits/game' }[sport]||'Stat'}</div>
+            <div style={{ fontSize:17, fontWeight:700, color:'#5a6480', lineHeight:1 }}>—</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds/play', Basketball:'Pts/poss', Baseball:'Hits/game', Soccer:'Shots/game', Softball:'Hits/game' }[sport]||'Stat'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
             <div style={{ fontSize:lastOffScheme?9:14, fontWeight:700, color:lastOffScheme?'#C0392B':'#3d4559', lineHeight:1.2 }}>{lastOffScheme ? lastOffScheme.slice(0,14) : '—'}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
           </div>
         </div>
         <div style={{ padding:'7px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>{{ Football:'Track offensive yards in Live Scoring to see this', Basketball:'Track possessions in Live Scoring to see this', Baseball:'Track hits in Live Scoring to see this', Soccer:'Track shots in Live Scoring to see this', Softball:'Track hits in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
+          <div style={{ fontSize:9, color:'#8a94b0', fontStyle:'italic' }}>{{ Football:'Track offensive yards in Live Scoring to see this', Basketball:'Track possessions in Live Scoring to see this', Baseball:'Track hits in Live Scoring to see this', Soccer:'Track shots in Live Scoring to see this', Softball:'Track hits in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
           <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#C0392B', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics →</div>
         </div>
       </div>
@@ -5934,19 +5935,19 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
         <div style={{ display:'flex', borderTop:'1px solid rgba(107,154,255,0.15)', borderBottom:'1px solid rgba(107,154,255,0.15)' }}>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
             <div style={{ fontSize:17, fontWeight:700, color: papg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{papg!==null?papg:'—'}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Pts allowed avg', Basketball:'Pts allowed avg', Baseball:'Runs allowed avg', Soccer:'Goals allowed avg', Softball:'Runs allowed avg' }[sport]||'Pts allowed'}</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Pts allowed avg', Basketball:'Pts allowed avg', Baseball:'Runs allowed avg', Soccer:'Goals allowed avg', Softball:'Runs allowed avg' }[sport]||'Pts allowed'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
-            <div style={{ fontSize:17, fontWeight:700, color:'#3d4559', lineHeight:1 }}>—</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds allowed/play', Basketball:'Opp pts/poss', Baseball:'ERA', Soccer:'Shots allowed', Softball:'ERA' }[sport]||'Stat'}</div>
+            <div style={{ fontSize:17, fontWeight:700, color:'#5a6480', lineHeight:1 }}>—</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds allowed/play', Basketball:'Opp pts/poss', Baseball:'ERA', Soccer:'Shots allowed', Softball:'ERA' }[sport]||'Stat'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
             <div style={{ fontSize:lastDefScheme?9:14, fontWeight:700, color:lastDefScheme?'#6b9fff':'#3d4559', lineHeight:1.2 }}>{lastDefScheme ? lastDefScheme.slice(0,14) : '—'}</div>
-            <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
+            <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
           </div>
         </div>
         <div style={{ padding:'7px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ fontSize:9, color:'#6b7a96', fontStyle:'italic' }}>{{ Football:'Track yards allowed in Live Scoring to see this', Basketball:'Track opponent scoring in Live Scoring', Baseball:'Track runs allowed in Live Scoring to see this', Soccer:'Track shots allowed in Live Scoring', Softball:'Track runs allowed in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
+          <div style={{ fontSize:9, color:'#8a94b0', fontStyle:'italic' }}>{{ Football:'Track yards allowed in Live Scoring to see this', Basketball:'Track opponent scoring in Live Scoring', Baseball:'Track runs allowed in Live Scoring to see this', Soccer:'Track shots allowed in Live Scoring', Softball:'Track runs allowed in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
           <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#6b9fff', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics →</div>
         </div>
       </div>
@@ -5964,18 +5965,18 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           </div>
           <div style={{ borderTop:'1px solid rgba(74,222,128,0.15)', padding:'8px 12px' }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
-              <div style={{ fontSize:8, color:'#6b7a96' }}>Plans saved</div>
+              <div style={{ fontSize:10, color:'#8a94b0' }}>Plans saved</div>
               <div style={{ fontSize:13, fontWeight:700, color:'#f2f4f8' }}>{practicePlans.length}</div>
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
-              <div style={{ fontSize:8, color:'#6b7a96' }}>Last focus</div>
+              <div style={{ fontSize:10, color:'#8a94b0' }}>Last focus</div>
               <div style={{ fontSize:9, fontWeight:700, color:'#f2f4f8', textAlign:'right', maxWidth:70, lineHeight:1.2 }}>{lastPlan?.focus || '—'}</div>
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-              <div style={{ fontSize:8, color:'#6b7a96' }}>Since last</div>
+              <div style={{ fontSize:10, color:'#8a94b0' }}>Since last</div>
               <div style={{ fontSize:13, fontWeight:700, color: daysSincePractice!==null&&daysSincePractice>5?'#f59e0b':'#f2f4f8' }}>{daysSincePractice!==null?daysSincePractice+'d':'—'}</div>
             </div>
-            <div style={{ fontSize:8, color:'#4ade80', fontWeight:700 }}>View all plans →</div>
+            <div style={{ fontSize:10, color:'#4ade80', fontWeight:700 }}>View all plans →</div>
           </div>
         </div>
 
@@ -5991,17 +5992,17 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           <div style={{ borderTop:'1px solid rgba(245,158,11,0.15)', padding:'8px 12px' }}>
             {nextOpponent ? (
               <>
-                <div style={{ fontSize:7, color:'#6b7a96', letterSpacing:1, marginBottom:3 }}>NEXT OPPONENT</div>
+                <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:1, marginBottom:3 }}>NEXT OPPONENT</div>
                 <div style={{ fontSize:11, fontWeight:700, color:'#f2f4f8', lineHeight:1.3, marginBottom:5 }}>{nextOpponent}</div>
                 <div style={{ background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:4, padding:'3px 6px', textAlign:'center', marginBottom:6 }}>
-                  <div style={{ fontSize:7, color:'#f59e0b', fontWeight:700 }}>NO SCOUT BUILT YET</div>
+                  <div style={{ fontSize:9, color:'#f59e0b', fontWeight:700 }}>NO SCOUT BUILT YET</div>
                 </div>
-                <div style={{ fontSize:8, color:'#f59e0b', fontWeight:700 }}>Build one now →</div>
+                <div style={{ fontSize:10, color:'#f59e0b', fontWeight:700 }}>Build one now →</div>
               </>
             ) : (
               <>
-                <div style={{ fontSize:10, color:'#3d4559', lineHeight:1.4, marginBottom:6 }}>Add a game to your schedule to prep a scout report</div>
-                <div style={{ fontSize:8, color:'#f59e0b', fontWeight:700 }}>Add to schedule →</div>
+                <div style={{ fontSize:10, color:'#5a6480', lineHeight:1.4, marginBottom:6 }}>Add a game to your schedule to prep a scout report</div>
+                <div onClick={()=>setPage('team')} style={{ fontSize:10, color:'#f59e0b', fontWeight:700, cursor:'pointer' }}>Add to schedule →</div>
               </>
             )}
           </div>
@@ -6009,44 +6010,44 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
       </div>
 
       {/* GAME DAY */}
-      <div style={{ fontSize:8, letterSpacing:2, color:'#3d4559', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Game day</div>
+      <div style={{ fontSize:10, letterSpacing:2, color:'#8a94b0', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Game day</div>
       <div style={{ display:'flex', gap:6, marginBottom:14 }}>
         {[
           { icon:'🏟', label:'Scoring', sub:'Track live', action:()=>setPage('team') },
           { icon:'👥', label:'Lineup', sub:'Set positions', action:()=>setPage('team') },
           { icon:'✏️', label:'Play Builder', sub:'Name plays', action:()=>{ setPage('learn'); setActiveMode('playbuilder') } },
         ].map(item => (
-          <div key={item.label} onClick={item.action} style={{ flex:1, background:'#0f1219', border:'1px solid rgba(107,154,255,0.2)', borderTop:'2px solid #6b9fff', borderRadius:10, padding:'10px 6px', textAlign:'center', cursor:'pointer' }}>
+          <div key={item.label} onClick={item.action} style={{ flex:1, background:'#0f1219', border:'1px solid rgba(107,154,255,0.2)', borderTop:'2px solid #6b9fff', borderRadius:10, padding:'12px 8px', textAlign:'center', cursor:'pointer' }}>
             <div style={{ fontSize:20, marginBottom:3 }}>{item.icon}</div>
-            <div style={{ fontSize:10, fontWeight:700, color:'#6b9fff', marginBottom:1 }}>{item.label}</div>
-            <div style={{ fontSize:7, color:'#3d4559' }}>{item.sub}</div>
+            <div style={{ fontSize:11, fontWeight:700, color:'#6b9fff', marginBottom:2 }}>{item.label}</div>
+            <div style={{ fontSize:9, color:'#5a6480' }}>{item.sub}</div>
           </div>
         ))}
       </div>
 
       {/* AFTER THE GAME */}
-      <div style={{ fontSize:8, letterSpacing:2, color:'#3d4559', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>After the game</div>
+      <div style={{ fontSize:10, letterSpacing:2, color:'#8a94b0', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>After the game</div>
       <div style={{ display:'flex', gap:6, marginBottom:14 }}>
         {[
           { icon:'📊', label:'Analytics', sub: record, action:()=>setPage('team') },
           { icon:'📖', label:'Playbook', sub: totalPlays+' plays', action:()=>{ setPage('schemes'); setActiveMode('playbook') } },
           { icon:'🎉', label:'Post-Game', sub: gameHistory.length>0 ? `Last: ${gameHistory[gameHistory.length-1].us}-${gameHistory[gameHistory.length-1].them}` : 'No games yet', action:()=>setPage('team') },
         ].map(item => (
-          <div key={item.label} onClick={item.action} style={{ flex:1, background:'#0f1219', border:'1px solid rgba(74,222,128,0.2)', borderTop:'2px solid #4ade80', borderRadius:10, padding:'10px 6px', textAlign:'center', cursor:'pointer' }}>
+          <div key={item.label} onClick={item.action} style={{ flex:1, background:'#0f1219', border:'1px solid rgba(74,222,128,0.2)', borderTop:'2px solid #4ade80', borderRadius:10, padding:'12px 8px', textAlign:'center', cursor:'pointer' }}>
             <div style={{ fontSize:20, marginBottom:3 }}>{item.icon}</div>
-            <div style={{ fontSize:10, fontWeight:700, color:'#4ade80', marginBottom:1 }}>{item.label}</div>
-            <div style={{ fontSize:7, color:'#3d4559' }}>{item.sub}</div>
+            <div style={{ fontSize:11, fontWeight:700, color:'#4ade80', marginBottom:2 }}>{item.label}</div>
+            <div style={{ fontSize:9, color:'#5a6480' }}>{item.sub}</div>
           </div>
         ))}
       </div>
 
       {/* ROADMAP */}
       <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:12, padding:'12px 14px', marginBottom:8 }}>
-        <div style={{ fontSize:8, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:10 }}>What's coming</div>
+        <div style={{ fontSize:10, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:10 }}>What's coming</div>
         {[
           { color:'#4ade80', label:'Just added', items:'Live scoring · Practice plans · Post-game summary · Player editing · CoachIQ Hub' },
           { color:'#f59e0b', label:'In progress', items:'Full play breakdown · Flag football · Position tracker · Yards tracking' },
-          { color:'#3d4559', label:'Planned', items:'Film room · Wristbands · AthleteIQ · Coach network · Season manager' },
+          { color:'#5a6480', label:'Planned', items:'Film room · Wristbands · AthleteIQ · Coach network · Season manager' },
         ].map(row => (
           <div key={row.label} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:8 }}>
             <div style={{ width:7, height:7, borderRadius:'50%', background:row.color, flexShrink:0, marginTop:3 }}></div>
@@ -6061,17 +6062,17 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           {!guestDemoTeam ? (
             <div style={{ background:'#0f1219', border:'1px solid rgba(192,57,43,0.3)', borderRadius:10, padding:'14px 16px' }}>
               <div style={{ fontSize:9, letterSpacing:2, color:'#C0392B', fontWeight:700, textTransform:'uppercase', marginBottom:6 }}>Try with a Demo Team</div>
-              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Load a pre-built {sport} team to explore the Hub with real stats, schedule, and roster — no account needed.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5, marginBottom:10 }}>Load a pre-built {sport} team to explore the Hub with real stats, schedule, and roster — no account needed.</div>
               <button onClick={()=>setGuestDemoTeam(DEMO_TEAMS[sport]||DEMO_TEAMS.Football)} style={{ width:'100%', padding:'11px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>LOAD {sport.toUpperCase()} DEMO TEAM</button>
             </div>
           ) : (
             <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:8, padding:'10px 14px', display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ flex:1, fontSize:10, color:'#4ade80', fontWeight:700 }}>Demo team loaded: {guestDemoTeam.name}</div>
-              <button onClick={()=>setGuestDemoTeam(null)} style={{ fontSize:9, color:'#6b7a96', background:'transparent', border:'none', cursor:'pointer', padding:'4px 6px' }}>✕ Remove</button>
+              <button onClick={()=>setGuestDemoTeam(null)} style={{ fontSize:9, color:'#8a94b0', background:'transparent', border:'none', cursor:'pointer', padding:'4px 6px' }}>✕ Remove</button>
             </div>
           )}
           <button onClick={onGuestSignUp} style={{ width:'100%', padding:'13px', background:'#C0392B', border:'none', borderRadius:8, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Coach Account →</button>
-          <div style={{ textAlign:'center', fontSize:10, color:'#3d4559' }}>No credit card required · Unlock teams, roster, analytics & more</div>
+          <div style={{ textAlign:'center', fontSize:10, color:'#5a6480' }}>No credit card required · Unlock teams, roster, analytics & more</div>
         </div>
       )}
 
@@ -6079,11 +6080,11 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
       <div style={{ display:'flex', gap:8 }}>
         <div onClick={()=>setPage('more')} style={{ flex:1, background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
           <span style={{ fontSize:15 }}>⚙️</span>
-          <span style={{ fontSize:11, fontWeight:700, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>SETTINGS</span>
+          <span style={{ fontSize:11, fontWeight:700, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>SETTINGS</span>
         </div>
         <div onClick={()=>setPage('learn')} style={{ flex:1, background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
           <span style={{ fontSize:15 }}>❓</span>
-          <span style={{ fontSize:11, fontWeight:700, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>HELP + TOUR</span>
+          <span style={{ fontSize:11, fontWeight:700, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>HELP + TOUR</span>
         </div>
       </div>
 
@@ -6098,7 +6099,7 @@ function GuestBanner({ onSignUp }) {
     <div style={{ background:'rgba(192,57,43,0.1)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:8, padding:'10px 14px', marginBottom:12, display:'flex', alignItems:'center', gap:10 }}>
       <div style={{ flex:1 }}>
         <div style={{ fontSize:10, fontWeight:700, color:'#C0392B', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, marginBottom:2 }}>GUEST MODE — LIMITED ACCESS</div>
-        <div style={{ fontSize:11, color:'#6b7a96' }}>Create a free account to unlock teams, roster, scheduling, analytics and more.</div>
+        <div style={{ fontSize:11, color:'#8a94b0' }}>Create a free account to unlock teams, roster, scheduling, analytics and more.</div>
       </div>
       <button onClick={onSignUp} style={{ flexShrink:0, padding:'8px 12px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>FREE ACCOUNT →</button>
     </div>
@@ -6111,11 +6112,11 @@ function GuestGate({ feature, onSignUp, children }) {
     <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:10, padding:'28px 20px', textAlign:'center' }}>
       <div style={{ fontSize:32, marginBottom:12 }}>🔒</div>
       <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', marginBottom:6, letterSpacing:1 }}>{feature} — Coaches Only</div>
-      <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6, marginBottom:16, maxWidth:280, margin:'0 auto 16px' }}>
+      <div style={{ fontSize:12, color:'#8a94b0', lineHeight:1.6, marginBottom:16, maxWidth:280, margin:'0 auto 16px' }}>
         This feature is available to CoachIQ members. Create your free account to unlock teams, roster, scheduling, live scoring, analytics, and more.
       </div>
       <button onClick={onSignUp} style={{ width:'100%', maxWidth:280, padding:'13px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Account →</button>
-      <div style={{ marginTop:10, fontSize:10, color:'#3d4559' }}>No credit card required</div>
+      <div style={{ marginTop:10, fontSize:10, color:'#5a6480' }}>No credit card required</div>
     </div>
   )
 }
@@ -6147,7 +6148,7 @@ function NewsTicker({ sport, P }) {
   return (
     <div style={{ flex:1, overflow:'hidden', margin:'0 6px' }}>
       <div style={{ overflow:'hidden', whiteSpace:'nowrap' }}>
-        <div style={{ display:'inline-block', animation:'ticker 120s linear infinite', fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
+        <div style={{ display:'inline-block', animation:'ticker 120s linear infinite', fontSize:9, color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
           {headlines.slice(0,5).join('   ·   ')}   ·   {headlines.slice(0,5).join('   ·   ')}
         </div>
       </div>
@@ -6156,7 +6157,7 @@ function NewsTicker({ sport, P }) {
 }
 
 // ─── NAV BUTTON WITH LONG PRESS ──────────────────────────────────────────────
-function NavButton({ id, icon, label, isActive, P='#C0392B', al, setPage }) {
+function NavButton({ id, icon, label, isActive, P='#C0392B', al, setPage, badge=0 }) {
   return (
     <div style={{ flex:1, position:'relative' }}>
       <button
@@ -6164,8 +6165,11 @@ function NavButton({ id, icon, label, isActive, P='#C0392B', al, setPage }) {
         onTouchEnd={(e)=>{ e.preventDefault(); setPage(id) }}
         style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'10px 2px 6px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation', userSelect:'none', WebkitUserSelect:'none' }}>
         {isActive && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:20, height:2, background:P, borderRadius:1 }} />}
-        <span style={{ fontSize:16, color:isActive?P:'#3d4559' }}>{icon}</span>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:isActive?P:'#3d4559', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
+        <div style={{ position:'relative' }}>
+          <span style={{ fontSize:16, color:isActive?P:'#5a6480' }}>{icon}</span>
+          {badge > 0 && <div style={{ position:'absolute', top:-4, right:-6, width:14, height:14, borderRadius:'50%', background:'#ef4444', display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ fontSize:8, color:'white', fontWeight:900, fontFamily:"'Barlow Condensed',sans-serif" }}>{badge}</span></div>}
+        </div>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:isActive?P:'#5a6480', fontWeight:700, letterSpacing:'0.8px', textTransform:'uppercase' }}>{label}</span>
       </button>
     </div>
   )
@@ -6355,42 +6359,6 @@ export default function CoachIQ() {
     { id:'learn',   icon:'🎓', label:'LEARN'   },
   ]
 
-  // Feature grid items for ALL button
-  const ALL_FEATURES = [
-    {
-      category:'Build', color:'#C0392B', items:[
-        { icon:'⚔️', label:'Offense',      action:()=>{ setPage('schemes'); setActiveMode('schemes_offense') } },
-        { icon:'🛡', label:'Defense',      action:()=>{ setPage('schemes'); setActiveMode('schemes_defense') } },
-        { icon:'✏️', label:'Play Builder', action:()=>{ setPage('learn');   setActiveMode('playbuilder') } },
-        { icon:'📖', label:'Playbook',     action:()=>{ setPage('schemes'); setActiveMode('playbook') } },
-      ]
-    },
-    {
-      category:'Team', color:'#6b9fff', items:[
-        { icon:'👥', label:'Roster',    action:()=>{ setPage('team'); } },
-        { icon:'🏟', label:'Lineup',    action:()=>{ setPage('team'); } },
-        { icon:'📅', label:'Schedule',  action:()=>{ setPage('team'); } },
-        { icon:'🏃', label:'Practice',  action:()=>{ setPage('team'); } },
-      ]
-    },
-    {
-      category:'Learn & Analyze', color:'#4ade80', items:[
-        { icon:'⚡', label:'Gauntlet',  action:()=>{ setPage('learn'); setActiveMode('gauntlet') } },
-        { icon:'🔍', label:'Scout',     action:()=>{ setPage('more');  setActiveMode('scout') } },
-        { icon:'📊', label:'Analytics', action:()=>{ setPage('team');  } },
-        { icon:'📰', label:'News',      action:()=>{ setPage('news') } },
-      ]
-    },
-    {
-      category:'Coming Soon', color:'#f59e0b', soon:true, items:[
-        { icon:'🎥', label:'Film Room'       },
-        { icon:'🖨', label:'Wristband'       },
-        { icon:'👤', label:'AthleteIQ'       },
-        { icon:'📖', label:'Play Breakdown'  },
-      ]
-    },
-  ]
-
   return (
     <>
       <Head>
@@ -6494,7 +6462,14 @@ export default function CoachIQ() {
           <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg, ${P}, ${S || '#002868'}, ${P}22)` }} />
           <CoachIQLogo size={22} brand={brand} />
           <div style={{ position:'relative', marginLeft:4 }}>
-            <select value={sport} onChange={e=>setSport(e.target.value)} style={{ background:'#161922', border:`1px solid ${al(P,0.35)}`, borderRadius:3, padding:'4px 22px 4px 6px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'0.3px', outline:'none', appearance:'none', cursor:'pointer', maxWidth:130 }}>
+            <select value={sport} onChange={e=>{
+              const newSport = e.target.value
+              if (newSport !== sport && (teams[sport]||[]).length > 0) {
+                if (window.confirm(`Switch to ${newSport}? Your active ${sport} team context will change.`)) setSport(newSport)
+              } else {
+                setSport(newSport)
+              }
+            }} style={{ background:'#161922', border:`1px solid ${al(P,0.35)}`, borderRadius:3, padding:'4px 22px 4px 6px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'0.3px', outline:'none', appearance:'none', cursor:'pointer', maxWidth:130 }}>
               {['Football','Basketball','Baseball','Soccer','Softball'].map(s=>(
                 <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾', Soccer:'⚽', Softball:'🥎' }[s]} {s}</option>
               ))}
@@ -6506,6 +6481,9 @@ export default function CoachIQ() {
           <button onClick={()=>setPage('news')} style={{ display:'flex', alignItems:'center', gap:3, background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:3, padding:'4px 8px', cursor:'pointer', userSelect:'none', flexShrink:0, WebkitTapHighlightColor:'transparent' }}>
             <span style={{ fontSize:14 }}>📰</span>
           </button>
+          <button onClick={()=>{ setPage('more'); }} title="Settings" style={{ display:'flex', alignItems:'center', background:'rgba(255,255,255,0.04)', border:'1px solid #1e2330', borderRadius:3, padding:'4px 7px', cursor:'pointer', flexShrink:0, WebkitTapHighlightColor:'transparent' }}>
+            <span style={{ fontSize:14 }}>⚙️</span>
+          </button>
           <TeamQuickSwitcher sport={sport} teams={teams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setCfg={setCfg} setPage={setPage} P={P} al={al} iq={iq} />
         </div>
 
@@ -6514,7 +6492,6 @@ export default function CoachIQ() {
           {/* Guest banner — shown on every page in guest mode */}
           {guestMode && <GuestBanner onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
           {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={guestMode&&guestDemoTeam?{...teams,[sport]:[guestDemoTeam]}:teams} activeTeam={guestMode&&guestDemoTeam?{...activeTeam,[sport]:guestDemoTeam}:activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} callAI={callAI} homeLocation={homeLocation} setTeams={setTeams} guestMode={guestMode} guestDemoTeam={guestDemoTeam} setGuestDemoTeam={setGuestDemoTeam} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
-          {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} homeLocation={homeLocation} setPage={setPage} />}
           {page==='schemes' && (guestMode && guestSchemeCount >= 2
             ? <GuestGate feature="Scheme Generator" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
             : <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} guestMode={guestMode} guestSchemeCount={guestSchemeCount} setGuestSchemeCount={setGuestSchemeCount} />
@@ -6547,13 +6524,14 @@ export default function CoachIQ() {
                 <div style={{ background:page==='hub'?'#C0392B':'#161922', border:`1px solid ${page==='hub'?'#C0392B':'#1e2330'}`, borderRadius:5, padding:'2px 7px', marginBottom:1 }}>
                   <span style={{ fontSize:11, fontWeight:900, color:'white', letterSpacing:'-0.5px', fontFamily:"'Barlow Condensed',sans-serif" }}>C·IQ</span>
                 </div>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:page==='hub'?'#C0392B':'#3d4559', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>HUB</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:page==='hub'?'#C0392B':'#3d4559', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>HUB</span>
               </button>
             </div>
             {/* Other tabs */}
-            {NAV_ITEMS.filter(n=>n.id!=='hub').map(({ id, icon, label }) => (
-              <NavButton key={id} id={id} icon={icon} label={label} isActive={page===id} P={P} al={al} setPage={setPage} />
-            ))}
+            {NAV_ITEMS.filter(n=>n.id!=='hub').map(({ id, icon, label }) => {
+              const postponedCount = id === 'team' ? Object.values(teams).flat().reduce((sum, team) => sum + ((team?.schedule||[]).filter(e=>e._needsReschedule).length), 0) : 0
+              return <NavButton key={id} id={id} icon={icon} label={label} isActive={page===id} P={P} al={al} setPage={setPage} badge={postponedCount} />
+            })}
           </div>
         </div>
       </div>
@@ -6631,25 +6609,25 @@ function RosterSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
       <div style={{ padding:14 }}>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr auto', gap:7, marginBottom:12, alignItems:'end' }}>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>First</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>First</label>
             <input value={newFirstName||''} onChange={e=>setNewFirstName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addPlayer()} placeholder="First" style={{ width:'100%', background:'#161922', border:`1px solid ${newFirstName?P:'#1e2330'}`, borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
           </div>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Last</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Last</label>
             <input value={newLastName||''} onChange={e=>setNewLastName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addPlayer()} placeholder="Last" style={{ width:'100%', background:'#161922', border:`1px solid ${newLastName?P:'#1e2330'}`, borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
           </div>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Pos</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Pos</label>
             {posDropdown(newPos, setNewPos, posOpen, setPosOpen)}
           </div>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>#</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>#</label>
             <input value={newNum} onChange={e=>setNewNum(e.target.value)} placeholder="00" maxLength={2} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none', textAlign:'center' }} />
           </div>
           <button onClick={addPlayer} style={{ padding:'8px 12px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', marginTop:18 }}>+</button>
         </div>
         {players.length === 0 ? (
-          <div style={{ textAlign:'center', padding:'20px 0', color:'#3d4559', fontSize:12 }}>No players added yet</div>
+          <div style={{ textAlign:'center', padding:'20px 0', color:'#5a6480', fontSize:12 }}>No players added yet</div>
         ) : (
           <div>
             {players.map(p => (
@@ -6658,24 +6636,24 @@ function RosterSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                   <div style={{ background:'#161922', border:`1px solid ${P}`, borderRadius:6, padding:'10px 12px', marginBottom:6 }}>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:6, marginBottom:8 }}>
                       <div>
-                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>First</label>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>First</label>
                         <input value={editForm.firstName} onChange={e=>setEditForm(f=>({...f,firstName:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
                       </div>
                       <div>
-                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Last</label>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Last</label>
                         <input value={editForm.lastName} onChange={e=>setEditForm(f=>({...f,lastName:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
                       </div>
                       <div>
-                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>Pos</label>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>Pos</label>
                         {posDropdown(editForm.position, v=>setEditForm(f=>({...f,position:v})), editPosOpen, setEditPosOpen)}
                       </div>
                       <div>
-                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, letterSpacing:1, textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:3, display:'block' }}>#</label>
+                        <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:1, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:3, display:'block' }}>#</label>
                         <input value={editForm.number} onChange={e=>setEditForm(f=>({...f,number:e.target.value}))} maxLength={2} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'6px 8px', color:'#f2f4f8', fontSize:12, outline:'none', textAlign:'center' }} />
                       </div>
                     </div>
                     <div style={{ display:'flex', gap:6 }}>
-                      <button onClick={()=>setEditingId(null)} style={{ flex:1, padding:'7px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
+                      <button onClick={()=>setEditingId(null)} style={{ flex:1, padding:'7px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
                       <button onClick={saveEdit} style={{ flex:2, padding:'7px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SAVE CHANGES</button>
                     </div>
                   </div>
@@ -6684,10 +6662,10 @@ function RosterSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                     {p.number && <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, flexShrink:0 }}>{p.number}</div>}
                     <div style={{ flex:1 }}>
                       <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:500 }}>{p.lastName ? p.lastName+', '+p.firstName : p.name}</div>
-                      {p.position&&<div style={{ fontSize:10, color:'#6b7a96' }}>{p.position}</div>}
+                      {p.position&&<div style={{ fontSize:10, color:'#8a94b0' }}>{p.position}</div>}
                     </div>
                     <button onClick={()=>startEdit(p)} style={{ background:'transparent', border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, cursor:'pointer', fontSize:10, padding:'4px 8px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>EDIT</button>
-                    <button onClick={()=>removePlayer(p.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, padding:'0 4px' }}>×</button>
+                    <button onClick={()=>removePlayer(p.id)} style={{ background:'transparent', border:'none', color:'#5a6480', cursor:'pointer', fontSize:16, padding:'0 4px' }}>×</button>
                   </div>
                 )}
               </div>
@@ -6755,16 +6733,16 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
                 <Sel label="Duration" value={planForm.duration} onChange={v=>setPlanForm(f=>({...f,duration:v}))} options={['45 minutes','60 minutes','75 minutes','90 minutes','2 hours','2.5 hours']} />
                 <Sel label="Intensity" value={planForm.intensity} onChange={v=>setPlanForm(f=>({...f,intensity:v}))} options={['Light / Recovery','Medium','High / Game Prep','Game Week Intensity']} />
                 <div>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Practice Date</label>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Practice Date</label>
                   <input value={planForm.date} onChange={e=>setPlanForm(f=>({...f,date:e.target.value}))} placeholder="e.g. Monday 4/21" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 </div>
                 <div style={{ gridColumn:'1/-1' }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Upcoming Opponent <span style={{ color:'#3d4559' }}>(optional)</span></label>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Upcoming Opponent <span style={{ color:'#5a6480' }}>(optional)</span></label>
                   <input value={planForm.opponent} onChange={e=>setPlanForm(f=>({...f,opponent:e.target.value}))} placeholder="e.g. Coventry Eagles" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 11px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 </div>
               </div>
               <div style={{ display:'flex', gap:8 }}>
-                <button onClick={()=>setShowForm(false)} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                <button onClick={()=>setShowForm(false)} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
                 <button onClick={generatePlan} disabled={generating} style={{ flex:2, padding:'10px', background:generating?'#3d4559':P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:generating?'not-allowed':'pointer', letterSpacing:'1px' }}>{generating?'GENERATING...':'GENERATE PLAN'}</button>
               </div>
               {generating && <Shimmer />}
@@ -6779,7 +6757,7 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
             <span style={{ fontSize:15 }}>📋</span>
             <div style={{ flex:1 }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase' }}>{plan.title}</div>
-              <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{plan.date} · {plan.duration}</div>
+              <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{plan.date} · {plan.duration}</div>
             </div>
             {!plan._linkedTo && (team.schedule||[]).filter(e=>e.type==='Practice').length > 0 && (
               <select onChange={e=>{ if(e.target.value) setPlanLinked(plan.id, parseInt(e.target.value)) }} style={{ fontSize:10, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, padding:'3px 6px', cursor:'pointer', colorScheme:'dark', maxWidth:130 }}>
@@ -6788,7 +6766,7 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
               </select>
             )}
             {plan._linkedTo && <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>✓ LINKED</span>}
-            <button onClick={()=>removePlan(plan.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, padding:'0 0 0 6px', flexShrink:0 }}>×</button>
+            <button onClick={()=>removePlan(plan.id)} style={{ background:'transparent', border:'none', color:'#5a6480', cursor:'pointer', fontSize:16, padding:'0 0 0 6px', flexShrink:0 }}>×</button>
           </div>
           <div style={{ padding:14 }}>
             {plan.warmup && <div style={{ padding:'8px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Warmup — {plan.warmup.time}</div>{(plan.warmup.activities||[]).map((a,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', marginBottom:2 }}>• {a}</div>)}</div>}
@@ -6796,14 +6774,14 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
               <div key={i} style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:8 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
                   <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:P }}>{i+1}</div>
-                  <div><div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{seg.name}</div><div style={{ fontSize:10, color:'#6b7a96' }}>{seg.time} · {seg.reps}</div></div>
+                  <div><div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{seg.name}</div><div style={{ fontSize:10, color:'#8a94b0' }}>{seg.time} · {seg.reps}</div></div>
                 </div>
                 <div style={{ fontSize:11, color:'#dde1f0', marginBottom:4, fontWeight:600 }}>📍 {seg.drill}</div>
-                <div style={{ fontSize:11, color:'#6b7a96', marginBottom:4 }}>Purpose: {seg.purpose}</div>
+                <div style={{ fontSize:11, color:'#8a94b0', marginBottom:4 }}>Purpose: {seg.purpose}</div>
                 <div style={{ fontSize:11, color:P, fontStyle:'italic' }}>Coach: "{seg.coaching}"</div>
               </div>
             ))}
-            {plan.teamPeriod && <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Team Period — {plan.teamPeriod.time}</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600, marginBottom:3 }}>{plan.teamPeriod.activity}</div><div style={{ fontSize:11, color:'#6b7a96' }}>{plan.teamPeriod.notes}</div></div>}
+            {plan.teamPeriod && <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Team Period — {plan.teamPeriod.time}</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600, marginBottom:3 }}>{plan.teamPeriod.activity}</div><div style={{ fontSize:11, color:'#8a94b0' }}>{plan.teamPeriod.notes}</div></div>}
             {plan.coachNote && <div style={{ padding:'8px 12px', background:'rgba(0,0,0,0.3)', borderRadius:8, borderLeft:`3px solid ${P}` }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Coach's Note</div><div style={{ fontSize:12, color:'#f2f4f8', fontStyle:'italic' }}>"{plan.coachNote}"</div></div>}
             {/* Print button */}
             <button onClick={()=>{
@@ -6873,8 +6851,8 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
     <div style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:'14px 12px' }}>
       <div style={{ fontSize:18, marginBottom:3 }}>{icon}</div>
       <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:28, color, lineHeight:1, marginBottom:2 }}>{val}</div>
-      <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.3 }}>{label}</div>
-      {sub && <div style={{ fontSize:9, color:'#3d4559', marginTop:2 }}>{sub}</div>}
+      <div style={{ fontSize:10, color:'#8a94b0', lineHeight:1.3 }}>{label}</div>
+      {sub && <div style={{ fontSize:9, color:'#5a6480', marginTop:2 }}>{sub}</div>}
     </div>
   )
 
@@ -6903,7 +6881,7 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
           {gamesPlayed > 0 && (
             <div style={{ marginBottom:14 }}>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
-                <span style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WIN RATE</span>
+                <span style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WIN RATE</span>
                 <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800 }}>{winPct}%</span>
               </div>
               <div style={{ height:6, background:'#1e2330', borderRadius:3, overflow:'hidden' }}>
@@ -6928,7 +6906,7 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
           {/* Game log — inline editable */}
           {history.length > 0 && (
             <div>
-              <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:8 }}>GAME RESULTS <span style={{ color:'#3d4559', fontWeight:400 }}>· tap to edit</span></div>
+              <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:8 }}>GAME RESULTS <span style={{ color:'#5a6480', fontWeight:400 }}>· tap to edit</span></div>
               {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((g,i)=>{
                 const result = g.us>g.them?'W':g.us<g.them?'L':'T'
                 const rc = result==='W'?'#4ade80':result==='L'?'#e74c3c':'#f59e0b'
@@ -6939,21 +6917,21 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                       <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:rc, width:16, textAlign:'center' }}>{result}</div>
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{g.opponent}</div>
-                        <div style={{ fontSize:10, color:'#6b7a96' }}>{g.date ? new Date(g.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}) : ''}</div>
+                        <div style={{ fontSize:10, color:'#8a94b0' }}>{g.date ? new Date(g.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}) : ''}</div>
                       </div>
                       <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8' }}>{g.us}–{g.them}</div>
-                      <span style={{ fontSize:10, color:'#3d4559', marginLeft:4 }}>{isExpanded?'▲':'✏️'}</span>
+                      <span style={{ fontSize:10, color:'#5a6480', marginLeft:4 }}>{isExpanded?'▲':'✏️'}</span>
                     </div>
                     {isExpanded && (
                       <div style={{ borderTop:'1px solid #1e2330', padding:'10px 12px', background:'rgba(255,255,255,0.02)' }}>
-                        <div style={{ fontSize:9, color:'#6b7a96', letterSpacing:2, fontWeight:700, marginBottom:8 }}>EDIT GAME</div>
+                        <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:2, fontWeight:700, marginBottom:8 }}>EDIT GAME</div>
                         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
                           <div style={{ gridColumn:'1/-1' }}>
-                            <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Opponent</label>
+                            <label style={{ fontSize:9, color:'#8a94b0', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Opponent</label>
                             <input value={editGame.opponent||''} onChange={e=>setEditGame(g=>({...g,opponent:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
                           </div>
                           <div>
-                            <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Date</label>
+                            <label style={{ fontSize:9, color:'#8a94b0', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Date</label>
                             <input type="date" value={editGame.date||''} onChange={e=>setEditGame(g=>({...g,date:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
                           </div>
                           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
@@ -6968,7 +6946,7 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                           </div>
                         </div>
                         <div style={{ display:'flex', gap:6 }}>
-                          <button onClick={()=>{ setExpandedGame(null); setEditGame({}) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
+                          <button onClick={()=>{ setExpandedGame(null); setEditGame({}) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
                           <button onClick={()=>deleteGame(g.id)} style={{ flex:1, padding:'8px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:4, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>DELETE</button>
                           <button onClick={()=>saveGameEdit(g.id)} style={{ flex:2, padding:'8px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SAVE CHANGES</button>
                         </div>
@@ -6981,7 +6959,7 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
           )}
 
           {gamesPlayed === 0 && (
-            <div style={{ textAlign:'center', padding:'18px 0', color:'#3d4559', fontSize:12 }}>
+            <div style={{ textAlign:'center', padding:'18px 0', color:'#5a6480', fontSize:12 }}>
               No games recorded yet. Use Live Scoring to track your games and stats will appear here automatically.
             </div>
           )}
@@ -7037,7 +7015,7 @@ function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport }) {
             {printTypes.map(pt => (
               <div key={pt.id} onClick={()=>setPrintType(pt.id)} style={{ padding:'10px 12px', background:printType===pt.id?al(P,0.12):'#161922', border:`1px solid ${printType===pt.id?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
                 <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:3 }}>{pt.label}</div>
-                <div style={{ fontSize:10, color:'#6b7a96', lineHeight:1.4 }}>{pt.desc}</div>
+                <div style={{ fontSize:10, color:'#8a94b0', lineHeight:1.4 }}>{pt.desc}</div>
               </div>
             ))}
           </div>
@@ -7070,7 +7048,7 @@ function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, active
   return (
     <>
       <div style={{ padding:'16px 0 8px' }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#3a4260', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Team management</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>Team management</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:26, color:'#dde1f0', lineHeight:1 }}>Team</div>
       </div>
 
@@ -7079,8 +7057,8 @@ function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, active
       {!currentTeam ? (
         <div style={{ marginTop:20, padding:'40px 20px', textAlign:'center', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4 }}>
           <div style={{ fontSize:36, marginBottom:10 }}>🏆</div>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#6b7a96', letterSpacing:'1px', marginBottom:8 }}>No Team Selected</div>
-          <div style={{ fontSize:12, color:'#3d4559', lineHeight:1.6 }}>Create or select a team above to access roster, schedule, practice plans, and more.</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#8a94b0', letterSpacing:'1px', marginBottom:8 }}>No Team Selected</div>
+          <div style={{ fontSize:12, color:'#5a6480', lineHeight:1.6 }}>Create or select a team above to access roster, schedule, practice plans, and more.</div>
         </div>
       ) : (
         <>
@@ -7089,7 +7067,7 @@ function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, active
             <span style={{ fontSize:20, flexShrink:0 }}>{mascotObj?.emoji||'🏆'}</span>
             <div style={{ flexShrink:0, minWidth:0 }}>
               <div style={{ fontFamily:(TEAM_FONTS||[]).find(f=>f.id===currentTeam.teamFont)?.style||"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:120 }}>{currentTeam.name}</div>
-              <div style={{ fontSize:9, color:'#6b7a96', whiteSpace:'nowrap' }}>{currentTeam.season}</div>
+              <div style={{ fontSize:9, color:'#8a94b0', whiteSpace:'nowrap' }}>{currentTeam.season}</div>
             </div>
             <div style={{ width:1, height:28, background:'#1e2330', flexShrink:0 }} />
             <div style={{ display:'flex', gap:5, overflowX:'auto' }}>
@@ -7195,7 +7173,7 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase' }}>Mascot Builder</div>
             <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:20, color:'#f2f4f8' }}>Create Your Mascot</div>
           </div>
-          <button onClick={onClose} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:20 }}>✕</button>
+          <button onClick={onClose} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:20 }}>✕</button>
         </div>
 
         {/* Step indicator */}
@@ -7213,13 +7191,13 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
           {/* Step 0: Pick Animal */}
           {step === 0 && (
             <div>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:12 }}>Choose the icon for your mascot badge.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginBottom:12 }}>Choose the icon for your mascot badge.</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
                 {ANIMAL_OPTIONS.map(a => (
                   <div key={a.id} onClick={()=>setSelected(s=>({...s,animal:a.id}))}
                     style={{ padding:'8px 4px', borderRadius:6, border:`2px solid ${selected.animal===a.id?P:'#1e2330'}`, background:selected.animal===a.id?al(P,0.1):'#161922', cursor:'pointer', textAlign:'center', transition:'all 0.15s' }}>
                     <div style={{ fontSize:24, lineHeight:1.2 }}>{a.emoji}</div>
-                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:selected.animal===a.id?P:'#6b7a96', fontWeight:700, marginTop:2 }}>{a.label}</div>
+                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:selected.animal===a.id?P:'#6b7a96', fontWeight:700, marginTop:2 }}>{a.label}</div>
                   </div>
                 ))}
               </div>
@@ -7229,9 +7207,9 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
           {/* Step 1: Pick Colors */}
           {step === 1 && (
             <div>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:14 }}>Set your mascot badge colors.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginBottom:14 }}>Set your mascot badge colors.</div>
               <div style={{ marginBottom:14 }}>
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#6b7a96', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:8, fontWeight:700 }}>Primary Color (ring + accent)</div>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#8a94b0', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:8, fontWeight:700 }}>Primary Color (ring + accent)</div>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:8 }}>
                   {PRESET_COLORS.map(c => (
                     <div key={c} onClick={()=>setSelected(s=>({...s,primaryColor:c}))}
@@ -7241,14 +7219,14 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
                 <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                   <input type="color" value={selected.primaryColor} onChange={e=>setSelected(s=>({...s,primaryColor:e.target.value}))}
                     style={{ width:36, height:36, border:'none', borderRadius:4, cursor:'pointer', padding:0 }}/>
-                  <span style={{ fontSize:11, color:'#6b7a96', fontFamily:'monospace' }}>Custom: {selected.primaryColor}</span>
+                  <span style={{ fontSize:11, color:'#8a94b0', fontFamily:'monospace' }}>Custom: {selected.primaryColor}</span>
                 </div>
               </div>
               {/* Live preview */}
               <div style={{ textAlign:'center', padding:'16px', background:'#161922', borderRadius:8, border:'1px solid #1e2330' }}>
                 <div style={{ display:'inline-block', width:80, height:80 }}
                   dangerouslySetInnerHTML={{ __html: MASCOT_SVGS[selected.animal]?.(selected.primaryColor) || '' }}/>
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#6b7a96', marginTop:6 }}>Preview</div>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#8a94b0', marginTop:6 }}>Preview</div>
               </div>
             </div>
           )}
@@ -7256,13 +7234,13 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
           {/* Step 2: Add Label */}
           {step === 2 && (
             <div>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:14 }}>Optional: this label auto-fills from your team name. Leave blank to use the animal name.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginBottom:14 }}>Optional: this label auto-fills from your team name. Leave blank to use the animal name.</div>
               <div style={{ marginBottom:16 }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, display:'block', marginBottom:6 }}>Badge Label (shows at bottom)</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, display:'block', marginBottom:6 }}>Badge Label (shows at bottom)</label>
                 <input value={selected.label} onChange={e=>setSelected(s=>({...s,label:e.target.value.toUpperCase().slice(0,12)}))}
                   placeholder={ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label?.toUpperCase() || 'TEAM NAME'}
                   style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'2px', outline:'none' }}/>
-                <div style={{ fontSize:10, color:'#3d4559', marginTop:4 }}>Max 12 characters · auto-UPPERCASE</div>
+                <div style={{ fontSize:10, color:'#5a6480', marginTop:4 }}>Max 12 characters · auto-UPPERCASE</div>
               </div>
               {/* Live preview */}
               <div style={{ textAlign:'center', padding:'16px', background:'#161922', borderRadius:8, border:'1px solid #1e2330' }}>
@@ -7275,18 +7253,18 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
           {/* Step 3: Preview + Save */}
           {step === 3 && (
             <div style={{ textAlign:'center' }}>
-              <div style={{ fontSize:11, color:'#6b7a96', marginBottom:16 }}>Your custom mascot is ready. Save it to use on your team.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginBottom:16 }}>Your custom mascot is ready. Save it to use on your team.</div>
               <div style={{ display:'flex', justifyContent:'center', gap:16, marginBottom:16 }}>
                 {[80, 52, 32].map(sz => (
                   <div key={sz}>
                     <div style={{ width:sz, height:sz, margin:'0 auto' }}
                       dangerouslySetInnerHTML={{ __html: MASCOT_SVGS[selected.animal]?.(selected.primaryColor) || '' }}/>
-                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, color:'#3d4559', textAlign:'center', marginTop:4 }}>{sz}px</div>
+                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#5a6480', textAlign:'center', marginTop:4 }}>{sz}px</div>
                   </div>
                 ))}
               </div>
               <div style={{ background:'#161922', borderRadius:6, padding:'10px 14px', border:'1px solid #1e2330', marginBottom:16, textAlign:'left' }}>
-                <div style={{ fontSize:10, color:'#6b7a96', marginBottom:4 }}>Mascot summary</div>
+                <div style={{ fontSize:10, color:'#8a94b0', marginBottom:4 }}>Mascot summary</div>
                 <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8' }}>
                   {ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label} · {selected.primaryColor}
                 </div>
@@ -7311,7 +7289,7 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
           <div style={{ display:'flex', gap:8, marginTop:16 }}>
             {step > 0 && (
               <button onClick={()=>setStep(s=>s-1)}
-                style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
+                style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
                 ← Back
               </button>
             )}
@@ -7409,9 +7387,9 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
           <div style={{ background:'#0f1219', border:'1px solid rgba(239,68,68,0.4)', borderRadius:8, padding:24, width:'100%', maxWidth:340 }}>
             <div style={{ fontSize:24, textAlign:'center', marginBottom:10 }}>⚠️</div>
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:18, color:'#f2f4f8', textAlign:'center', marginBottom:6 }}>Delete Team?</div>
-            <div style={{ fontSize:13, color:'#6b7a96', textAlign:'center', lineHeight:1.6, marginBottom:20 }}>This will permanently delete <span style={{ color:'#f2f4f8', fontWeight:600 }}>{deleteConfirm.name}</span>. This cannot be undone.</div>
+            <div style={{ fontSize:13, color:'#8a94b0', textAlign:'center', lineHeight:1.6, marginBottom:20 }}>This will permanently delete <span style={{ color:'#f2f4f8', fontWeight:600 }}>{deleteConfirm.name}</span>. This cannot be undone.</div>
             <div style={{ display:'flex', gap:8 }}>
-              <button onClick={()=>setDeleteConfirm(null)} style={{ flex:1, padding:'11px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>CANCEL</button>
+              <button onClick={()=>setDeleteConfirm(null)} style={{ flex:1, padding:'11px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>CANCEL</button>
               <button onClick={doDelete} style={{ flex:1, padding:'11px', background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.5)', borderRadius:4, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer' }}>DELETE</button>
             </div>
           </div>
@@ -7440,19 +7418,19 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
             <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:current?15:13, color:'#f2f4f8', textTransform:'uppercase' }}>
               {current ? current.name : 'No '+sport+' Team Selected'}
             </div>
-            {current && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{current.season}{current.hometown?' · '+current.hometown:''} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
-            {!current && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>Tap to create or select a team</div>}
+            {current && <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{current.season}{current.hometown?' · '+current.hometown:''} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
+            {!current && <div style={{ fontSize:10, color:'#5a6480', marginTop:1 }}>Tap to create or select a team</div>}
 
           </div>
           {current && <div style={{ display:'flex', gap:3 }}>{[current.primary,current.secondary,current.accent1,current.accent2].filter(Boolean).map((c,i)=><div key={i} style={{ width:10,height:10,borderRadius:2,background:c }} />)}</div>}
-          <span style={{ fontSize:12, color:'#6b7a96' }}>{expanded?'▲':'▼'}</span>
+          <span style={{ fontSize:12, color:'#8a94b0' }}>{expanded?'▲':'▼'}</span>
         </div>
 
         {expanded && (
           <div style={{ background:'#0d1017', border:`1px solid ${al(P,0.2)}`, borderTop:'none', borderRadius:'0 0 4px 4px', padding:14, animation:'fadeIn 0.2s ease' }}>
             {sportTeams.length > 0 && mode === 'view' && (
               <div style={{ marginBottom:12 }}>
-                <div style={{ fontSize:9, letterSpacing:2, color:'#6b7a96', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
+                <div style={{ fontSize:9, letterSpacing:2, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Your {sport} Teams</div>
                 {sportTeams.map(team => {
                   const m = (MASCOTS||[]).find(x=>x.id===team.mascot)
                   const fs = (TEAM_FONTS||[]).find(f=>f.id===team.teamFont)?.style||"'Barlow Condensed',sans-serif"
@@ -7464,7 +7442,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
                           <MascotAvatar mascotId={team.mascot} color={current?.id===team.id?P:'#607080'} size={32} />
                           <div style={{ flex:1 }} onClick={()=>{ selectTeam(team); setTimeout(()=>{ if(onOpenTeamTab) onOpenTeamTab() }, 50) }}>
                             <div style={{ fontFamily:fs, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
-                            <div style={{ fontSize:10, color:'#6b7a96' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
+                            <div style={{ fontSize:10, color:'#8a94b0' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
                           </div>
                           <div style={{ display:'flex', gap:4, alignItems:'center' }}>
                             {current?.id===team.id && <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>DESELECT</button>}
@@ -7477,35 +7455,35 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
                           <div style={{ fontSize:9, color:'#f59e0b', letterSpacing:2, fontWeight:700, marginBottom:10 }}>EDIT TEAM</div>
                           <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:8 }}>
                             <div>
-                              <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Team Name</label>
+                              <label style={{ fontSize:9, color:'#8a94b0', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Team Name</label>
                               <input value={editForm.name||''} onChange={e=>setEditForm(f=>({...f,name:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
                             </div>
                             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                               <div>
-                                <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Season</label>
+                                <label style={{ fontSize:9, color:'#8a94b0', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Season</label>
                                 <select value={editForm.season||''} onChange={e=>setEditForm(f=>({...f,season:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:13, outline:'none' }}>
                                   {seasons.map(s=><option key={s} value={s}>{s}</option>)}
                                 </select>
                               </div>
                               <div>
-                                <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Hometown</label>
+                                <label style={{ fontSize:9, color:'#8a94b0', display:'block', marginBottom:4, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Hometown</label>
                                 <input value={editForm.hometown||''} onChange={e=>setEditForm(f=>({...f,hometown:e.target.value}))} style={{ width:'100%', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, outline:'none' }} />
                               </div>
                             </div>
                             <div>
-                              <label style={{ fontSize:9, color:'#6b7a96', display:'block', marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Team Colors</label>
+                              <label style={{ fontSize:9, color:'#8a94b0', display:'block', marginBottom:6, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>Team Colors</label>
                               <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6 }}>
                                 {[{key:'primary',label:'Primary'},{key:'secondary',label:'Secondary'},{key:'accent1',label:'Accent 1'},{key:'accent2',label:'Accent 2'}].map(({key,label})=>(
                                   <div key={key} style={{ textAlign:'center' }}>
                                     <input type="color" value={editForm[key]||'#C0392B'} onChange={e=>setEditForm(f=>({...f,[key]:e.target.value}))} style={{ width:'100%', height:32, border:'none', borderRadius:4, cursor:'pointer', padding:0 }} />
-                                    <div style={{ fontSize:7, color:'#6b7a96', marginTop:2 }}>{label}</div>
+                                    <div style={{ fontSize:9, color:'#8a94b0', marginTop:2 }}>{label}</div>
                                   </div>
                                 ))}
                               </div>
                             </div>
                           </div>
                           <div style={{ display:'flex', gap:6 }}>
-                            <button onClick={()=>{ setEditingTeamId(null); setEditForm({}) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
+                            <button onClick={()=>{ setEditingTeamId(null); setEditForm({}) }} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>CANCEL</button>
                             <button onClick={saveEditTeam} style={{ flex:2, padding:'8px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SAVE CHANGES</button>
                           </div>
                         </div>
@@ -7520,13 +7498,13 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
               <div style={{ animation:'fadeIn 0.2s ease' }}>
                 <div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:12 }}>Create New Team</div>
                 <div style={{ marginBottom:10 }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Team Name *</label>
                   <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={'e.g. Tolland Youth '+sport} style={{ width:'100%', background:'#161922', border:`1px solid ${form.name?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 </div>
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:10 }}>
                   <Sel label="Season" value={form.season||seasons[0]} onChange={v=>setForm(f=>({...f,season:v}))} options={seasons} />
                   <div>
-                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Hometown</label>
+                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Hometown</label>
                     <CitySearch value={form.hometown} onChange={v=>setForm(f=>({...f,hometown:v}))} placeholder="e.g. Tolland, CT" P={P} al={al} />
                   </div>
                 </div>
@@ -7534,12 +7512,12 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
                   <span style={{ fontSize:15 }}>✏️</span>
                   <div style={{ flex:1 }}>
                     <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, color:'#f59e0b', letterSpacing:'0.5px' }}>Create Custom Mascot</div>
-                    <div style={{ fontSize:9, color:'#6b7a96', marginTop:1 }}>Design your own logo — Premium feature</div>
+                    <div style={{ fontSize:9, color:'#8a94b0', marginTop:1 }}>Design your own logo — Premium feature</div>
                   </div>
                   <span style={{ fontSize:13 }}>🔒</span>
                 </div>
                 <div style={{ marginBottom:12 }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Mascot</label>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:6, display:'block' }}>Team Mascot</label>
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:5, maxHeight:180, overflowY:'auto', padding:6, background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
                     {(MASCOTS||[]).map(m=>{
                       const isLocked = m.tier === 'premium'
@@ -7557,20 +7535,20 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
                       <span style={{ fontSize:16 }}>⭐</span>
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:11, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Premium Mascot</div>
-                        <div style={{ fontSize:10, color:'#6b7a96' }}>40 more mascots available with CoachIQ Pro.</div>
+                        <div style={{ fontSize:10, color:'#8a94b0' }}>40 more mascots available with CoachIQ Pro.</div>
                       </div>
-                      <button onClick={()=>setShowUpgrade(false)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14 }}>✕</button>
+                      <button onClick={()=>setShowUpgrade(false)} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:14 }}>✕</button>
                     </div>
                   )}
                   {form.mascot && <div style={{ fontSize:10, color:P, marginTop:4, display:'flex', alignItems:'center', gap:6 }}><MascotAvatar mascotId={form.mascot} color={P} size={20}/> {(MASCOTS||[]).find(m=>m.id===form.mascot)?.name}</div>}
                 </div>
                 <div style={{ marginBottom:12 }}>
-                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:6, display:'block' }}>Team Name Font</label>
+                  <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:6, display:'block' }}>Team Name Font</label>
                   <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
                     {(TEAM_FONTS||[]).map(tf=>(
                       <div key={tf.id} onClick={()=>setForm(f=>({...f,teamFont:tf.id}))} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 12px', background:form.teamFont===tf.id?al(P,0.1):'#161922', border:`1px solid ${form.teamFont===tf.id?P:'#1e2330'}`, borderRadius:5, cursor:'pointer' }}>
                         <span style={{ fontFamily:tf.style, fontSize:15, color:'#f2f4f8', flex:1 }}>{form.name||'Team Name'}</span>
-                        <span style={{ fontSize:9, color:'#6b7a96' }}>{tf.preview}</span>
+                        <span style={{ fontSize:9, color:'#8a94b0' }}>{tf.preview}</span>
                         {form.teamFont===tf.id && <span style={{ fontSize:11, color:'#4ade80' }}>✓</span>}
                       </div>
                     ))}
@@ -7582,7 +7560,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
                 {showMascotBuilder && <MascotBuilder P={P} al={al} onClose={()=>setShowMascotBuilder(false)} onSave={(customMascot)=>{ setForm(f=>({...f, mascot:customMascot.id, _customMascotSvg:customMascot.customSvg})); setShowMascotBuilder(false) }} />}
                 {[['primary','Primary'],['secondary','Secondary'],['accent1','Accent 1'],['accent2','Accent 2']].map(([key,label])=>(
                   <div key={key} style={{ marginBottom:10 }}>
-                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:5, display:'block' }}>{label} Color</label>
+                    <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:5, display:'block' }}>{label} Color</label>
                     <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                       <input type="color" value={form[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))} style={{ width:34, height:34, border:'none', borderRadius:4, cursor:'pointer', padding:0 }} />
                       <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
@@ -7596,7 +7574,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
                 <div style={{ height:5, borderRadius:2, background:`linear-gradient(90deg,${form.primary} 25%,${form.secondary} 25%,${form.secondary} 50%,${form.accent1} 50%,${form.accent1} 75%,${form.accent2} 75%)`, marginBottom:12 }} />
                 {error && <div style={{ fontSize:11, color:'#f87171', marginBottom:8 }}>{error}</div>}
                 <div style={{ display:'flex', gap:8 }}>
-                  <button onClick={()=>{setMode('view');setError('')}} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+                  <button onClick={()=>{setMode('view');setError('')}} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
                   <button onClick={createTeam} style={{ flex:2, padding:'10px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>CREATE TEAM</button>
                 </div>
               </div>
@@ -7771,7 +7749,7 @@ function AddressSearch({ value, onChange, placeholder, P, al }) {
                 <span style={{ fontSize:13, flexShrink:0, marginTop:1 }}>📍</span>
                 <div>
                   <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.3 }}>{mainText}</div>
-                  {subText && <div style={{ fontSize:10, color:'#6b7a96', marginTop:1 }}>{subText}</div>}
+                  {subText && <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{subText}</div>}
                 </div>
               </div>
             )
@@ -7963,7 +7941,7 @@ function LineupBuilder({ team, sport, P='#C0392B', S='#002868', al, teams, setTe
           <div key={lineup.id} onClick={()=>setActiveLineup(lineup.id)} style={{ flexShrink:0, padding:'6px 10px', borderRadius:6, border:`1px solid ${activeLineup===lineup.id?P:'#1e2330'}`, background:activeLineup===lineup.id?al(P,0.12):'#161922', cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
             {lineup.isGameDay && <span style={{ fontSize:12 }}>⭐</span>}
             <span style={{ fontSize:11, color:activeLineup===lineup.id?P:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{lineup.name}</span>
-            <button onClick={e=>{e.stopPropagation();deleteLineup(lineup.id)}} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:12, padding:0 }}>✕</button>
+            <button onClick={e=>{e.stopPropagation();deleteLineup(lineup.id)}} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:12, padding:0 }}>✕</button>
           </div>
         ))}
         <button onClick={()=>setShowNewLineup(true)} style={{ flexShrink:0, padding:'6px 12px', borderRadius:6, border:`1px dashed ${al(P,0.4)}`, background:'#161922', color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+ New Lineup</button>
@@ -7975,7 +7953,7 @@ function LineupBuilder({ team, sport, P='#C0392B', S='#002868', al, teams, setTe
           <div style={{ display:'flex', gap:8, marginBottom:8 }}>
             <input value={newLineupName} onChange={e=>setNewLineupName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&createLineup()} placeholder="e.g. Base Offense, 2-Minute, Nickel D" style={{ flex:1, background:'#0f1219', border:`1px solid ${al(P,0.3)}`, borderRadius:4, padding:'7px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }}/>
             <button onClick={createLineup} style={{ padding:'7px 12px', background:P, border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer' }}>CREATE</button>
-            <button onClick={()=>{setShowNewLineup(false);setIsGameDay(false)}} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', cursor:'pointer', fontSize:12 }}>✕</button>
+            <button onClick={()=>{setShowNewLineup(false);setIsGameDay(false)}} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', cursor:'pointer', fontSize:12 }}>✕</button>
           </div>
           <div onClick={()=>setIsGameDay(g=>!g)} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
             <div style={{ width:18, height:18, borderRadius:4, border:`2px solid ${isGameDay?P:'#3d4559'}`, background:isGameDay?P:'#0f1219', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -8036,21 +8014,21 @@ function LineupBuilder({ team, sport, P='#C0392B', S='#002868', al, teams, setTe
                 Assign player to {selectedSlot}
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:4, maxHeight:150, overflowY:'auto' }}>
-                <div onClick={()=>assignPlayer(selectedSlot, null)} style={{ padding:'6px 10px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, cursor:'pointer', fontSize:11, color:'#6b7a96' }}>— Remove assignment</div>
+                <div onClick={()=>assignPlayer(selectedSlot, null)} style={{ padding:'6px 10px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, cursor:'pointer', fontSize:11, color:'#8a94b0' }}>— Remove assignment</div>
                 {players.map(p => (
                   <div key={p.id} onClick={()=>assignPlayer(selectedSlot, p.id)} style={{ padding:'6px 10px', background:currentLineup.slots[selectedSlot]===p.id?al(P,0.12):'#0f1219', border:`1px solid ${currentLineup.slots[selectedSlot]===p.id?P:'#1e2330'}`, borderRadius:4, cursor:'pointer', display:'flex', alignItems:'center', gap:8 }}>
                     <span style={{ fontSize:11, color:'#f2f4f8', fontWeight:500 }}>{p.lastName||''}{p.lastName&&p.firstName?', ':''}{p.firstName||''}</span>
                     {p.position && <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{p.position}</span>}
-                    {p.number && <span style={{ fontSize:9, color:'#6b7a96', marginLeft:'auto' }}>#{p.number}</span>}
+                    {p.number && <span style={{ fontSize:9, color:'#8a94b0', marginLeft:'auto' }}>#{p.number}</span>}
                   </div>
                 ))}
-                {players.length === 0 && <div style={{ fontSize:11, color:'#3d4559', padding:'6px' }}>No players in roster yet. Add players in the Roster tab.</div>}
+                {players.length === 0 && <div style={{ fontSize:11, color:'#5a6480', padding:'6px' }}>No players in roster yet. Add players in the Roster tab.</div>}
               </div>
             </div>
           )}
         </>
       ) : (
-        <div style={{ textAlign:'center', padding:'24px 0', color:'#3d4559', fontSize:12 }}>Create a lineup above to start assigning players to positions.</div>
+        <div style={{ textAlign:'center', padding:'24px 0', color:'#5a6480', fontSize:12 }}>Create a lineup above to start assigning players to positions.</div>
       )}
     </div>
   )
@@ -8182,7 +8160,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
   )
 
   if (!team) return (
-    <Card><div style={{ padding:24, textAlign:'center', color:'#3d4559', fontSize:13 }}>Select or create a team to use live scoring.</div></Card>
+    <Card><div style={{ padding:24, textAlign:'center', color:'#5a6480', fontSize:13 }}>Select or create a team to use live scoring.</div></Card>
   )
 
   if (setupMode) return (
@@ -8196,11 +8174,11 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
         )}
         <div style={{ display:'grid', gap:10, marginBottom:14 }}>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Opponent *</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Opponent *</label>
             <input value={setupForm.opponent} onChange={e=>setSetupForm(f=>({...f,opponent:e.target.value}))} placeholder="e.g. Westport Eagles" style={{ width:'100%', background:'#161922', border:`1px solid ${setupForm.opponent?P:'#1e2330'}`, borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
           </div>
           <div>
-            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Game Date</label>
+            <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Game Date</label>
             <input type="date" value={setupForm.date} onChange={e=>setSetupForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
           </div>
         </div>
@@ -8221,16 +8199,16 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
         <div style={{ background:'#0d1117', borderRadius:8, padding:'16px 12px', marginBottom:12, border:`1px solid ${al(P,0.2)}` }}>
           <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
             {bigScore(game.us,'us')}
-            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:36, fontWeight:900, color:'#3d4559' }}>—</div>
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:36, fontWeight:900, color:'#5a6480' }}>—</div>
             {bigScore(game.them,'them')}
           </div>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:10 }}>
             <div style={{ fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>{team.name?.toUpperCase()}</div>
-            <div style={{ fontSize:10, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>{game.opponent?.toUpperCase()}</div>
+            <div style={{ fontSize:10, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>{game.opponent?.toUpperCase()}</div>
           </div>
 
           {/* Quarter box scores */}
-          <div style={{ display:'grid', gridTemplateColumns:'auto 1fr 1fr 1fr 1fr auto', gap:4, fontSize:10, textAlign:'center', color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'auto 1fr 1fr 1fr 1fr auto', gap:4, fontSize:10, textAlign:'center', color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>
             {['','Q1','Q2','Q3','Q4','TOT'].map((h,i)=><div key={i} style={{ fontWeight:700, color:i===0||i===5?'#3d4559':'#6b7a96' }}>{h}</div>)}
             {[team.name?.slice(0,4)||'US', ...game.quarters.us, game.us].map((v,i)=><div key={'u'+i} style={{ color:i===0?P:'#f2f4f8', fontWeight:i===5?800:600 }}>{v}</div>)}
             {[game.opponent?.slice(0,4)||'THM', ...game.quarters.them, game.them].map((v,i)=><div key={'t'+i} style={{ color:i===0?'#a0aec0':'#f2f4f8', fontWeight:i===5?800:600 }}>{v}</div>)}
@@ -8240,14 +8218,14 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
         {/* QUARTER + CLOCK CONTROLS */}
         {!game.final && (
           <div style={{ marginBottom:12 }}>
-            <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>QUARTER</div>
+            <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>QUARTER</div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6, marginBottom:10 }}>
               {[1,2,3,4].map(q=>(
                 <button key={q} onClick={()=>setQuarter(q)} style={{ padding:'10px 0', background:game.quarter===q?P:'#161922', border:`1px solid ${game.quarter===q?P:'#1e2330'}`, borderRadius:6, color:game.quarter===q?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:14, cursor:'pointer', minHeight:46, touchAction:'manipulation' }}>Q{q}</button>
               ))}
             </div>
             <div>
-              <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:4 }}>CLOCK</div>
+              <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:4 }}>CLOCK</div>
               <input value={game.clock} onChange={e=>setClock(e.target.value)} placeholder="e.g. 4:32" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:"'Big Shoulders Display',sans-serif", fontSize:20, fontWeight:900, outline:'none', textAlign:'center' }} />
             </div>
           </div>
@@ -8258,7 +8236,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
             {[['us', team.name?.slice(0,10)||'Us'], ['them', game.opponent?.slice(0,10)||'Them']].map(([side, label])=>(
               <div key={side} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'10px 12px' }}>
-                <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, marginBottom:6 }}>{label.toUpperCase()}</div>
+                <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, marginBottom:6 }}>{label.toUpperCase()}</div>
                 <div style={{ display:'flex', gap:5, marginBottom:6 }}>
                   {[0,1,2].map(i=>(
                     <div key={i} style={{ width:14, height:14, borderRadius:'50%', background:i<(side==='us'?game.timeoutsUs:game.timeoutsThem)?P:'#1e2330', border:`1px solid ${al(P,0.4)}` }} />
@@ -8293,7 +8271,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
             </div>
             {players.length > 0 && scoreSide==='us' && (
               <div style={{ marginBottom:10 }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Scored by (optional)</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Scored by (optional)</label>
                 <select value={scoringPlayer} onChange={e=>setScoringPlayer(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }}>
                   <option value="">—</option>
                   {players.map(p=><option key={p.id} value={`#${p.jersey} ${p.firstName}`}>#{p.jersey} {p.firstName} {p.lastName}</option>)}
@@ -8301,7 +8279,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
               </div>
             )}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-              <button onClick={()=>{setShowQB(false);setScoringPlayer('')}} style={{ padding:'12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', minHeight:48 }}>CANCEL</button>
+              <button onClick={()=>{setShowQB(false);setScoringPlayer('')}} style={{ padding:'12px', background:'#161922', border:'1px solid #1e2330', borderRadius:6, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', minHeight:48 }}>CANCEL</button>
               <button onClick={addScore} style={{ padding:'12px', background:scoreSide==='us'?P:'#e74c3c', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:13, cursor:'pointer', letterSpacing:1, minHeight:48 }}>CONFIRM +{({TD:6,FG:3,Safety:2,XP:1,'2PT':2})[scoreType]}</button>
             </div>
           </div>
@@ -8310,7 +8288,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
         {/* PLAY LOG */}
         {game.log && game.log.length > 0 && (
           <div style={{ marginBottom:12 }}>
-            <button onClick={()=>setShowLog(v=>!v)} style={{ width:'100%', textAlign:'left', background:'transparent', border:'none', color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, letterSpacing:2, cursor:'pointer', padding:'6px 0', display:'flex', justifyContent:'space-between' }}>
+            <button onClick={()=>setShowLog(v=>!v)} style={{ width:'100%', textAlign:'left', background:'transparent', border:'none', color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, letterSpacing:2, cursor:'pointer', padding:'6px 0', display:'flex', justifyContent:'space-between' }}>
               <span>SCORE LOG ({game.log.length})</span><span>{showLog?'▲':'▼'}</span>
             </button>
             {showLog && (
@@ -8320,8 +8298,8 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
                     <span style={{ fontSize:14 }}>{entry.side==='us'?'🟢':'🔴'}</span>
                     <span style={{ color:'#f2f4f8', fontWeight:600 }}>{entry.label}</span>
                     <span style={{ color:entry.side==='us'?P:'#e74c3c', fontWeight:800 }}>+{entry.pts}</span>
-                    {entry.player && <span style={{ color:'#6b7a96' }}>{entry.player}</span>}
-                    <span style={{ color:'#3d4559', marginLeft:'auto', fontSize:9 }}>Q{entry.quarter}</span>
+                    {entry.player && <span style={{ color:'#8a94b0' }}>{entry.player}</span>}
+                    <span style={{ color:'#5a6480', marginLeft:'auto', fontSize:9 }}>Q{entry.quarter}</span>
                   </div>
                 ))}
               </div>
@@ -8331,7 +8309,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
 
         {/* END GAME / RESET */}
         <div style={{ display:'grid', gridTemplateColumns: game.final ? '1fr' : '1fr 1fr', gap:8 }}>
-          <button onClick={resetGame} style={{ padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:6, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1, minHeight:46 }}>NEW GAME</button>
+          <button onClick={resetGame} style={{ padding:'11px', background:'transparent', border:'1px solid #1e2330', borderRadius:6, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1, minHeight:46 }}>NEW GAME</button>
           {!game.final && (
             <button onClick={endGame} style={{ padding:'11px', background:'#161922', border:`1px solid ${al('#4ade80',0.4)}`, borderRadius:6, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:12, cursor:'pointer', letterSpacing:1, minHeight:46 }}>✓ END GAME</button>
           )}
@@ -8351,7 +8329,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
             {summaryLoading && (
               <div style={{ padding:'16px', background:'#0d1117', border:`1px solid ${al(P,0.2)}`, borderRadius:8, textAlign:'center' }}>
                 <div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }} />
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#6b7a96', letterSpacing:1 }}>AI ANALYZING GAME DATA...</div>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#8a94b0', letterSpacing:1 }}>AI ANALYZING GAME DATA...</div>
               </div>
             )}
             {summary && (
@@ -8401,7 +8379,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
                     </div>
                   )}
 
-                  <button onClick={()=>generateSummary(game)} style={{ width:'100%', padding:'8px', background:'transparent', border:`1px solid ${al(P,0.3)}`, borderRadius:6, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1 }}>↺ REGENERATE</button>
+                  <button onClick={()=>generateSummary(game)} style={{ width:'100%', padding:'8px', background:'transparent', border:`1px solid ${al(P,0.3)}`, borderRadius:6, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:1 }}>↺ REGENERATE</button>
                 </div>
               </div>
             )}
@@ -8484,33 +8462,33 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
               <Sel label="Type" value={form.type} onChange={v=>setForm(f=>({...f,type:v}))} options={['Game','Practice','Scrimmage','Tournament']} />
               <Sel label="Home / Away" value={form.homeAway} onChange={v=>setForm(f=>({...f,homeAway:v}))} options={['Home','Away','Neutral']} />
               <div style={{ gridColumn:'1/-1' }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Opponent / Event Name</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Opponent / Event Name</label>
                 <input value={form.opponent} onChange={e=>setForm(f=>({...f,opponent:e.target.value}))} placeholder={form.type==='Practice' ? 'Practice session' : 'e.g. Westport Eagles'} list="saved-opps-list" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
                 <datalist id="saved-opps-list">{savedOpponents.map(o=><option key={o} value={o}/>)}</datalist>
               </div>
               <div>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Date *</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Date *</label>
                 <input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={{ width:'100%', background:'#161922', border:`1px solid ${form.date?P:'#1e2330'}`, borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
               <div>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Start Time</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Start Time</label>
                 <input type="time" value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
               <div>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Arrive By</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Arrive By</label>
                 <input type="time" value={form.arrivalTime} onChange={e=>setForm(f=>({...f,arrivalTime:e.target.value}))} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
               <div>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Location / Address</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Location / Address</label>
                 <AddressSearch value={form.location} onChange={v=>setForm(f=>({...f,location:v}))} placeholder={form.homeAway==='Home' ? (team.hometown||'Search home field address...') : 'Search away venue address...'} P={P} al={al} />
               </div>
               <div style={{ gridColumn:'1/-1' }}>
-                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
+                <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Notes</label>
                 <input value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="e.g. Wear red jerseys, bring extra water" style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }} />
               </div>
             </div>
             <div style={{ display:'flex', gap:8 }}>
-              <button onClick={()=>setShowAdd(false)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
+              <button onClick={()=>setShowAdd(false)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>CANCEL</button>
               <button onClick={saveEvent} disabled={!form.date} style={{ flex:2, padding:'9px', background:form.date?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:form.date?'pointer':'not-allowed', letterSpacing:'1px' }}>SAVE EVENT</button>
             </div>
           </div>
@@ -8519,7 +8497,7 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
         {/* Needs Rescheduling */}
         {needsReschedule.length > 0 && (
           <div style={{ marginBottom:10 }}>
-            <div style={{ fontSize:8, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:6 }}>Needs Rescheduling</div>
+            <div style={{ fontSize:10, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:6 }}>Needs Rescheduling</div>
             {needsReschedule.map(event => (
               <div key={event.id} style={{ background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:8, padding:'10px 12px', marginBottom:6 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
@@ -8528,13 +8506,13 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                     <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{event.opponent || event.type}</div>
                     <div style={{ fontSize:9, color:'#f59e0b', fontWeight:700 }}>📅 POSTPONED — needs new date</div>
                   </div>
-                  <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#3d4559', cursor:'pointer', fontSize:16, padding:0 }}>×</button>
+                  <button onClick={()=>removeEvent(event.id)} style={{ background:'transparent', border:'none', color:'#5a6480', cursor:'pointer', fontSize:16, padding:0 }}>×</button>
                 </div>
                 {postponingId === event.id ? (
                   <div>
                     <input type="date" value={postponeDate} onChange={e=>setPostponeDate(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'7px 10px', color:'#f2f4f8', fontSize:14, marginBottom:6, outline:'none' }} />
                     <div style={{ display:'flex', gap:6 }}>
-                      <button onClick={()=>setPostponingId(null)} style={{ flex:1, padding:'7px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>CANCEL</button>
+                      <button onClick={()=>setPostponingId(null)} style={{ flex:1, padding:'7px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>CANCEL</button>
                       <button onClick={()=>postponeEvent(event.id, postponeDate)} disabled={!postponeDate} style={{ flex:2, padding:'7px', background:postponeDate?'#f59e0b':'#3d4559', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:postponeDate?'pointer':'not-allowed', letterSpacing:1 }}>SET NEW DATE</button>
                     </div>
                   </div>
@@ -8547,7 +8525,7 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
         )}
 
         {upcoming.length === 0 && !showAdd && needsReschedule.length === 0 && (
-          <div style={{ textAlign:'center', padding:'18px 0', color:'#3d4559', fontSize:12 }}>No upcoming events — tap above to add your schedule</div>
+          <div style={{ textAlign:'center', padding:'18px 0', color:'#5a6480', fontSize:12 }}>No upcoming events — tap above to add your schedule</div>
         )}
 
         {upcoming.map(event => {
@@ -8564,17 +8542,17 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:2 }}>
                     <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{event.opponent || event.type}</div>
-                    <span style={{ fontSize:8, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} · {event.homeAway}</span>
-                    {rsvp && <span style={{ fontSize:8, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(rsvpColor[rsvp],0.15), color:rsvpColor[rsvp], fontFamily:"'Barlow Condensed',sans-serif" }}>{rsvpLabel[rsvp]}</span>}
+                    <span style={{ fontSize:10, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} · {event.homeAway}</span>
+                    {rsvp && <span style={{ fontSize:10, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(rsvpColor[rsvp],0.15), color:rsvpColor[rsvp], fontFamily:"'Barlow Condensed',sans-serif" }}>{rsvpLabel[rsvp]}</span>}
                   </div>
-                  <div style={{ fontSize:11, color:'#6b7a96' }}>
+                  <div style={{ fontSize:11, color:'#8a94b0' }}>
                     {d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
                     {event.time && ' · ' + event.time}
                     {event.arrivalTime && ' · Arrive ' + event.arrivalTime}
                   </div>
-                  {event.location && <div style={{ fontSize:10, color:'#3d4559', marginTop:1 }}>📍 {event.location}</div>}
+                  {event.location && <div style={{ fontSize:10, color:'#5a6480', marginTop:1 }}>📍 {event.location}</div>}
                 </div>
-                <span style={{ color:'#3d4559', fontSize:12, flexShrink:0 }}>{isExpanded?'▲':'▼'}</span>
+                <span style={{ color:'#5a6480', fontSize:12, flexShrink:0 }}>{isExpanded?'▲':'▼'}</span>
               </div>
 
               {isExpanded && (
@@ -8583,10 +8561,10 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
 
                   {/* RSVP */}
                   <div style={{ marginBottom:10 }}>
-                    <div style={{ fontSize:9, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>YOUR RSVP</div>
+                    <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>YOUR RSVP</div>
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6 }}>
                       {[['yes','✓ Going','#4ade80'],['maybe','? Maybe','#f59e0b'],['no','✗ Can\'t','#e74c3c']].map(([status,label,color])=>(
-                        <button key={status} onClick={()=>setRsvp(event.id,status)} style={{ padding:'9px 0', background:rsvp===status?al(color,0.2):'#161922', border:`1px solid ${rsvp===status?color:'#1e2330'}`, borderRadius:6, color:rsvp===status?color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', minHeight:40, touchAction:'manipulation' }}>{label}</button>
+                        <button key={status} onClick={()=>setRsvp(event.id,status)} style={{ padding:'9px 0', background:rsvp===status?al(color,0.2):'#161922', border:`1px solid ${rsvp===status?color:'#1e2330'}`, borderRadius:6, color:rsvp===status?color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', minHeight:40, touchAction:'manipulation' }}>{label}</button>
                       ))}
                     </div>
                   </div>
@@ -8597,7 +8575,7 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                       <div style={{ fontSize:9, color:'#f59e0b', fontWeight:700, letterSpacing:1, marginBottom:6 }}>POSTPONE — Pick new date or leave blank to reschedule later</div>
                       <input type="date" value={postponeDate} onChange={e=>setPostponeDate(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:'#f2f4f8', fontSize:14, marginBottom:6, outline:'none' }} />
                       <div style={{ display:'flex', gap:6 }}>
-                        <button onClick={()=>setPostponingId(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                        <button onClick={()=>setPostponingId(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
                         <button onClick={()=>postponeEvent(event.id, postponeDate)} style={{ flex:2, padding:'8px', background:'#f59e0b', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>{postponeDate ? 'MOVE TO NEW DATE' : 'MARK AS POSTPONED'}</button>
                       </div>
                     </div>
@@ -8605,7 +8583,7 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                     <div style={{ marginBottom:8, padding:'10px', background:'rgba(239,68,68,0.08)', borderRadius:6 }}>
                       <div style={{ fontSize:10, color:'#ef4444', fontWeight:700, marginBottom:6 }}>Cancel this {event.type.toLowerCase()}? This cannot be undone.</div>
                       <div style={{ display:'flex', gap:6 }}>
-                        <button onClick={()=>setCancelConfirmId(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
+                        <button onClick={()=>setCancelConfirmId(null)} style={{ flex:1, padding:'8px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer' }}>BACK</button>
                         <button onClick={()=>removeEvent(event.id)} style={{ flex:2, padding:'8px', background:'#ef4444', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>YES, CANCEL IT</button>
                       </div>
                     </div>
@@ -8624,14 +8602,14 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
 
         {past.length > 0 && (
           <details style={{ marginTop:8 }}>
-            <summary style={{ fontSize:10, color:'#3d4559', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>PAST EVENTS ({past.length})</summary>
+            <summary style={{ fontSize:10, color:'#5a6480', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>PAST EVENTS ({past.length})</summary>
             <div style={{ marginTop:6, opacity:0.5 }}>
               {past.map(event => (
-                <div key={event.id} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5, fontSize:11, color:'#6b7a96', display:'flex', alignItems:'center', gap:8 }}>
+                <div key={event.id} style={{ padding:'7px 10px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, marginBottom:5, fontSize:11, color:'#8a94b0', display:'flex', alignItems:'center', gap:8 }}>
                   <span>{typeIcons[event.type]||'📅'}</span>
                   <span>{event.opponent || event.type}</span>
                   <span style={{ marginLeft:'auto' }}>{new Date(event.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'})}</span>
-                  <button onClick={()=>removeEvent(event.id)} style={{ background:'#161922', border:'none', color:'#3d4559', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
+                  <button onClick={()=>removeEvent(event.id)} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:14, padding:0 }}>×</button>
                 </div>
               ))}
             </div>
@@ -8734,15 +8712,15 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P='#
       <div key="hw" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
         <div style={{ fontSize:18 }}>{weatherEmoji(homeWeather.code)}</div>
         <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8', lineHeight:1 }}>{homeWeather.temp}°</div>
-        <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center', lineHeight:1.2, maxWidth:60 }}>{homeWeather.city}</div>
+        <div style={{ fontSize:9, color:'#8a94b0', textAlign:'center', lineHeight:1.2, maxWidth:60 }}>{homeWeather.city}</div>
         {likelihood !== null && (
-          <div style={{ fontSize:8, color: likelihood > 70 ? '#4ade80' : likelihood > 40 ? '#f59e0b' : '#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:1 }}>{likelihood}% on</div>
+          <div style={{ fontSize:10, color: likelihood > 70 ? '#4ade80' : likelihood > 40 ? '#f59e0b' : '#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:1 }}>{likelihood}% on</div>
         )}
       </div>
     ) : (
       <div key="noloc" onClick={onSetLocation} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2, cursor:'pointer' }}>
         <div style={{ fontSize:16 }}>🌤️</div>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:7, color:'#6b7a96', fontWeight:700, textAlign:'center', lineHeight:1.3 }}>Add location for weather</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#8a94b0', fontWeight:700, textAlign:'center', lineHeight:1.3 }}>Add location for weather</div>
       </div>
     ),
 
@@ -8750,27 +8728,27 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P='#
       <div key="aw" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
         <div style={{ fontSize:18 }}>{weatherEmoji(awayWeather.code)}</div>
         <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8', lineHeight:1 }}>{awayWeather.temp}°</div>
-        <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center', lineHeight:1.2, maxWidth:60 }}>{awayWeather.city}</div>
-        <div style={{ fontSize:7, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Away</div>
+        <div style={{ fontSize:9, color:'#8a94b0', textAlign:'center', lineHeight:1.2, maxWidth:60 }}>{awayWeather.city}</div>
+        <div style={{ fontSize:9, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Away</div>
       </div>
     ) : null,
 
     <div key="evt" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
       <div style={{ fontSize:14 }}>{nextEvent && nextEvent.type === 'Practice' ? '📋' : '🏆'}</div>
       <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, lineHeight:1, textAlign:'center' }}>{getCountdown() || '—'}</div>
-      <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center', lineHeight:1.3, maxWidth:64 }}>{nextEvent ? (nextEvent.opponent || nextEvent.type) : 'No events'}</div>
+      <div style={{ fontSize:9, color:'#8a94b0', textAlign:'center', lineHeight:1.3, maxWidth:64 }}>{nextEvent ? (nextEvent.opponent || nextEvent.type) : 'No events'}</div>
     </div>,
 
     <div key="dt" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
       <div style={{ fontSize:14 }}>📅</div>
       <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:'#f2f4f8', lineHeight:1 }}>{now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
-      <div style={{ fontSize:7, color:'#6b7a96', textAlign:'center' }}>{now.toLocaleDateString([],{month:'short',day:'numeric'})}</div>
+      <div style={{ fontSize:9, color:'#8a94b0', textAlign:'center' }}>{now.toLocaleDateString([],{month:'short',day:'numeric'})}</div>
     </div>,
 
     <div key="tip" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2 }}>
       <div style={{ fontSize:14 }}>💡</div>
-      <div style={{ fontSize:8, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>Coach Tip</div>
-      <div style={{ fontSize:8, color:'#dde1f0', textAlign:'center', lineHeight:1.4, maxWidth:72 }}>{currentTip}</div>
+      <div style={{ fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>Coach Tip</div>
+      <div style={{ fontSize:10, color:'#dde1f0', textAlign:'center', lineHeight:1.4, maxWidth:72 }}>{currentTip}</div>
     </div>,
   ].filter(Boolean)
 
