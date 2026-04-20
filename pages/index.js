@@ -4956,7 +4956,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
       {/* Ticker */}
       <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
         <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:8, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
-        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 28s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — Prepare. Lead. Inspire. · Generate schemes · Scout opponents · Build your playbook`}</div></div>
+        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 90s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ — Prepare. Lead. Inspire. · Generate schemes · Scout opponents · Build your playbook`}</div></div>
       </div>
 
       {/* Next Event Card — only shown when there's an upcoming event */}
@@ -6147,7 +6147,7 @@ function NewsTicker({ sport, P }) {
   return (
     <div style={{ flex:1, overflow:'hidden', margin:'0 6px' }}>
       <div style={{ overflow:'hidden', whiteSpace:'nowrap' }}>
-        <div style={{ display:'inline-block', animation:'ticker 60s linear infinite', fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
+        <div style={{ display:'inline-block', animation:'ticker 120s linear infinite', fontSize:9, color:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
           {headlines.slice(0,5).join('   ·   ')}   ·   {headlines.slice(0,5).join('   ·   ')}
         </div>
       </div>
