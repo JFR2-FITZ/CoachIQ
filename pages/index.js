@@ -787,29 +787,36 @@ function PBtn({ onClick, disabled, children, color='#C0392B', style={} }) {
   )
 }
 function Sel({ label, value, onChange, options }) {
-  const [open, setOpen] = useState(false)
   return (
     <div style={{ position:'relative', background:'#161922', border:'1px solid #1e2330', borderRadius:4 }}>
       <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#6b7a96', fontWeight:700, display:'block', paddingTop:6, paddingLeft:11, paddingRight:11 }}>{label}</label>
-      <div
-        onClick={()=>setOpen(o=>!o)}
-        style={{ padding:'10px 30px 10px 11px', color:'#f2f4f8', fontSize:16, cursor:'pointer', position:'relative', userSelect:'none', WebkitUserSelect:'none', background:'#161922', minHeight:44, display:'flex', alignItems:'center', WebkitTapHighlightColor:'transparent' }}>
-        <span style={{ fontSize:13 }}>{value}</span>
+      <div style={{ position:'relative' }}>
+        <select
+          value={value}
+          onChange={e=>onChange(e.target.value)}
+          style={{
+            width:'100%',
+            padding:'10px 30px 10px 11px',
+            color:'#f2f4f8',
+            fontSize:13,
+            background:'#161922',
+            border:'none',
+            borderRadius:4,
+            outline:'none',
+            appearance:'none',
+            WebkitAppearance:'none',
+            MozAppearance:'none',
+            cursor:'pointer',
+            minHeight:44,
+            fontFamily:"'DM Sans',sans-serif",
+            WebkitTapHighlightColor:'transparent',
+          }}>
+          {options.map(o => (
+            <option key={o} value={o} style={{ background:'#161922', color:'#f2f4f8' }}>{o}</option>
+          ))}
+        </select>
         <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:9, color:'#6b7a96', pointerEvents:'none' }}>▾</span>
       </div>
-      {open && (
-        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:200, maxHeight:240, overflowY:'auto', WebkitOverflowScrolling:'touch', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
-          {options.map(o => (
-            <div key={o}
-              onTouchEnd={(e)=>{ e.preventDefault(); onChange(o); setOpen(false) }}
-              onMouseDown={()=>{ onChange(o); setOpen(false) }}
-              style={{ padding:'13px 11px', color:o===value?'#f2f4f8':'#9aa0b0', background:o===value?'#1e2330':'#161922', fontSize:14, cursor:'pointer', borderBottom:'1px solid #0e1220', minHeight:44, display:'flex', alignItems:'center', WebkitTapHighlightColor:'transparent' }}>
-              {o}
-            </div>
-          ))}
-        </div>
-      )}
-      {open && <div style={{ position:'fixed', inset:0, zIndex:199 }} onTouchStart={()=>setOpen(false)} onClick={()=>setOpen(false)}/>}
     </div>
   )
 }
@@ -6198,6 +6205,16 @@ export default function CoachIQ() {
           select option {
             background-color: #161922 !important;
             color: #f2f4f8 !important;
+          }
+          select:focus {
+            outline: none;
+            box-shadow: none;
+          }
+          /* Sel component native select — ensure readable on all platforms */
+          select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
           }
           /* Desktop: reduce font size (mobile keeps 16px to prevent zoom) */
           @media (min-width: 768px) {
