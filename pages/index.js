@@ -628,6 +628,176 @@ const FEATURE_GUIDE = [
 
 
 
+// ─── DEMO TEAMS (guest/just-exploring mode only — session only, never persisted) ──
+const DEMO_TEAMS = {
+  Football: {
+    id: 'demo_football', name: 'Tolland Eagles', season: 'Fall 2025', mascot: 'eagles',
+    teamFont: 'barlow', hometown: 'Tolland, CT', primary: '#C0392B', secondary: '#002868',
+    accent1: '#f59e0b', accent2: '#1565C0', sport: 'Football', _isDemo: true,
+    players: [
+      {id:'dp1',name:'Marcus Williams',number:'12',position:'QB',active:true},
+      {id:'dp2',name:'Jaylen Carter',number:'22',position:'RB',active:true},
+      {id:'dp3',name:'Devon Brooks',number:'84',position:'WR',active:true},
+      {id:'dp4',name:'Tyler Mason',number:'81',position:'WR',active:true},
+      {id:'dp5',name:'Chris Hall',number:'88',position:'TE',active:true},
+      {id:'dp6',name:'Jordan Lee',number:'74',position:'OL',active:true},
+      {id:'dp7',name:'Sam Rivera',number:'75',position:'OL',active:true},
+      {id:'dp8',name:'Mike Torres',number:'52',position:'DL',active:true},
+      {id:'dp9',name:'Brandon King',number:'55',position:'LB',active:true},
+      {id:'dp10',name:'Caleb Scott',number:'21',position:'CB',active:true},
+      {id:'dp11',name:'Eli Parker',number:'32',position:'S',active:true},
+      {id:'dp12',name:'Noah James',number:'44',position:'K',active:true},
+    ],
+    gameHistory: [
+      {id:'dg1',opponent:'Ellington RoadRunners',date:'2025-09-06',us:21,them:14},
+      {id:'dg2',opponent:'Coventry Patriots',date:'2025-09-13',us:7,them:14},
+      {id:'dg3',opponent:'Stafford Bulldogs',date:'2025-09-20',us:28,them:6},
+      {id:'dg4',opponent:'Mansfield Chiefs',date:'2025-09-27',us:14,them:10},
+      {id:'dg5',opponent:'Somers Spartans',date:'2025-10-04',us:35,them:21},
+    ],
+    schedule: [
+      {id:'ds1',type:'Game',opponent:'Bolton Bears',date:'2025-10-18',time:'10:00',homeAway:'Home',rsvp:'yes'},
+      {id:'ds2',type:'Practice',opponent:'Practice',date:'2025-10-15',time:'17:00',homeAway:'Home',rsvp:'yes'},
+    ],
+    practicePlans: [{id:1728000000000,title:'Red Zone Offense',focus:'Red Zone',duration:60,segments:[{label:'Warm-up',duration:10},{label:'Goal line runs',duration:20},{label:'Pass routes in the red zone',duration:20},{label:'Cool-down',duration:10}]}],
+  },
+  Basketball: {
+    id: 'demo_basketball', name: 'Tolland Huskies', season: 'Winter 2025', mascot: 'wolves',
+    teamFont: 'barlow', hometown: 'Tolland, CT', primary: '#1565C0', secondary: '#C0392B',
+    accent1: '#f59e0b', accent2: '#1e2330', sport: 'Basketball', _isDemo: true,
+    players: [
+      {id:'dbk1',name:'Isaiah Grant',number:'3',position:'PG',active:true},
+      {id:'dbk2',name:'Marcus Webb',number:'5',position:'SG',active:true},
+      {id:'dbk3',name:'Darius Cole',number:'23',position:'SF',active:true},
+      {id:'dbk4',name:'Tyler Nash',number:'32',position:'PF',active:true},
+      {id:'dbk5',name:'Jordan Pierce',number:'44',position:'C',active:true},
+      {id:'dbk6',name:'Chris Owens',number:'11',position:'G',active:true},
+      {id:'dbk7',name:'Kevin Hall',number:'15',position:'F',active:true},
+      {id:'dbk8',name:'Brandon Young',number:'20',position:'G',active:true},
+      {id:'dbk9',name:'Elijah Moore',number:'33',position:'F',active:true},
+      {id:'dbk10',name:'Samuel Fox',number:'2',position:'G',active:true},
+    ],
+    gameHistory: [
+      {id:'dbkg1',opponent:'Coventry Cardinals',date:'2025-12-06',us:54,them:42},
+      {id:'dbkg2',opponent:'Stafford Bulldogs',date:'2025-12-13',us:48,them:51},
+      {id:'dbkg3',opponent:'Ellington Eagles',date:'2025-12-20',us:61,them:44},
+      {id:'dbkg4',opponent:'Mansfield Warriors',date:'2026-01-04',us:55,them:49},
+      {id:'dbkg5',opponent:'Bolton Bears',date:'2026-01-11',us:70,them:58},
+    ],
+    schedule: [
+      {id:'dbks1',type:'Game',opponent:'Somers Storm',date:'2026-01-25',time:'14:00',homeAway:'Away',rsvp:'yes'},
+      {id:'dbks2',type:'Practice',opponent:'Practice',date:'2026-01-22',time:'16:30',homeAway:'Home',rsvp:'yes'},
+    ],
+    practicePlans: [{id:1728000000001,title:'Motion Offense Sets',focus:'Offense',duration:75,segments:[{label:'Warm-up',duration:10},{label:'Passing drills',duration:20},{label:'5-out motion sets',duration:30},{label:'Scrimmage',duration:15}]}],
+  },
+  Baseball: {
+    id: 'demo_baseball', name: 'Tolland Bears', season: 'Spring 2026', mascot: 'bears',
+    teamFont: 'barlow', hometown: 'Tolland, CT', primary: '#1B5E20', secondary: '#C0392B',
+    accent1: '#f59e0b', accent2: '#1e2330', sport: 'Baseball', _isDemo: true,
+    players: [
+      {id:'dbb1',name:'Ryan Cooper',number:'10',position:'P',active:true},
+      {id:'dbb2',name:'Jake Morris',number:'2',position:'C',active:true},
+      {id:'dbb3',name:'Tyler Banks',number:'3',position:'1B',active:true},
+      {id:'dbb4',name:'Marcus Lee',number:'4',position:'2B',active:true},
+      {id:'dbb5',name:'Devon Cruz',number:'5',position:'3B',active:true},
+      {id:'dbb6',name:'Chase Flynn',number:'6',position:'SS',active:true},
+      {id:'dbb7',name:'Evan Ross',number:'7',position:'LF',active:true},
+      {id:'dbb8',name:'Caleb West',number:'8',position:'CF',active:true},
+      {id:'dbb9',name:'Noah Bell',number:'9',position:'RF',active:true},
+      {id:'dbb10',name:'Aiden Clark',number:'18',position:'P',active:true},
+      {id:'dbb11',name:'Mason Gray',number:'21',position:'UT',active:true},
+      {id:'dbb12',name:'Logan Price',number:'25',position:'UT',active:true},
+      {id:'dbb13',name:'Owen Reed',number:'33',position:'P',active:true},
+      {id:'dbb14',name:'Finn Walsh',number:'14',position:'C',active:true},
+    ],
+    gameHistory: [
+      {id:'dbbg1',opponent:'Coventry Cardinals',date:'2026-04-05',us:5,them:3},
+      {id:'dbbg2',opponent:'Stafford Warriors',date:'2026-04-09',us:2,them:4},
+      {id:'dbbg3',opponent:'Ellington Eagles',date:'2026-04-12',us:8,them:1},
+      {id:'dbbg4',opponent:'Mansfield Chiefs',date:'2026-04-16',us:6,them:5},
+      {id:'dbbg5',opponent:'Bolton Patriots',date:'2026-04-19',us:4,them:2},
+      {id:'dbbg6',opponent:'Somers Falcons',date:'2026-04-23',us:1,them:3},
+      {id:'dbbg7',opponent:'Andover Jaguars',date:'2026-04-26',us:9,them:0},
+      {id:'dbbg8',opponent:'Union Warriors',date:'2026-04-30',us:3,them:4},
+    ],
+    schedule: [
+      {id:'dbbs1',type:'Game',opponent:'Hebron Hawks',date:'2026-05-03',time:'10:00',homeAway:'Home',rsvp:'yes'},
+      {id:'dbbs2',type:'Practice',opponent:'Practice',date:'2026-05-01',time:'15:30',homeAway:'Home',rsvp:'yes'},
+    ],
+    practicePlans: [],
+  },
+  Soccer: {
+    id: 'demo_soccer', name: 'Tolland FC', season: 'Fall 2025', mascot: 'lions',
+    teamFont: 'barlow', hometown: 'Tolland, CT', primary: '#0D6E3D', secondary: '#f5c518',
+    accent1: '#f2f4f8', accent2: '#1e2330', sport: 'Soccer', _isDemo: true,
+    players: [
+      {id:'dsc1',name:'Mateo Silva',number:'1',position:'GK',active:true},
+      {id:'dsc2',name:'Lucas Perez',number:'2',position:'RB',active:true},
+      {id:'dsc3',name:'Ethan Cruz',number:'5',position:'CB',active:true},
+      {id:'dsc4',name:'Noah Reyes',number:'6',position:'CB',active:true},
+      {id:'dsc5',name:'Liam Rojas',number:'3',position:'LB',active:true},
+      {id:'dsc6',name:'Carlos Diaz',number:'8',position:'CM',active:true},
+      {id:'dsc7',name:'Diego Morales',number:'10',position:'CM',active:true},
+      {id:'dsc8',name:'Adrian Torres',number:'7',position:'RM',active:true},
+      {id:'dsc9',name:'Nico Vargas',number:'11',position:'LM',active:true},
+      {id:'dsc10',name:'Ivan Ramos',number:'9',position:'ST',active:true},
+      {id:'dsc11',name:'Sergio Flores',number:'17',position:'ST',active:true},
+      {id:'dsc12',name:'Pablo Mendez',number:'4',position:'DEF',active:true},
+      {id:'dsc13',name:'Miguel Santos',number:'14',position:'MID',active:true},
+      {id:'dsc14',name:'Rafael Lima',number:'16',position:'MID',active:true},
+      {id:'dsc15',name:'Andre Costa',number:'20',position:'FWD',active:true},
+      {id:'dsc16',name:'Thiago Alves',number:'22',position:'GK',active:true},
+    ],
+    gameHistory: [
+      {id:'dscg1',opponent:'Coventry FC',date:'2025-09-07',us:3,them:1},
+      {id:'dscg2',opponent:'Stafford United',date:'2025-09-14',us:2,them:0},
+      {id:'dscg3',opponent:'Ellington City',date:'2025-09-21',us:4,them:2},
+      {id:'dscg4',opponent:'Mansfield Athletic',date:'2025-09-28',us:1,them:1},
+      {id:'dscg5',opponent:'Bolton Rovers',date:'2025-10-05',us:3,them:0},
+      {id:'dscg6',opponent:'Somers United',date:'2025-10-12',us:2,them:1},
+    ],
+    schedule: [
+      {id:'dscs1',type:'Game',opponent:'Andover City',date:'2025-10-19',time:'11:00',homeAway:'Away',rsvp:'yes'},
+      {id:'dscs2',type:'Practice',opponent:'Practice',date:'2025-10-17',time:'16:00',homeAway:'Home',rsvp:'yes'},
+    ],
+    practicePlans: [],
+  },
+  Softball: {
+    id: 'demo_softball', name: 'Tolland Storm', season: 'Spring 2026', mascot: 'lightning',
+    teamFont: 'barlow', hometown: 'Tolland, CT', primary: '#7B1FA2', secondary: '#f5c518',
+    accent1: '#f2f4f8', accent2: '#1e2330', sport: 'Softball', _isDemo: true,
+    players: [
+      {id:'dsb1',name:'Emma Davis',number:'1',position:'P',active:true},
+      {id:'dsb2',name:'Olivia Chen',number:'2',position:'C',active:true},
+      {id:'dsb3',name:'Ava Johnson',number:'3',position:'1B',active:true},
+      {id:'dsb4',name:'Mia Williams',number:'4',position:'2B',active:true},
+      {id:'dsb5',name:'Sophia Brown',number:'5',position:'3B',active:true},
+      {id:'dsb6',name:'Isabella Jones',number:'6',position:'SS',active:true},
+      {id:'dsb7',name:'Charlotte Garcia',number:'7',position:'LF',active:true},
+      {id:'dsb8',name:'Amelia Miller',number:'8',position:'CF',active:true},
+      {id:'dsb9',name:'Harper Wilson',number:'9',position:'RF',active:true},
+      {id:'dsb10',name:'Evelyn Moore',number:'10',position:'P',active:true},
+      {id:'dsb11',name:'Abigail Taylor',number:'11',position:'UT',active:true},
+      {id:'dsb12',name:'Emily Anderson',number:'12',position:'UT',active:true},
+      {id:'dsb13',name:'Elizabeth Thomas',number:'13',position:'C',active:true},
+      {id:'dsb14',name:'Sofia Jackson',number:'14',position:'IF',active:true},
+    ],
+    gameHistory: [
+      {id:'dsbg1',opponent:'Coventry Cardinals',date:'2026-04-04',us:6,them:2},
+      {id:'dsbg2',opponent:'Stafford Thunder',date:'2026-04-08',us:4,them:1},
+      {id:'dsbg3',opponent:'Ellington Lightning',date:'2026-04-11',us:3,them:5},
+      {id:'dsbg4',opponent:'Mansfield Flames',date:'2026-04-15',us:7,them:3},
+      {id:'dsbg5',opponent:'Bolton Blaze',date:'2026-04-18',us:5,them:2},
+      {id:'dsbg6',opponent:'Somers Surge',date:'2026-04-22',us:2,them:4},
+    ],
+    schedule: [
+      {id:'dsbs1',type:'Game',opponent:'Hebron Hawks',date:'2026-04-25',time:'10:00',homeAway:'Home',rsvp:'yes'},
+      {id:'dsbs2',type:'Practice',opponent:'Practice',date:'2026-04-23',time:'15:00',homeAway:'Home',rsvp:'yes'},
+    ],
+    practicePlans: [],
+  },
+}
+
 // ─── SPORT COLORS ────────────────────────────────────────────────────────────
 const SPORT_COLORS = {
   Football:   { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', label: 'Football' },
@@ -2546,7 +2716,7 @@ function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
     </svg>
   )
 }
-function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ }) {
+function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ, guestMode=false, guestSchemeCount=0, setGuestSchemeCount }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
   const [offFields, setOffFields] = useState(initFields)
@@ -2572,6 +2742,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
       if (!data.plays || !data.plays.length) throw new Error('No plays returned — please try again.')
       setOffResult(data)
       setGenHistory(prev => ({ ...prev, [sport]: [{ ...data, _sport:sport, _ts:Date.now() }, ...(prev[sport]||[])].slice(0,20) }))
+      if (guestMode && setGuestSchemeCount) setGuestSchemeCount(n => n + 1)
     } catch(e) {
       const msg = e.message || 'Generation failed'
       if (msg.includes('timed out') || msg.includes('AbortError') || msg.includes('timeout')) {
@@ -2614,6 +2785,12 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
             <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:10 }}>
               {(() => { const skillVal = offFields['skill'] || offFields['teamSkill'] || (cfg.fields.find(x=>x.id==='skill'||x.id==='teamSkill')?.opts[0]||''); const isBeginner = skillVal.includes('First Year') || skillVal.includes('Beginner') || skillVal.includes('Recreational'); return cfg.fields.filter(f => !(f.id==='oppTendency' && isBeginner)).map(f => <Sel key={f.id} label={f.label} value={offFields[f.id]||f.opts[0]} onChange={v=>setOffFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />) })()} 
             </div>
+            {guestMode && guestSchemeCount === 1 && (
+              <div style={{ padding:'8px 12px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:6, marginBottom:8 }}>
+                <div style={{ fontSize:10, color:'#f59e0b', fontWeight:700, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>1 GENERATION REMAINING</div>
+                <div style={{ fontSize:10, color:'#6b7a96', marginTop:2 }}>Create a free account to generate unlimited schemes.</div>
+              </div>
+            )}
             <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
             {offLoading && (<div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your scheme...</div><div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5 }}>This takes 20–40 seconds. Please keep this screen open.</div></div>)}
             {offError && (
@@ -2659,7 +2836,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
       </Card>
 
       {/* DEFENSIVE GENERATOR */}
-      <DefenseGenCollapsible sport={sport} P={P} S={'#6b9fff'} al={al} callAI={callAI} parseJSON={parseJSON} defaultOpen={true} playbook={playbook} setPlaybook={setPlaybook} />
+      <DefenseGenCollapsible sport={sport} P={P} S={'#6b9fff'} al={al} callAI={callAI} parseJSON={parseJSON} defaultOpen={true} playbook={playbook} setPlaybook={setPlaybook} guestMode={guestMode} setGuestSchemeCount={setGuestSchemeCount} />
 
       <PlayNameBuilder P={P} S={S} al={al} sport={sport} />
     </div>
@@ -2713,7 +2890,7 @@ function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSO
 }
 
 // ─── DEFENSIVE GEN COLLAPSIBLE ────────────────────────────────────────────────
-function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook }) {
+function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook, guestMode=false, setGuestSchemeCount }) {
   const [open, setOpen] = useState(defaultOpen)
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball'
   const fbFields = [
@@ -2760,6 +2937,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
       const data = parseJSON(raw)
       if (!data.formations || !data.formations.length) throw new Error('No formations returned — please try again.')
       setResult(data)
+      if (guestMode && setGuestSchemeCount) setGuestSchemeCount(n => n + 1)
     } catch(e) {
       const msg = e.message || 'Generation failed'
       if (msg.includes('timed out') || msg.includes('timeout')) {
@@ -4323,7 +4501,7 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
 }
 
 
-function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage }) {
+function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage, guestMode=false, guestGauntletDone=false, setGuestGauntletDone, onGuestSignUp }) {
   const [activeMode, setActiveMode] = useState(null)
 
   const categories = [
@@ -4351,10 +4529,18 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
     },
   ]
 
-  if (activeMode === 'gauntlet') return (
-    <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
-    <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} /> </>
-  )
+  if (activeMode === 'gauntlet') {
+    if (guestMode && guestGauntletDone) return (
+      <>
+        <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+        <GuestGate feature="Coaching Gauntlet" onSignUp={onGuestSignUp} />
+      </>
+    )
+    return (
+      <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
+      <GauntletPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={(n)=>{ setGauntlets(n); if(guestMode && setGuestGauntletDone) setGuestGauntletDone(true) }} callAI={callAI} parseJSON={parseJSON} /> </>
+    )
+  }
   if (activeMode === 'playnames') return (
     <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#6b7a96', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
     <PlayNameBuilder P={P} S={S} al={al} sport={sport} /> </>
@@ -5052,6 +5238,9 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
             </div>
             <button onClick={handleStart} disabled={!coachName.trim()} style={{ width:'100%', background:coachName.trim()?accent:'#3d4559', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:coachName.trim()?'pointer':'not-allowed', textTransform:'uppercase', marginTop:6 }}>Next →</button>
             <div style={{ textAlign:'center' }}><span style={{ fontSize:11, color:'#3d4559' }}>You can create and manage teams from the home screen</span></div>
+            <div style={{ textAlign:'center', paddingTop:4 }}>
+              <span onClick={()=>onLaunch({ guest:true, sport:'Football' })} style={{ fontSize:11, color:'#3d4559', cursor:'pointer', letterSpacing:'0.5px' }}>Just exploring → limited access</span>
+            </div>
           </div>
         ) : (
           <div>
@@ -5068,7 +5257,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
 
 
 // ─── C·IQ HUB PAGE ────────────────────────────────────────────────────────────
-function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation, setTeams }) {
+function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, callAI, homeLocation, setTeams, guestMode=false, guestDemoTeam, setGuestDemoTeam, onGuestSignUp }) {
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const gameHistory = currentTeam?.gameHistory || []
   const practicePlans = currentTeam?.practicePlans || []
@@ -5866,6 +6055,26 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
         ))}
       </div>
 
+      {/* GUEST MODE — Demo Team + Sign Up */}
+      {guestMode && (
+        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:0 }}>
+          {!guestDemoTeam ? (
+            <div style={{ background:'#0f1219', border:'1px solid rgba(192,57,43,0.3)', borderRadius:10, padding:'14px 16px' }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:'#C0392B', fontWeight:700, textTransform:'uppercase', marginBottom:6 }}>Try with a Demo Team</div>
+              <div style={{ fontSize:11, color:'#6b7a96', lineHeight:1.5, marginBottom:10 }}>Load a pre-built {sport} team to explore the Hub with real stats, schedule, and roster — no account needed.</div>
+              <button onClick={()=>setGuestDemoTeam(DEMO_TEAMS[sport]||DEMO_TEAMS.Football)} style={{ width:'100%', padding:'11px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>LOAD {sport.toUpperCase()} DEMO TEAM</button>
+            </div>
+          ) : (
+            <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:8, padding:'10px 14px', display:'flex', alignItems:'center', gap:10 }}>
+              <div style={{ flex:1, fontSize:10, color:'#4ade80', fontWeight:700 }}>Demo team loaded: {guestDemoTeam.name}</div>
+              <button onClick={()=>setGuestDemoTeam(null)} style={{ fontSize:9, color:'#6b7a96', background:'transparent', border:'none', cursor:'pointer', padding:'4px 6px' }}>✕ Remove</button>
+            </div>
+          )}
+          <button onClick={onGuestSignUp} style={{ width:'100%', padding:'13px', background:'#C0392B', border:'none', borderRadius:8, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Coach Account →</button>
+          <div style={{ textAlign:'center', fontSize:10, color:'#3d4559' }}>No credit card required · Unlock teams, roster, analytics & more</div>
+        </div>
+      )}
+
       {/* SETTINGS + HELP */}
       <div style={{ display:'flex', gap:8 }}>
         <div onClick={()=>setPage('more')} style={{ flex:1, background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
@@ -5882,6 +6091,34 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
   )
 }
 
+
+// ─── GUEST MODE COMPONENTS ────────────────────────────────────────────────────
+function GuestBanner({ onSignUp }) {
+  return (
+    <div style={{ background:'rgba(192,57,43,0.1)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:8, padding:'10px 14px', marginBottom:12, display:'flex', alignItems:'center', gap:10 }}>
+      <div style={{ flex:1 }}>
+        <div style={{ fontSize:10, fontWeight:700, color:'#C0392B', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, marginBottom:2 }}>GUEST MODE — LIMITED ACCESS</div>
+        <div style={{ fontSize:11, color:'#6b7a96' }}>Create a free account to unlock teams, roster, scheduling, analytics and more.</div>
+      </div>
+      <button onClick={onSignUp} style={{ flexShrink:0, padding:'8px 12px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>FREE ACCOUNT →</button>
+    </div>
+  )
+}
+
+function GuestGate({ feature, onSignUp, children }) {
+  // Wraps a feature — if guest hits a locked section, shows upgrade prompt instead
+  return (
+    <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:10, padding:'28px 20px', textAlign:'center' }}>
+      <div style={{ fontSize:32, marginBottom:12 }}>🔒</div>
+      <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, color:'#f2f4f8', marginBottom:6, letterSpacing:1 }}>{feature} — Coaches Only</div>
+      <div style={{ fontSize:12, color:'#6b7a96', lineHeight:1.6, marginBottom:16, maxWidth:280, margin:'0 auto 16px' }}>
+        This feature is available to CoachIQ members. Create your free account to unlock teams, roster, scheduling, live scoring, analytics, and more.
+      </div>
+      <button onClick={onSignUp} style={{ width:'100%', maxWidth:280, padding:'13px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Account →</button>
+      <div style={{ marginTop:10, fontSize:10, color:'#3d4559' }}>No credit card required</div>
+    </div>
+  )
+}
 
 // ─── NEWS TICKER ──────────────────────────────────────────────────────────────
 function NewsTicker({ sport, P }) {
@@ -5947,6 +6184,11 @@ export default function CoachIQ() {
   // All hooks must be declared before any early returns (React Rules of Hooks)
   const [mounted, setMounted] = useState(false)
   const [launched, setLaunched] = useState(false)
+  const [guestMode, setGuestMode] = useState(false)
+  const [guestSport, setGuestSport] = useState('Football')
+  const [guestSchemeCount, setGuestSchemeCount] = useState(0)
+  const [guestGauntletDone, setGuestGauntletDone] = useState(false)
+  const [guestDemoTeam, setGuestDemoTeam] = useState(null) // session-only demo team
   const [tutorialState, setTutorialState] = useState('pending') // pending|tour|guide|done
   const [homeLocation, setHomeLocation] = useState('')
   const [showSplash, setShowSplash] = useState(() => {
@@ -6082,18 +6324,27 @@ export default function CoachIQ() {
       setShowSplash(false); if (skipToApp) setLaunched(true) 
     }} alreadyAuthed={launched} brand={brand} />
   )
-  if (!launched) return (
-    <Onboarding onLaunch={(c) => { setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true) }} onBack={()=>setShowSplash(true)} brand={brand} />
+  if (!launched && !guestMode) return (
+    <Onboarding onLaunch={(c) => {
+      if (c.guest) {
+        setGuestMode(true)
+        setGuestSport(c.sport || 'Football')
+        setSport(c.sport || 'Football')
+        setLaunched(true)
+      } else {
+        setCfg(c); if(c.sport) setSport(c.sport); setLaunched(true)
+      }
+    }} onBack={()=>setShowSplash(true)} brand={brand} />
   )
 
-  // First-time tutorial flow
-  if (tutorialState === 'pending') return (
+  // First-time tutorial flow — skip for guest mode
+  if (!guestMode && tutorialState === 'pending') return (
     <FirstTimeWelcome onChoice={(c)=>setTutorialState(c==='skip'?'done':c)} P={P} al={al} />
   )
-  if (tutorialState === 'tour') return (
+  if (!guestMode && tutorialState === 'tour') return (
     <QuickTourModal onDone={()=>setTutorialState('done')} P={P} al={al} setPage={setPage} />
   )
-  if (tutorialState === 'guide') return (
+  if (!guestMode && tutorialState === 'guide') return (
     <FeatureGuide P={P} al={al} onClose={()=>setTutorialState('done')} />
   )
 
@@ -6260,14 +6511,28 @@ export default function CoachIQ() {
 
         {/* PAGE CONTENT */}
         <div style={{ flex:1, maxWidth:'min(640px, 100%)', margin:'0 auto', width:'100%', padding:'14px 14px 90px', display:'flex', flexDirection:'column', gap:14, background:'#07090d', overflowX:'hidden', boxSizing:'border-box' }}>
-          {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={teams} activeTeam={activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} callAI={callAI} homeLocation={homeLocation} setTeams={setTeams} />}
+          {/* Guest banner — shown on every page in guest mode */}
+          {guestMode && <GuestBanner onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
+          {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={guestMode&&guestDemoTeam?{...teams,[sport]:[guestDemoTeam]}:teams} activeTeam={guestMode&&guestDemoTeam?{...activeTeam,[sport]:guestDemoTeam}:activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} callAI={callAI} homeLocation={homeLocation} setTeams={setTeams} guestMode={guestMode} guestDemoTeam={guestDemoTeam} setGuestDemoTeam={setGuestDemoTeam} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
           {page==='home' && <HomePage P={P} S={S} al={al} dk={dk} lastName={lastName} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} brand={brand} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} setSport={setSport} setCfg={setCfg} homeLocation={homeLocation} setPage={setPage} />}
-          {page==='schemes' && <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} />}
-          {page==='scout' && <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />}
-          {page==='team'     && <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} setPage={setPage} />}
-          {page==='playbook' && <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />}
+          {page==='schemes' && (guestMode && guestSchemeCount >= 2
+            ? <GuestGate feature="Scheme Generator" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
+            : <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} guestMode={guestMode} guestSchemeCount={guestSchemeCount} setGuestSchemeCount={setGuestSchemeCount} />
+          )}
+          {page==='scout' && (guestMode
+            ? <GuestGate feature="Scout Report" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
+            : <ScoutPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />
+          )}
+          {page==='team' && (guestMode
+            ? <GuestGate feature="Team Management" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
+            : <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} setPage={setPage} />
+          )}
+          {page==='playbook' && (guestMode
+            ? <GuestGate feature="Playbook" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
+            : <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />
+          )}
           {page==='news'  && <NewsPage  P={P} S={S} al={al} sport={sport} callAI={callAI} />}
-          {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} />}
+          {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} guestMode={guestMode} guestGauntletDone={guestGauntletDone} setGuestGauntletDone={setGuestGauntletDone} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
           {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} activeTeam={activeTeam} setTeams={setTeams} scrollToLocation={scrollToLocation} currentTeam={currentTeam} />}
         </div>
 
