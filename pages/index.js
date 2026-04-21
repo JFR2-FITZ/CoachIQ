@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 // Update APP_VERSION with each major push.
 // STATUS: 'live' | 'beta' | 'coming_soon' | 'planned'
 // TIER: 'free' | 'founding' | 'pro' | 'league'
-const APP_VERSION = '1.5.0'
+const APP_VERSION = '1.5.1'
 const FEATURES = {
   hub:               { status:'live',        name:'C·IQ Hub',                  tier:'free'     },
   schemes_offense:   { status:'live',        name:'Offense Scheme Generator',  tier:'free'     },
@@ -7160,13 +7160,13 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
   )
 }
 
-function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport }) {
-  const plays = team ? Object.values(
-    Object.entries(team.playbook || {}).reduce((acc, [folder, arr]) => {
-      (arr||[]).forEach(p => { if (!acc[p.name]) acc[p.name] = {...p, folder} })
-      return acc
-    }, {})
-  ) : []
+function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport, playbook={} }) {
+  // Read plays from app-level playbook[sport] — this is where saved plays live
+  const sportPlaybook = playbook[sport] || {}
+  const plays = Object.entries(sportPlaybook).reduce((acc, [folder, arr]) => {
+    ;(arr||[]).forEach(p => { if (!acc.find(x=>x.name===p.name)) acc.push({...p, folder}) })
+    return acc
+  }, [])
 
   // Config state — mirrors Playmaker X options
   const [printType, setPrintType] = useState('wristband')
