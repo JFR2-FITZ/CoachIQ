@@ -979,10 +979,6 @@ function hexToRgba(hex, alpha) {
   const num = parseInt(h.slice(1), 16)
   return 'rgba(' + (num >> 16 & 255) + ',' + (num >> 8 & 255) + ',' + (num & 255) + ',' + alpha + ')'
 }
-  const h = safeHex(hex, '#C0392B')
-  const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16)
-  return '#'+[r,g,b].map(x=>Math.max(0,x-amt).toString(16).padStart(2,'0')).join('')
-}
 function Card({ children, style={} }) {
   return <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, overflow:'hidden', animation:'fadeIn 0.3s ease', ...style }}>{children}</div>
 }
