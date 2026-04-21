@@ -974,7 +974,11 @@ function al(hex, a) {
   const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16)
   return `rgba(${r},${g},${b},${a})`
 }
-function dk(hex, amt) {
+function hexToRgba(hex, alpha) {
+  const h = safeHex(hex, '#C0392B')
+  const num = parseInt(h.slice(1), 16)
+  return 'rgba(' + (num >> 16 & 255) + ',' + (num >> 8 & 255) + ',' + (num & 255) + ',' + alpha + ')'
+}
   const h = safeHex(hex, '#C0392B')
   const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16)
   return '#'+[r,g,b].map(x=>Math.max(0,x-amt).toString(16).padStart(2,'0')).join('')
@@ -1518,10 +1522,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
     const dur = parsed.duration || 3000
     const snap = parsed.snapPoint || 0.18
     let startTime = null
-    // Compute team color RGB components for canvas drawing
-    const cR = parseInt((P||'#C0392B').slice(1,3),16)||192
-    const cG = parseInt((P||'#C0392B').slice(3,5),16)||57
-    const cB = parseInt((P||'#C0392B').slice(5,7),16)||43
+    // Use hexToRgba utility — no manual RGB parsing needed
 
     function lerp(a, b, t) { return a + (b-a)*t }
     function getPos(player, t) {
@@ -1638,7 +1639,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
           const isLineman = ['C','G','T'].includes(player.label)
           const isBlock = player.routeType==='block' || isLineman
           const bbRole = isBBall ? getBBRole(player) : null
-          const routeColor = isLineman?'rgba(100,100,100,0.5)':isBBall?(bbRole==='ball'?'rgba(245,158,11,0.8)':bbRole==='shooter'?'rgba(74,222,128,0.8)':`rgba(${cR},${cG},${cB},0.7)`): `rgba(${cR},${cG},${cB},0.75)`
+          const routeColor = isLineman?'rgba(100,100,100,0.5)':isBBall?(bbRole==='ball'?'rgba(245,158,11,0.8)':bbRole==='shooter'?'rgba(74,222,128,0.8)':hexToRgba(P,0.7)): hexToRgba(P,0.75)
           ctx.strokeStyle=routeColor; ctx.lineWidth=isLineman?1:2; ctx.setLineDash([])
           ctx.beginPath(); ctx.moveTo(sx(path[0][0]),sy(path[0][1]))
           for (let i=1;i<path.length;i++) ctx.lineTo(sx(path[i][0]),sy(path[i][1]))
@@ -1651,7 +1652,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
           if (!isBlock && player.routeName) {
             const midIdx = Math.max(0,Math.floor(path.length/2)-1)
             const lx=sx(path[midIdx][0]), ly=sy(path[midIdx][1])-r*2
-            ctx.fillStyle=isBBall?'rgba(200,200,200,0.9)':`rgba(${cR},${cG},${cB},0.9)`
+            ctx.fillStyle=isBBall?'rgba(200,200,200,0.9)':hexToRgba(P,0.9)
             ctx.font=`bold ${Math.round(r*1.8)}px sans-serif`; ctx.textAlign='center'
             const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:)/,'').trim()
             const displayText = player.routeYards>0?(displayName?displayName+' '+player.routeYards+'yd':player.routeYards+'yd'):displayName
@@ -1693,7 +1694,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
           const isLineman=['C','G','T'].includes(player.label)
           const isBlock=player.routeType==='block'||isLineman
           const bbRole=isBBall?getBBRole(player):null
-          const routeColor=isLineman?'rgba(100,100,100,0.8)':isBBall?(bbRole==='ball'?`rgba(245,158,11,0.95)`:bbRole==='shooter'?`rgba(74,222,128,0.95)`:`rgba(${cR},${cG},${cB},0.9)`): `rgba(${cR},${cG},${cB},0.95)`
+          const routeColor=isLineman?'rgba(100,100,100,0.8)':isBBall?(bbRole==='ball'?`rgba(245,158,11,0.95)`:bbRole==='shooter'?`rgba(74,222,128,0.95)`:hexToRgba(P,0.9)): hexToRgba(P,0.95)
           ctx.strokeStyle=routeColor; ctx.lineWidth=isLineman?1.2:2; ctx.setLineDash([])
           ctx.beginPath(); ctx.moveTo(sx(path[0][0]),sy(path[0][1]))
           for (let s=0;s<segs;s++) { const sp=Math.max(0,Math.min(1,totalDraw-s)); if(sp<=0)break; ctx.lineTo(sx(lerp(path[s][0],path[s+1][0],sp)),sy(lerp(path[s][1],path[s+1][1],sp))) }
@@ -1740,7 +1741,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
             const rn2=(player.routeName||'').toLowerCase()
             const isDL=['DE','DT','NT','DL'].includes(player.label)
             const isBlitz2=rn2.includes('blitz')||rn2.includes('rush')
-            ctx.fillStyle=isBlitz2?'rgba(220,80,0,0.9)':`rgba(${cR},${cG},${cB},0.9)`; ctx.strokeStyle='white'; ctx.lineWidth=1.5
+            ctx.fillStyle=isBlitz2?'rgba(220,80,0,0.9)':hexToRgba(P,0.9); ctx.strokeStyle='white'; ctx.lineWidth=1.5
             if (isDL) { const s=r*0.92; ctx.fillRect(pos.x-s,pos.y-s,s*2,s*2); ctx.strokeRect(pos.x-s,pos.y-s,s*2,s*2) }
             else { ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fill(); ctx.stroke() }
             ctx.fillStyle='white'; ctx.font=`bold ${Math.round(r*0.85)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(player.label,pos.x,pos.y)
@@ -1772,7 +1773,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
   function replay() { if (animRef.current) cancelAnimationFrame(animRef.current); setProgress(0); setPlaying(true) }
 
   return (
-    <div style={{ marginTop:10, background:'#0f1219', borderRadius:10, border:`1px solid rgba(${cR},${cG},${cB},0.3)`, overflow:'hidden' }}>
+    <div style={{ marginTop:10, background:'#0f1219', borderRadius:10, border:`1px solid ${hexToRgba(P,0.3)}`, overflow:'hidden' }}>
       <div style={{ padding:'9px 13px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:8, background:'#161922' }}>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{play.name}</span>
         <span style={{ fontSize:10, color:'#8a94b0', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
@@ -1802,7 +1803,6 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
   const defPlay = { name: f.name, type: f.type, note: f.assignment, _isDefense: true }
   const ageGroup = f.ageGroup || ''
   const showDisguiseFeature = !ageGroup || (!ageGroup.includes('6-8') && !ageGroup.includes('9-10'))
-  const dR = parseInt(S.slice(1,3),16), dG = parseInt(S.slice(3,5),16), dB = parseInt(S.slice(5,7),16)
 
   async function loadSteps() {
     if (steps) return
@@ -1851,7 +1851,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
           <div style={{ fontSize:11, color:'#8a94b0', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
           <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Expand breakdown + diagram'}</div>
         </div>
-        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true);loadSteps()}} style={{ padding:'4px 9px', background:showAnim?S:`rgba(${dR},${dG},${dB},0.12)`, border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
+        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true);loadSteps()}} style={{ padding:'4px 9px', background:showAnim?S:hexToRgba(S,0.12), border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
       </div>
       {expanded && (
         <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
@@ -1864,9 +1864,9 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
             </div>
           )}
           {steps && !steps.error && (
-            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid rgba(${dR},${dG},${dB},0.2)` }}>
+            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid ${hexToRgba(S,0.2)}` }}>
               <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:S, fontWeight:700, marginBottom:10 }}>Defensive Breakdown</div>
-              {steps.keyAssignment&&<div style={{ padding:'8px 10px', background:`rgba(${dR},${dG},${dB},0.1)`, border:`1px solid rgba(${dR},${dG},${dB},0.25)`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:S, fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Key Assignment</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{steps.keyAssignment}</div></div>}
+              {steps.keyAssignment&&<div style={{ padding:'8px 10px', background:hexToRgba(S,0.1), border:`1px solid ${hexToRgba(S,0.25)}`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:S, fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Key Assignment</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{steps.keyAssignment}</div></div>}
               {steps.coverageType&&<div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, marginBottom:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#6b9fff', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Coverage Type</div><div style={{ fontSize:12, color:'#f2f4f8' }}>{steps.coverageType}</div></div>}
               {(steps.steps||[]).map((step,i) => (<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}><div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${S}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:S, flexShrink:0, marginTop:1 }}>{i+1}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div></div>))}
               {steps.keyCoachingPoints&&steps.keyCoachingPoints.length>0&&(<div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:6 }}>Key Coaching Points</div>{steps.keyCoachingPoints.map((pt,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>)}</div>)}
@@ -2487,11 +2487,7 @@ function FilmPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON }
 
 // ─── SCHEME PREVIEW (mini interactive diagrams for home card) ─────────────────
 function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
-  const diagColor = (() => {
-    if (!P || P === '#ffffff' || P === '#fff') return '#C0392B'
-    const r = parseInt(P.slice(1,3)||'C0',16), g = parseInt(P.slice(3,5)||'39',16), b = parseInt(P.slice(5,7)||'2B',16)
-    return ((r*299+g*587+b*114)/1000) > 210 ? '#C0392B' : P
-  })()
+  const diagColor = safeHex(P, '#C0392B') // safeHex already rejects near-white
   const isOff = type === 'offense'
   const col = isOff ? P : '#6b9fff'
 
