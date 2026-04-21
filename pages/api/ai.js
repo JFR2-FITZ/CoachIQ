@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
     const body = {
       model,
-      max_tokens: fast ? 1500 : 2000,
+      max_tokens: fast ? 2500 : 3000,
       messages: [{ role: 'user', content: userContent }],
     }
 
