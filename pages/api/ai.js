@@ -1,21 +1,30 @@
 // pages/api/ai.js
-// Replace your existing pages/api/ai.js with this file
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  
-  const { prompt, useWebSearch } = req.body
+
+  const { prompt, image, fast } = req.body
   if (!prompt) return res.status(400).json({ error: 'No prompt provided' })
 
   try {
+    // fast=true uses Haiku — 5-10x faster, ideal for structured JSON (schemes, defense, situational)
+    // fast=false (default) uses Sonnet — for complex reasoning (film analysis, post-game, scout)
+    const model = fast ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-5'
+
+    const userContent = image
+      ? [
+          { type: 'image', source: { type: 'base64', media_type: image.type || 'image/jpeg', data: image.data } },
+          { type: 'text', text: prompt },
+        ]
+      : prompt
+
     const body = {
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }],
+      model,
+      max_tokens: fast ? 1500 : 2000,
+      messages: [{ role: 'user', content: userContent }],
     }
 
-    // Enable web search for news-related prompts
-    if (useWebSearch || prompt.includes('VERY RECENT') || prompt.includes('last 7') || prompt.includes('last 30 days')) {
+    // Enable web search for news/recent content — only on Sonnet (Haiku doesn't need it for schemes)
+    if (!fast && (prompt.includes('VERY RECENT') || prompt.includes('last 7') || prompt.includes('last 30 days'))) {
       body.tools = [{ type: 'web_search_20250305', name: 'web_search' }]
     }
 
@@ -36,13 +45,13 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json()
-    
+
     // Extract text from all content blocks (handles tool use + text responses)
     const text = (data.content || [])
       .filter(block => block.type === 'text')
       .map(block => block.text)
       .join('\n')
-    
+
     return res.status(200).json({ result: text })
   } catch (error) {
     return res.status(500).json({ error: error.message })

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 // Update APP_VERSION with each major push.
 // STATUS: 'live' | 'beta' | 'coming_soon' | 'planned'
 // TIER: 'free' | 'founding' | 'pro' | 'league'
-const APP_VERSION = '1.5.1'
+const APP_VERSION = '1.5.2'
 const FEATURES = {
   hub:               { status:'live',        name:'C·IQ Hub',                  tier:'free'     },
   schemes_offense:   { status:'live',        name:'Offense Scheme Generator',  tier:'free'     },
@@ -872,7 +872,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Cover 2 Zone','Cover 3 Zone','Cover 4 / Quarters','Man Press Every Down','Zone Blitz Heavy','Blitzes Every Down','Soft Zone / Prevent','Tampa 2','Quarters Robber']},
     ],
     positions:['Quarterback','Running Back','Wide Receiver','Offensive Line','Linebacker','Cornerback','Safety'],
-    buildPrompt:(f)=>`You are an elite youth football coordinator. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}. ${f.defense==="Unknown / Surprise Me"||f.defense==="Multiple / Varies"?"Generate the best all-around scheme.":`Tailor to beat the ${f.defense} defense.`} Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 6 plays using types: RUN BASE, RUN PERIMETER, RUN MISDIRECTION, PASS PLAY ACTION, PASS QUICK GAME, RUN SHORT YARDAGE. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":6,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
+    buildPrompt:(f)=>{const d=f.defense==='Unknown / Surprise Me'||f.defense==='Multiple / Varies'?'Best all-around scheme.':'Beat the '+f.defense+'.';const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth football OC: 6-play package. '+st+'. '+d+' Age/skill drive complexity. Types: RUN BASE,RUN PERIMETER,RUN MISDIRECTION,PASS PLAY ACTION,PASS QUICK GAME,RUN SHORT YARDAGE. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5,6].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a football coaching AI. Create a football coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. 3RD AND 7 OWN 35 DOWN 4","phase":"OFFENSE or DEFENSE","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct, randomize which letter.`,
   },
   Basketball: {
@@ -887,7 +887,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth basketball coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: HALF COURT SET, TRANSITION, PRESS BREAK, OUT OF BOUNDS, QUICK HITTER, MOTION. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth basketball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: HALF COURT SET,TRANSITION,PRESS BREAK,OUT OF BOUNDS,QUICK HITTER. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -902,7 +902,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
-    buildPrompt:(f)=>`You are an elite youth baseball coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: OFFENSIVE APPROACH, BASERUNNING SITUATION, BUNT PLAY, HIT AND RUN, FIRST AND THIRD, STEAL SITUATION. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth baseball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: OFFENSIVE APPROACH,BASERUNNING SITUATION,BUNT PLAY,HIT AND RUN,FIRST AND THIRD. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Soccer: {
@@ -918,7 +918,7 @@ const SPORTS = {
       {id:'oppShape',  label:'Opponent Shape',     opts:['Unknown / Balanced','4-4-2 Block','5-4-1 Defensive','4-3-3 High Press','4-2-3-1','3-5-2 Wings','Long Ball Direct']},
     ],
     positions:['Goalkeeper','Center Back','Full Back','Defensive Mid','Central Mid','Attacking Mid','Winger','Striker','Wing Back'],
-    buildPrompt:(f)=>`You are an elite youth soccer coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: ATTACKING BUILDUP, SET PIECE ATTACK, CORNER KICK, FREE KICK, COUNTER ATTACK, DEFENSIVE SHAPE. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth soccer coach: 5-play package. '+st+'. Age/skill drive complexity. Types: ATTACKING BUILDUP,SET PIECE ATTACK,CORNER KICK,FREE KICK,COUNTER ATTACK. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a soccer coaching AI. Create a youth soccer coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. DOWN 1 GOAL 15 MIN LEFT ATTACKING","phase":"ATTACK or DEFENSE or SET PIECE or TRANSITION or TIMEOUT","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Softball: {
@@ -933,7 +933,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Tendency',  opts:['Unknown / Balanced','Slap Hitters Heavy','Power Lineup','Bunt Every Opportunity','Free Swingers','Patient Takes Pitches','Aggressive First Pitch','Pull Hitters Only','Spray Hitters','Speed Team Steals Often']},
     ],
     positions:['Pitcher','Catcher','First Base','Second Base','Third Base','Shortstop','Left Field','Center Field','Right Field'],
-    buildPrompt:(f)=>`You are an elite youth softball coach. Create a complete scheme package. Settings: ${Object.keys(f).map(k=>k+': '+f[k]).join(', ')}.  Age group and skill level must heavily influence complexity — beginner teams get simpler schemes. Return 5 plays using types: OFFENSIVE APPROACH, BASERUNNING SITUATION, BUNT PLAY, HIT AND RUN, FIRST AND THIRD, STEAL SITUATION. Return ONLY valid JSON no markdown: {"packageName":"name","summary":"2 sentences on package philosophy","plays":[{"number":1,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":2,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":3,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":4,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"},{"number":5,"name":"play name","type":"TYPE","note":"when/situation to use","presnap":"specific pre-snap read and decision","audible":"exact word or signal to change play","youthCue":"one sentence a young player can memorize","mistake":"most common error and one-sentence fix"}],"defenseTip":"specific tip","coachingCue":"memorable sideline phrase"}`,
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth softball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: OFFENSIVE APPROACH,BASERUNNING SITUATION,BUNT PLAY,HIT AND RUN,FIRST AND THIRD. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a softball coaching AI with knowledge of ASA/USA Softball rules. Create a coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 5TH RUNNER ON 2ND 1 OUT TIED 2-2","phase":"OFFENSE or PITCHING or DEFENSE or BASERUNNING","question":"2-3 sentence softball-specific scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
 
@@ -1519,9 +1519,9 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
     const snap = parsed.snapPoint || 0.18
     let startTime = null
     // Compute team color RGB components for canvas drawing
-    const pr = parseInt((P||'#C0392B').slice(1,3),16)||192
-    const pg = parseInt((P||'#C0392B').slice(3,5),16)||57
-    const pb = parseInt((P||'#C0392B').slice(5,7),16)||43
+    const cR = parseInt((P||'#C0392B').slice(1,3),16)||192
+    const cG = parseInt((P||'#C0392B').slice(3,5),16)||57
+    const cB = parseInt((P||'#C0392B').slice(5,7),16)||43
 
     function lerp(a, b, t) { return a + (b-a)*t }
     function getPos(player, t) {
@@ -1638,7 +1638,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
           const isLineman = ['C','G','T'].includes(player.label)
           const isBlock = player.routeType==='block' || isLineman
           const bbRole = isBBall ? getBBRole(player) : null
-          const routeColor = isLineman?'rgba(100,100,100,0.5)':isBBall?(bbRole==='ball'?'rgba(245,158,11,0.8)':bbRole==='shooter'?'rgba(74,222,128,0.8)':`rgba(${pr},${pg},${pb},0.7)`): `rgba(${pr},${pg},${pb},0.75)`
+          const routeColor = isLineman?'rgba(100,100,100,0.5)':isBBall?(bbRole==='ball'?'rgba(245,158,11,0.8)':bbRole==='shooter'?'rgba(74,222,128,0.8)':`rgba(${cR},${cG},${cB},0.7)`): `rgba(${cR},${cG},${cB},0.75)`
           ctx.strokeStyle=routeColor; ctx.lineWidth=isLineman?1:2; ctx.setLineDash([])
           ctx.beginPath(); ctx.moveTo(sx(path[0][0]),sy(path[0][1]))
           for (let i=1;i<path.length;i++) ctx.lineTo(sx(path[i][0]),sy(path[i][1]))
@@ -1651,7 +1651,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
           if (!isBlock && player.routeName) {
             const midIdx = Math.max(0,Math.floor(path.length/2)-1)
             const lx=sx(path[midIdx][0]), ly=sy(path[midIdx][1])-r*2
-            ctx.fillStyle=isBBall?'rgba(200,200,200,0.9)':`rgba(${pr},${pg},${pb},0.9)`
+            ctx.fillStyle=isBBall?'rgba(200,200,200,0.9)':`rgba(${cR},${cG},${cB},0.9)`
             ctx.font=`bold ${Math.round(r*1.8)}px sans-serif`; ctx.textAlign='center'
             const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:)/,'').trim()
             const displayText = player.routeYards>0?(displayName?displayName+' '+player.routeYards+'yd':player.routeYards+'yd'):displayName
@@ -1693,7 +1693,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
           const isLineman=['C','G','T'].includes(player.label)
           const isBlock=player.routeType==='block'||isLineman
           const bbRole=isBBall?getBBRole(player):null
-          const routeColor=isLineman?'rgba(100,100,100,0.8)':isBBall?(bbRole==='ball'?`rgba(245,158,11,0.95)`:bbRole==='shooter'?`rgba(74,222,128,0.95)`:`rgba(${pr},${pg},${pb},0.9)`): `rgba(${pr},${pg},${pb},0.95)`
+          const routeColor=isLineman?'rgba(100,100,100,0.8)':isBBall?(bbRole==='ball'?`rgba(245,158,11,0.95)`:bbRole==='shooter'?`rgba(74,222,128,0.95)`:`rgba(${cR},${cG},${cB},0.9)`): `rgba(${cR},${cG},${cB},0.95)`
           ctx.strokeStyle=routeColor; ctx.lineWidth=isLineman?1.2:2; ctx.setLineDash([])
           ctx.beginPath(); ctx.moveTo(sx(path[0][0]),sy(path[0][1]))
           for (let s=0;s<segs;s++) { const sp=Math.max(0,Math.min(1,totalDraw-s)); if(sp<=0)break; ctx.lineTo(sx(lerp(path[s][0],path[s+1][0],sp)),sy(lerp(path[s][1],path[s+1][1],sp))) }
@@ -1740,7 +1740,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
             const rn2=(player.routeName||'').toLowerCase()
             const isDL=['DE','DT','NT','DL'].includes(player.label)
             const isBlitz2=rn2.includes('blitz')||rn2.includes('rush')
-            ctx.fillStyle=isBlitz2?'rgba(220,80,0,0.9)':`rgba(${pr},${pg},${pb},0.9)`; ctx.strokeStyle='white'; ctx.lineWidth=1.5
+            ctx.fillStyle=isBlitz2?'rgba(220,80,0,0.9)':`rgba(${cR},${cG},${cB},0.9)`; ctx.strokeStyle='white'; ctx.lineWidth=1.5
             if (isDL) { const s=r*0.92; ctx.fillRect(pos.x-s,pos.y-s,s*2,s*2); ctx.strokeRect(pos.x-s,pos.y-s,s*2,s*2) }
             else { ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fill(); ctx.stroke() }
             ctx.fillStyle='white'; ctx.font=`bold ${Math.round(r*0.85)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(player.label,pos.x,pos.y)
@@ -1772,7 +1772,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
   function replay() { if (animRef.current) cancelAnimationFrame(animRef.current); setProgress(0); setPlaying(true) }
 
   return (
-    <div style={{ marginTop:10, background:'#0f1219', borderRadius:10, border:`1px solid rgba(${pr},${pg},${pb},0.3)`, overflow:'hidden' }}>
+    <div style={{ marginTop:10, background:'#0f1219', borderRadius:10, border:`1px solid rgba(${cR},${cG},${cB},0.3)`, overflow:'hidden' }}>
       <div style={{ padding:'9px 13px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:8, background:'#161922' }}>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{play.name}</span>
         <span style={{ fontSize:10, color:'#8a94b0', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
@@ -1802,7 +1802,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
   const defPlay = { name: f.name, type: f.type, note: f.assignment, _isDefense: true }
   const ageGroup = f.ageGroup || ''
   const showDisguiseFeature = !ageGroup || (!ageGroup.includes('6-8') && !ageGroup.includes('9-10'))
-  const pr = parseInt(S.slice(1,3),16), pg = parseInt(S.slice(3,5),16), pb = parseInt(S.slice(5,7),16)
+  const dR = parseInt(S.slice(1,3),16), dG = parseInt(S.slice(3,5),16), dB = parseInt(S.slice(5,7),16)
 
   async function loadSteps() {
     if (steps) return
@@ -1851,7 +1851,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
           <div style={{ fontSize:11, color:'#8a94b0', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
           <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Expand breakdown + diagram'}</div>
         </div>
-        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true);loadSteps()}} style={{ padding:'4px 9px', background:showAnim?S:`rgba(${pr},${pg},${pb},0.12)`, border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
+        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true);loadSteps()}} style={{ padding:'4px 9px', background:showAnim?S:`rgba(${dR},${dG},${dB},0.12)`, border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
       </div>
       {expanded && (
         <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
@@ -1864,9 +1864,9 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
             </div>
           )}
           {steps && !steps.error && (
-            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid rgba(${pr},${pg},${pb},0.2)` }}>
+            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid rgba(${dR},${dG},${dB},0.2)` }}>
               <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:S, fontWeight:700, marginBottom:10 }}>Defensive Breakdown</div>
-              {steps.keyAssignment&&<div style={{ padding:'8px 10px', background:`rgba(${pr},${pg},${pb},0.1)`, border:`1px solid rgba(${pr},${pg},${pb},0.25)`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:S, fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Key Assignment</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{steps.keyAssignment}</div></div>}
+              {steps.keyAssignment&&<div style={{ padding:'8px 10px', background:`rgba(${dR},${dG},${dB},0.1)`, border:`1px solid rgba(${dR},${dG},${dB},0.25)`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:S, fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Key Assignment</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{steps.keyAssignment}</div></div>}
               {steps.coverageType&&<div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, marginBottom:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#6b9fff', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Coverage Type</div><div style={{ fontSize:12, color:'#f2f4f8' }}>{steps.coverageType}</div></div>}
               {(steps.steps||[]).map((step,i) => (<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}><div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${S}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:S, flexShrink:0, marginTop:1 }}>{i+1}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div></div>))}
               {steps.keyCoachingPoints&&steps.keyCoachingPoints.length>0&&(<div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:6 }}>Key Coaching Points</div>{steps.keyCoachingPoints.map((pt,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>)}</div>)}
@@ -2779,7 +2779,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
   async function generateOffense() {
     setOffLoading(true); setOffResult(null); setOffError('')
     try {
-      const raw = await callAI(cfg.buildPrompt(offFields))
+      const raw = await callAI(cfg.buildPrompt(offFields), null, true) // fast=true: Haiku for structured JSON
       const data = parseJSON(raw)
       if (!data.plays || !data.plays.length) throw new Error('No plays returned — please try again.')
       setOffResult(data)
@@ -2799,7 +2799,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSO
   function addToPlaybook(play, folderName) {
     const sportFolders = playbook[sport] || {}
     const folder = sportFolders[folderName] || []
-    setPlaybook(pb => ({
+    setPlaybook(ppb => ({
       ...pb,
       [sport]: { ...sportFolders, [folderName]: [...folder, { ...play, _fromPackage: offResult?.packageName, _addedAt: Date.now() }] }
     }))
@@ -2975,9 +2975,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
       ? 'You are an elite youth basketball defensive coach. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive scheme name","type":"MAN or ZONE or PRESS or TRAP","assignment":"specific assignments and rotations","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important thing to take away","adjustmentTip":"halftime adjustment","coachingCue":"phrase"}'
       : 'You are an elite youth baseball manager. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive alignment name","type":"STANDARD or SHIFT or WHEEL or FIVE MAN INFIELD","assignment":"specific positioning for all fielders","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important out to get","adjustmentTip":"adjustment tip","coachingCue":"phrase"}'
     try {
-      const raw = await callAI(prompt)
-      const data = parseJSON(raw)
-      if (!data.formations || !data.formations.length) throw new Error('No formations returned — please try again.')
+      const raw = await callAI(prompt, null, true) // fast=true: Haiku for structured JSON
       setResult(data)
       if (guestMode && setGuestSchemeCount) setGuestSchemeCount(n => n + 1)
     } catch(e) {
@@ -2995,7 +2993,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
     const sportFolders = playbook[sport] || {}
     const folder = sportFolders[folderName] || []
     const play = { number: formation.number, name: formation.name, type: formation.type, note: formation.assignment, _isDefense: true, _fromPackage: result?.packageName, _addedAt: Date.now() }
-    setPlaybook(pb => ({ ...pb, [sport]: { ...sportFolders, [folderName]: [...folder, play] } }))
+    setPlaybook(ppb => ({ ...pb, [sport]: { ...sportFolders, [folderName]: [...folder, play] } }))
   }
 
   return (
@@ -3081,7 +3079,7 @@ function PlaybookPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, 
 
   function removePlay(idx) {
     const updated = folderPlays.filter((_,i)=>i!==idx)
-    setPlaybook(pb => ({ ...pb, [sport]: { ...sportFolders, [activeFolder]: updated } }))
+    setPlaybook(ppb => ({ ...pb, [sport]: { ...sportFolders, [activeFolder]: updated } }))
   }
 
   function createFolder() {
@@ -6458,12 +6456,12 @@ export default function CoachIQ() {
   const S = safeHex(currentTeam?.secondary || cfg.secondary || sportColors.secondary, '#002868')
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
-  async function callAI(prompt, imageData) {
+  async function callAI(prompt, imageData, fast=false) {
     const body = imageData
-      ? { prompt, image: imageData }
-      : { prompt }
+      ? { prompt, image: imageData, fast: false } // images always use Sonnet
+      : { prompt, fast }
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 90000) // 90s timeout — scheme generation needs time
+    const timeout = setTimeout(() => controller.abort(), fast ? 45000 : 90000) // faster timeout for Haiku
     try {
       const res = await fetch('/api/ai', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify(body), signal:controller.signal })
       clearTimeout(timeout)
