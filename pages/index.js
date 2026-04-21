@@ -4644,13 +4644,13 @@ function LearnPage({ P='#C0392B', S='#002868', al, dk, sport, iq, setIQ, gauntle
 }
 function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, sport, homeLocation, setHomeLocation, callAI, activeTeam, setTeams, scrollToLocation=false, currentTeam }) {
   const [activeSection, setActiveSection] = useState('features')
+  const [helpMode, setHelpMode] = useState(null)
   const locationRef = useRef(null)
   useEffect(() => {
     if (scrollToLocation && locationRef.current) {
       setTimeout(() => locationRef.current.scrollIntoView({ behavior:'smooth', block:'center' }), 200)
     }
   }, [scrollToLocation])
-  const [helpMode, setHelpMode] = useState(null)
   const colorOptions = {
     primary: ['#C0392B','#E8460C','#D4600A','#1B5E20','#0066CC','#7B1FA2','#C8A400','#1565C0','#880E4F'],
     secondary: ['#002868','#1a3a6b','#37474f','#1B5E20','#4a0070','#1a1a1a','#5c3a00','#004d40','#6b0010'],
@@ -6406,8 +6406,7 @@ export default function CoachIQ() {
   const [page, setPage] = useState('hub')
   const [activeMode, setActiveMode] = useState(null)
   const [learnMode, setLearnMode] = useState(null) // deep-link into Learn sub-sections
-  // Reset learnMode when navigating away from Learn so it doesn't persist
-  useEffect(() => { if (page !== 'learn') setLearnMode(null) }, [page])
+  const [scrollToLocation, setScrollToLocation] = useState(false) // scroll MorePage to location section
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(500)
   const [gauntlets, setGauntlets] = useState(0)
@@ -6445,6 +6444,8 @@ export default function CoachIQ() {
   useEffect(() => { try { localStorage.setItem('coachiq_teams', JSON.stringify(teams)) } catch(e){} }, [teams])
   useEffect(() => { try { localStorage.setItem('coachiq_activeTeam', JSON.stringify(activeTeam)) } catch(e){} }, [activeTeam])
   useEffect(() => { try { localStorage.setItem('coachiq_cfg', JSON.stringify(cfg)) } catch(e){} }, [cfg])
+  // Reset learnMode when navigating away from Learn so deep-links don't persist stale state
+  useEffect(() => { if (page !== 'learn') setLearnMode(null) }, [page])
 
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
@@ -6692,7 +6693,7 @@ export default function CoachIQ() {
             ? guestDemoTeam
               ? <GuestTeamPreview team={guestDemoTeam} sport={sport} P={P} S={S} al={al} onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
               : <GuestGate feature="Team Management" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
-            : <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} setPage={setPage} />
+            : <TeamPage P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} activeTeam={activeTeam} setActiveTeam={setActiveTeam} callAI={callAI} parseJSON={parseJSON} setCfg={setCfg} setPage={setPage} playbook={playbook} />
           )}
           {page==='playbook' && (guestMode
             ? <GuestGate feature="Playbook" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
@@ -7160,68 +7161,240 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
 }
 
 function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport }) {
+  const plays = team ? Object.values(
+    Object.entries(team.playbook || {}).reduce((acc, [folder, arr]) => {
+      (arr||[]).forEach(p => { if (!acc[p.name]) acc[p.name] = {...p, folder} })
+      return acc
+    }, {})
+  ) : []
+
+  // Config state — mirrors Playmaker X options
   const [printType, setPrintType] = useState('wristband')
-  const [generating, setGenerating] = useState(false)
-  const [generated, setGenerated] = useState(null)
+  const [wristWidth, setWristWidth] = useState('4.5')
+  const [wristHeight, setWristHeight] = useState('2.25')
+  const [playsPerCard, setPlaysPerCard] = useState(8)
+  const [displayMode, setDisplayMode] = useState('text') // 'text' | 'both'
+  const [labelStyle, setLabelStyle] = useState('number_name') // 'number' | 'name' | 'number_name'
+  const [groupBy, setGroupBy] = useState('folder') // 'folder' | 'type' | 'all'
+  const [selectedFolders, setSelectedFolders] = useState([])
+  const [showPreview, setShowPreview] = useState(false)
+  const [activeTab, setActiveTab] = useState('config') // 'config' | 'select'
 
-  const printTypes = [
-    { id:'wristband', label:'📿 Wristband', desc:'QR/play call strips for game day' },
-    { id:'playbook', label:'📋 Playbook Sheet', desc:'Full play diagrams for your playbook' },
-    { id:'coach', label:'🗂 Coach Sheet', desc:'Sideline reference sheet' },
-    { id:'practice', label:'📆 Practice Plan', desc:'Print-ready practice schedule' },
-  ]
+  const allFolders = [...new Set((plays||[]).map(p=>p.folder).filter(Boolean))]
+  const activeFolders = selectedFolders.length ? selectedFolders : allFolders
+  const selectedPlays = plays.filter(p => !selectedFolders.length || selectedFolders.includes(p.folder))
 
-  async function generatePDF() {
-    setGenerating(true)
-    try {
-      const content = await callAI(`You are a ${sport} coordinator. Generate content for a ${printType} sheet for team: ${team.name}, ${team.season}. Return a plain text formatted document suitable for printing. Include team name, sport, season, and relevant ${printType} content with clear sections and formatting. Keep it concise and professional.`)
-      setGenerated({ type: printType, team: team.name, content, generatedAt: new Date().toLocaleString() })
-    } catch(e) { console.error(e) }
-    setGenerating(false)
+  function toggleFolder(f) {
+    setSelectedFolders(prev => prev.includes(f) ? prev.filter(x=>x!==f) : [...prev, f])
   }
 
-  function downloadAsPDF() {
-    if (!generated) return
-    const printWindow = window.open('', '_blank')
-    const scriptTag = '<scr' + 'ipt>window.onload=()=>{window.print()}</scr' + 'ipt>'
-    const html = [
-      '<html><head><title>' + team.name + ' - ' + generated.type + '</title>',
-      '<style>body{font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto}pre{white-space:pre-wrap;font-size:13px;line-height:1.6}.header{border-bottom:3px solid ' + P + ';padding-bottom:12px;margin-bottom:16px}@media print{body{padding:12px}}</style></head><body>',
-      '<div class="header"><h1>' + team.name + '</h1><h2>' + sport + ' - ' + (team.season||'') + ' - ' + (generated.type||'').toUpperCase() + '</h2></div>',
-      '<pre>' + (generated.content||'') + '</pre>',
-      '<div style="margin-top:20px;font-size:11px;color:#888">Generated by CoachIQ</div>',
-      scriptTag,'</body></html>'
-    ].join('')
-    printWindow.document.write(html)
-    printWindow.document.close()
+  function getPlayLabel(play, idx) {
+    const num = play.number ? `#${play.number}` : `${idx+1}`
+    const name = play.name || 'Play'
+    if (labelStyle === 'number') return num
+    if (labelStyle === 'name') return name
+    return `${num} ${name}`
   }
+
+  function buildPrintHTML() {
+    const chunks = []
+    for (let i = 0; i < selectedPlays.length; i += playsPerCard) {
+      chunks.push(selectedPlays.slice(i, i + playsPerCard))
+    }
+
+    const cardW = wristWidth + 'in'
+    const cardH = wristHeight + 'in'
+    const fontSize = playsPerCard <= 4 ? '13px' : playsPerCard <= 6 ? '11px' : '10px'
+    const lineH = playsPerCard <= 4 ? '1.8' : '1.5'
+
+    const cards = chunks.map((chunk, ci) => {
+      const rows = chunk.map((play, i) => {
+        const label = getPlayLabel(play, i)
+        const note = play.note ? ` — ${play.note}` : ''
+        const typeTag = play.type ? `<span style="color:#888;font-size:9px;margin-left:4px">[${play.type}]</span>` : ''
+        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:2px 0;border-bottom:1px solid #eee">
+          <span style="font-weight:700;min-width:20px;font-size:${fontSize}">${i+1}.</span>
+          <span style="font-size:${fontSize};line-height:${lineH};flex:1"><strong>${label}</strong>${typeTag}<br><span style="color:#555;font-size:9px">${note}</span></span>
+        </div>`
+      }).join('')
+
+      const header = groupBy === 'folder' && chunk[0]?.folder
+        ? `<div style="background:${P};color:white;padding:3px 8px;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">${chunk[0].folder}</div>`
+        : ''
+
+      return `<div style="width:${cardW};height:${cardH};border:1.5px solid #333;border-radius:4px;padding:6px 8px;page-break-inside:avoid;display:inline-block;margin:4px;vertical-align:top;overflow:hidden;font-family:Arial,sans-serif;box-sizing:border-box">
+        <div style="border-bottom:2px solid ${P};padding-bottom:3px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:900;font-size:11px;color:${P}">${team.name}</span>
+          <span style="font-size:9px;color:#888">Card ${ci+1}</span>
+        </div>
+        ${header}
+        ${rows}
+      </div>`
+    }).join('\n')
+
+    return `<!DOCTYPE html><html><head><title>${team.name} — Wristband</title>
+    <style>
+      body { margin:0; padding:12px; background:white; font-family:Arial,sans-serif; }
+      @media print {
+        body { padding:4px; }
+        @page { margin:0.4in; size:letter; }
+      }
+    </style></head><body>
+    <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid ${P}">
+      <strong style="font-size:14px">${team.name}</strong>
+      <span style="font-size:11px;color:#666;margin-left:8px">${sport} · ${team.season||''}</span>
+      <span style="font-size:10px;color:#aaa;float:right">Generated by CoachIQ · ${new Date().toLocaleDateString()}</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      ${cards}
+    </div>
+    <script>window.onload=()=>window.print()<\/script>
+    </body></html>`
+  }
+
+  function openPrint() {
+    const html = buildPrintHTML()
+    const w = window.open('', '_blank')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
+  const noPlays = !plays || plays.length === 0
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
       <Card>
-        <CardHead icon="🖨" title="Printable Sheets" accent={P} />
+        <CardHead icon="🖨" title="Print & Wristbands" accent={P} />
         <div style={{ padding:14 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:12 }}>
-            {printTypes.map(pt => (
+
+          {/* Print type selector */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:6, marginBottom:14 }}>
+            {[
+              { id:'wristband', icon:'📿', label:'Wristband Cards', desc:'Play call strips for players' },
+              { id:'coach',     icon:'🗂', label:'Coach Sheet',     desc:'Sideline reference card' },
+              { id:'playbook',  icon:'📋', label:'Playbook Sheet',  desc:'Full play list by category' },
+              { id:'practice',  icon:'📆', label:'Practice Plan',   desc:'Today\'s practice schedule' },
+            ].map(pt => (
               <div key={pt.id} onClick={()=>setPrintType(pt.id)} style={{ padding:'10px 12px', background:printType===pt.id?al(P,0.12):'#161922', border:`1px solid ${printType===pt.id?P:'#1e2330'}`, borderRadius:6, cursor:'pointer' }}>
-                <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8', marginBottom:3 }}>{pt.label}</div>
-                <div style={{ fontSize:10, color:'#8a94b0', lineHeight:1.4 }}>{pt.desc}</div>
+                <div style={{ fontSize:16, marginBottom:3 }}>{pt.icon}</div>
+                <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{pt.label}</div>
+                <div style={{ fontSize:10, color:'#8a94b0' }}>{pt.desc}</div>
               </div>
             ))}
           </div>
-          <PBtn onClick={generatePDF} disabled={generating} color={P}>{generating?'GENERATING...':'GENERATE '+printType.toUpperCase()}</PBtn>
-          {generating && <Shimmer />}
-          {generated && (
-            <div style={{ marginTop:12, animation:'fadeIn 0.2s ease' }}>
-              <div style={{ padding:'10px 12px', background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, marginBottom:10 }}>
-                <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Ready to Print</div>
-                <div style={{ fontSize:12, color:'#f2f4f8' }}>{team.name} — {generated.type} sheet generated</div>
+
+          {/* Wristband config — only shown for wristband type */}
+          {printType === 'wristband' && (
+            <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:14, marginBottom:12 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:'#8a94b0', fontWeight:700, textTransform:'uppercase', marginBottom:12 }}>Wristband Options</div>
+
+              {/* Tab: Config / Select Plays */}
+              <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+                {[['config','⚙️ Options'],['select','✅ Select Plays']].map(([id,lbl])=>(
+                  <button key={id} onClick={()=>setActiveTab(id)} style={{ flex:1, padding:'7px', borderRadius:5, fontSize:11, border:`1px solid ${activeTab===id?P:'#1e2330'}`, background:activeTab===id?al(P,0.15):'transparent', color:activeTab===id?P:'#8a94b0', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{lbl}</button>
+                ))}
               </div>
-              <button onClick={downloadAsPDF} style={{ width:'100%', padding:'11px', background:'linear-gradient(135deg,#1B5E20,#2e7d32)', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
-                <span>🖨</span> OPEN PRINT DIALOG (PDF)
-              </button>
+
+              {activeTab === 'config' && (
+                <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+                  {/* Width */}
+                  <div>
+                    <div style={{ fontSize:10, color:'#8a94b0', marginBottom:6 }}>Width (inches)</div>
+                    <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+                      {['3','3.5','4','4.5','5'].map(w=>(
+                        <button key={w} onClick={()=>setWristWidth(w)} style={{ padding:'6px 12px', borderRadius:4, fontSize:11, border:`1px solid ${wristWidth===w?P:'#1e2330'}`, background:wristWidth===w?al(P,0.2):'#161922', color:wristWidth===w?P:'#8a94b0', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{w}"</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Height */}
+                  <div>
+                    <div style={{ fontSize:10, color:'#8a94b0', marginBottom:6 }}>Height (inches)</div>
+                    <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+                      {['2','2.25','2.5','3'].map(h=>(
+                        <button key={h} onClick={()=>setWristHeight(h)} style={{ padding:'6px 12px', borderRadius:4, fontSize:11, border:`1px solid ${wristHeight===h?P:'#1e2330'}`, background:wristHeight===h?al(P,0.2):'#161922', color:wristHeight===h?P:'#8a94b0', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{h}"</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Plays per card */}
+                  <div>
+                    <div style={{ fontSize:10, color:'#8a94b0', marginBottom:6 }}>Plays per card</div>
+                    <div style={{ display:'flex', gap:5 }}>
+                      {[4,6,8,10].map(n=>(
+                        <button key={n} onClick={()=>setPlaysPerCard(n)} style={{ flex:1, padding:'7px', borderRadius:4, fontSize:12, border:`1px solid ${playsPerCard===n?P:'#1e2330'}`, background:playsPerCard===n?al(P,0.2):'#161922', color:playsPerCard===n?P:'#8a94b0', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{n}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Label style */}
+                  <div>
+                    <div style={{ fontSize:10, color:'#8a94b0', marginBottom:6 }}>Play label style</div>
+                    <div style={{ display:'flex', gap:5 }}>
+                      {[['number','# Only'],['name','Name Only'],['number_name','# + Name']].map(([id,lbl])=>(
+                        <button key={id} onClick={()=>setLabelStyle(id)} style={{ flex:1, padding:'7px 4px', borderRadius:4, fontSize:10, border:`1px solid ${labelStyle===id?P:'#1e2330'}`, background:labelStyle===id?al(P,0.2):'#161922', color:labelStyle===id?P:'#8a94b0', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center' }}>{lbl}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Group by */}
+                  <div>
+                    <div style={{ fontSize:10, color:'#8a94b0', marginBottom:6 }}>Group by</div>
+                    <div style={{ display:'flex', gap:5 }}>
+                      {[['folder','Folder'],['type','Play Type'],['all','No grouping']].map(([id,lbl])=>(
+                        <button key={id} onClick={()=>setGroupBy(id)} style={{ flex:1, padding:'7px 4px', borderRadius:4, fontSize:10, border:`1px solid ${groupBy===id?P:'#1e2330'}`, background:groupBy===id?al(P,0.2):'#161922', color:groupBy===id?P:'#8a94b0', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center' }}>{lbl}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'select' && (
+                <div>
+                  <div style={{ fontSize:10, color:'#8a94b0', marginBottom:8 }}>Select folders to include (all selected by default)</div>
+                  {allFolders.length === 0 && <div style={{ fontSize:11, color:'#5a6480', textAlign:'center', padding:'12px 0' }}>No saved plays yet. Add plays to your playbook first.</div>}
+                  {allFolders.map(f => {
+                    const count = plays.filter(p=>p.folder===f).length
+                    const selected = !selectedFolders.length || selectedFolders.includes(f)
+                    return (
+                      <div key={f} onClick={()=>toggleFolder(f)} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 12px', background:selected?al(P,0.08):'#161922', border:`1px solid ${selected?al(P,0.3):'#1e2330'}`, borderRadius:5, marginBottom:5, cursor:'pointer' }}>
+                        <div style={{ width:16, height:16, borderRadius:3, border:`2px solid ${selected?P:'#3d4559'}`, background:selected?P:'transparent', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                          {selected && <span style={{ color:'white', fontSize:10, fontWeight:900 }}>✓</span>}
+                        </div>
+                        <div style={{ flex:1, fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{f}</div>
+                        <div style={{ fontSize:10, color:'#8a94b0' }}>{count} plays</div>
+                      </div>
+                    )
+                  })}
+                  {selectedPlays.length > 0 && (
+                    <div style={{ marginTop:8, fontSize:10, color:'#4ade80', textAlign:'center' }}>{selectedPlays.length} plays selected · {Math.ceil(selectedPlays.length/playsPerCard)} card{Math.ceil(selectedPlays.length/playsPerCard)!==1?'s':''}</div>
+                  )}
+                </div>
+              )}
             </div>
           )}
+
+          {/* Preview summary */}
+          {printType === 'wristband' && selectedPlays.length > 0 && (
+            <div style={{ background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6, padding:'10px 12px', marginBottom:12 }}>
+              <div style={{ fontSize:10, color:'#4ade80', fontWeight:700, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, marginBottom:3 }}>READY TO PRINT</div>
+              <div style={{ fontSize:11, color:'#f2f4f8' }}>{selectedPlays.length} plays · {Math.ceil(selectedPlays.length/playsPerCard)} wristband card{Math.ceil(selectedPlays.length/playsPerCard)!==1?'s':''} · {wristWidth}" × {wristHeight}"</div>
+            </div>
+          )}
+
+          {printType === 'wristband' && noPlays && (
+            <div style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:6, padding:'14px', marginBottom:12, textAlign:'center' }}>
+              <div style={{ fontSize:12, color:'#5a6480' }}>No plays in playbook yet.</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginTop:4 }}>Generate schemes and save plays to your playbook first.</div>
+            </div>
+          )}
+
+          <button
+            onClick={openPrint}
+            disabled={printType === 'wristband' && noPlays}
+            style={{ width:'100%', padding:'13px', background: printType==='wristband'&&noPlays ? '#3d4559' : P, border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor: printType==='wristband'&&noPlays ? 'not-allowed' : 'pointer', letterSpacing:'1.5px', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+            <span>🖨</span> OPEN PRINT DIALOG
+          </button>
+          <div style={{ marginTop:8, fontSize:10, color:'#5a6480', textAlign:'center' }}>Opens a print-ready page · Use your browser's Print dialog to save as PDF or print</div>
         </div>
       </Card>
     </div>
@@ -7230,7 +7403,7 @@ function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport }) {
 
 
 // ─── TEAM PAGE ─────────────────────────────────────────────────────────────────
-function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, setPage }) {
+function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, setPage, playbook={} }) {
   const [section, setSection] = useState('roster')
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const mascotObj = currentTeam ? (MASCOTS||[]).find(m=>m.id===currentTeam.mascot) : null
@@ -7276,7 +7449,7 @@ function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, active
           {section==='scoring'  && <LiveScoringSection team={currentTeam} P={P} S={S} al={al} sport={sport} teams={teams} setTeams={setTeams} callAI={callAI} parseJSON={parseJSON} />}
           {section==='practice' && <PracticePlanSection team={currentTeam} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} teams={teams} setTeams={setTeams} />}
           {section==='analytics'&& <AnalyticsSection team={currentTeam} P={P} al={al} teams={teams} setTeams={setTeams} sport={sport} />}
-          {section==='print'    && <PrintSection     team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} />}
+          {section==='print'    && <PrintSection     team={currentTeam} P={P} S={S} al={al} callAI={callAI} sport={sport} playbook={playbook} />}
         </>
       )}
     </>
