@@ -2372,7 +2372,7 @@ function GauntletPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlet
 }
 
 
-function FilmPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON }) {
+function FilmPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
   const [mode, setMode] = useState('describe')
   const [description, setDescription] = useState('')
   const [imageData, setImageData] = useState(null)
@@ -2750,7 +2750,7 @@ function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
     </svg>
   )
 }
-function SchemesPage({ P='#C0392B', S='#002868', al, dk, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ, guestMode=false, guestSchemeCount=0, setGuestSchemeCount }) {
+function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, playbook, setPlaybook, genHistory, setGenHistory, iq, setIQ, guestMode=false, guestSchemeCount=0, setGuestSchemeCount }) {
   const cfg = SPORTS[sport] || SPORTS.Football
   const initFields = () => { const f={}; cfg.fields.forEach(x=>{f[x.id]=x.opts[0]}); return f }
   const [offFields, setOffFields] = useState(initFields)
@@ -4533,7 +4533,7 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
 }
 
 
-function LearnPage({ P='#C0392B', S='#002868', al, dk, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage, guestMode=false, guestGauntletDone=false, setGuestGauntletDone, onGuestSignUp, initialMode=null }) {
+function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, playbook, setPlaybook, setPage, guestMode=false, guestGauntletDone=false, setGuestGauntletDone, onGuestSignUp, initialMode=null }) {
   const [activeMode, setActiveMode] = useState(initialMode)
 
   const categories = [
@@ -4582,7 +4582,7 @@ function LearnPage({ P='#C0392B', S='#002868', al, dk, sport, iq, setIQ, gauntle
   )
   if (activeMode === 'film') return (
     <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
-    <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} /> </>
+    <FilmPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} /> </>
   )
   if (activeMode === 'rulebook') return (
     <> <button onClick={()=>setActiveMode(null)} style={{ background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'6px 12px', color:'#8a94b0', fontSize:12, cursor:'pointer', marginBottom:12, marginTop:8 }}>← Back to Learn</button>
@@ -4880,7 +4880,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
 
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg, homeLocation, setPage }) {
+function HomePage({ P='#C0392B', S='#002868', al, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg, homeLocation, setPage }) {
   const [feed, setFeed] = useState(null)
   const [feedLoading, setFeedLoading] = useState(false)
   const [activeMode, setActiveMode] = useState('dashboard')
@@ -4913,7 +4913,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
         <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#8a94b0', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>{sport} {activeMode==='schemes_offense'?'Offensive':'Defensive'} Schemes</span>
       </div>
-      <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={{Football:{},Basketball:{},Baseball:{}}} setPlaybook={()=>{}} genHistory={{Football:[],Basketball:[],Baseball:[]}} setGenHistory={()=>{}} iq={iq} setIQ={setIQ} defaultOpenOff={activeMode==='schemes_offense'} defaultOpenDef={activeMode==='schemes_defense'} />
+      <SchemesPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={{Football:{},Basketball:{},Baseball:{}}} setPlaybook={()=>{}} genHistory={{Football:[],Basketball:[],Baseball:[]}} setGenHistory={()=>{}} iq={iq} setIQ={setIQ} defaultOpenOff={activeMode==='schemes_offense'} defaultOpenDef={activeMode==='schemes_defense'} />
     </>
   )
 
@@ -4933,7 +4933,7 @@ function HomePage({ P='#C0392B', S='#002868', al, dk, lastName, sport, iq, setIQ
         <button onClick={()=>setActiveMode('dashboard')} style={{ background:'#161922', border:'0.5px solid #1e2330', borderRadius:4, padding:'5px 10px', color:'#8a94b0', fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>← Back</button>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:16, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase', flex:1 }}>Film Room</span>
       </div>
-      <FilmPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} />
+      <FilmPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} />
     </>
   )
 
@@ -6673,7 +6673,7 @@ export default function CoachIQ() {
           {page==='hub' && <HubPage P={P} S={S} al={al} sport={sport} cfg={cfg} teams={guestMode&&guestDemoTeam?{...teams,[sport]:[guestDemoTeam]}:teams} activeTeam={guestMode&&guestDemoTeam?{...activeTeam,[sport]:guestDemoTeam}:activeTeam} genHistory={genHistory} playbook={playbook} iq={iq} setPage={setPage} setActiveMode={setActiveMode} setLearnMode={setLearnMode} callAI={callAI} homeLocation={homeLocation} setTeams={setTeams} guestMode={guestMode} guestDemoTeam={guestDemoTeam} setGuestDemoTeam={setGuestDemoTeam} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />}
           {page==='schemes' && (guestMode && guestSchemeCount >= 2
             ? <GuestGate feature="Scheme Generator" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
-            : <SchemesPage P={P} S={S} al={al} dk={dk} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} guestMode={guestMode} guestSchemeCount={guestSchemeCount} setGuestSchemeCount={setGuestSchemeCount} />
+            : <SchemesPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} genHistory={genHistory} setGenHistory={setGenHistory} iq={iq} setIQ={setIQ} guestMode={guestMode} guestSchemeCount={guestSchemeCount} setGuestSchemeCount={setGuestSchemeCount} />
           )}
           {page==='scout' && (guestMode
             ? <GuestGate feature="Scout Report" onSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} />
@@ -6690,7 +6690,7 @@ export default function CoachIQ() {
             : <PlaybookPage P={P} S={S} al={al} sport={sport} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} />
           )}
           {page==='news'  && <NewsPage  P={P} S={S} al={al} sport={sport} callAI={callAI} />}
-          {page==='learn' && <LearnPage P={P} S={S} al={al} dk={dk} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} guestMode={guestMode} guestGauntletDone={guestGauntletDone} setGuestGauntletDone={setGuestGauntletDone} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} initialMode={learnMode} key={learnMode} />}
+          {page==='learn' && <LearnPage P={P} S={S} al={al} sport={sport} iq={iq} setIQ={setIQ} gauntlets={gauntlets} setGauntlets={setGauntlets} callAI={callAI} parseJSON={parseJSON} playbook={playbook} setPlaybook={setPlaybook} setPage={setPage} guestMode={guestMode} guestGauntletDone={guestGauntletDone} setGuestGauntletDone={setGuestGauntletDone} onGuestSignUp={()=>{ setGuestMode(false); setLaunched(false); setGuestDemoTeam(null) }} initialMode={learnMode} key={learnMode} />}
           {page==='more' && <MorePage P={P} S={S} al={al} cfg={cfg} setCfg={setCfg} brand={brand} setBrand={setBrand} sport={sport} homeLocation={homeLocation} setHomeLocation={setHomeLocation} callAI={callAI} activeTeam={activeTeam} setTeams={setTeams} scrollToLocation={scrollToLocation} currentTeam={currentTeam} />}
         </div>
 
