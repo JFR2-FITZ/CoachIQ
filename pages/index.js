@@ -1532,6 +1532,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
       return { x: sx(lerp(path[seg][0], path[seg+1][0], st)), y: sy(lerp(path[seg][1], path[seg+1][1], st)) }
     }
 
+    const sportType = parsed._sportType || 'football'
     const isBBall = sportType === 'basketball'
     const isBSB = sportType === 'baseball'
     const r = W * 0.016
