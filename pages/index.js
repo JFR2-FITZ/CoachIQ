@@ -1614,7 +1614,6 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
       data._sportType = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
       try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
       setParsed(data)
-      setPlaying(true)
     } catch(e) { setError(e.message) }
     setLoading(false)
   }
