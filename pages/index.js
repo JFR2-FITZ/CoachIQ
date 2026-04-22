@@ -1602,10 +1602,21 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Show all 9 fielders in correct positions plus batter movement.' +
         ' Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
     } else {
-      prompt = 'Generate football offensive play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
-        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense lines up at y=42 (LOS=dashed line at y=38). Offense attacks UPWARD (forward = LOWER y values). Defenders at y=34-38. Safeties at y=12-24.' +
-        ' CRITICAL RULES: (1) ALL forward routes and run paths must go to LOWER y values (e.g. y=42 to y=26 is forward 16 yards). (2) QB on RUN plays: routeName="Handoff", short path toward RB. (3) RB run path must go continuously toward lower y (e.g. [[47,47],[44,42],[42,34],[42,24]]). (4) Receivers run routes to LOWER y values. (5) Linemen move 3-4 units toward lower y (blocking forward). (6) Defensive players react: DL moves toward higher y (toward offense), coverage drops to lower y.' +
-        ' TIMING (pathDelay field, required on every player): Lead blockers FB and pulling G/T get pathDelay:-0.15 so they fire first and arrive at the point of attack before the RB. Ball carrier RB/QB-keeper gets pathDelay:0.12 so they read the block before hitting the hole. Standard linemen and receivers get pathDelay:0.' +
+      prompt = 'Generate a football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38, dashed). Forward = LOWER y. Defenders at y=34-38. Safeties y=12-22.' +
+        ' DIRECTION RULES: ALL routes and run paths go to LOWER y (toward y=0). Receivers run to lower y. RB run continuously decreases y. Linemen move 3-4 units to lower y. DL moves to higher y (toward offense). Coverage drops to lower y (deeper).' +
+        ' TIMING — use pathDelay (float) on every player to model real football sequencing:' +
+        ' PRE-SNAP MOTION: any player in motion pre-snap gets pathDelay:-0.30 (they start moving well before the snap, their path includes the motion path then the route). Label their routeName with "MOTION: then [route]".' +
+        ' LEAD BLOCKERS (FB, H-back, pulling G, pulling T): pathDelay:-0.15. They fire before the snap count finishes and must arrive at the point of attack BEFORE the ball carrier.' +
+        ' STANDARD OL (C, non-pulling G, non-pulling T): pathDelay:0. Fire on snap.' +
+        ' BALL CARRIER (RB, QB keeper, pitchback): pathDelay:0.12. Reads the block, waits for hole to open, then attacks.' +
+        ' QUICK ROUTES (slant, quick out, smoke, hitch under 5 yds): pathDelay:0. Fire immediately on snap, fast path.' +
+        ' INTERMEDIATE ROUTES (curl, dig, cross, out 5-12 yds): pathDelay:0.05. Slightly delayed — stem, then break.' +
+        ' DEEP ROUTES (post, corner, go/fly over 12 yds): pathDelay:0.08. Stem upfield first, then make break late.' +
+        ' PLAY ACTION QB: pathDelay:0, fake handoff path first, then drop back or bootleg.' +
+        ' PASS SET QB (dropback): pathDelay:0, path shows 3/5/7 step drop moving to lower y then holding.' +
+        ' SCREENS (WR screen, RB screen): receiver pathDelay:-0.05, blocker pathDelay:-0.20 (blockers release downfield before receiver gets ball).' +
+        ' MOTION rule: if play involves pre-snap motion, the moving player path MUST start at their pre-motion spot and move laterally/forward BEFORE the snap, then continue their post-snap route — the full combined path goes in the path array.' +
         ' Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
 
@@ -1641,21 +1652,37 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
     function getPos(player, t) {
       const path = player.path
       if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
-      // Before snap: hold at start position
-      if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
-      // pathDelay: fraction of post-snap time before this player starts moving
-      // Negative = starts before snap point (lead blockers)
-      // Positive = waits after snap (ball carrier waits for hole)
+
       const delay = player.pathDelay || 0
-      const postSnap = (t - snap) / (1 - snap)
-      const adjustedPt = Math.max(0, Math.min(1, (postSnap - delay) / (1 - delay * 0.5 + 0.001)))
       const segs = path.length - 1
-      const rawSeg = adjustedPt * segs
-      const seg = Math.min(Math.floor(rawSeg), segs - 1)
-      const segT = rawSeg - seg
-      return {
-        x: sx(lerp(path[seg][0], path[seg + 1][0], segT)),
-        y: sy(lerp(path[seg][1], path[seg + 1][1], segT))
+
+      if (delay < 0) {
+        // NEGATIVE delay: player starts moving BEFORE the snap
+        // Their motion starts at t = snap + delay (which is before snap since delay < 0)
+        // Map total animation time so this player's path spans the full duration
+        const motionStart = snap + delay  // e.g. snap=0.18, delay=-0.15 → motionStart=0.03
+        if (t < motionStart) return { x: sx(path[0][0]), y: sy(path[0][1]) }
+        const pt = Math.min((t - motionStart) / (1 - motionStart), 1)
+        const rawSeg = pt * segs
+        const seg = Math.min(Math.floor(rawSeg), segs - 1)
+        const segT = rawSeg - seg
+        return {
+          x: sx(lerp(path[seg][0], path[seg + 1][0], segT)),
+          y: sy(lerp(path[seg][1], path[seg + 1][1], segT))
+        }
+      } else {
+        // ZERO or POSITIVE delay: player holds pre-snap, then starts moving at snap + delay
+        if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
+        const postSnap = (t - snap) / (1 - snap)
+        if (postSnap < delay) return { x: sx(path[0][0]), y: sy(path[0][1]) }
+        const pt = Math.min((postSnap - delay) / Math.max(0.001, 1 - delay), 1)
+        const rawSeg = pt * segs
+        const seg = Math.min(Math.floor(rawSeg), segs - 1)
+        const segT = rawSeg - seg
+        return {
+          x: sx(lerp(path[seg][0], path[seg + 1][0], segT)),
+          y: sy(lerp(path[seg][1], path[seg + 1][1], segT))
+        }
       }
     }
 
@@ -1836,15 +1863,20 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 
           // Route label at midpoint
           if (!isBlock && player.routeName && !isBSB) {
+            const isMotion = player.routeName.startsWith('MOTION:')
             const midIdx = Math.max(0, Math.floor(path.length / 2) - 1)
             const lx = sx(path[midIdx][0])
             const ly = sy(path[midIdx][1]) - r * 2.4
-            const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:)/, '').trim()
-            const displayText = player.routeYards > 0
-              ? (displayName ? displayName + ' ' + player.routeYards + 'yd' : player.routeYards + 'yd')
-              : displayName
+            const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:|MOTION:)/, '').trim()
+            const displayText = isMotion
+              ? ('↔ ' + displayName)
+              : player.routeYards > 0
+                ? (displayName ? displayName + ' ' + player.routeYards + 'yd' : player.routeYards + 'yd')
+                : displayName
             if (displayText) {
-              ctx.fillStyle = isBBall ? 'rgba(200,200,200,0.85)' : hexToRgba(P, 0.85)
+              ctx.fillStyle = isMotion
+                ? 'rgba(245,158,11,0.9)'
+                : isBBall ? 'rgba(200,200,200,0.85)' : hexToRgba(P, 0.85)
               ctx.font = `bold ${Math.round(r * 1.65)}px sans-serif`
               ctx.textAlign = 'center'
               ctx.fillText(displayText, lx, ly)
@@ -3169,7 +3201,21 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               } else if (isBSB) {
                 prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
               } else {
-                prompt = 'Generate football offensive play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38). Forward = LOWER y values. ALL routes/runs go to lower y. RB run path must continuously decrease y. Linemen move 3-4 units lower y. TIMING RULES (pathDelay field): Lead blockers (FB, pulling G/T) use pathDelay:-0.15 so they fire before RB and arrive at point of attack first. Ball carrier (RB/QB keeper) uses pathDelay:0.12 so they wait for the hole to open. Receivers and standard linemen use pathDelay:0. Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+                prompt = 'Generate a football play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38). Forward = LOWER y. Defenders y=34-38. Safeties y=12-22.' +
+                  ' DIRECTION: ALL routes/runs go to LOWER y. RB continuously decreases y. Linemen move 3-4 units lower y. DL moves higher y. Coverage drops lower y.' +
+                  ' TIMING — pathDelay (float) required on every player:' +
+                  ' Pre-snap motion player: pathDelay:-0.30, path includes motion then route, routeName starts with MOTION:.' +
+                  ' Lead blockers FB/H-back/pulling G or T: pathDelay:-0.15, arrive at point of attack before ball carrier.' +
+                  ' Standard OL C/non-pulling G/T: pathDelay:0.' +
+                  ' Ball carrier RB/QB-keeper/pitchback: pathDelay:0.12, waits for hole.' +
+                  ' Quick routes slant/hitch/smoke under 5yd: pathDelay:0.' +
+                  ' Intermediate routes curl/dig/cross/out 5-12yd: pathDelay:0.05.' +
+                  ' Deep routes post/corner/go over 12yd: pathDelay:0.08.' +
+                  ' Play action QB: pathDelay:0, fake first then drop or bootleg.' +
+                  ' Dropback QB: pathDelay:0, path shows 3/5/7 step drop to lower y then hold.' +
+                  ' Screen plays: blocker pathDelay:-0.20, receiver pathDelay:-0.05.' +
+                  ' Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
               }
               const raw = await callAI(prompt)
               const parsed3 = parseJSON(raw)
