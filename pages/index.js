@@ -1610,7 +1610,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n\nPATH RULES: All forward motion (routes, runs, blocks) goes to LOWER y. OL blocking paths decrease y by 3-4 units. RB run paths continuously decrease y. Receiver routes go to lower y. DL/LB defensive reactions: DL charge to higher y, coverage drops to lower y.' +
         '\n\npathDelay field rules — ONLY assign non-zero when the play actually requires it:' +
         '\n• DEFAULT is pathDelay:0 for almost every player on almost every play.' +
-        '\n• Pulling linemen (G or T who pull on counter/power/trap): pathDelay:-0.12. They fire slightly before the snap count to arrive at the kick-out/log block point. ONLY assign this if the play actually calls for a pull.' +
+        '\n• Pulling linemen (G or T who pull on counter/power/trap): pathDelay:0. They fire ON the snap — they just pull laterally instead of straight ahead. Their path shows the pull route (lateral then upfield). NEVER negative pathDelay for any lineman.' +
         '\n• Ball carrier (RB on runs): pathDelay:0.10. Reads the block then hits the hole.' +
         '\n• Deep routes (post, corner, go over 12 yds): pathDelay:0.06. Stem before breaking.' +
         '\n• PRE-SNAP MOTION: ONLY assign pathDelay:-0.30 if the play name or description explicitly mentions motion (jet motion, fly motion, orbit motion, shifting). Motion is ONLY for eligible receivers (WR, TE, slot, H-back). NEVER for C, G, T, or QB. Motion path must be purely lateral (y stays flat) or backward (y increases). MOST PLAYS HAVE NO PRE-SNAP MOTION — default is no motion.' +
@@ -1624,6 +1624,20 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       if (!data.players || data.players.length === 0) throw new Error('No players returned')
       data._sportType = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
       try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
+      // Sanitize pathDelay: OL (C, G, T) and DL can NEVER fire before the snap
+      // pathDelay < 0 on ineligible players = illegal motion penalty in real football
+      const INELIGIBLE_LABELS = new Set(['C','G','T','DE','DT','NT','DL','D'])
+      if (data.players) {
+        data.players.forEach(p => {
+          if (INELIGIBLE_LABELS.has(p.label) && (p.pathDelay || 0) < 0) {
+            p.pathDelay = 0
+          }
+          // QB can never be in pre-snap motion (would need 1 full second set first — not modeled)
+          if (p.label === 'QB' && (p.pathDelay || 0) < 0) {
+            p.pathDelay = 0
+          }
+        })
+      }
       setParsed(data)
     } catch(e) { setError(e.message) }
     setLoading(false)
@@ -3210,7 +3224,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   '\n\nBLOCKING AND ROUTE ACCURACY: Inside zone = all OL step playside, no pulls. Outside zone = OL reach block. Counter = backside G and T pull through. Power = one G pulls, FB lead blocks. Trap = opposite G traps DL. Sweep = lead blockers outside. Pass plays = correct route combinations matching the concept (flood, mesh, smash, four verts, levels, etc).' +
                   '\n\nPATH RULES: Forward = LOWER y always. OL block lower y 3-4 units. RB run continuously lower y. DL charge higher y. Coverage drops lower y.' +
                   '\n\npathDelay — DEFAULT is 0. Only assign non-zero when the play specifically requires it.' +
-                  '\n• Pulling G or T on counter/power/trap: pathDelay:-0.12 only.' +
+                  '\n• Pulling G or T on counter/power/trap: pathDelay:0. They fire ON the snap and pull laterally — never before the snap. Path shows lateral pull route then upfield to block point. NEVER negative pathDelay for any lineman.' +
                   '\n• Ball carrier RB: pathDelay:0.10.' +
                   '\n• Deep routes over 12yd: pathDelay:0.06.' +
                   '\n• PRE-SNAP MOTION: ONLY if play name or description explicitly says motion/jet/fly/orbit. ONLY eligible receivers (WR, TE, slot, H-back). NEVER C, G, T, QB. Motion path must be purely lateral (y flat) or backward (y increases). MOST PLAYS HAVE ZERO PRE-SNAP MOTION.' +
@@ -3221,6 +3235,11 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               const parsed3 = parseJSON(raw)
               if (parsed3 && parsed3.players && parsed3.players.length > 0) {
                 parsed3._sportType = detectedSport
+                // Sanitize pathDelay: OL/DL/QB can never have negative pathDelay (pre-snap motion illegal)
+                const INELIG = new Set(['C','G','T','DE','DT','NT','DL','D','QB'])
+                parsed3.players.forEach(p => {
+                  if (INELIG.has(p.label) && (p.pathDelay || 0) < 0) p.pathDelay = 0
+                })
                 try { sessionStorage.setItem(cacheKey, JSON.stringify(parsed3)) } catch(e) {}
                 setDiagrams(prev => ({ ...prev, [play.number]: parsed3 }))
               }
