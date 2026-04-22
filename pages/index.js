@@ -1456,12 +1456,26 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
 // ─── PLAY ANIMATOR ────────────────────────────────────────────────────────────
 function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) {
   const canvasRef = useRef(null)
+  const animRef = useRef(null)
   const [parsed, setParsed] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
-  const cacheKey = 'coachiq_anim_' + (play?.name||'').replace(/\s/g,'_').slice(0,30)
+  const cacheKey = 'coachiq_anim2_' + (play?.name||'').replace(/\s/g,'_').slice(0,30)
+
+  // Detect sport from play type
+  const isBasketball = !!(play?.type && (
+    play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') ||
+    play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK') ||
+    play.type.includes('TRANSITION') || play.type.includes('QUICK HITTER') || play.type.includes('MOTION') ||
+    play.type.includes('HALF COURT') || play.type.includes('ZONE ATTACK')
+  ))
+  const isBaseball = !isBasketball && !!(play?.type && (
+    play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('BUNT') ||
+    play.type.includes('HIT AND RUN') || play.type.includes('FIRST AND THIRD') || play.type.includes('STEAL') ||
+    play.type.includes('PITCHING') || play.type.includes('DEFENSE ALIGN') || play.type.includes('OFFENSIVE APPROACH')
+  ))
 
   useEffect(() => {
     try {
@@ -1471,30 +1485,126 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
     if (autoLoad) generateAnim()
   }, [play?.name])
 
-  const isBasketball = play?.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK') || play.type.includes('TRANSITION') || play.type.includes('QUICK HITTER') || play.type.includes('MOTION'))
-  const isBaseball = !isBasketball && play?.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('BUNT') || play.type.includes('HIT AND RUN') || play.type.includes('FIRST AND THIRD') || play.type.includes('STEAL') || play.type.includes('PITCHING') || play.type.includes('DEFENSE ALIGN') || play.type.includes('OFFENSIVE APPROACH'))
-
   async function generateAnim() {
-    setLoading(true); setError(null)
-    const fbTemplate = '{"formation":"PLAYNAME","snapPoint":0.18,"duration":3000,"players":[{"id":"QB","label":"QB","role":"off","routeType":"route","x":50,"y":44,"path":[[50,44],[50,52]],"routeName":"Handoff","routeYards":0},{"id":"RB","label":"RB","role":"off","routeType":"route","x":47,"y":47,"path":[[47,47],[44,50],[44,60]],"routeName":"Run","routeYards":8},{"id":"WR1","label":"WR","role":"off","routeType":"route","x":22,"y":42,"path":[[22,42],[22,34],[28,28]],"routeName":"Curl","routeYards":0},{"id":"WR2","label":"WR","role":"off","routeType":"route","x":78,"y":42,"path":[[78,42],[78,30]],"routeName":"Go","routeYards":0},{"id":"TE","label":"TE","role":"off","routeType":"block","x":64,"y":42,"path":[[64,42],[62,39]],"routeName":"Block","routeYards":0},{"id":"LT","label":"T","role":"off","routeType":"block","x":38,"y":42,"path":[[38,42],[38,39]],"routeName":"","routeYards":0},{"id":"LG","label":"G","role":"off","routeType":"block","x":44,"y":42,"path":[[44,42],[44,39]],"routeName":"","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,39]],"routeName":"","routeYards":0},{"id":"RG","label":"G","role":"off","routeType":"block","x":56,"y":42,"path":[[56,42],[56,39]],"routeName":"","routeYards":0},{"id":"RT","label":"T","role":"off","routeType":"block","x":62,"y":42,"path":[[62,42],[62,39]],"routeName":"","routeYards":0},{"id":"d1","label":"D","role":"def","routeType":"block","x":44,"y":36,"path":[[44,36],[44,37]],"routeName":"","routeYards":0},{"id":"d2","label":"D","role":"def","routeType":"block","x":50,"y":36,"path":[[50,36],[50,37]],"routeName":"","routeYards":0},{"id":"d3","label":"D","role":"def","routeType":"block","x":56,"y":36,"path":[[56,36],[56,37]],"routeName":"","routeYards":0},{"id":"d4","label":"LB","role":"def","routeType":"route","x":44,"y":30,"path":[[44,30],[44,36]],"routeName":"","routeYards":0},{"id":"d5","label":"LB","role":"def","routeType":"route","x":56,"y":30,"path":[[56,30],[56,36]],"routeName":"","routeYards":0},{"id":"d6","label":"CB","role":"def","routeType":"route","x":22,"y":38,"path":[[22,38],[22,32]],"routeName":"","routeYards":0},{"id":"d7","label":"CB","role":"def","routeType":"route","x":78,"y":38,"path":[[78,38],[78,32]],"routeName":"","routeYards":0},{"id":"d8","label":"S","role":"def","routeType":"route","x":50,"y":20,"path":[[50,20],[50,26]],"routeName":"","routeYards":0}]}'
-    const bbTemplate = '{"formation":"PLAYNAME","snapPoint":0.15,"duration":3500,"players":[{"id":"PG","label":"1","role":"off","routeType":"route","x":50,"y":48,"path":[[50,48],[50,40]],"routeName":"BALL: Dribble","routeYards":0},{"id":"SG","label":"2","role":"off","routeType":"route","x":72,"y":44,"path":[[72,44],[78,32]],"routeName":"CUT: Wing","routeYards":0},{"id":"SF","label":"3","role":"off","routeType":"route","x":82,"y":38,"path":[[82,38],[85,26]],"routeName":"SHOOT: Corner","routeYards":0},{"id":"PF","label":"4","role":"off","routeType":"block","x":62,"y":22,"path":[[62,22],[62,22]],"routeName":"SCREEN: High","routeYards":0},{"id":"C5","label":"5","role":"off","routeType":"block","x":50,"y":17,"path":[[50,17],[50,17]],"routeName":"MOVE: Post","routeYards":0},{"id":"d1","label":"D","role":"def","routeType":"block","x":50,"y":50,"path":[[50,50],[50,51]],"routeName":"","routeYards":0},{"id":"d2","label":"D","role":"def","routeType":"block","x":72,"y":46,"path":[[72,46],[72,47]],"routeName":"","routeYards":0},{"id":"d3","label":"D","role":"def","routeType":"block","x":82,"y":40,"path":[[82,40],[82,41]],"routeName":"","routeYards":0},{"id":"d4","label":"D","role":"def","routeType":"block","x":62,"y":24,"path":[[62,24],[62,25]],"routeName":"","routeYards":0},{"id":"d5","label":"D","role":"def","routeType":"block","x":50,"y":19,"path":[[50,19],[50,20]],"routeName":"","routeYards":0}]}'
+    setLoading(true); setError(null); setParsed(null)
 
-    const bsbTemplate = '{"formation":"PLAYNAME","snapPoint":0.2,"duration":3000,"players":[{"id":"P","label":"P","role":"off","routeType":"block","x":50,"y":30,"path":[[50,30],[50,30]],"routeName":"Pitch","routeYards":0},{"id":"C","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"Receive","routeYards":0},{"id":"1B","label":"1B","role":"off","routeType":"block","x":75,"y":42,"path":[[75,42],[75,42]],"routeName":"Hold","routeYards":0},{"id":"2B","label":"2B","role":"off","routeType":"block","x":65,"y":28,"path":[[65,28],[65,28]],"routeName":"Cover","routeYards":0},{"id":"SS","label":"SS","role":"off","routeType":"block","x":38,"y":30,"path":[[38,30],[38,30]],"routeName":"Cover","routeYards":0},{"id":"3B","label":"3B","role":"off","routeType":"block","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"Hold","routeYards":0},{"id":"LF","label":"LF","role":"off","routeType":"block","x":20,"y":12,"path":[[20,12],[20,12]],"routeName":"Pos","routeYards":0},{"id":"CF","label":"CF","role":"off","routeType":"block","x":50,"y":8,"path":[[50,8],[50,8]],"routeName":"Pos","routeYards":0},{"id":"RF","label":"RF","role":"off","routeType":"block","x":80,"y":12,"path":[[80,12],[80,12]],"routeName":"Pos","routeYards":0},{"id":"BAT","label":"B","role":"def","routeType":"route","x":50,"y":44,"path":[[50,44],[60,38]],"routeName":"Run","routeYards":0},{"id":"R1","label":"R","role":"def","routeType":"route","x":25,"y":42,"path":[[25,42],[25,42]],"routeName":"","routeYards":0}]}'
+    // ── COORDINATE SYSTEM ────────────────────────────────────────────────────
+    // x: 0=left, 100=right  (both sports)
+    // y: 0=top of canvas, 60=bottom of canvas
+    // FOOTBALL: offense lines up at y=42 (LOS=dashed line), attacks UPWARD toward y=0 (defense side)
+    //   - Forward routes go to LOWER y values (y=30, y=20, y=10)
+    //   - Defenders line up at y=34-38, safeties at y=14-24
+    // BASKETBALL: basket at y=6 (top), offense attacks upward (lower y = closer to basket)
+    // BASEBALL: diamond drawn with home at y=50, CF at y=8 (top)
 
-    const isDefense = play._isDefense === true
+    const fbTemplate = JSON.stringify({
+      formation:"PLAYNAME", snapPoint:0.18, duration:3200,
+      players:[
+        {id:"QB",  label:"QB", role:"off", routeType:"route", x:50, y:44, path:[[50,44],[50,40]], routeName:"Handoff", routeYards:0},
+        {id:"RB",  label:"RB", role:"off", routeType:"route", x:47, y:47, path:[[47,47],[44,41],[42,34],[42,26]], routeName:"Run", routeYards:8},
+        {id:"WR1", label:"WR", role:"off", routeType:"route", x:18, y:42, path:[[18,42],[18,32],[24,26]], routeName:"Curl", routeYards:0},
+        {id:"WR2", label:"WR", role:"off", routeType:"route", x:82, y:42, path:[[82,42],[82,26]], routeName:"Go", routeYards:0},
+        {id:"TE",  label:"TE", role:"off", routeType:"block", x:64, y:42, path:[[64,42],[62,38]], routeName:"Block", routeYards:0},
+        {id:"LT",  label:"T",  role:"off", routeType:"block", x:38, y:42, path:[[38,42],[38,38]], routeName:"", routeYards:0},
+        {id:"LG",  label:"G",  role:"off", routeType:"block", x:44, y:42, path:[[44,42],[44,38]], routeName:"", routeYards:0},
+        {id:"C",   label:"C",  role:"off", routeType:"block", x:50, y:42, path:[[50,42],[50,38]], routeName:"", routeYards:0},
+        {id:"RG",  label:"G",  role:"off", routeType:"block", x:56, y:42, path:[[56,42],[56,38]], routeName:"", routeYards:0},
+        {id:"RT",  label:"T",  role:"off", routeType:"block", x:62, y:42, path:[[62,42],[62,38]], routeName:"", routeYards:0},
+        {id:"d1",  label:"D",  role:"def", routeType:"block", x:44, y:36, path:[[44,36],[44,38]], routeName:"Gap A", routeYards:0},
+        {id:"d2",  label:"D",  role:"def", routeType:"block", x:50, y:36, path:[[50,36],[50,38]], routeName:"Gap A", routeYards:0},
+        {id:"d3",  label:"D",  role:"def", routeType:"block", x:56, y:36, path:[[56,36],[56,38]], routeName:"Gap B", routeYards:0},
+        {id:"d4",  label:"LB", role:"def", routeType:"route", x:42, y:28, path:[[42,28],[42,34]], routeName:"Hook Zone", routeYards:0},
+        {id:"d5",  label:"LB", role:"def", routeType:"route", x:58, y:28, path:[[58,28],[58,34]], routeName:"Hook Zone", routeYards:0},
+        {id:"d6",  label:"CB", role:"def", routeType:"route", x:18, y:38, path:[[18,38],[18,30]], routeName:"Man", routeYards:0},
+        {id:"d7",  label:"CB", role:"def", routeType:"route", x:82, y:38, path:[[82,38],[82,30]], routeName:"Man", routeYards:0},
+        {id:"d8",  label:"S",  role:"def", routeType:"route", x:50, y:18, path:[[50,18],[50,24]], routeName:"Deep Middle", routeYards:0}
+      ]
+    })
+
+    const bbTemplate = JSON.stringify({
+      formation:"PLAYNAME", snapPoint:0.15, duration:3500,
+      players:[
+        {id:"PG", label:"1", role:"off", routeType:"route", x:50, y:50, path:[[50,50],[50,38]], routeName:"BALL: Dribble up", routeYards:0},
+        {id:"SG", label:"2", role:"off", routeType:"route", x:72, y:44, path:[[72,44],[78,30]], routeName:"CUT: Wing", routeYards:0},
+        {id:"SF", label:"3", role:"off", routeType:"route", x:82, y:36, path:[[82,36],[85,24]], routeName:"SHOOT: Corner", routeYards:0},
+        {id:"PF", label:"4", role:"off", routeType:"block", x:62, y:20, path:[[62,20],[62,20]], routeName:"SCREEN: High", routeYards:0},
+        {id:"C5", label:"5", role:"off", routeType:"block", x:50, y:14, path:[[50,14],[50,14]], routeName:"MOVE: Post", routeYards:0},
+        {id:"d1", label:"D", role:"def", routeType:"block", x:50, y:52, path:[[50,52],[50,53]], routeName:"", routeYards:0},
+        {id:"d2", label:"D", role:"def", routeType:"block", x:72, y:46, path:[[72,46],[72,47]], routeName:"", routeYards:0},
+        {id:"d3", label:"D", role:"def", routeType:"block", x:82, y:38, path:[[82,38],[82,39]], routeName:"", routeYards:0},
+        {id:"d4", label:"D", role:"def", routeType:"block", x:62, y:22, path:[[62,22],[62,23]], routeName:"", routeYards:0},
+        {id:"d5", label:"D", role:"def", routeType:"block", x:50, y:16, path:[[50,16],[50,17]], routeName:"", routeYards:0}
+      ]
+    })
+
+    const bsbTemplate = JSON.stringify({
+      formation:"PLAYNAME", snapPoint:0.2, duration:3000,
+      players:[
+        {id:"P",   label:"P",  role:"off", routeType:"block", x:50, y:28, path:[[50,28],[50,28]], routeName:"Pitch", routeYards:0},
+        {id:"C",   label:"C",  role:"off", routeType:"block", x:50, y:44, path:[[50,44],[50,44]], routeName:"Receive", routeYards:0},
+        {id:"1B",  label:"1B", role:"off", routeType:"block", x:74, y:38, path:[[74,38],[74,38]], routeName:"Hold", routeYards:0},
+        {id:"2B",  label:"2B", role:"off", routeType:"block", x:64, y:26, path:[[64,26],[64,26]], routeName:"Cover", routeYards:0},
+        {id:"SS",  label:"SS", role:"off", routeType:"block", x:38, y:28, path:[[38,28],[38,28]], routeName:"Cover", routeYards:0},
+        {id:"3B",  label:"3B", role:"off", routeType:"block", x:26, y:38, path:[[26,38],[26,38]], routeName:"Hold", routeYards:0},
+        {id:"LF",  label:"LF", role:"off", routeType:"block", x:20, y:10, path:[[20,10],[20,10]], routeName:"Pos", routeYards:0},
+        {id:"CF",  label:"CF", role:"off", routeType:"block", x:50, y:6,  path:[[50,6],[50,6]],   routeName:"Pos", routeYards:0},
+        {id:"RF",  label:"RF", role:"off", routeType:"block", x:80, y:10, path:[[80,10],[80,10]], routeName:"Pos", routeYards:0},
+        {id:"BAT", label:"B",  role:"def", routeType:"route", x:50, y:46, path:[[50,46],[62,36]], routeName:"Run to 1B", routeYards:0}
+      ]
+    })
+
+    const isDefPlay = play._isDefense === true
     const isDisguise = play._isDisguise === true
 
     let prompt
     if (isDisguise) {
-      prompt = 'Generate a DISGUISE defensive diagram for: ' + play.name + '. ' + play.note + ' Show defenders in PRE-SNAP fake look for first 40% then moving to TRUE assignment. routeName format: FAKE: for pre-snap, TRUE: for real assignment. snapPoint 0.40. Return ONLY raw JSON using this template: {"formation":"' + play.name.replace(/"/g,"") + '","snapPoint":0.40,"duration":3500,"players":[{"id":"DEa","label":"DE","role":"def","routeType":"route","x":38,"y":35,"path":[[38,35],[42,32],[42,32],[38,38]],"routeName":"FAKE: Walk up","routeYards":0},{"id":"DTa","label":"DT","role":"def","routeType":"block","x":45,"y":35,"path":[[45,35],[45,38]],"routeName":"TRUE: Gap A","routeYards":0},{"id":"DTb","label":"DT","role":"def","routeType":"block","x":55,"y":35,"path":[[55,35],[55,38]],"routeName":"TRUE: Gap A","routeYards":0},{"id":"DEb","label":"DE","role":"def","routeType":"route","x":62,"y":35,"path":[[62,35],[58,32],[58,32],[62,38]],"routeName":"FAKE: Show Blitz","routeYards":0},{"id":"WLB","label":"WLB","role":"def","routeType":"route","x":34,"y":28,"path":[[34,28],[34,32],[34,32],[30,34]],"routeName":"FAKE: Press Man","routeYards":0},{"id":"MLB","label":"MLB","role":"def","routeType":"route","x":50,"y":27,"path":[[50,27],[50,27],[50,27],[50,33]],"routeName":"TRUE: Hook Zone","routeYards":0},{"id":"SLB","label":"SLB","role":"def","routeType":"route","x":66,"y":28,"path":[[66,28],[66,32],[66,32],[70,34]],"routeName":"FAKE: Show Blitz","routeYards":0},{"id":"CBa","label":"CB","role":"def","routeType":"route","x":12,"y":35,"path":[[12,35],[12,30],[12,30],[12,24]],"routeName":"FAKE: Press Zone","routeYards":0},{"id":"CBb","label":"CB","role":"def","routeType":"route","x":88,"y":35,"path":[[88,35],[88,30],[88,30],[88,24]],"routeName":"FAKE: Press Zone","routeYards":0},{"id":"SS","label":"SS","role":"def","routeType":"route","x":66,"y":20,"path":[[66,20],[58,24],[58,24],[58,26]],"routeName":"FAKE: Man then Half","routeYards":0},{"id":"FS","label":"FS","role":"def","routeType":"route","x":50,"y":14,"path":[[50,14],[50,14],[50,14],[50,20]],"routeName":"TRUE: Deep Middle","routeYards":0},{"id":"OC","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,38]],"routeName":"","routeYards":0},{"id":"OTa","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[38,38]],"routeName":"","routeYards":0},{"id":"OTb","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[62,38]],"routeName":"","routeYards":0}]}'
-    } else if (isDefense) {
-      prompt = 'Generate a DEFENSIVE football diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 11 defenders with assignments. Include 5 offensive linemen as STATIC reference. Defender routeNames: use Gap A/B/C for DL, Hook Zone/Flat Zone/Deep Half/Deep Third/Man Coverage/Blitz for others. Return ONLY raw JSON: {"formation":"' + play.name.replace(/"/g,"") + '","snapPoint":0.15,"duration":3000,"players":[{"id":"DEa","label":"DE","role":"def","routeType":"block","x":38,"y":35,"path":[[38,35],[35,38]],"routeName":"Gap B","routeYards":0},{"id":"DTa","label":"DT","role":"def","routeType":"block","x":45,"y":35,"path":[[45,35],[45,38]],"routeName":"Gap A","routeYards":0},{"id":"DTb","label":"DT","role":"def","routeType":"block","x":55,"y":35,"path":[[55,35],[55,38]],"routeName":"Gap A","routeYards":0},{"id":"DEb","label":"DE","role":"def","routeType":"block","x":62,"y":35,"path":[[62,35],[65,38]],"routeName":"Gap B","routeYards":0},{"id":"WLB","label":"WLB","role":"def","routeType":"route","x":34,"y":28,"path":[[34,28],[30,34]],"routeName":"Flat Zone","routeYards":0},{"id":"MLB","label":"MLB","role":"def","routeType":"route","x":50,"y":27,"path":[[50,27],[50,33]],"routeName":"Hook Zone","routeYards":0},{"id":"SLB","label":"SLB","role":"def","routeType":"route","x":66,"y":28,"path":[[66,28],[70,34]],"routeName":"Flat Zone","routeYards":0},{"id":"CBa","label":"CB","role":"def","routeType":"route","x":12,"y":35,"path":[[12,35],[12,24]],"routeName":"Man Coverage","routeYards":0},{"id":"CBb","label":"CB","role":"def","routeType":"route","x":88,"y":35,"path":[[88,35],[88,24]],"routeName":"Man Coverage","routeYards":0},{"id":"SS","label":"SS","role":"def","routeType":"route","x":66,"y":20,"path":[[66,20],[58,26]],"routeName":"Deep Half","routeYards":0},{"id":"FS","label":"FS","role":"def","routeType":"route","x":50,"y":14,"path":[[50,14],[50,20]],"routeName":"Deep Middle","routeYards":0},{"id":"OTa","label":"T","role":"off","routeType":"block","x":38,"y":38,"path":[[38,38],[38,38]],"routeName":"","routeYards":0},{"id":"OGa","label":"G","role":"off","routeType":"block","x":44,"y":38,"path":[[44,38],[44,38]],"routeName":"","routeYards":0},{"id":"OC","label":"C","role":"off","routeType":"block","x":50,"y":38,"path":[[50,38],[50,38]],"routeName":"","routeYards":0},{"id":"OGb","label":"G","role":"off","routeType":"block","x":56,"y":38,"path":[[56,38],[56,38]],"routeName":"","routeYards":0},{"id":"OTb","label":"T","role":"off","routeType":"block","x":62,"y":38,"path":[[62,38],[62,38]],"routeName":"","routeYards":0}]}'
+      prompt = 'Generate a DISGUISE defensive football diagram for: ' + play.name + '. ' + play.note +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS). Defense attacks DOWNWARD (higher y). Defenders start in fake look, then move to true assignment after snapPoint 0.40.' +
+        ' routeName format: "FAKE: description" for pre-snap look, "TRUE: description" for real assignment.' +
+        ' Return ONLY raw JSON: {"formation":"' + play.name.replace(/"/g,'') + '","snapPoint":0.40,"duration":3500,"players":[' +
+        '{"id":"DEa","label":"DE","role":"def","routeType":"route","x":38,"y":34,"path":[[38,34],[42,30],[38,38]],"routeName":"FAKE: Walk up","routeYards":0},' +
+        '{"id":"DTa","label":"DT","role":"def","routeType":"block","x":45,"y":34,"path":[[45,34],[45,38]],"routeName":"TRUE: Gap A","routeYards":0},' +
+        '{"id":"MLB","label":"MLB","role":"def","routeType":"route","x":50,"y":26,"path":[[50,26],[50,26],[50,32]],"routeName":"TRUE: Hook Zone","routeYards":0},' +
+        '{"id":"CBa","label":"CB","role":"def","routeType":"route","x":12,"y":34,"path":[[12,34],[12,28],[12,22]],"routeName":"FAKE: Press","routeYards":0},' +
+        '{"id":"FS","label":"FS","role":"def","routeType":"route","x":50,"y":14,"path":[[50,14],[50,14],[50,20]],"routeName":"TRUE: Deep Middle","routeYards":0},' +
+        '{"id":"OC","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"","routeYards":0},' +
+        '{"id":"OTa","label":"T","role":"off","routeType":"block","x":38,"y":42,"path":[[38,42],[38,42]],"routeName":"","routeYards":0},' +
+        '{"id":"OTb","label":"T","role":"off","routeType":"block","x":62,"y":42,"path":[[62,42],[62,42]],"routeName":"","routeYards":0}]}'
+    } else if (isDefPlay) {
+      prompt = 'Generate DEFENSIVE football diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS). Defense lines up at y=34-38. Safeties at y=12-22. Deep zones at y=10-22. LBs at y=26-32.' +
+        ' Defender movement: DL attack DOWNWARD (y increases toward offense). Coverage defenders drop UPWARD (y decreases = deeper).' +
+        ' Include 5 static offensive linemen as reference. Return ONLY raw JSON: {"formation":"' + play.name.replace(/"/g,'') + '","snapPoint":0.15,"duration":3000,"players":[' +
+        '{"id":"DEa","label":"DE","role":"def","routeType":"block","x":36,"y":34,"path":[[36,34],[34,38]],"routeName":"Gap B","routeYards":0},' +
+        '{"id":"DTa","label":"DT","role":"def","routeType":"block","x":44,"y":34,"path":[[44,34],[44,38]],"routeName":"Gap A","routeYards":0},' +
+        '{"id":"DTb","label":"DT","role":"def","routeType":"block","x":56,"y":34,"path":[[56,34],[56,38]],"routeName":"Gap A","routeYards":0},' +
+        '{"id":"DEb","label":"DE","role":"def","routeType":"block","x":64,"y":34,"path":[[64,34],[66,38]],"routeName":"Gap B","routeYards":0},' +
+        '{"id":"WLB","label":"WLB","role":"def","routeType":"route","x":34,"y":28,"path":[[34,28],[30,34]],"routeName":"Flat Zone","routeYards":0},' +
+        '{"id":"MLB","label":"MLB","role":"def","routeType":"route","x":50,"y":26,"path":[[50,26],[50,32]],"routeName":"Hook Zone","routeYards":0},' +
+        '{"id":"SLB","label":"SLB","role":"def","routeType":"route","x":66,"y":28,"path":[[66,28],[70,34]],"routeName":"Flat Zone","routeYards":0},' +
+        '{"id":"CBa","label":"CB","role":"def","routeType":"route","x":14,"y":36,"path":[[14,36],[14,24]],"routeName":"Man Coverage","routeYards":0},' +
+        '{"id":"CBb","label":"CB","role":"def","routeType":"route","x":86,"y":36,"path":[[86,36],[86,24]],"routeName":"Man Coverage","routeYards":0},' +
+        '{"id":"SS","label":"SS","role":"def","routeType":"route","x":66,"y":20,"path":[[66,20],[58,26]],"routeName":"Deep Half","routeYards":0},' +
+        '{"id":"FS","label":"FS","role":"def","routeType":"route","x":34,"y":14,"path":[[34,14],[42,20]],"routeName":"Deep Half","routeYards":0},' +
+        '{"id":"OLT","label":"T","role":"off","routeType":"block","x":38,"y":42,"path":[[38,42],[38,42]],"routeName":"","routeYards":0},' +
+        '{"id":"OLG","label":"G","role":"off","routeType":"block","x":44,"y":42,"path":[[44,42],[44,42]],"routeName":"","routeYards":0},' +
+        '{"id":"OC","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"","routeYards":0},' +
+        '{"id":"ORG","label":"G","role":"off","routeType":"block","x":56,"y":42,"path":[[56,42],[56,42]],"routeName":"","routeYards:0},' +
+        '{"id":"ORT","label":"T","role":"off","routeType":"block","x":62,"y":42,"path":[[62,42],[62,42]],"routeName":"","routeYards":0}]}'
     } else if (isBasketball) {
-      prompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL: ONE player routeName starts with BALL: (has ball), ONE starts with SHOOT: (receives for shot), others use CUT:, MOVE:, or SCREEN. snapPoint 0.12. Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
+      prompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 (top). Half court line at y=55. Players attack UPWARD (toward lower y = toward basket).' +
+        ' CRITICAL: ONE player routeName starts with BALL: (has ball), ONE starts with SHOOT: (receives for shot), others use CUT:, MOVE:, or SCREEN:.' +
+        ' Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
     } else if (isBaseball) {
-      prompt = 'Generate baseball defensive positioning diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' Show 9 fielders in correct positions. Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
+      prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Show all 9 fielders in correct positions plus batter movement.' +
+        ' Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
     } else {
-      prompt = 'Generate football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note + ' CRITICAL: QB on RUN plays set routeName to Handoff. Ball carrier path must show FULL run lane past y=38 minimum 8-10 units. Each receiver has named route (Curl, Slant, Post, Out, Corner, Go, Cross, Flat). Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
+      prompt = 'Generate football offensive play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense lines up at y=42 (LOS=dashed line at y=38). Offense attacks UPWARD (forward = LOWER y values). Defenders at y=34-38. Safeties at y=12-24.' +
+        ' CRITICAL RULES: (1) ALL forward routes and run paths must go to LOWER y values (e.g. y=42 to y=26 is forward 16 yards). (2) QB on RUN plays: routeName="Handoff", short path toward RB. (3) RB run path must go continuously toward lower y (e.g. [[47,47],[44,42],[42,34],[42,24]]). (4) Receivers run routes to LOWER y values. (5) Linemen move 3-4 units toward lower y (blocking forward). (6) Defensive players react: DL moves toward higher y (toward offense), coverage drops to lower y.' +
+        ' Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
 
     try {
@@ -1504,6 +1614,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
       data._sportType = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
       try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
       setParsed(data)
+      setPlaying(true)
     } catch(e) { setError(e.message) }
     setLoading(false)
   }
@@ -1513,81 +1624,153 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     const W = canvas.width, H = canvas.height
+    // x: 0-100 → 0-W, y: 0-60 → 0-H
     const sx = x => (x / 100) * W
     const sy = y => (y / 60) * H
-    const dur = parsed.duration || 3000
+    const dur = parsed.duration || 3200
     const snap = parsed.snapPoint || 0.18
-    let startTime = null
-    // Use hexToRgba utility — no manual RGB parsing needed
-
-    function lerp(a, b, t) { return a + (b-a)*t }
-    function getPos(player, t) {
-      const path = player.path
-      if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
-      if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
-      const pt = Math.min((t - snap) / (1 - snap), 1)
-      const segs = path.length - 1
-      const seg = Math.min(Math.floor(pt * segs), segs - 1)
-      const st = pt * segs - seg
-      return { x: sx(lerp(path[seg][0], path[seg+1][0], st)), y: sy(lerp(path[seg][1], path[seg+1][1], st)) }
-    }
-
     const sportType = parsed._sportType || 'football'
     const isBBall = sportType === 'basketball'
     const isBSB = sportType === 'baseball'
-    const r = W * 0.016
+    const r = W * 0.018
+    let startTime = null
 
-    function arrow(ctx, ex, ey, nx, ny, size) {
-      const angle = Math.atan2(ny, nx), a = 0.45
-      ctx.beginPath(); ctx.moveTo(ex, ey)
-      ctx.lineTo(ex - size*Math.cos(angle-a), ey - size*Math.sin(angle-a))
-      ctx.lineTo(ex - size*Math.cos(angle+a), ey - size*Math.sin(angle+a))
-      ctx.closePath(); ctx.fill()
+    function lerp(a, b, t) { return a + (b - a) * t }
+
+    function getPos(player, t) {
+      const path = player.path
+      if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
+      // Before snap: hold at start position
+      if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
+      const pt = Math.min((t - snap) / (1 - snap), 1)
+      const segs = path.length - 1
+      const rawSeg = pt * segs
+      const seg = Math.min(Math.floor(rawSeg), segs - 1)
+      const segT = rawSeg - seg
+      return {
+        x: sx(lerp(path[seg][0], path[seg + 1][0], segT)),
+        y: sy(lerp(path[seg][1], path[seg + 1][1], segT))
+      }
     }
-    function perp(ctx, ex, ey, nx, ny, size) {
-      const px = -ny, py = nx
-      ctx.beginPath(); ctx.moveTo(ex - px*size, ey - py*size); ctx.lineTo(ex + px*size, ey + py*size); ctx.stroke()
+
+    function arrow(fromX, fromY, toX, toY, size) {
+      const dx = toX - fromX, dy = toY - fromY
+      const len = Math.sqrt(dx * dx + dy * dy) || 1
+      const ux = dx / len, uy = dy / len
+      const a = 0.42
+      ctx.beginPath()
+      ctx.moveTo(toX, toY)
+      ctx.lineTo(toX - size * (ux * Math.cos(a) - uy * Math.sin(a)), toY - size * (uy * Math.cos(a) + ux * Math.sin(a)))
+      ctx.lineTo(toX - size * (ux * Math.cos(a) + uy * Math.sin(a)), toY - size * (uy * Math.cos(a) - ux * Math.sin(a)))
+      ctx.closePath()
+      ctx.fill()
+    }
+
+    function perpMark(x, y, dx, dy, size) {
+      const len = Math.sqrt(dx * dx + dy * dy) || 1
+      const px = -dy / len * size, py = dx / len * size
+      ctx.beginPath()
+      ctx.moveTo(x - px, y - py)
+      ctx.lineTo(x + px, y + py)
+      ctx.stroke()
     }
 
     function drawField() {
       if (isBBall) {
-        ctx.fillStyle = '#c4893e'; ctx.fillRect(0,0,W,H)
-        ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2; ctx.strokeRect(sx(4),sy(3),sx(92),sy(94))
-        ctx.fillStyle = 'rgba(160,50,50,0.2)'; ctx.fillRect(sx(37),sy(6),sx(26),sy(24))
-        ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5; ctx.strokeRect(sx(37),sy(6),sx(26),sy(24))
-        ctx.beginPath(); ctx.moveTo(sx(37),sy(30)); ctx.lineTo(sx(63),sy(30)); ctx.stroke()
-        ctx.beginPath(); ctx.arc(sx(50),sy(30),sx(12),0,Math.PI*2); ctx.stroke()
-        ctx.fillStyle = '#e05020'; ctx.beginPath(); ctx.arc(sx(50),sy(6),sx(2.5),0,Math.PI*2); ctx.fill()
-        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx(50),sy(6),sx(2.5),0,Math.PI*2); ctx.stroke()
-        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(sx(41),sy(3.5)); ctx.lineTo(sx(59),sy(3.5)); ctx.stroke()
-        ctx.strokeStyle = 'rgba(255,255,255,0.65)'; ctx.lineWidth = 1.5
-        ctx.beginPath(); ctx.moveTo(sx(7),sy(3)); ctx.lineTo(sx(7),sy(34)); ctx.stroke()
-        ctx.beginPath(); ctx.moveTo(sx(93),sy(3)); ctx.lineTo(sx(93),sy(34)); ctx.stroke()
-        const r3 = Math.sqrt(Math.pow(sx(50)-sx(7),2)+Math.pow(sy(6)-sy(34),2))
-        const sa = Math.atan2(sy(34)-sy(6),sx(7)-sx(50)), ea = Math.atan2(sy(34)-sy(6),sx(93)-sx(50))
-        ctx.beginPath(); ctx.arc(sx(50),sy(6),r3,sa,ea,false); ctx.stroke()
-      } else if (isBSB) {
-        ctx.fillStyle = '#2d7a2d'; ctx.fillRect(0,0,W,H)
-        ctx.fillStyle = '#c4955a'
-        ctx.beginPath(); ctx.moveTo(sx(50),sy(42)); ctx.lineTo(sx(75),sy(28)); ctx.lineTo(sx(50),sy(14)); ctx.lineTo(sx(25),sy(28)); ctx.closePath(); ctx.fill()
-        ctx.beginPath(); ctx.arc(sx(50),sy(28),sx(18),0,Math.PI*2); ctx.fill()
-        ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5
-        ctx.beginPath(); ctx.moveTo(sx(50),sy(42)); ctx.lineTo(sx(5),sy(5)); ctx.stroke()
-        ctx.beginPath(); ctx.moveTo(sx(50),sy(42)); ctx.lineTo(sx(95),sy(5)); ctx.stroke()
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5
-        ctx.beginPath(); ctx.arc(sx(50),sy(42),sy(40),Math.PI*1.2,Math.PI*1.8,false); ctx.stroke()
-        [[50,42,'HP'],[75,28,'1B'],[50,14,'2B'],[25,28,'3B']].forEach(([bx,by,lbl]) => {
-          ctx.fillStyle = lbl==='HP'?'#aaa':'white'; ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1
-          const bs = sx(2.5); ctx.save(); ctx.translate(sx(bx),sy(by)); ctx.rotate(Math.PI/4); ctx.fillRect(-bs/2,-bs/2,bs,bs); ctx.strokeRect(-bs/2,-bs/2,bs,bs); ctx.restore()
-          ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font=`bold ${Math.round(sx(2))}px sans-serif`; ctx.textAlign='center'; ctx.fillText(lbl,sx(bx),sy(by)-sx(3))
+        // Basketball court — hardwood, attacks toward top (y=6)
+        ctx.fillStyle = '#c8904a'; ctx.fillRect(0, 0, W, H)
+        // Court lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2
+        ctx.strokeRect(sx(4), sy(2), sx(92), sy(56))
+        // Half court
+        ctx.beginPath(); ctx.moveTo(sx(4), sy(55)); ctx.lineTo(sx(96), sy(55)); ctx.stroke()
+        ctx.beginPath(); ctx.arc(sx(50), sy(55), sx(12), Math.PI, 0); ctx.stroke()
+        // Key (lane) — top
+        ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.5
+        ctx.strokeRect(sx(36), sy(2), sx(28), sy(26))
+        // Free throw line
+        ctx.beginPath(); ctx.moveTo(sx(36), sy(28)); ctx.lineTo(sx(64), sy(28)); ctx.stroke()
+        ctx.beginPath(); ctx.arc(sx(50), sy(28), sx(14), 0, Math.PI, false); ctx.stroke()
+        // Three point arc
+        ctx.beginPath(); ctx.moveTo(sx(6), sy(2)); ctx.lineTo(sx(6), sy(22)); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(sx(94), sy(2)); ctx.lineTo(sx(94), sy(22)); ctx.stroke()
+        const r3 = Math.sqrt(Math.pow(sx(44), 2) + Math.pow(sy(20), 2))
+        ctx.beginPath(); ctx.arc(sx(50), sy(6), r3, Math.PI * 1.08, Math.PI * 1.92, false); ctx.stroke()
+        // Basket
+        ctx.fillStyle = '#e05020'
+        ctx.beginPath(); ctx.arc(sx(50), sy(4), sx(2), 0, Math.PI * 2); ctx.fill()
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2
+        ctx.beginPath(); ctx.arc(sx(50), sy(4), sx(2), 0, Math.PI * 2); ctx.stroke()
+        // Backboard
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2.5
+        ctx.beginPath(); ctx.moveTo(sx(40), sy(2.2)); ctx.lineTo(sx(60), sy(2.2)); ctx.stroke()
+        // Lane dots
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'
+        ;[[36,16],[36,20],[36,24],[64,16],[64,20],[64,24]].forEach(([bx,by]) => {
+          ctx.beginPath(); ctx.arc(sx(bx), sy(by), sx(0.8), 0, Math.PI * 2); ctx.fill()
         })
-        ctx.fillStyle='#b8885a'; ctx.beginPath(); ctx.arc(sx(50),sy(28),sx(3),0,Math.PI*2); ctx.fill()
+      } else if (isBSB) {
+        // Baseball field — green outfield, dirt infield diamond
+        ctx.fillStyle = '#2e7d2e'; ctx.fillRect(0, 0, W, H)
+        // Dirt infield (roughly diamond + arcs)
+        ctx.fillStyle = '#c49055'
+        ctx.beginPath()
+        ctx.moveTo(sx(50), sy(50)) // home
+        ctx.lineTo(sx(74), sy(36)) // 1B
+        ctx.lineTo(sx(50), sy(22)) // 2B
+        ctx.lineTo(sx(26), sy(36)) // 3B
+        ctx.closePath(); ctx.fill()
+        // Pitcher mound circle
+        ctx.beginPath(); ctx.arc(sx(50), sy(36), sx(4), 0, Math.PI * 2); ctx.fill()
+        // Foul lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.65)'; ctx.lineWidth = 1.5
+        ctx.beginPath(); ctx.moveTo(sx(50), sy(50)); ctx.lineTo(sx(3), sy(3)); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(sx(50), sy(50)); ctx.lineTo(sx(97), sy(3)); ctx.stroke()
+        // Outfield warning track arc
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4])
+        ctx.beginPath(); ctx.arc(sx(50), sy(50), sy(47), Math.PI * 1.18, Math.PI * 1.82); ctx.stroke()
+        ctx.setLineDash([])
+        // Bases
+        ;[[50,50,'HP'],[74,36,'1B'],[50,22,'2B'],[26,36,'3B']].forEach(([bx, by, lbl]) => {
+          const bs = sx(2.4)
+          ctx.fillStyle = lbl === 'HP' ? '#bbb' : 'white'
+          ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1
+          ctx.save(); ctx.translate(sx(bx), sy(by)); ctx.rotate(Math.PI / 4)
+          ctx.fillRect(-bs / 2, -bs / 2, bs, bs); ctx.strokeRect(-bs / 2, -bs / 2, bs, bs)
+          ctx.restore()
+          ctx.fillStyle = 'rgba(255,255,255,0.7)'
+          ctx.font = `bold ${Math.round(sx(2))}px sans-serif`; ctx.textAlign = 'center'
+          ctx.fillText(lbl, sx(bx), sy(by) - sx(3.5))
+        })
+        // Pitcher rubber
+        ctx.fillStyle = 'white'; ctx.fillRect(sx(49), sy(35.5), sx(2), sy(1))
       } else {
-        ctx.fillStyle = '#f8f8f4'; ctx.fillRect(0,0,W,H)
-        ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=1
-        for (let y=0;y<=60;y+=6) { ctx.beginPath(); ctx.moveTo(0,sy(y)); ctx.lineTo(W,sy(y)); ctx.stroke() }
-        ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1.5; ctx.setLineDash([8,5])
-        ctx.beginPath(); ctx.moveTo(0,sy(38)); ctx.lineTo(W,sy(38)); ctx.stroke(); ctx.setLineDash([])
+        // Football field — white background with yard lines
+        ctx.fillStyle = '#f4f4f0'; ctx.fillRect(0, 0, W, H)
+        // Yard lines (every 10 yards visual = 6 units)
+        ctx.strokeStyle = 'rgba(0,0,0,0.07)'; ctx.lineWidth = 1
+        for (let yv = 0; yv <= 60; yv += 6) {
+          ctx.beginPath(); ctx.moveTo(0, sy(yv)); ctx.lineTo(W, sy(yv)); ctx.stroke()
+        }
+        // Hash marks
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.8
+        for (let yv = 0; yv <= 60; yv += 2) {
+          ctx.beginPath(); ctx.moveTo(sx(30), sy(yv)); ctx.lineTo(sx(35), sy(yv)); ctx.stroke()
+          ctx.beginPath(); ctx.moveTo(sx(65), sy(yv)); ctx.lineTo(sx(70), sy(yv)); ctx.stroke()
+        }
+        // Line of scrimmage (dashed)
+        ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 1.5; ctx.setLineDash([10, 6])
+        ctx.beginPath(); ctx.moveTo(0, sy(38)); ctx.lineTo(W, sy(38)); ctx.stroke()
+        ctx.setLineDash([])
+        // LOS label
+        ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.font = `${Math.round(sx(2))}px sans-serif`
+        ctx.textAlign = 'left'; ctx.fillText('LOS', sx(1), sy(37.2))
+        // First down line (gold)
+        ctx.strokeStyle = 'rgba(218,165,32,0.55)'; ctx.lineWidth = 1.5; ctx.setLineDash([8, 4])
+        ctx.beginPath(); ctx.moveTo(0, sy(28)); ctx.lineTo(W, sy(28)); ctx.stroke()
+        ctx.setLineDash([])
+        ctx.fillStyle = 'rgba(218,165,32,0.4)'; ctx.font = `${Math.round(sx(1.8))}px sans-serif`
+        ctx.textAlign = 'left'; ctx.fillText('1D', sx(1), sy(27.2))
       }
     }
 
@@ -1595,191 +1778,319 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
       const rn = player.routeName || ''
       if (rn.startsWith('BALL:')) return 'ball'
       if (rn.startsWith('SHOOT:')) return 'shooter'
-      if (rn.startsWith('PASS:')) return 'pass'
-      if (rn === 'SCREEN' || rn.startsWith('SCREEN:')) return 'screen'
+      if (rn.startsWith('SCREEN:') || rn === 'SCREEN') return 'screen'
       if (rn.startsWith('CUT:')) return 'cut'
       return 'move'
     }
 
-    function draw(t) {
-      ctx.clearRect(0,0,W,H); drawField()
+    function drawRoutes(t) {
+      const pt = t < snap ? 0 : Math.min((t - snap) / (1 - snap), 1)
+      ;(parsed.players || []).forEach(player => {
+        if (player.role !== 'off') return
+        const path = player.path
+        if (!path || path.length < 2) return
+        const isLineman = ['C', 'G', 'T'].includes(player.label)
+        const isBlock = player.routeType === 'block' || isLineman
+        const bbRole = isBBall ? getBBRole(player) : null
 
-      const defPlayers = (parsed.players||[]).filter(p=>p.role==='def')
-      const offPlayers = (parsed.players||[]).filter(p=>p.role==='off')
-      const isDefDiagram = defPlayers.length >= offPlayers.length
+        const routeColor = isLineman
+          ? 'rgba(120,120,120,0.6)'
+          : isBBall
+            ? (bbRole === 'ball' ? 'rgba(245,158,11,0.9)' : bbRole === 'shooter' ? 'rgba(74,222,128,0.9)' : hexToRgba(P, 0.8))
+            : hexToRgba(P, 0.85)
 
-      if (isDefDiagram && !isBBall && !isBSB) {
-        defPlayers.forEach(player => {
-          if (!player.routeName) return
-          const pos = getPos(player, t < snap ? 0 : t)
-          const rn = (player.routeName||'').toLowerCase()
-          const isDeep = rn.includes('deep') || rn.includes('half') || player.label==='FS' || player.label==='SS'
-          const isMid = rn.includes('hook') || rn.includes('mid') || player.label==='MLB'
-          const isFlat = rn.includes('flat') || rn.includes('out') || player.label==='WLB' || player.label==='SLB'
-          if (isDeep || isMid || isFlat) {
-            const zoneW = isDeep?sx(26):isFlat?sx(15):sx(18)
-            const zoneH = isDeep?sy(9):isFlat?sy(7):sy(8)
-            const zoneColor = isDeep?'rgba(30,80,220,0.18)':isMid?'rgba(180,160,0,0.18)':'rgba(0,140,90,0.18)'
-            const borderColor = isDeep?'rgba(30,80,220,0.55)':isMid?'rgba(180,160,0,0.6)':'rgba(0,140,90,0.55)'
-            const yOff = isDeep?-sy(5):isMid?-sy(3):-sy(2.5)
-            ctx.save(); ctx.translate(pos.x,pos.y+yOff); ctx.scale(1,0.52)
-            ctx.fillStyle=zoneColor; ctx.strokeStyle=borderColor; ctx.lineWidth=1.5; ctx.setLineDash([5,3])
-            ctx.beginPath(); ctx.ellipse(0,0,zoneW,zoneH,0,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.setLineDash([]); ctx.restore()
-          }
-        })
-      }
+        // Draw the portion of the path traveled so far
+        const segs = path.length - 1
+        const traveled = pt * segs
 
-      if (t < snap) {
-        parsed.players.forEach(player => {
-          if (player.role !== 'off') return
-          const path = player.path; if (!path || path.length < 2) return
-          const isLineman = ['C','G','T'].includes(player.label)
-          const isBlock = player.routeType==='block' || isLineman
-          const bbRole = isBBall ? getBBRole(player) : null
-          const routeColor = isLineman?'rgba(100,100,100,0.5)':isBBall?(bbRole==='ball'?'rgba(245,158,11,0.8)':bbRole==='shooter'?'rgba(74,222,128,0.8)':hexToRgba(P,0.7)): hexToRgba(P,0.75)
-          ctx.strokeStyle=routeColor; ctx.lineWidth=isLineman?1:2; ctx.setLineDash([])
-          ctx.beginPath(); ctx.moveTo(sx(path[0][0]),sy(path[0][1]))
-          for (let i=1;i<path.length;i++) ctx.lineTo(sx(path[i][0]),sy(path[i][1]))
-          ctx.stroke()
-          const ep=path[path.length-1], pp=path[path.length-2]
-          const dx=ep[0]-pp[0], dy=ep[1]-pp[1], dl=Math.sqrt(dx*dx+dy*dy)||1
-          const ex=sx(ep[0]), ey=sy(ep[1])
-          if (isBlock) { ctx.strokeStyle=routeColor; ctx.lineWidth=1.8; perp(ctx,ex,ey,dx/dl,dy/dl,r*1.4) }
-          else { ctx.fillStyle=routeColor; arrow(ctx,ex,ey,dx/dl,dy/dl,r*1.8) }
-          if (!isBlock && player.routeName) {
-            const midIdx = Math.max(0,Math.floor(path.length/2)-1)
-            const lx=sx(path[midIdx][0]), ly=sy(path[midIdx][1])-r*2
-            ctx.fillStyle=isBBall?'rgba(200,200,200,0.9)':hexToRgba(P,0.9)
-            ctx.font=`bold ${Math.round(r*1.8)}px sans-serif`; ctx.textAlign='center'
-            const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:)/,'').trim()
-            const displayText = player.routeYards>0?(displayName?displayName+' '+player.routeYards+'yd':player.routeYards+'yd'):displayName
-            if (displayText) ctx.fillText(displayText,lx,ly)
-          }
-        })
-      }
+        ctx.strokeStyle = routeColor
+        ctx.lineWidth = isLineman ? 1.2 : 2
+        ctx.setLineDash([])
+        ctx.beginPath()
+        ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
 
-      if (t >= snap) {
-        const pt = Math.min((t-snap)/(1-snap),1)
-        const ballHolder = parsed.players.find(p=>p.role==='off'&&getBBRole(p)==='ball')
-        const shooter = parsed.players.find(p=>p.role==='off'&&getBBRole(p)==='shooter')
-        const qb = !isBBall&&!isBSB?parsed.players.find(p=>p.id==='QB'):null
-        const rb = !isBBall&&!isBSB?parsed.players.find(p=>p.id==='RB'):null
-        const passTime = 0.55
-        if (isBBall && ballHolder && shooter && pt>=passTime) {
-          const pp2 = Math.min(1,(pt-passTime)/0.25)
-          const startPos = getPos(ballHolder, snap+(passTime)*(1-snap))
-          const endPos = getPos(shooter, t)
-          ctx.strokeStyle=`rgba(255,220,50,0.9)`; ctx.lineWidth=2; ctx.setLineDash([6,3])
-          ctx.beginPath(); ctx.moveTo(startPos.x,startPos.y)
-          const steps=20
-          for (let i=1;i<=Math.round(steps*pp2);i++) { const f=i/steps; ctx.lineTo(startPos.x+(endPos.x-startPos.x)*f, startPos.y+(endPos.y-startPos.y)*f-30*f*(1-f)*4) }
-          ctx.stroke(); ctx.setLineDash([])
-          if (pp2<1) { const f=pp2; const bx=startPos.x+(endPos.x-startPos.x)*f, by=startPos.y+(endPos.y-startPos.y)*f-30*f*(1-f)*4; ctx.fillStyle='#f59e0b'; ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(bx,by,r*0.55,0,Math.PI*2); ctx.fill(); ctx.stroke() }
+        for (let s = 0; s < segs; s++) {
+          const segProgress = Math.max(0, Math.min(1, traveled - s))
+          if (segProgress <= 0) break
+          const ex = lerp(path[s][0], path[s + 1][0], segProgress)
+          const ey = lerp(path[s][1], path[s + 1][1], segProgress)
+          ctx.lineTo(sx(ex), sy(ey))
         }
-        if (!isBBall&&!isBSB&&qb&&rb) {
-          const qbRN=qb.routeName||''; const isHandoff=qbRN.includes('Handoff')
-          if (isHandoff&&pt>=0.1&&pt<=0.4) {
-            const hp=Math.min(1,(pt-0.1)/0.2), qbPos=getPos(qb,t), rbPos=getPos(rb,t)
-            const bx=qbPos.x+(rbPos.x-qbPos.x)*hp, by=qbPos.y+(rbPos.y-qbPos.y)*hp
-            ctx.fillStyle='#b45309'; ctx.strokeStyle='rgba(255,200,50,0.8)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(bx,by,r*0.6,0,Math.PI*2); ctx.fill(); ctx.stroke()
+        ctx.stroke()
+
+        // Arrowhead / block mark at end of route
+        const progress2 = Math.min(traveled / segs, 1)
+        if (progress2 >= 0.85) {
+          const ep = path[path.length - 1]
+          const pp2 = path[path.length - 2]
+          const endX = sx(ep[0]), endY = sy(ep[1])
+          ctx.fillStyle = routeColor
+          ctx.strokeStyle = routeColor
+          ctx.lineWidth = 2
+          if (isBlock) {
+            perpMark(endX, endY, ep[0] - pp2[0], ep[1] - pp2[1], r * 1.5)
+          } else {
+            arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 2)
           }
         }
-        parsed.players.forEach(player => {
-          if (player.role!=='off') return
-          const path=player.path; if (!path||path.length<2) return
-          const segs=path.length-1, totalDraw=pt*segs
-          const isLineman=['C','G','T'].includes(player.label)
-          const isBlock=player.routeType==='block'||isLineman
-          const bbRole=isBBall?getBBRole(player):null
-          const routeColor=isLineman?'rgba(100,100,100,0.8)':isBBall?(bbRole==='ball'?`rgba(245,158,11,0.95)`:bbRole==='shooter'?`rgba(74,222,128,0.95)`:hexToRgba(P,0.9)): hexToRgba(P,0.95)
-          ctx.strokeStyle=routeColor; ctx.lineWidth=isLineman?1.2:2; ctx.setLineDash([])
-          ctx.beginPath(); ctx.moveTo(sx(path[0][0]),sy(path[0][1]))
-          for (let s=0;s<segs;s++) { const sp=Math.max(0,Math.min(1,totalDraw-s)); if(sp<=0)break; ctx.lineTo(sx(lerp(path[s][0],path[s+1][0],sp)),sy(lerp(path[s][1],path[s+1][1],sp))) }
-          ctx.stroke()
-          if (totalDraw>=segs*0.88) {
-            const ep=path[path.length-1],pp2=path[path.length-2]
-            const dx=ep[0]-pp2[0],dy=ep[1]-pp2[1],dl=Math.sqrt(dx*dx+dy*dy)||1
-            const ex=sx(ep[0]),ey=sy(ep[1])
-            if (isBlock) { ctx.strokeStyle=routeColor; ctx.lineWidth=2; perp(ctx,ex,ey,dx/dl,dy/dl,r*1.4) }
-            else { ctx.fillStyle=routeColor; arrow(ctx,ex,ey,dx/dl,dy/dl,r*1.8) }
-            if (!isBlock&&player.routeYards>0) { ctx.fillStyle=routeColor; ctx.font=`bold ${Math.round(r*1.7)}px sans-serif`; ctx.textAlign='left'; ctx.fillText(player.routeYards+'yd',ex+r*1.2,ey) }
-          }
-        })
-      }
 
-      parsed.players.forEach(player => {
-        const pos = getPos(player, t)
-        const isOff = player.role==='off'
-        const isLineman = ['C','G','T'].includes(player.label)
-        const bbRole = isBBall?getBBRole(player):null
-        const defPlayers2 = (parsed.players||[]).filter(p=>p.role==='def')
-        const offPlayers2 = (parsed.players||[]).filter(p=>p.role==='off')
-        const isDefDiagram2 = defPlayers2.length >= offPlayers2.length
-
-        if (isOff) {
-          if (isBBall) {
-            const isBallHolder=bbRole==='ball', isShooter=bbRole==='shooter', isScreener=bbRole==='screen'
-            const hasPassed=isBBall&&shooter&&t>=snap+(0.55+0.25)*(1-snap)
-            if (isBallHolder||isShooter) { ctx.fillStyle=isBallHolder?'rgba(245,158,11,0.25)':'rgba(74,222,128,0.2)'; ctx.beginPath(); ctx.arc(pos.x,pos.y,r*2.4,0,Math.PI*2); ctx.fill() }
-            ctx.fillStyle=isBallHolder?'#f59e0b':isShooter?'#4ade80':isScreener?'#888':P; ctx.strokeStyle='white'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fill(); ctx.stroke()
-            if (isBallHolder&&!hasPassed) { ctx.fillStyle='#f59e0b'; ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.arc(pos.x+r*0.95,pos.y-r*0.95,r*0.52,0,Math.PI*2); ctx.fill(); ctx.stroke() }
-            if (isShooter&&hasPassed) { ctx.fillStyle='#f59e0b'; ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.arc(pos.x+r*0.95,pos.y-r*0.95,r*0.52,0,Math.PI*2); ctx.fill(); ctx.stroke() }
-            ctx.fillStyle=isBallHolder||isShooter?'#000':'white'; ctx.font=`bold ${Math.round(r*1.05)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(player.label,pos.x,pos.y)
-          } else if (isLineman) {
-            ctx.fillStyle=P; ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.2
-            const s=r*0.92; ctx.fillRect(pos.x-s,pos.y-s,s*2,s*2); ctx.strokeRect(pos.x-s,pos.y-s,s*2,s*2)
-            ctx.fillStyle='white'; ctx.font=`bold ${Math.round(r)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(player.label,pos.x,pos.y)
-          } else {
-            ctx.fillStyle=P; ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fill(); ctx.stroke()
-            ctx.fillStyle='white'; ctx.font=`bold ${Math.round(r*1.0)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(player.label,pos.x,pos.y)
-          }
-        } else {
-          if (isDefDiagram2&&!isBBall&&!isBSB) {
-            const rn2=(player.routeName||'').toLowerCase()
-            const isDL=['DE','DT','NT','DL'].includes(player.label)
-            const isBlitz2=rn2.includes('blitz')||rn2.includes('rush')
-            ctx.fillStyle=isBlitz2?'rgba(220,80,0,0.9)':hexToRgba(P,0.9); ctx.strokeStyle='white'; ctx.lineWidth=1.5
-            if (isDL) { const s=r*0.92; ctx.fillRect(pos.x-s,pos.y-s,s*2,s*2); ctx.strokeRect(pos.x-s,pos.y-s,s*2,s*2) }
-            else { ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fill(); ctx.stroke() }
-            ctx.fillStyle='white'; ctx.font=`bold ${Math.round(r*0.85)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(player.label,pos.x,pos.y)
-          } else {
-            ctx.strokeStyle=isBBall?'rgba(120,120,120,0.7)':'rgba(60,60,60,0.75)'; ctx.fillStyle=isBBall?'rgba(120,120,120,0.08)':'rgba(60,60,60,0.08)'; ctx.lineWidth=1.2
-            ctx.beginPath(); ctx.arc(pos.x,pos.y,r*0.82,0,Math.PI*2); ctx.fill(); ctx.stroke()
-            ctx.fillStyle=isBBall?'rgba(120,120,120,0.7)':'rgba(60,60,60,0.75)'; ctx.font=`${Math.round(r*0.85)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(player.label,pos.x,pos.y)
+        // Route label (show before snap, at midpoint of path)
+        if (t < snap && !isBlock && player.routeName && !isBSB) {
+          const midIdx = Math.max(0, Math.floor(path.length / 2) - 1)
+          const lx = sx(path[midIdx][0])
+          const ly = sy(path[midIdx][1]) - r * 2.2
+          const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:)/, '').trim()
+          const displayText = player.routeYards > 0
+            ? (displayName ? displayName + ' ' + player.routeYards + 'yd' : player.routeYards + 'yd')
+            : displayName
+          if (displayText) {
+            ctx.fillStyle = isBBall ? 'rgba(220,220,220,0.9)' : hexToRgba(P, 0.9)
+            ctx.font = `bold ${Math.round(r * 1.7)}px sans-serif`
+            ctx.textAlign = 'center'
+            ctx.fillText(displayText, lx, ly)
           }
         }
       })
-
-      if (!isBBall&&!isBSB&&t>=snap&&t<snap+0.07) { ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.font=`bold ${Math.round(H*0.045)}px sans-serif`; ctx.textAlign='center'; ctx.fillText('SNAP',W/2,sy(38)-10) }
     }
+
+    function drawDefenseZones(t) {
+      if (isBBall || isBSB) return
+      const defPlayers = (parsed.players || []).filter(p => p.role === 'def')
+      const offPlayers = (parsed.players || []).filter(p => p.role === 'off')
+      if (defPlayers.length < offPlayers.length) return // not a def diagram
+      defPlayers.forEach(player => {
+        if (!player.routeName) return
+        const pos = getPos(player, t)
+        const rn = (player.routeName || '').toLowerCase()
+        const isDeep = rn.includes('deep') || rn.includes('half') || player.label === 'FS' || player.label === 'SS'
+        const isMid = rn.includes('hook') || rn.includes('curl') || player.label === 'MLB'
+        const isFlat = rn.includes('flat') || rn.includes('curl-flat') || player.label === 'WLB' || player.label === 'SLB'
+        if (!isDeep && !isMid && !isFlat) return
+        const zoneW = isDeep ? sx(26) : isFlat ? sx(14) : sx(17)
+        const zoneH = isDeep ? sy(9) : isFlat ? sy(6) : sy(7)
+        const zoneColor = isDeep ? 'rgba(30,80,220,0.15)' : isMid ? 'rgba(180,160,0,0.15)' : 'rgba(0,140,90,0.15)'
+        const borderColor = isDeep ? 'rgba(30,80,220,0.5)' : isMid ? 'rgba(180,160,0,0.55)' : 'rgba(0,140,90,0.5)'
+        const yOff = isDeep ? -sy(5) : isMid ? -sy(3) : -sy(2)
+        ctx.save()
+        ctx.translate(pos.x, pos.y + yOff)
+        ctx.scale(1, 0.5)
+        ctx.fillStyle = zoneColor; ctx.strokeStyle = borderColor; ctx.lineWidth = 1.5
+        ctx.setLineDash([5, 3])
+        ctx.beginPath(); ctx.ellipse(0, 0, zoneW, zoneH, 0, 0, Math.PI * 2)
+        ctx.fill(); ctx.stroke()
+        ctx.setLineDash([])
+        ctx.restore()
+      })
+    }
+
+    function drawBall(t) {
+      if (isBSB || isBBall) return
+      const qb = parsed.players.find(p => p.id === 'QB')
+      const rb = parsed.players.find(p => p.id === 'RB')
+      if (!qb || !rb) return
+      const pt = t < snap ? 0 : Math.min((t - snap) / (1 - snap), 1)
+      const isHandoff = (qb.routeName || '').includes('Handoff')
+      if (isHandoff && pt >= 0.05 && pt <= 0.45) {
+        const hp = Math.min(1, (pt - 0.05) / 0.3)
+        const qbPos = getPos(qb, t)
+        const rbPos = getPos(rb, t)
+        const bx = qbPos.x + (rbPos.x - qbPos.x) * hp
+        const by = qbPos.y + (rbPos.y - qbPos.y) * hp
+        ctx.fillStyle = '#92400e'; ctx.strokeStyle = 'rgba(255,200,50,0.9)'; ctx.lineWidth = 1.5
+        ctx.beginPath(); ctx.arc(bx, by, r * 0.55, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+      }
+    }
+
+    function drawBBPass(t) {
+      if (!isBBall) return
+      const ballHolder = parsed.players.find(p => p.role === 'off' && getBBRole(p) === 'ball')
+      const shooter = parsed.players.find(p => p.role === 'off' && getBBRole(p) === 'shooter')
+      if (!ballHolder || !shooter) return
+      const pt = t < snap ? 0 : Math.min((t - snap) / (1 - snap), 1)
+      const passTime = 0.55
+      if (pt < passTime) {
+        // Ball dot on ball handler
+        const pos = getPos(ballHolder, t)
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
+        ctx.beginPath(); ctx.arc(pos.x + r, pos.y - r, r * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+      } else {
+        // Pass arc in flight
+        const pp2 = Math.min(1, (pt - passTime) / 0.3)
+        const startPos = getPos(ballHolder, snap + passTime * (1 - snap))
+        const endPos = getPos(shooter, t)
+        ctx.strokeStyle = 'rgba(255,220,50,0.9)'; ctx.lineWidth = 2; ctx.setLineDash([6, 3])
+        ctx.beginPath(); ctx.moveTo(startPos.x, startPos.y)
+        const steps = 24
+        for (let i = 1; i <= Math.round(steps * pp2); i++) {
+          const f = i / steps
+          ctx.lineTo(
+            startPos.x + (endPos.x - startPos.x) * f,
+            startPos.y + (endPos.y - startPos.y) * f - sy(8) * f * (1 - f) * 4
+          )
+        }
+        ctx.stroke(); ctx.setLineDash([])
+        if (pp2 < 1) {
+          const f = pp2
+          const bx = startPos.x + (endPos.x - startPos.x) * f
+          const by = startPos.y + (endPos.y - startPos.y) * f - sy(8) * f * (1 - f) * 4
+          ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
+          ctx.beginPath(); ctx.arc(bx, by, r * 0.55, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+        } else {
+          // Ball arrived — show on shooter
+          const pos = getPos(shooter, t)
+          ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
+          ctx.beginPath(); ctx.arc(pos.x + r, pos.y - r, r * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+        }
+      }
+    }
+
+    function drawPlayers(t) {
+      const defPlayers = (parsed.players || []).filter(p => p.role === 'def')
+      const offPlayers = (parsed.players || []).filter(p => p.role === 'off')
+      const isDefDiagram = defPlayers.length >= offPlayers.length
+
+      ;(parsed.players || []).forEach(player => {
+        const pos = getPos(player, t)
+        const isOff = player.role === 'off'
+        const isLineman = ['C', 'G', 'T'].includes(player.label)
+        const bbRole = isBBall ? getBBRole(player) : null
+
+        if (isOff) {
+          if (isBBall) {
+            // Basketball offensive players
+            const isBH = bbRole === 'ball'
+            const isShooter = bbRole === 'shooter'
+            const isScreener = bbRole === 'screen'
+            if (isBH || isShooter) {
+              ctx.fillStyle = isBH ? 'rgba(245,158,11,0.2)' : 'rgba(74,222,128,0.15)'
+              ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 2.5, 0, Math.PI * 2); ctx.fill()
+            }
+            ctx.fillStyle = isBH ? '#f59e0b' : isShooter ? '#4ade80' : isScreener ? '#999' : P
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 1.8
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+            ctx.fillStyle = isBH || isShooter ? '#000' : 'white'
+            ctx.font = `bold ${Math.round(r * 1.1)}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
+          } else if (isLineman) {
+            // Linemen = squares
+            ctx.fillStyle = P; ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1.5
+            const s = r * 0.95
+            ctx.fillRect(pos.x - s, pos.y - s, s * 2, s * 2)
+            ctx.strokeRect(pos.x - s, pos.y - s, s * 2, s * 2)
+            ctx.fillStyle = 'white'; ctx.font = `bold ${Math.round(r * 1.0)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
+          } else {
+            // Skill positions = circles
+            ctx.fillStyle = P; ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1.5
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+            ctx.fillStyle = 'white'; ctx.font = `bold ${Math.round(r * 1.0)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
+          }
+        } else {
+          // Defensive players
+          if (isDefDiagram && !isBBall && !isBSB) {
+            const rn2 = (player.routeName || '').toLowerCase()
+            const isDL = ['DE', 'DT', 'NT', 'DL', 'D'].includes(player.label)
+            const isBlitz = rn2.includes('blitz') || rn2.includes('rush')
+            ctx.fillStyle = isBlitz ? 'rgba(220,60,0,0.9)' : 'rgba(50,50,50,0.85)'
+            ctx.strokeStyle = 'rgba(200,200,200,0.9)'; ctx.lineWidth = 1.5
+            if (isDL) {
+              const s = r * 0.95
+              ctx.fillRect(pos.x - s, pos.y - s, s * 2, s * 2)
+              ctx.strokeRect(pos.x - s, pos.y - s, s * 2, s * 2)
+            } else {
+              ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+            }
+            ctx.fillStyle = 'white'; ctx.font = `bold ${Math.round(r * 0.85)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
+          } else {
+            // Ghost defenders (reference only)
+            ctx.strokeStyle = 'rgba(80,80,80,0.65)'; ctx.fillStyle = 'rgba(80,80,80,0.08)'; ctx.lineWidth = 1.2
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 0.85, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+            ctx.fillStyle = 'rgba(80,80,80,0.7)'; ctx.font = `${Math.round(r * 0.9)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            ctx.fillText(player.label, pos.x, pos.y)
+          }
+        }
+      })
+    }
+
+    function drawSnapFlash(t) {
+      if (!isBBall && !isBSB && t >= snap && t < snap + 0.06) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)'
+        ctx.font = `bold ${Math.round(H * 0.042)}px sans-serif`
+        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'
+        ctx.fillText('SNAP', W / 2, sy(37))
+      }
+    }
+
+    function draw(t) {
+      ctx.clearRect(0, 0, W, H)
+      drawField()
+      drawDefenseZones(t)
+      drawRoutes(t)
+      drawBall(t)
+      drawBBPass(t)
+      drawPlayers(t)
+      drawSnapFlash(t)
+    }
+
+    // Cancel any in-flight animation
+    if (animRef.current) cancelAnimationFrame(animRef.current)
 
     if (playing) {
       startTime = null
-      if (animRef.current) cancelAnimationFrame(animRef.current)
       function frame(ts) {
         if (!startTime) startTime = ts
-        const t = Math.min((ts-startTime)/dur, 1)
-        setProgress(t); draw(t)
-        if (t < 1) { animRef.current = requestAnimationFrame(frame) } else { setPlaying(false) }
+        const t = Math.min((ts - startTime) / dur, 1)
+        setProgress(t)
+        draw(t)
+        if (t < 1) {
+          animRef.current = requestAnimationFrame(frame)
+        } else {
+          setPlaying(false)
+          animRef.current = null
+        }
       }
       animRef.current = requestAnimationFrame(frame)
-    } else { draw(0) }
-    return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
+    } else {
+      draw(progress)
+    }
+
+    return () => {
+      if (animRef.current) { cancelAnimationFrame(animRef.current); animRef.current = null }
+    }
   }, [parsed, playing, P])
 
-  function replay() { if (animRef.current) cancelAnimationFrame(animRef.current); setProgress(0); setPlaying(true) }
+  function replay() {
+    if (animRef.current) { cancelAnimationFrame(animRef.current); animRef.current = null }
+    setProgress(0)
+    setPlaying(true)
+  }
 
   return (
-    <div style={{ marginTop:10, background:'#0f1219', borderRadius:10, border:`1px solid ${hexToRgba(P,0.3)}`, overflow:'hidden' }}>
-      <div style={{ padding:'9px 13px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:8, background:'#161922' }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, color:'#f2f4f8', flex:1 }}>{play.name}</span>
-        <span style={{ fontSize:10, color:'#8a94b0', fontFamily:"'DM Mono',monospace" }}>{play.type}</span>
-        {!parsed && !loading && !autoLoad && (<button onClick={generateAnim} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:1 }}>ANIMATE</button>)}
-        {parsed && (<button onClick={replay} disabled={playing} style={{ padding:'4px 12px', background:playing?'#ccc':P, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, cursor:playing?'not-allowed':'pointer', fontFamily:'inherit', letterSpacing:1 }}>{playing?'PLAYING':'REPLAY'}</button>)}
+    <div style={{ marginTop:10, background:'#0f1219', borderRadius:8, border:`1px solid ${hexToRgba(P,0.3)}`, overflow:'hidden' }}>
+      <div style={{ padding:'8px 12px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:8, background:'#161922' }}>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{play.name}</span>
+        <span style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>{play.type}</span>
+        {!parsed && !loading && !autoLoad && (
+          <button onClick={generateAnim} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:4, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>ANIMATE</button>
+        )}
+        {parsed && (
+          <button onClick={replay} disabled={playing} style={{ padding:'4px 12px', background:playing?'#3d4559':P, border:'none', borderRadius:4, color:'white', fontSize:10, fontWeight:700, cursor:playing?'not-allowed':'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>{playing ? 'PLAYING…' : 'REPLAY'}</button>
+        )}
       </div>
-      {loading && <div style={{ padding:14, textAlign:'center', color:'#666', fontSize:12 }}>Generating play diagram...</div>}
-      {error && <div style={{ padding:10, color:'#c00', fontSize:11 }}>Error: {error}</div>}
-      {parsed && (<div style={{ position:'relative' }}><canvas ref={canvasRef} width={500} height={300} style={{ width:'100%', display:'block' }} /><div style={{ position:'absolute', bottom:6, right:8, background:'rgba(0,0,0,0.4)', borderRadius:4, padding:'1px 6px', fontSize:9, color:'white' }}>{Math.round(progress*100)}%</div></div>)}
+      {loading && <div style={{ padding:16, textAlign:'center', color:'#666', fontSize:12, fontFamily:"'DM Sans',sans-serif" }}>Generating diagram…</div>}
+      {error && <ErrBox msg={error} />}
+      {parsed && (
+        <div style={{ position:'relative' }}>
+          <canvas ref={canvasRef} width={560} height={336} style={{ width:'100%', display:'block' }} />
+          <div style={{ position:'absolute', bottom:6, right:8, background:'rgba(0,0,0,0.45)', borderRadius:3, padding:'2px 7px', fontSize:9, color:'white', fontFamily:"'DM Mono',monospace" }}>{Math.round(progress * 100)}%</div>
+        </div>
+      )}
     </div>
   )
 }
