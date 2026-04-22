@@ -1202,7 +1202,7 @@ function FootballHoleDiagram({ P }) {
 }
 
 
-function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extraAction }) {
+function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extraAction, preloadedDiagram=null }) {
   const [showSummary, setShowSummary] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
@@ -1301,7 +1301,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
 
       {/* ── DIAGRAM — primary, always shown, auto-loads ── */}
       <div style={{ marginBottom:10 }}>
-        <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key={play.name} />
+        <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key={play.name} preloadedData={preloadedDiagram} />
       </div>
 
       {/* ── TOGGLE BUTTONS ── */}
@@ -1454,7 +1454,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
 }
 
 // ─── PLAY ANIMATOR ────────────────────────────────────────────────────────────
-function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) {
+function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, preloadedData=null }) {
   const canvasRef = useRef(null)
   const animRef = useRef(null)
   const [parsed, setParsed] = useState(null)
@@ -1478,12 +1478,13 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false }) 
   ))
 
   useEffect(() => {
+    if (preloadedData) { setParsed(preloadedData); return }
     try {
       const cached = sessionStorage.getItem(cacheKey)
       if (cached) { setParsed(JSON.parse(cached)); return }
     } catch(e) {}
     if (autoLoad) generateAnim()
-  }, [play?.name])
+  }, [play?.name, preloadedData])
 
   async function generateAnim() {
     setLoading(true); setError(null); setParsed(null)
@@ -3071,12 +3072,14 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
   const [offOpen, setOffOpen] = useState(true)
   const [defOpen, setDefOpen] = useState(true)
   const [prevSport, setPrevSport] = useState(sport)
+  const [diagrams, setDiagrams] = useState({}) // preloaded diagram data keyed by play.number
 
   if (sport !== prevSport) {
     setPrevSport(sport)
     setOffFields(initFields())
     setOffResult(null)
     setOffError('')
+    setDiagrams({})
   }
 
   async function generateOffense() {
@@ -3086,7 +3089,51 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
       const data = parseJSON(raw)
       if (!data.plays || !data.plays.length) throw new Error('No plays returned — please try again.')
       setOffResult(data)
+      setDiagrams({})
       setGenHistory(prev => ({ ...prev, [sport]: [{ ...data, _sport:sport, _ts:Date.now() }, ...(prev[sport]||[])].slice(0,20) }))
+      // Pre-generate all play diagrams in parallel — ready before user taps any card
+      if (data.plays && data.plays.length) {
+        const sportCfg = SPORTS[sport] || SPORTS.Football
+        const isBasketball = sport === 'Basketball'
+        const isBaseball = sport === 'Baseball' || sport === 'Softball'
+        data.plays.forEach(play => {
+          const animatorPlay = { ...play }
+          // Determine sport type detection same way PlayAnimator does
+          const typeStr = play.type || ''
+          const isBB = typeStr.includes('COURT')||typeStr.includes('PRESS')||typeStr.includes('BREAK')||typeStr.includes('INBOUND')||typeStr.includes('TRANSITION')||typeStr.includes('QUICK HITTER')||typeStr.includes('HALF COURT')
+          const isBSB = !isBB && (typeStr.includes('BATTING')||typeStr.includes('BASERUN')||typeStr.includes('BUNT')||typeStr.includes('HIT AND RUN')||typeStr.includes('FIRST AND THIRD')||typeStr.includes('OFFENSIVE APPROACH'))
+          const detectedSport = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
+          const cacheKey = 'coachiq_anim2_' + (play.name||'').replace(/\s/g,'_').slice(0,30)
+          // Check session cache first — skip API call if already cached
+          try {
+            const cached = sessionStorage.getItem(cacheKey)
+            if (cached) { const parsed2 = JSON.parse(cached); setDiagrams(prev => ({ ...prev, [play.number]: parsed2 })); return }
+          } catch(e) {}
+          // Build same prompt PlayAnimator would build, fire in background
+          ;(async () => {
+            try {
+              const fbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.18,duration:3200,players:[{id:"QB",label:"QB",role:"off",routeType:"route",x:50,y:44,path:[[50,44],[50,40]],routeName:"Handoff",routeYards:0},{id:"RB",label:"RB",role:"off",routeType:"route",x:47,y:47,path:[[47,47],[44,41],[42,34],[42,26]],routeName:"Run",routeYards:8},{id:"WR1",label:"WR",role:"off",routeType:"route",x:18,y:42,path:[[18,42],[18,32],[24,26]],routeName:"Curl",routeYards:0},{id:"WR2",label:"WR",role:"off",routeType:"route",x:82,y:42,path:[[82,42],[82,26]],routeName:"Go",routeYards:0},{id:"TE",label:"TE",role:"off",routeType:"block",x:64,y:42,path:[[64,42],[62,38]],routeName:"Block",routeYards:0},{id:"LT",label:"T",role:"off",routeType:"block",x:38,y:42,path:[[38,42],[38,38]],routeName:"",routeYards:0},{id:"LG",label:"G",role:"off",routeType:"block",x:44,y:42,path:[[44,42],[44,38]],routeName:"",routeYards:0},{id:"C",label:"C",role:"off",routeType:"block",x:50,y:42,path:[[50,42],[50,38]],routeName:"",routeYards:0},{id:"RG",label:"G",role:"off",routeType:"block",x:56,y:42,path:[[56,42],[56,38]],routeName:"",routeYards:0},{id:"RT",label:"T",role:"off",routeType:"block",x:62,y:42,path:[[62,42],[62,38]],routeName:"",routeYards:0},{id:"d1",label:"D",role:"def",routeType:"block",x:44,y:36,path:[[44,36],[44,38]],routeName:"Gap A",routeYards:0},{id:"d2",label:"D",role:"def",routeType:"block",x:50,y:36,path:[[50,36],[50,38]],routeName:"Gap A",routeYards:0},{id:"d3",label:"D",role:"def",routeType:"block",x:56,y:36,path:[[56,36],[56,38]],routeName:"Gap B",routeYards:0},{id:"d4",label:"LB",role:"def",routeType:"route",x:42,y:28,path:[[42,28],[42,34]],routeName:"Hook Zone",routeYards:0},{id:"d5",label:"LB",role:"def",routeType:"route",x:58,y:28,path:[[58,28],[58,34]],routeName:"Hook Zone",routeYards:0},{id:"d6",label:"CB",role:"def",routeType:"route",x:18,y:38,path:[[18,38],[18,30]],routeName:"Man",routeYards:0},{id:"d7",label:"CB",role:"def",routeType:"route",x:82,y:38,path:[[82,38],[82,30]],routeName:"Man",routeYards:0},{id:"d8",label:"S",role:"def",routeType:"route",x:50,y:18,path:[[50,18],[50,24]],routeName:"Deep Middle",routeYards:0}]})
+              const bbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.15,duration:3500,players:[{id:"PG",label:"1",role:"off",routeType:"route",x:50,y:50,path:[[50,50],[50,38]],routeName:"BALL: Dribble up",routeYards:0},{id:"SG",label:"2",role:"off",routeType:"route",x:72,y:44,path:[[72,44],[78,30]],routeName:"CUT: Wing",routeYards:0},{id:"SF",label:"3",role:"off",routeType:"route",x:82,y:36,path:[[82,36],[85,24]],routeName:"SHOOT: Corner",routeYards:0},{id:"PF",label:"4",role:"off",routeType:"block",x:62,y:20,path:[[62,20],[62,20]],routeName:"SCREEN: High",routeYards:0},{id:"C5",label:"5",role:"off",routeType:"block",x:50,y:14,path:[[50,14],[50,14]],routeName:"MOVE: Post",routeYards:0},{id:"d1",label:"D",role:"def",routeType:"block",x:50,y:52,path:[[50,52],[50,53]],routeName:"",routeYards:0},{id:"d2",label:"D",role:"def",routeType:"block",x:72,y:46,path:[[72,46],[72,47]],routeName:"",routeYards:0},{id:"d3",label:"D",role:"def",routeType:"block",x:82,y:38,path:[[82,38],[82,39]],routeName:"",routeYards:0},{id:"d4",label:"D",role:"def",routeType:"block",x:62,y:22,path:[[62,22],[62,23]],routeName:"",routeYards:0},{id:"d5",label:"D",role:"def",routeType:"block",x:50,y:16,path:[[50,16],[50,17]],routeName:"",routeYards:0}]})
+              const bsbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.2,duration:3000,players:[{id:"P",label:"P",role:"off",routeType:"block",x:50,y:28,path:[[50,28],[50,28]],routeName:"Pitch",routeYards:0},{id:"C",label:"C",role:"off",routeType:"block",x:50,y:44,path:[[50,44],[50,44]],routeName:"Receive",routeYards:0},{id:"1B",label:"1B",role:"off",routeType:"block",x:74,y:38,path:[[74,38],[74,38]],routeName:"Hold",routeYards:0},{id:"2B",label:"2B",role:"off",routeType:"block",x:64,y:26,path:[[64,26],[64,26]],routeName:"Cover",routeYards:0},{id:"SS",label:"SS",role:"off",routeType:"block",x:38,y:28,path:[[38,28],[38,28]],routeName:"Cover",routeYards:0},{id:"3B",label:"3B",role:"off",routeType:"block",x:26,y:38,path:[[26,38],[26,38]],routeName:"Hold",routeYards:0},{id:"LF",label:"LF",role:"off",routeType:"block",x:20,y:10,path:[[20,10],[20,10]],routeName:"Pos",routeYards:0},{id:"CF",label:"CF",role:"off",routeType:"block",x:50,y:6,path:[[50,6],[50,6]],routeName:"Pos",routeYards:0},{id:"RF",label:"RF",role:"off",routeType:"block",x:80,y:10,path:[[80,10],[80,10]],routeName:"Pos",routeYards:0},{id:"BAT",label:"B",role:"def",routeType:"route",x:50,y:46,path:[[50,46],[62,36]],routeName:"Run to 1B",routeYards:0}]})
+              let prompt
+              if (isBB) {
+                prompt = 'Generate basketball play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 (top). Players attack UPWARD (lower y = closer to basket). ONE player routeName starts with BALL:, ONE starts with SHOOT:, others use CUT:, MOVE:, or SCREEN:. Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
+              } else if (isBSB) {
+                prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
+              } else {
+                prompt = 'Generate football offensive play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38). Forward = LOWER y values. ALL routes/runs go to lower y. RB run path must continuously decrease y. Linemen move 3-4 units lower y. Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+              }
+              const raw = await callAI(prompt)
+              const parsed3 = parseJSON(raw)
+              if (parsed3 && parsed3.players && parsed3.players.length > 0) {
+                parsed3._sportType = detectedSport
+                try { sessionStorage.setItem(cacheKey, JSON.stringify(parsed3)) } catch(e) {}
+                setDiagrams(prev => ({ ...prev, [play.number]: parsed3 }))
+              }
+            } catch(e) {} // silent fail — PlayAnimator will handle on demand if needed
+          })()
+        })
+      }
       if (guestMode && setGuestSchemeCount) setGuestSchemeCount(n => n + 1)
     } catch(e) {
       const msg = e.message || 'Generation failed'
@@ -3151,7 +3198,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                 <p style={{ fontSize:12, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>{offResult.summary}</p>
                 {offResult.defenseTip && (<div style={{ padding:'8px 12px', background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Defensive Context</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{offResult.defenseTip}</div></div>)}
                 {(offResult.plays||[]).map(play => (
-                  <PlayCardWithSave key={play.number} play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addToPlaybook} onCreateAndAdd={createAndAdd} />
+                  <PlayCardWithSave key={play.number} play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addToPlaybook} onCreateAndAdd={createAndAdd} preloadedDiagram={diagrams[play.number]||null} />
                 ))}
                 {offResult.coachingCue && (<div style={{ marginTop:10, padding:10, background:al(P,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Coaching Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{offResult.coachingCue}"</div></div>)}
                 {/* Coming Soon tease */}
@@ -3189,7 +3236,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
 }
 
 // ─── PLAY CARD WITH SAVE TO PLAYBOOK ─────────────────────────────────────────
-function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, sport, playbook, onAddToPlaybook, onCreateAndAdd }) {
+function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, sport, playbook, onAddToPlaybook, onCreateAndAdd, preloadedDiagram=null }) {
   const [showSaveMenu, setShowSaveMenu] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const wrapRef = useRef(null)
@@ -3205,7 +3252,7 @@ function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSO
 
   return (
     <div ref={wrapRef} style={{ position:'relative' }}>
-      <PlayCard play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} extraAction={
+      <PlayCard play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} preloadedDiagram={preloadedDiagram} extraAction={
         <div style={{ position:'relative' }}>
           {saved ? (
             <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>✓ SAVED</span>
