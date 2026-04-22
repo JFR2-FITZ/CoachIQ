@@ -1606,8 +1606,8 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38 dashed). Forward = LOWER y. Defenders y=34-38. Safeties y=12-22.' +
         ' DIRECTION: ALL routes and run paths go to LOWER y values. RB run continuously decreases y. Linemen move 3-4 units lower y. DL moves higher y. Coverage drops lower y.' +
         ' === PRE-SNAP MOTION RULES — NFL/NCAA LAW, STRICTLY ENFORCE ===' +
-        ' ONLY ONE player may be in motion at the snap. ONLY eligible receivers may go in motion: WR, TE, RB, FB, H-back, slot. NEVER C, G, or T. NEVER QB (illegal). Motion is lateral or backward only — player must NOT be moving toward LOS at snap.' +
-        ' Motion player: pathDelay:-0.30. Path starts at pre-motion spot, moves laterally/backward, then continues into post-snap route — one continuous path array. routeName: "MOTION: [route name]".' +
+        ' ONLY ONE player may be in motion at the snap. ONLY eligible receivers may go in motion: WR, TE, RB, FB, H-back, slot. NEVER C, G, or T. NEVER QB (illegal). Motion direction rule: the pre-snap portion of the path MUST move SIDEWAYS (x changes) or BACKWARD (y increases = away from LOS) ONLY. y must NEVER decrease during pre-snap motion — decreasing y = moving toward LOS = ILLEGAL MOTION PENALTY.' +
+        ' Motion player: pathDelay:-0.30. Path array: pre-snap segment moves laterally (x changes, y stays same or increases), then post-snap route moves to lower y normally. Example legal motion: [[82,42],[70,42],[58,42]] then route [[58,42],[52,36]]. Example ILLEGAL (never do this): [[82,42],[76,40],[70,38]] — y decreasing during motion = forward = penalty.' +
         ' If play has NO pre-snap motion, NO player gets negative pathDelay except lead blockers.' +
         ' === pathDelay required on every player ===' +
         ' FB / H-back / pulling G / pulling T (lead blockers): pathDelay:-0.15. MUST arrive at point of attack before ball carrier. Path goes through hole first.' +
@@ -1668,18 +1668,22 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 
       if (delay < 0) {
         // NEGATIVE delay: player starts moving BEFORE the snap
-        // Their motion starts at t = snap + delay (which is before snap since delay < 0)
-        // Map total animation time so this player's path spans the full duration
-        const motionStart = snap + delay  // e.g. snap=0.18, delay=-0.15 → motionStart=0.03
-        if (t < motionStart) return { x: sx(path[0][0]), y: sy(path[0][1]) }
-        const pt = Math.min((t - motionStart) / (1 - motionStart), 1)
+        const motionStart = snap + delay  // e.g. snap=0.18, delay=-0.30 → motionStart=-0.12 (clamped to 0)
+        const effectiveStart = Math.max(0, motionStart)
+        if (t < effectiveStart) return { x: sx(path[0][0]), y: sy(path[0][1]) }
+        const pt = Math.min((t - effectiveStart) / (1 - effectiveStart), 1)
         const rawSeg = pt * segs
         const seg = Math.min(Math.floor(rawSeg), segs - 1)
         const segT = rawSeg - seg
-        return {
-          x: sx(lerp(path[seg][0], path[seg + 1][0], segT)),
-          y: sy(lerp(path[seg][1], path[seg + 1][1], segT))
-        }
+        const rawX = lerp(path[seg][0], path[seg + 1][0], segT)
+        const rawY = lerp(path[seg][1], path[seg + 1][1], segT)
+        // ENFORCE pre-snap motion rule: before the snap, y must not decrease (no forward motion)
+        // snap corresponds to a specific pt value: ptAtSnap = (snap - effectiveStart) / (1 - effectiveStart)
+        const ptAtSnap = Math.min(1, Math.max(0, (snap - effectiveStart) / Math.max(0.001, 1 - effectiveStart)))
+        const isPreSnap = pt < ptAtSnap
+        const startY = path[0][1]
+        const clampedY = isPreSnap ? Math.max(rawY, startY) : rawY  // pre-snap: y cannot go below startY (lower y = forward = illegal)
+        return { x: sx(rawX), y: sy(clampedY) }
       } else {
         // ZERO or POSITIVE delay: player holds pre-snap, then starts moving at snap + delay
         if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
@@ -3215,8 +3219,8 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS y=38). Forward=LOWER y. Defenders y=34-38. Safeties y=12-22.' +
                   ' DIRECTION: All routes/runs go LOWER y. RB continuously decreases y. OL move 3-4 units lower y. DL higher y. Coverage lower y.' +
                   ' === PRE-SNAP MOTION — NFL/NCAA RULES STRICTLY ENFORCED ===' +
-                  ' Only ONE player may be in motion. ONLY eligible: WR, TE, RB, FB, H-back, slot. NEVER OL (C/G/T), NEVER QB. Motion is lateral or backward only.' +
-                  ' Motion player: pathDelay:-0.30. Path starts at pre-motion spot, moves laterally, flows into post-snap route. routeName starts with MOTION:. No other player gets negative pathDelay except lead blockers.' +
+                  ' Only ONE player may be in motion. ONLY eligible: WR, TE, RB, FB, H-back, slot. NEVER OL (C/G/T), NEVER QB. Pre-snap motion direction law: y must NEVER decrease during pre-snap segment. Lateral (x changes, y same) or backward (y increases) ONLY. y decreasing pre-snap = forward toward LOS = ILLEGAL MOTION.' +
+                  ' Motion player: pathDelay:-0.30. Pre-snap path: x changes, y stays flat or increases. Post-snap: y decreases normally. Example legal: [[82,42],[70,42],[58,42],[52,36]] — first 3 lateral, 4th is post-snap. No other player gets negative pathDelay except lead blockers.' +
                   ' === pathDelay on every player ===' +
                   ' FB/H-back/pulling G or T (lead blockers): pathDelay:-0.15. Arrive at point of attack BEFORE ball carrier.' +
                   ' Standard OL C/non-pulling G/T: pathDelay:0. NEVER pre-snap motion.' +
