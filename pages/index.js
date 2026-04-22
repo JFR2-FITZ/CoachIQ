@@ -1603,20 +1603,30 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         ' Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
     } else {
       prompt = 'Generate a football play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
-        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38, dashed). Forward = LOWER y. Defenders at y=34-38. Safeties y=12-22.' +
-        ' DIRECTION RULES: ALL routes and run paths go to LOWER y (toward y=0). Receivers run to lower y. RB run continuously decreases y. Linemen move 3-4 units to lower y. DL moves to higher y (toward offense). Coverage drops to lower y (deeper).' +
-        ' TIMING — use pathDelay (float) on every player to model real football sequencing:' +
-        ' PRE-SNAP MOTION: any player in motion pre-snap gets pathDelay:-0.30 (they start moving well before the snap, their path includes the motion path then the route). Label their routeName with "MOTION: then [route]".' +
-        ' LEAD BLOCKERS (FB, H-back, pulling G, pulling T): pathDelay:-0.15. They fire before the snap count finishes and must arrive at the point of attack BEFORE the ball carrier.' +
-        ' STANDARD OL (C, non-pulling G, non-pulling T): pathDelay:0. Fire on snap.' +
-        ' BALL CARRIER (RB, QB keeper, pitchback): pathDelay:0.12. Reads the block, waits for hole to open, then attacks.' +
-        ' QUICK ROUTES (slant, quick out, smoke, hitch under 5 yds): pathDelay:0. Fire immediately on snap, fast path.' +
-        ' INTERMEDIATE ROUTES (curl, dig, cross, out 5-12 yds): pathDelay:0.05. Slightly delayed — stem, then break.' +
-        ' DEEP ROUTES (post, corner, go/fly over 12 yds): pathDelay:0.08. Stem upfield first, then make break late.' +
-        ' PLAY ACTION QB: pathDelay:0, fake handoff path first, then drop back or bootleg.' +
-        ' PASS SET QB (dropback): pathDelay:0, path shows 3/5/7 step drop moving to lower y then holding.' +
-        ' SCREENS (WR screen, RB screen): receiver pathDelay:-0.05, blocker pathDelay:-0.20 (blockers release downfield before receiver gets ball).' +
-        ' MOTION rule: if play involves pre-snap motion, the moving player path MUST start at their pre-motion spot and move laterally/forward BEFORE the snap, then continue their post-snap route — the full combined path goes in the path array.' +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38 dashed). Forward = LOWER y. Defenders y=34-38. Safeties y=12-22.' +
+        ' DIRECTION: ALL routes and run paths go to LOWER y values. RB run continuously decreases y. Linemen move 3-4 units lower y. DL moves higher y. Coverage drops lower y.' +
+        ' === PRE-SNAP MOTION RULES — NFL/NCAA LAW, STRICTLY ENFORCE ===' +
+        ' ONLY ONE player may be in motion at the snap. ONLY eligible receivers may go in motion: WR, TE, RB, FB, H-back, slot. NEVER C, G, or T. NEVER QB (illegal). Motion is lateral or backward only — player must NOT be moving toward LOS at snap.' +
+        ' Motion player: pathDelay:-0.30. Path starts at pre-motion spot, moves laterally/backward, then continues into post-snap route — one continuous path array. routeName: "MOTION: [route name]".' +
+        ' If play has NO pre-snap motion, NO player gets negative pathDelay except lead blockers.' +
+        ' === pathDelay required on every player ===' +
+        ' FB / H-back / pulling G / pulling T (lead blockers): pathDelay:-0.15. MUST arrive at point of attack before ball carrier. Path goes through hole first.' +
+        ' Standard OL (C, non-pulling G, non-pulling T): pathDelay:0. On snap only. NEVER in pre-snap motion.' +
+        ' Ball carrier (RB, pitchback, QB keeper): pathDelay:0.12. Reads, waits for block, then attacks.' +
+        ' Quick routes slant/hitch/quick-out/smoke under 5yd: pathDelay:0.' +
+        ' Intermediate routes curl/dig/cross/in-out 5-12yd: pathDelay:0.05.' +
+        ' Deep routes post/corner/go/fly over 12yd: pathDelay:0.08.' +
+        ' Play-action QB: pathDelay:0. Path fakes toward RB (2-3 points), then drops or boots opposite. routeName: "PA Bootleg Left", "PA Bootleg Right", or "PA Drop".' +
+        ' Dropback QB: pathDelay:0. 3/5/7-step drop moving to lower y. routeName: "3-Step Drop", "5-Step Drop", "7-Step Drop".' +
+        ' Screen blocker: pathDelay:-0.20. Screen receiver: pathDelay:-0.05.' +
+        ' === QB HANDOFF DIRECTION — MUST BE UNAMBIGUOUS ===' +
+        ' Every run play QB path must have 3-4 waypoints that make the handoff direction visually clear.' +
+        ' Inside zone LEFT: QB steps left and slightly forward — x decreases, y decreases slightly (e.g. [[50,44],[46,42],[43,41]]).' +
+        ' Inside zone RIGHT: QB steps right and slightly forward — x increases, y decreases slightly (e.g. [[50,44],[54,42],[57,41]]).' +
+        ' Counter/trap: QB steps one direction first (fake), then pivots and hands opposite direction.' +
+        ' Sweep/pitch: QB path moves quickly to the pitch side with clear lateral direction.' +
+        ' Keeper/bootleg: QB path goes clearly one direction past the LOS.' +
+        ' routeName must be one of: "Handoff Left", "Handoff Right", "Reverse Pivot Left", "Reverse Pivot Right", "Pitch Left", "Pitch Right", "Keeper Left", "Keeper Right", "Bootleg Left", "Bootleg Right", "PA Bootleg Left", "PA Bootleg Right", "3-Step Drop", "5-Step Drop", "7-Step Drop".' +
         ' Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
 
@@ -3202,19 +3212,22 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                 prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
               } else {
                 prompt = 'Generate a football play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
-                  ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38). Forward = LOWER y. Defenders y=34-38. Safeties y=12-22.' +
-                  ' DIRECTION: ALL routes/runs go to LOWER y. RB continuously decreases y. Linemen move 3-4 units lower y. DL moves higher y. Coverage drops lower y.' +
-                  ' TIMING — pathDelay (float) required on every player:' +
-                  ' Pre-snap motion player: pathDelay:-0.30, path includes motion then route, routeName starts with MOTION:.' +
-                  ' Lead blockers FB/H-back/pulling G or T: pathDelay:-0.15, arrive at point of attack before ball carrier.' +
-                  ' Standard OL C/non-pulling G/T: pathDelay:0.' +
-                  ' Ball carrier RB/QB-keeper/pitchback: pathDelay:0.12, waits for hole.' +
+                  ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS y=38). Forward=LOWER y. Defenders y=34-38. Safeties y=12-22.' +
+                  ' DIRECTION: All routes/runs go LOWER y. RB continuously decreases y. OL move 3-4 units lower y. DL higher y. Coverage lower y.' +
+                  ' === PRE-SNAP MOTION — NFL/NCAA RULES STRICTLY ENFORCED ===' +
+                  ' Only ONE player may be in motion. ONLY eligible: WR, TE, RB, FB, H-back, slot. NEVER OL (C/G/T), NEVER QB. Motion is lateral or backward only.' +
+                  ' Motion player: pathDelay:-0.30. Path starts at pre-motion spot, moves laterally, flows into post-snap route. routeName starts with MOTION:. No other player gets negative pathDelay except lead blockers.' +
+                  ' === pathDelay on every player ===' +
+                  ' FB/H-back/pulling G or T (lead blockers): pathDelay:-0.15. Arrive at point of attack BEFORE ball carrier.' +
+                  ' Standard OL C/non-pulling G/T: pathDelay:0. NEVER pre-snap motion.' +
+                  ' Ball carrier RB/pitchback/QB-keeper: pathDelay:0.12. Waits for hole.' +
                   ' Quick routes slant/hitch/smoke under 5yd: pathDelay:0.' +
-                  ' Intermediate routes curl/dig/cross/out 5-12yd: pathDelay:0.05.' +
-                  ' Deep routes post/corner/go over 12yd: pathDelay:0.08.' +
-                  ' Play action QB: pathDelay:0, fake first then drop or bootleg.' +
-                  ' Dropback QB: pathDelay:0, path shows 3/5/7 step drop to lower y then hold.' +
-                  ' Screen plays: blocker pathDelay:-0.20, receiver pathDelay:-0.05.' +
+                  ' Intermediate curl/dig/cross/out 5-12yd: pathDelay:0.05.' +
+                  ' Deep post/corner/go over 12yd: pathDelay:0.08.' +
+                  ' Play-action QB: pathDelay:0. Path fakes toward RB then drops/boots. routeName: PA Drop or PA Bootleg Left/Right.' +
+                  ' Dropback QB: pathDelay:0. 3/5/7-step drop moving to lower y. routeName: 3-Step Drop, 5-Step Drop, 7-Step Drop.' +
+                  ' === QB HANDOFF CLARITY ===' +
+                  ' QB path on ALL run plays must show exchange direction clearly with 3-4 points. Inside zone left: lower y, lower x. Inside zone right: lower y, higher x. Counter: fake one way then hand opposite. routeName must be Handoff Left, Handoff Right, Reverse Pivot Hand Left, Reverse Pivot Hand Right, Keeper Left, Keeper Right, Bootleg Left, or Bootleg Right.' +
                   ' Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
               }
               const raw = await callAI(prompt)
