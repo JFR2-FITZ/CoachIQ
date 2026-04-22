@@ -1605,6 +1605,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       prompt = 'Generate football offensive play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
         ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense lines up at y=42 (LOS=dashed line at y=38). Offense attacks UPWARD (forward = LOWER y values). Defenders at y=34-38. Safeties at y=12-24.' +
         ' CRITICAL RULES: (1) ALL forward routes and run paths must go to LOWER y values (e.g. y=42 to y=26 is forward 16 yards). (2) QB on RUN plays: routeName="Handoff", short path toward RB. (3) RB run path must go continuously toward lower y (e.g. [[47,47],[44,42],[42,34],[42,24]]). (4) Receivers run routes to LOWER y values. (5) Linemen move 3-4 units toward lower y (blocking forward). (6) Defensive players react: DL moves toward higher y (toward offense), coverage drops to lower y.' +
+        ' TIMING (pathDelay field, required on every player): Lead blockers FB and pulling G/T get pathDelay:-0.15 so they fire first and arrive at the point of attack before the RB. Ball carrier RB/QB-keeper gets pathDelay:0.12 so they read the block before hitting the hole. Standard linemen and receivers get pathDelay:0.' +
         ' Return ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
 
@@ -1642,9 +1643,14 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       if (!path || path.length < 2) return { x: sx(player.x), y: sy(player.y) }
       // Before snap: hold at start position
       if (t < snap) return { x: sx(path[0][0]), y: sy(path[0][1]) }
-      const pt = Math.min((t - snap) / (1 - snap), 1)
+      // pathDelay: fraction of post-snap time before this player starts moving
+      // Negative = starts before snap point (lead blockers)
+      // Positive = waits after snap (ball carrier waits for hole)
+      const delay = player.pathDelay || 0
+      const postSnap = (t - snap) / (1 - snap)
+      const adjustedPt = Math.max(0, Math.min(1, (postSnap - delay) / (1 - delay * 0.5 + 0.001)))
       const segs = path.length - 1
-      const rawSeg = pt * segs
+      const rawSeg = adjustedPt * segs
       const seg = Math.min(Math.floor(rawSeg), segs - 1)
       const segT = rawSeg - seg
       return {
@@ -1784,7 +1790,9 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
     }
 
     function drawRoutes(t) {
-      const pt = t < snap ? 0 : Math.min((t - snap) / (1 - snap), 1)
+      const isStatic = t < snap
+      const pt = isStatic ? 0 : Math.min((t - snap) / (1 - snap), 1)
+
       ;(parsed.players || []).forEach(player => {
         if (player.role !== 'off') return
         const path = player.path
@@ -1794,60 +1802,87 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         const bbRole = isBBall ? getBBRole(player) : null
 
         const routeColor = isLineman
-          ? 'rgba(120,120,120,0.6)'
+          ? 'rgba(120,120,120,0.65)'
           : isBBall
             ? (bbRole === 'ball' ? 'rgba(245,158,11,0.9)' : bbRole === 'shooter' ? 'rgba(74,222,128,0.9)' : hexToRgba(P, 0.8))
             : hexToRgba(P, 0.85)
 
-        // Draw the portion of the path traveled so far
         const segs = path.length - 1
-        const traveled = pt * segs
 
-        ctx.strokeStyle = routeColor
-        ctx.lineWidth = isLineman ? 1.2 : 2
-        ctx.setLineDash([])
-        ctx.beginPath()
-        ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+        if (isStatic) {
+          // ── STATIC VIEW: draw full route as ghost lines so coach can read the play ──
+          // Full route — dashed for receivers, solid-thin for linemen/blockers
+          ctx.strokeStyle = isLineman ? 'rgba(120,120,120,0.4)' : hexToRgba(P, isBBall ? 0.5 : 0.45)
+          ctx.lineWidth = isLineman ? 1 : 1.8
+          ctx.setLineDash(isBlock ? [4, 3] : [])
+          ctx.beginPath()
+          ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+          for (let s = 1; s < path.length; s++) ctx.lineTo(sx(path[s][0]), sy(path[s][1]))
+          ctx.stroke()
+          ctx.setLineDash([])
 
-        for (let s = 0; s < segs; s++) {
-          const segProgress = Math.max(0, Math.min(1, traveled - s))
-          if (segProgress <= 0) break
-          const ex = lerp(path[s][0], path[s + 1][0], segProgress)
-          const ey = lerp(path[s][1], path[s + 1][1], segProgress)
-          ctx.lineTo(sx(ex), sy(ey))
-        }
-        ctx.stroke()
-
-        // Arrowhead / block mark at end of route
-        const progress2 = Math.min(traveled / segs, 1)
-        if (progress2 >= 0.85) {
+          // Arrowhead or block mark at end of full route
           const ep = path[path.length - 1]
           const pp2 = path[path.length - 2]
           const endX = sx(ep[0]), endY = sy(ep[1])
-          ctx.fillStyle = routeColor
-          ctx.strokeStyle = routeColor
-          ctx.lineWidth = 2
+          ctx.fillStyle = isLineman ? 'rgba(120,120,120,0.55)' : hexToRgba(P, 0.6)
+          ctx.strokeStyle = isLineman ? 'rgba(120,120,120,0.55)' : hexToRgba(P, 0.6)
+          ctx.lineWidth = 1.8
           if (isBlock) {
-            perpMark(endX, endY, ep[0] - pp2[0], ep[1] - pp2[1], r * 1.5)
+            perpMark(endX, endY, ep[0] - pp2[0], ep[1] - pp2[1], r * 1.4)
           } else {
-            arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 2)
+            arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 1.9)
           }
-        }
 
-        // Route label (show before snap, at midpoint of path)
-        if (t < snap && !isBlock && player.routeName && !isBSB) {
-          const midIdx = Math.max(0, Math.floor(path.length / 2) - 1)
-          const lx = sx(path[midIdx][0])
-          const ly = sy(path[midIdx][1]) - r * 2.2
-          const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:)/, '').trim()
-          const displayText = player.routeYards > 0
-            ? (displayName ? displayName + ' ' + player.routeYards + 'yd' : player.routeYards + 'yd')
-            : displayName
-          if (displayText) {
-            ctx.fillStyle = isBBall ? 'rgba(220,220,220,0.9)' : hexToRgba(P, 0.9)
-            ctx.font = `bold ${Math.round(r * 1.7)}px sans-serif`
-            ctx.textAlign = 'center'
-            ctx.fillText(displayText, lx, ly)
+          // Route label at midpoint
+          if (!isBlock && player.routeName && !isBSB) {
+            const midIdx = Math.max(0, Math.floor(path.length / 2) - 1)
+            const lx = sx(path[midIdx][0])
+            const ly = sy(path[midIdx][1]) - r * 2.4
+            const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:)/, '').trim()
+            const displayText = player.routeYards > 0
+              ? (displayName ? displayName + ' ' + player.routeYards + 'yd' : player.routeYards + 'yd')
+              : displayName
+            if (displayText) {
+              ctx.fillStyle = isBBall ? 'rgba(200,200,200,0.85)' : hexToRgba(P, 0.85)
+              ctx.font = `bold ${Math.round(r * 1.65)}px sans-serif`
+              ctx.textAlign = 'center'
+              ctx.fillText(displayText, lx, ly)
+            }
+          }
+        } else {
+          // ── ANIMATED VIEW: draw the traveled portion of each route ──
+          const traveled = pt * segs
+
+          ctx.strokeStyle = routeColor
+          ctx.lineWidth = isLineman ? 1.3 : 2.2
+          ctx.setLineDash([])
+          ctx.beginPath()
+          ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+
+          for (let s = 0; s < segs; s++) {
+            const segProgress = Math.max(0, Math.min(1, traveled - s))
+            if (segProgress <= 0) break
+            const ex = lerp(path[s][0], path[s + 1][0], segProgress)
+            const ey = lerp(path[s][1], path[s + 1][1], segProgress)
+            ctx.lineTo(sx(ex), sy(ey))
+          }
+          ctx.stroke()
+
+          // Arrowhead / block mark at end of traveled route
+          const progress2 = Math.min(traveled / segs, 1)
+          if (progress2 >= 0.82) {
+            const ep = path[path.length - 1]
+            const pp2 = path[path.length - 2]
+            const endX = sx(ep[0]), endY = sy(ep[1])
+            ctx.fillStyle = routeColor
+            ctx.strokeStyle = routeColor
+            ctx.lineWidth = 2
+            if (isBlock) {
+              perpMark(endX, endY, ep[0] - pp2[0], ep[1] - pp2[1], r * 1.5)
+            } else {
+              arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 2)
+            }
           }
         }
       })
@@ -2071,6 +2106,11 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
     setPlaying(true)
   }
 
+  function pause() {
+    if (animRef.current) { cancelAnimationFrame(animRef.current); animRef.current = null }
+    setPlaying(false)
+  }
+
   return (
     <div style={{ marginTop:10, background:'#0f1219', borderRadius:8, border:`1px solid ${hexToRgba(P,0.3)}`, overflow:'hidden' }}>
       <div style={{ padding:'8px 12px', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:8, background:'#161922' }}>
@@ -2079,8 +2119,11 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         {!parsed && !loading && !autoLoad && (
           <button onClick={generateAnim} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:4, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>ANIMATE</button>
         )}
-        {parsed && (
-          <button onClick={replay} disabled={playing} style={{ padding:'4px 12px', background:playing?'#3d4559':P, border:'none', borderRadius:4, color:'white', fontSize:10, fontWeight:700, cursor:playing?'not-allowed':'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>{playing ? 'PLAYING…' : 'REPLAY'}</button>
+        {parsed && !playing && (
+          <button onClick={replay} style={{ padding:'4px 12px', background:P, border:'none', borderRadius:4, color:'white', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>▶ PLAY</button>
+        )}
+        {parsed && playing && (
+          <button onClick={pause} style={{ padding:'4px 12px', background:'#f59e0b', border:'none', borderRadius:4, color:'#000', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>⏸ PAUSE</button>
         )}
       </div>
       {loading && <div style={{ padding:16, textAlign:'center', color:'#666', fontSize:12, fontFamily:"'DM Sans',sans-serif" }}>Generating diagram…</div>}
@@ -3115,13 +3158,18 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               const fbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.18,duration:3200,players:[{id:"QB",label:"QB",role:"off",routeType:"route",x:50,y:44,path:[[50,44],[50,40]],routeName:"Handoff",routeYards:0},{id:"RB",label:"RB",role:"off",routeType:"route",x:47,y:47,path:[[47,47],[44,41],[42,34],[42,26]],routeName:"Run",routeYards:8},{id:"WR1",label:"WR",role:"off",routeType:"route",x:18,y:42,path:[[18,42],[18,32],[24,26]],routeName:"Curl",routeYards:0},{id:"WR2",label:"WR",role:"off",routeType:"route",x:82,y:42,path:[[82,42],[82,26]],routeName:"Go",routeYards:0},{id:"TE",label:"TE",role:"off",routeType:"block",x:64,y:42,path:[[64,42],[62,38]],routeName:"Block",routeYards:0},{id:"LT",label:"T",role:"off",routeType:"block",x:38,y:42,path:[[38,42],[38,38]],routeName:"",routeYards:0},{id:"LG",label:"G",role:"off",routeType:"block",x:44,y:42,path:[[44,42],[44,38]],routeName:"",routeYards:0},{id:"C",label:"C",role:"off",routeType:"block",x:50,y:42,path:[[50,42],[50,38]],routeName:"",routeYards:0},{id:"RG",label:"G",role:"off",routeType:"block",x:56,y:42,path:[[56,42],[56,38]],routeName:"",routeYards:0},{id:"RT",label:"T",role:"off",routeType:"block",x:62,y:42,path:[[62,42],[62,38]],routeName:"",routeYards:0},{id:"d1",label:"D",role:"def",routeType:"block",x:44,y:36,path:[[44,36],[44,38]],routeName:"Gap A",routeYards:0},{id:"d2",label:"D",role:"def",routeType:"block",x:50,y:36,path:[[50,36],[50,38]],routeName:"Gap A",routeYards:0},{id:"d3",label:"D",role:"def",routeType:"block",x:56,y:36,path:[[56,36],[56,38]],routeName:"Gap B",routeYards:0},{id:"d4",label:"LB",role:"def",routeType:"route",x:42,y:28,path:[[42,28],[42,34]],routeName:"Hook Zone",routeYards:0},{id:"d5",label:"LB",role:"def",routeType:"route",x:58,y:28,path:[[58,28],[58,34]],routeName:"Hook Zone",routeYards:0},{id:"d6",label:"CB",role:"def",routeType:"route",x:18,y:38,path:[[18,38],[18,30]],routeName:"Man",routeYards:0},{id:"d7",label:"CB",role:"def",routeType:"route",x:82,y:38,path:[[82,38],[82,30]],routeName:"Man",routeYards:0},{id:"d8",label:"S",role:"def",routeType:"route",x:50,y:18,path:[[50,18],[50,24]],routeName:"Deep Middle",routeYards:0}]})
               const bbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.15,duration:3500,players:[{id:"PG",label:"1",role:"off",routeType:"route",x:50,y:50,path:[[50,50],[50,38]],routeName:"BALL: Dribble up",routeYards:0},{id:"SG",label:"2",role:"off",routeType:"route",x:72,y:44,path:[[72,44],[78,30]],routeName:"CUT: Wing",routeYards:0},{id:"SF",label:"3",role:"off",routeType:"route",x:82,y:36,path:[[82,36],[85,24]],routeName:"SHOOT: Corner",routeYards:0},{id:"PF",label:"4",role:"off",routeType:"block",x:62,y:20,path:[[62,20],[62,20]],routeName:"SCREEN: High",routeYards:0},{id:"C5",label:"5",role:"off",routeType:"block",x:50,y:14,path:[[50,14],[50,14]],routeName:"MOVE: Post",routeYards:0},{id:"d1",label:"D",role:"def",routeType:"block",x:50,y:52,path:[[50,52],[50,53]],routeName:"",routeYards:0},{id:"d2",label:"D",role:"def",routeType:"block",x:72,y:46,path:[[72,46],[72,47]],routeName:"",routeYards:0},{id:"d3",label:"D",role:"def",routeType:"block",x:82,y:38,path:[[82,38],[82,39]],routeName:"",routeYards:0},{id:"d4",label:"D",role:"def",routeType:"block",x:62,y:22,path:[[62,22],[62,23]],routeName:"",routeYards:0},{id:"d5",label:"D",role:"def",routeType:"block",x:50,y:16,path:[[50,16],[50,17]],routeName:"",routeYards:0}]})
               const bsbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.2,duration:3000,players:[{id:"P",label:"P",role:"off",routeType:"block",x:50,y:28,path:[[50,28],[50,28]],routeName:"Pitch",routeYards:0},{id:"C",label:"C",role:"off",routeType:"block",x:50,y:44,path:[[50,44],[50,44]],routeName:"Receive",routeYards:0},{id:"1B",label:"1B",role:"off",routeType:"block",x:74,y:38,path:[[74,38],[74,38]],routeName:"Hold",routeYards:0},{id:"2B",label:"2B",role:"off",routeType:"block",x:64,y:26,path:[[64,26],[64,26]],routeName:"Cover",routeYards:0},{id:"SS",label:"SS",role:"off",routeType:"block",x:38,y:28,path:[[38,28],[38,28]],routeName:"Cover",routeYards:0},{id:"3B",label:"3B",role:"off",routeType:"block",x:26,y:38,path:[[26,38],[26,38]],routeName:"Hold",routeYards:0},{id:"LF",label:"LF",role:"off",routeType:"block",x:20,y:10,path:[[20,10],[20,10]],routeName:"Pos",routeYards:0},{id:"CF",label:"CF",role:"off",routeType:"block",x:50,y:6,path:[[50,6],[50,6]],routeName:"Pos",routeYards:0},{id:"RF",label:"RF",role:"off",routeType:"block",x:80,y:10,path:[[80,10],[80,10]],routeName:"Pos",routeYards:0},{id:"BAT",label:"B",role:"def",routeType:"route",x:50,y:46,path:[[50,46],[62,36]],routeName:"Run to 1B",routeYards:0}]})
+              // pathDelay rules injected into every football prompt:
+              // FB/pulling G = pathDelay -0.15 (fire before RB, lead the play)
+              // RB = pathDelay 0.12 (waits for hole to open)
+              // WRs/TEs running routes = pathDelay 0 (fire on snap)
+              // Linemen blocking = pathDelay 0
               let prompt
               if (isBB) {
                 prompt = 'Generate basketball play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 (top). Players attack UPWARD (lower y = closer to basket). ONE player routeName starts with BALL:, ONE starts with SHOOT:, others use CUT:, MOVE:, or SCREEN:. Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
               } else if (isBSB) {
                 prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
               } else {
-                prompt = 'Generate football offensive play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38). Forward = LOWER y values. ALL routes/runs go to lower y. RB run path must continuously decrease y. Linemen move 3-4 units lower y. Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+                prompt = 'Generate football offensive play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS at y=38). Forward = LOWER y values. ALL routes/runs go to lower y. RB run path must continuously decrease y. Linemen move 3-4 units lower y. TIMING RULES (pathDelay field): Lead blockers (FB, pulling G/T) use pathDelay:-0.15 so they fire before RB and arrive at point of attack first. Ball carrier (RB/QB keeper) uses pathDelay:0.12 so they wait for the hole to open. Receivers and standard linemen use pathDelay:0. Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
               }
               const raw = await callAI(prompt)
               const parsed3 = parseJSON(raw)
