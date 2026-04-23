@@ -1624,20 +1624,85 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       if (!data.players || data.players.length === 0) throw new Error('No players returned')
       data._sportType = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
       try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
-      // Sanitize pathDelay: OL (C, G, T) and DL can NEVER fire before the snap
-      // pathDelay < 0 on ineligible players = illegal motion penalty in real football
-      const INELIGIBLE_LABELS = new Set(['C','G','T','DE','DT','NT','DL','D'])
+      // ── FULL DIAGRAM SANITIZER ──────────────────────────────────────────────
+      // Enforces real football rules on AI-returned coordinates before rendering.
+      // No matter what the model returns, these rules hold.
       if (data.players) {
+        const snapY = 42  // LOS — offense lines up here
+        const OL_LABELS = new Set(['C','G','T'])
+        const DL_LABELS = new Set(['DE','DT','NT','DL','D'])
+        const INELIGIBLE = new Set(['C','G','T','DE','DT','NT','DL','D'])
+
         data.players.forEach(p => {
-          if (INELIGIBLE_LABELS.has(p.label) && (p.pathDelay || 0) < 0) {
+          if (!p.path || p.path.length < 2) return
+
+          // ── RULE 1: No OL, DL, or QB moves before the snap ──────────────────
+          if ((INELIGIBLE.has(p.label) || p.label === 'QB') && (p.pathDelay || 0) < 0) {
             p.pathDelay = 0
           }
-          // QB can never be in pre-snap motion (would need 1 full second set first — not modeled)
-          if (p.label === 'QB' && (p.pathDelay || 0) < 0) {
-            p.pathDelay = 0
+
+          // ── RULE 2: Offensive linemen on run plays must move FORWARD (lower y) ──
+          // A blocker can never retreat backward — that's surrendering the block
+          if (OL_LABELS.has(p.label) && p.role === 'off' && p.routeType === 'block') {
+            for (let i = 1; i < p.path.length; i++) {
+              // y must never increase from previous point (increasing y = backward)
+              if (p.path[i][1] > p.path[i-1][1]) {
+                p.path[i][1] = p.path[i-1][1] - 1  // force at least 1 unit forward
+              }
+              // Must move at least somewhat forward overall (end y < start y)
+              if (i === p.path.length - 1 && p.path[i][1] >= p.path[0][1]) {
+                p.path[i][1] = p.path[0][1] - 2
+              }
+            }
           }
+
+          // ── RULE 3: RB/ball carrier run paths must continuously go forward ──
+          // An RB path can have a single lateral jab step but must trend lower y
+          if ((p.id === 'RB' || p.id === 'HB' || p.id === 'FB') && p.routeType === 'route' && p.role === 'off') {
+            const isRunPlay = !isBasketball && !isBaseball
+            if (isRunPlay) {
+              // End point must be significantly forward of start
+              const startY = p.path[0][1]
+              const endY = p.path[p.path.length - 1][1]
+              if (endY >= startY - 4) {
+                // Force the run to go at least 8 units forward
+                const midX = p.path[Math.floor(p.path.length / 2)][0]
+                p.path[p.path.length - 1] = [midX, startY - 10]
+              }
+            }
+          }
+
+          // ── RULE 4: Defensive linemen must attack toward offense (higher y) ──
+          if (DL_LABELS.has(p.label) && p.role === 'def') {
+            for (let i = 1; i < p.path.length; i++) {
+              if (p.path[i][1] < p.path[i-1][1]) {
+                p.path[i][1] = p.path[i-1][1] + 1  // DL moves toward LOS = higher y
+              }
+            }
+          }
+
+          // ── RULE 5: Receivers on routes must end upfield (lower y) ──
+          const isReceiver = ['WR','TE','WR1','WR2','WR3','SL','SLT'].includes(p.label)
+          if (isReceiver && p.routeType === 'route' && p.role === 'off') {
+            const startY = p.path[0][1]
+            const endY = p.path[p.path.length - 1][1]
+            if (endY >= startY) {
+              // Force route to end upfield
+              p.path[p.path.length - 1][1] = startY - 8
+            }
+          }
+
+          // ── RULE 6: No player starts below y=55 or above y=5 ──
+          // Keeps everyone on the visible field
+          p.path = p.path.map(pt => [
+            Math.max(2, Math.min(98, pt[0])),  // x: 2-98
+            Math.max(5, Math.min(57, pt[1]))   // y: 5-57
+          ])
+          p.x = Math.max(2, Math.min(98, p.x))
+          p.y = Math.max(5, Math.min(57, p.y))
         })
       }
+      // ── END SANITIZER ────────────────────────────────────────────────────────
       setParsed(data)
     } catch(e) { setError(e.message) }
     setLoading(false)
@@ -3235,11 +3300,41 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               const parsed3 = parseJSON(raw)
               if (parsed3 && parsed3.players && parsed3.players.length > 0) {
                 parsed3._sportType = detectedSport
-                // Sanitize pathDelay: OL/DL/QB can never have negative pathDelay (pre-snap motion illegal)
-                const INELIG = new Set(['C','G','T','DE','DT','NT','DL','D','QB'])
+                // ── SANITIZER (mirrors PlayAnimator sanitizer) ──────────────────
+                const OL_SET = new Set(['C','G','T'])
+                const DL_SET = new Set(['DE','DT','NT','DL','D'])
+                const INELIG_SET = new Set(['C','G','T','DE','DT','NT','DL','D'])
                 parsed3.players.forEach(p => {
-                  if (INELIG.has(p.label) && (p.pathDelay || 0) < 0) p.pathDelay = 0
+                  if (!p.path || p.path.length < 2) return
+                  // Rule 1: no pre-snap motion for ineligible players
+                  if ((INELIG_SET.has(p.label) || p.label === 'QB') && (p.pathDelay || 0) < 0) p.pathDelay = 0
+                  // Rule 2: OL blockers must move forward (lower y)
+                  if (OL_SET.has(p.label) && p.role === 'off' && p.routeType === 'block') {
+                    for (let i = 1; i < p.path.length; i++) {
+                      if (p.path[i][1] > p.path[i-1][1]) p.path[i][1] = p.path[i-1][1] - 1
+                    }
+                    if (p.path[p.path.length-1][1] >= p.path[0][1]) p.path[p.path.length-1][1] = p.path[0][1] - 2
+                  }
+                  // Rule 3: RB/HB/FB run paths must end significantly forward
+                  if (['RB','HB','FB'].includes(p.id) && p.routeType === 'route' && p.role === 'off') {
+                    const startY3 = p.path[0][1], endY3 = p.path[p.path.length-1][1]
+                    if (endY3 >= startY3 - 4) p.path[p.path.length-1] = [p.path[Math.floor(p.path.length/2)][0], startY3 - 10]
+                  }
+                  // Rule 4: DL must move toward LOS (higher y)
+                  if (DL_SET.has(p.label) && p.role === 'def') {
+                    for (let i = 1; i < p.path.length; i++) {
+                      if (p.path[i][1] < p.path[i-1][1]) p.path[i][1] = p.path[i-1][1] + 1
+                    }
+                  }
+                  // Rule 5: receivers must end upfield
+                  if (['WR','TE','WR1','WR2','WR3'].includes(p.label) && p.routeType === 'route' && p.role === 'off') {
+                    if (p.path[p.path.length-1][1] >= p.path[0][1]) p.path[p.path.length-1][1] = p.path[0][1] - 8
+                  }
+                  // Rule 6: keep everyone on field
+                  p.path = p.path.map(pt => [Math.max(2,Math.min(98,pt[0])), Math.max(5,Math.min(57,pt[1]))])
+                  p.x = Math.max(2,Math.min(98,p.x)); p.y = Math.max(5,Math.min(57,p.y))
                 })
+                // ── END SANITIZER ────────────────────────────────────────────────
                 try { sessionStorage.setItem(cacheKey, JSON.stringify(parsed3)) } catch(e) {}
                 setDiagrams(prev => ({ ...prev, [play.number]: parsed3 }))
               }
