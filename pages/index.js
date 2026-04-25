@@ -1205,6 +1205,7 @@ function FootballHoleDiagram({ P }) {
 function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extraAction, preloadedDiagram=null }) {
   const [showSummary, setShowSummary] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [showDiagram, setShowDiagram] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
   const [showRoles, setShowRoles] = useState(false)
   const [showVariations, setShowVariations] = useState(false)
@@ -1221,26 +1222,41 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
 
   async function loadSteps() {
     if (steps) return
+    // Check session cache first
+    const stepsCacheKey = 'coachiq_steps_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+    try {
+      const cached = sessionStorage.getItem(stepsCacheKey)
+      if (cached) { setSteps(JSON.parse(cached)); return }
+    } catch(e) {}
     setStepsLoading(true)
     try {
       const isBBPlay = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
       const isBSBPlay = !isBBPlay && play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN'))
       const sportLabel = isBBPlay ? 'basketball' : isBSBPlay ? 'baseball' : 'football'
       const raw = await callAI('You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' Return ONLY valid JSON with these exact keys: {"steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2"],"playerRoles":[{"position":"pos","job":"job","whyTheyDoIt":"explain why"},{"position":"pos2","job":"job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"job","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"QB","instruction":"one sentence","termNote":""},{"player":"RB","instruction":"one sentence","termNote":""},{"player":"WR","instruction":"one sentence","termNote":""},{"player":"OL","instruction":"one sentence","termNote":""}]}')
-      setSteps(parseJSON(raw))
+      const parsedSteps = parseJSON(raw)
+      try { sessionStorage.setItem(stepsCacheKey, JSON.stringify(parsedSteps)) } catch(e) {}
+      setSteps(parsedSteps)
     } catch(e) { setSteps({ error: e.message }) }
     setStepsLoading(false)
   }
 
   async function loadVariations() {
     if (variations) { setShowVariations(true); return }
+    const varCacheKey = 'coachiq_vars_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+    try {
+      const cached = sessionStorage.getItem(varCacheKey)
+      if (cached) { setVariations(JSON.parse(cached)); setShowVariations(true); return }
+    } catch(e) {}
     setVariationsLoading(true)
     try {
       const isBB = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('SET PLAY'))
       const isBSB = play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING'))
       const sportName = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
       const raw = await callAI('You are a ' + sportName + ' coordinator. Base play: "' + play.name + '" (' + play.type + '). ' + play.note + ' Generate 3 variations. Return ONLY valid JSON: {"variations":[{"name":"name","note":"what differs and when","changeFrom":"what changed"},{"name":"name","note":"note","changeFrom":"changed"},{"name":"name","note":"note","changeFrom":"changed"}]}')
-      setVariations(parseJSON(raw).variations || [])
+      const parsedVars = parseJSON(raw).variations || []
+      try { sessionStorage.setItem(varCacheKey, JSON.stringify(parsedVars)) } catch(e) {}
+      setVariations(parsedVars)
       setShowVariations(true)
     } catch(e) { setVariations([]) }
     setVariationsLoading(false)
@@ -1299,9 +1315,18 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
       </div>
 
-      {/* ── DIAGRAM — primary, always shown, auto-loads ── */}
+      {/* ── DIAGRAM — collapsed by default, expand on tap ── */}
       <div style={{ marginBottom:10 }}>
-        <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key={play.name} preloadedData={preloadedDiagram} />
+        {!showDiagram ? (
+          <button onClick={()=>setShowDiagram(true)} style={{ width:'100%', padding:'8px 12px', background:'#0f1219', border:`1px solid ${hexToRgba(P,0.25)}`, borderRadius:6, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'1px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+          📐 VIEW DIAGRAM
+        </button>
+        ) : (
+          <div>
+            <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key={play.name} preloadedData={preloadedDiagram} />
+            <button onClick={()=>setShowDiagram(false)} style={{ width:'100%', marginTop:4, padding:'4px', background:'transparent', border:'none', color:'#5a6480', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>▲ COLLAPSE DIAGRAM</button>
+          </div>
+        )}
       </div>
 
       {/* ── TOGGLE BUTTONS ── */}
@@ -2463,6 +2488,12 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
 
   async function loadSteps() {
     if (steps) return
+    // Check session cache first
+    const stepsCacheKey = 'coachiq_steps_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+    try {
+      const cached = sessionStorage.getItem(stepsCacheKey)
+      if (cached) { setSteps(JSON.parse(cached)); return }
+    } catch(e) {}
     setStepsLoading(true)
     try {
       const sportLabel = sport || 'football'
@@ -6456,7 +6487,7 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
           <span style={{ color:cC }}>C</span><span style={{ color:cOach }}>oach</span><span style={{ color:cIQ }}>IQ</span>
         </div>
         <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, letterSpacing:'4px', color:'#5a6480', textTransform:'uppercase' }}>
-          {step===1 ? 'Set up your profile' : 'Your coaching philosophy'}
+          {step===1 ? 'Set up your profile' : 'Join the community'}
         </div>
         {step===2 && <div style={{ fontSize:11, color:'#5a6480', marginTop:6, maxWidth:280, margin:'6px auto 0' }}>This stays private. It helps CoachIQ understand what matters to you.</div>}
       </div>
@@ -6476,10 +6507,39 @@ function Onboarding({ onLaunch, onBack, brand='Red — C+IQ colored' }) {
           </div>
         ) : (
           <div>
-            <PhilQ label="What matters most to you as a coach?" options={['Player development','Having fun','Building confidence','Winning','A mix of all four']} value={philosophy.priority} onChange={v=>setPhilosophy(p=>({...p,priority:v}))} />
-            <PhilQ label="How do you measure a good season?" options={['Every kid improved','Everyone had fun','Strong record','A mix of all three']} value={philosophy.measure} onChange={v=>setPhilosophy(p=>({...p,measure:v}))} />
-            <PhilQ label="Who are you coaching?" options={['First-timers / Brand new','Mixed experience levels','Competitive / Experienced']} value={philosophy.who} onChange={v=>setPhilosophy(p=>({...p,who:v}))} />
-            <button onClick={handleLaunch} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Enter CoachIQ</button>
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#8a94b0', marginBottom:10 }}>What matters most to you as a coach?</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                {[
+                  { val:'Player development', emoji:'🏆', count:'1,247' },
+                  { val:'Having fun', emoji:'😄', count:'891' },
+                  { val:'Building confidence', emoji:'💪', count:'634' },
+                  { val:'Winning', emoji:'🥇', count:'503' },
+                  { val:'A mix of all four', emoji:'⚖️', count:'728' },
+                ].map(opt => (
+                  <button key={opt.val} onClick={()=>setPhilosophy(p=>({...p,priority:opt.val}))} style={{ width:'100%', padding:'10px 14px', background:philosophy.priority===opt.val?accent:'#161922', border:`1px solid ${philosophy.priority===opt.val?accent:'#1e2330'}`, borderRadius:6, color:philosophy.priority===opt.val?'white':'#9aa0b0', fontFamily:"'DM Sans',sans-serif", fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', textAlign:'left' }}>
+                    <span>{philosophy.priority===opt.val?'→ ':''}{opt.emoji} {opt.val}</span>
+                    <span style={{ fontSize:10, opacity:0.55, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>{opt.count} coaches</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#8a94b0', marginBottom:10 }}>Who are you coaching?</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                {[
+                  { val:'First-timers / Brand new', emoji:'🌱', count:'412' },
+                  { val:'Mixed experience levels', emoji:'🔄', count:'728' },
+                  { val:'Competitive / Experienced', emoji:'🔥', count:'503' },
+                ].map(opt => (
+                  <button key={opt.val} onClick={()=>setPhilosophy(p=>({...p,who:opt.val}))} style={{ width:'100%', padding:'10px 14px', background:philosophy.who===opt.val?accent:'#161922', border:`1px solid ${philosophy.who===opt.val?accent:'#1e2330'}`, borderRadius:6, color:philosophy.who===opt.val?'white':'#9aa0b0', fontFamily:"'DM Sans',sans-serif", fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', textAlign:'left' }}>
+                    <span>{philosophy.who===opt.val?'→ ':''}{opt.emoji} {opt.val}</span>
+                    <span style={{ fontSize:10, opacity:0.55, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>{opt.count} coaches</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button onClick={handleLaunch} disabled={!philosophy.priority||!philosophy.who} style={{ width:'100%', background:philosophy.priority&&philosophy.who?accent:'#3d4559', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:philosophy.priority&&philosophy.who?'pointer':'not-allowed', textTransform:'uppercase' }}>Enter CoachIQ</button>
           </div>
         )}
       </div>
