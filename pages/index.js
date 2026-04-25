@@ -1615,6 +1615,9 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n• Deep routes (post, corner, go over 12 yds): pathDelay:0.06. Stem before breaking.' +
         '\n• PRE-SNAP MOTION: ONLY assign pathDelay:-0.30 if the play name or description explicitly mentions motion (jet motion, fly motion, orbit motion, shifting). Motion is ONLY for eligible receivers (WR, TE, slot, H-back). NEVER for C, G, T, or QB. Motion path must be purely lateral (y stays flat) or backward (y increases). MOST PLAYS HAVE NO PRE-SNAP MOTION — default is no motion.' +
         '\n\nPRIMARY RECEIVER: On ALL pass plays, exactly ONE receiver must have routeYards > 0 — this marks them as the primary read/target. Set routeYards to the expected catch depth in yards (e.g. slant = 5, curl = 10, post = 18, go = 25). All other receivers get routeYards:0. This is critical for the throw animation to identify the target correctly.' +
+        '\n\nRECEIVER ALIGNMENT AND COLLISION AVOIDANCE: WRs always start OUTSIDE the offensive tackles (OL occupies x=36-64). Left WR starts at x=10-22, right WR at x=78-90. Slot WR starts at x=24-34 or x=66-76. On short routes (slant, hitch, quick out, smoke under 6 yards): the receiver path must NEVER cross through x=36-64 (the OL body zone) — route must stay outside or above the OL. A slant from the left WR goes from x=18,y=42 diagonally to x=32,y=32 — staying outside-to-inside but ABOVE the LOS and outside OL. It does NOT cut through the linemen. On crossing routes (dig, mesh, cross over 8 yards): receiver crosses through x=36-64 only AFTER clearing y=32 (well past the OL line of engagement at y=38-42). Linemen never end up in front of skill players on pass plays.' +
+        '\n\nPLAY ACTION QB: On all play action plays (routeName contains "PA" or "Bootleg"), the QB path must show: (1) short fake step toward the run direction (2 points near center), then (2) a clear rollout to the edge — ending at x=15-25 for left bootleg or x=75-85 for right bootleg, at y=36-38 (behind LOS but with clear throwing lane). QB must end up OUTSIDE the tackle box (outside x=36 or outside x=64) with clear space. The QB on play action is NOT a runner — he needs a lane to see and throw. His path: [[50,44],[45,42],[38,40],[28,38]] for left bootleg. routeName: "PA Bootleg Left" or "PA Bootleg Right".' +
+        '\n\nPA PASS THROW: On play action plays, the drawPassIndicator will fire — make sure one receiver has routeYards > 0 so the throw animates correctly. The primary target is typically a crossing route or the backside TE on a seam.' +
         '\n\nQB HANDOFF CLARITY on all run plays: QB path must have 3-4 points making direction unambiguous. Inside zone left: x decreases, y decreases slightly. Inside zone right: x increases, y decreases slightly. Counter: fake direction first, then hand opposite. QB routeName must be descriptive: "Handoff Left", "Handoff Right", "Reverse Pivot Right", "Pitch Left", "Bootleg Right", "PA Drop", "5-Step Drop", etc.' +
         '\n\nReturn ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
@@ -1695,13 +1698,35 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           }
 
           // ── RULE 6: No player starts below y=55 or above y=5 ──
-          // Keeps everyone on the visible field
           p.path = p.path.map(pt => [
-            Math.max(2, Math.min(98, pt[0])),  // x: 2-98
-            Math.max(5, Math.min(57, pt[1]))   // y: 5-57
+            Math.max(2, Math.min(98, pt[0])),
+            Math.max(5, Math.min(57, pt[1]))
           ])
           p.x = Math.max(2, Math.min(98, p.x))
           p.y = Math.max(5, Math.min(57, p.y))
+
+          // ── RULE 7: Short receiver routes must not pass through OL body zone ──
+          // OL occupy x=36-64, y=38-42. Short routes (end y > 30) that cross this zone
+          // are corrected to route around it. Only applies to WR/TE on pass plays.
+          const isRecv = ['WR','TE','WR1','WR2','WR3','SL'].includes(p.label)
+          if (isRecv && p.routeType === 'route' && p.role === 'off' && !isBasketball && !isBaseball) {
+            const endY = p.path[p.path.length - 1][1]
+            const endX = p.path[p.path.length - 1][0]
+            const isShortRoute = endY > 28  // ends within ~14 yards of LOS
+            const crossesOL = endX > 34 && endX < 66 && endY > 34
+            if (isShortRoute && crossesOL) {
+              // Route ends in OL zone — push endpoint outside OL zone
+              // If receiver started left (x<50), keep them left; if right, keep right
+              const startX = p.path[0][0]
+              if (startX < 50) {
+                // Left side receiver — push endpoint to left of OL (x < 34)
+                p.path[p.path.length - 1][0] = Math.min(endX, 32)
+              } else {
+                // Right side receiver — push endpoint to right of OL (x > 66)
+                p.path[p.path.length - 1][0] = Math.max(endX, 68)
+              }
+            }
+          }
         })
       }
       // ── END SANITIZER ────────────────────────────────────────────────────────
@@ -2060,7 +2085,13 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 
       // Detect pass play: QB routeName indicates drop/PA, not a run
       const qbRoute = (qb.routeName || '').toLowerCase()
-      const isPassPlay = qbRoute.includes('drop') || qbRoute.includes('pa ') || qbRoute.includes('bootleg')
+      const playType = (parsed.formation || '').toLowerCase()
+      const isPassPlay = qbRoute.includes('drop') || qbRoute.includes('pa ') ||
+                         qbRoute.includes('bootleg') || qbRoute.includes('pa boot') ||
+                         qbRoute.includes('pass') || qbRoute.includes('throw') ||
+                         playType.includes('pass') || playType.includes('action') ||
+                         // Also detect by play type label from the play object
+                         ((parsed._playType||'').toLowerCase().includes('pass'))
       if (!isPassPlay) return
 
       // Find primary receiver — prefer routeYards > 0, then first WR/TE with a route
@@ -3339,7 +3370,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
         const sportCfg = SPORTS[sport] || SPORTS.Football
         const isBasketball = sport === 'Basketball'
         const isBaseball = sport === 'Baseball' || sport === 'Softball'
-        data.plays.forEach(play => {
+        data.plays.forEach((play, playIdx) => {
           const animatorPlay = { ...play }
           // Determine sport type detection same way PlayAnimator does
           const typeStr = play.type || ''
@@ -3353,7 +3384,9 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
             if (cached) { const parsed2 = JSON.parse(cached); setDiagrams(prev => ({ ...prev, [play.number]: parsed2 })); return }
           } catch(e) {}
           // Build same prompt PlayAnimator would build, fire in background
+          // Stagger calls by 1.5s per play to avoid rate limiting
           ;(async () => {
+            await new Promise(res => setTimeout(res, playIdx * 1500))
             try {
               const fbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.18,duration:3200,players:[{id:"QB",label:"QB",role:"off",routeType:"route",x:50,y:44,path:[[50,44],[50,40]],routeName:"Handoff",routeYards:0},{id:"RB",label:"RB",role:"off",routeType:"route",x:47,y:47,path:[[47,47],[44,41],[42,34],[42,26]],routeName:"Run",routeYards:8},{id:"WR1",label:"WR",role:"off",routeType:"route",x:18,y:42,path:[[18,42],[18,32],[24,26]],routeName:"Curl",routeYards:0},{id:"WR2",label:"WR",role:"off",routeType:"route",x:82,y:42,path:[[82,42],[82,26]],routeName:"Go",routeYards:0},{id:"TE",label:"TE",role:"off",routeType:"block",x:64,y:42,path:[[64,42],[62,38]],routeName:"Block",routeYards:0},{id:"LT",label:"T",role:"off",routeType:"block",x:38,y:42,path:[[38,42],[38,38]],routeName:"",routeYards:0},{id:"LG",label:"G",role:"off",routeType:"block",x:44,y:42,path:[[44,42],[44,38]],routeName:"",routeYards:0},{id:"C",label:"C",role:"off",routeType:"block",x:50,y:42,path:[[50,42],[50,38]],routeName:"",routeYards:0},{id:"RG",label:"G",role:"off",routeType:"block",x:56,y:42,path:[[56,42],[56,38]],routeName:"",routeYards:0},{id:"RT",label:"T",role:"off",routeType:"block",x:62,y:42,path:[[62,42],[62,38]],routeName:"",routeYards:0},{id:"d1",label:"D",role:"def",routeType:"block",x:44,y:36,path:[[44,36],[44,38]],routeName:"Gap A",routeYards:0},{id:"d2",label:"D",role:"def",routeType:"block",x:50,y:36,path:[[50,36],[50,38]],routeName:"Gap A",routeYards:0},{id:"d3",label:"D",role:"def",routeType:"block",x:56,y:36,path:[[56,36],[56,38]],routeName:"Gap B",routeYards:0},{id:"d4",label:"LB",role:"def",routeType:"route",x:42,y:28,path:[[42,28],[42,34]],routeName:"Hook Zone",routeYards:0},{id:"d5",label:"LB",role:"def",routeType:"route",x:58,y:28,path:[[58,28],[58,34]],routeName:"Hook Zone",routeYards:0},{id:"d6",label:"CB",role:"def",routeType:"route",x:18,y:38,path:[[18,38],[18,30]],routeName:"Man",routeYards:0},{id:"d7",label:"CB",role:"def",routeType:"route",x:82,y:38,path:[[82,38],[82,30]],routeName:"Man",routeYards:0},{id:"d8",label:"S",role:"def",routeType:"route",x:50,y:18,path:[[50,18],[50,24]],routeName:"Deep Middle",routeYards:0}]})
               const bbTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.15,duration:3500,players:[{id:"PG",label:"1",role:"off",routeType:"route",x:50,y:50,path:[[50,50],[50,38]],routeName:"BALL: Dribble up",routeYards:0},{id:"SG",label:"2",role:"off",routeType:"route",x:72,y:44,path:[[72,44],[78,30]],routeName:"CUT: Wing",routeYards:0},{id:"SF",label:"3",role:"off",routeType:"route",x:82,y:36,path:[[82,36],[85,24]],routeName:"SHOOT: Corner",routeYards:0},{id:"PF",label:"4",role:"off",routeType:"block",x:62,y:20,path:[[62,20],[62,20]],routeName:"SCREEN: High",routeYards:0},{id:"C5",label:"5",role:"off",routeType:"block",x:50,y:14,path:[[50,14],[50,14]],routeName:"MOVE: Post",routeYards:0},{id:"d1",label:"D",role:"def",routeType:"block",x:50,y:52,path:[[50,52],[50,53]],routeName:"",routeYards:0},{id:"d2",label:"D",role:"def",routeType:"block",x:72,y:46,path:[[72,46],[72,47]],routeName:"",routeYards:0},{id:"d3",label:"D",role:"def",routeType:"block",x:82,y:38,path:[[82,38],[82,39]],routeName:"",routeYards:0},{id:"d4",label:"D",role:"def",routeType:"block",x:62,y:22,path:[[62,22],[62,23]],routeName:"",routeYards:0},{id:"d5",label:"D",role:"def",routeType:"block",x:50,y:16,path:[[50,16],[50,17]],routeName:"",routeYards:0}]})
@@ -3380,6 +3413,8 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   '\n• Ball carrier RB: pathDelay:0.10.' +
                   '\n• Deep routes over 12yd: pathDelay:0.06.' +
                   '\n• PRE-SNAP MOTION: ONLY if play name or description explicitly says motion/jet/fly/orbit. ONLY eligible receivers (WR, TE, slot, H-back). NEVER C, G, T, QB. Motion path must be purely lateral (y flat) or backward (y increases). MOST PLAYS HAVE ZERO PRE-SNAP MOTION.' +
+                  '\n\nRECEIVER ALIGNMENT: WRs always outside OL (OL x=36-64). Left WR at x=10-22, right WR at x=78-90, slot at x=24-34 or x=66-76. Short routes (slant/hitch/quick-out under 6yd): path must never cross x=36-64 — stay outside. Slant from left WR: x=18,y=42 → x=32,y=32, staying outside OL. Crossing routes only enter OL x-zone after clearing y=32 (past OL engagement).' +
+                  '\n\nPLAY ACTION QB: Path must show fake step (2 pts near center) then clear rollout to edge — left bootleg ends x=15-28, right bootleg ends x=72-85, both at y=36-38. QB must be OUTSIDE tackle box with throwing lane. Example left bootleg: [[50,44],[45,42],[38,40],[28,38]]. routeName: PA Bootleg Left or PA Bootleg Right. Mark one receiver routeYards > 0 for throw animation.' +
                   '\n\nQB on run plays: 3-4 path points, direction unambiguous. Left = x decreases y decreases. Right = x increases y decreases. routeName: Handoff Left, Handoff Right, Reverse Pivot Right, Pitch Left, Bootleg Right, PA Drop, 5-Step Drop, etc.' +
                   '\n\nReturn ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
               }
@@ -3420,6 +3455,14 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   // Rule 6: keep everyone on field
                   p.path = p.path.map(pt => [Math.max(2,Math.min(98,pt[0])), Math.max(5,Math.min(57,pt[1]))])
                   p.x = Math.max(2,Math.min(98,p.x)); p.y = Math.max(5,Math.min(57,p.y))
+                  // Rule 7: short receiver routes must not end in OL zone (x=36-64, y>34)
+                  const isRecv7 = ['WR','TE','WR1','WR2','WR3','SL'].includes(p.label)
+                  if (isRecv7 && p.routeType === 'route' && p.role === 'off') {
+                    const lastPt = p.path[p.path.length-1]
+                    if (lastPt[1] > 28 && lastPt[0] > 34 && lastPt[0] < 66 && lastPt[1] > 34) {
+                      lastPt[0] = p.path[0][0] < 50 ? Math.min(lastPt[0], 32) : Math.max(lastPt[0], 68)
+                    }
+                  }
                 })
                 // ── END SANITIZER ────────────────────────────────────────────────
                 try { sessionStorage.setItem(cacheKey, JSON.stringify(parsed3)) } catch(e) {}
