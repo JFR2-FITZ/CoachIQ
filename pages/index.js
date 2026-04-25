@@ -1614,6 +1614,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n• Ball carrier (RB on runs): pathDelay:0.10. Reads the block then hits the hole.' +
         '\n• Deep routes (post, corner, go over 12 yds): pathDelay:0.06. Stem before breaking.' +
         '\n• PRE-SNAP MOTION: ONLY assign pathDelay:-0.30 if the play name or description explicitly mentions motion (jet motion, fly motion, orbit motion, shifting). Motion is ONLY for eligible receivers (WR, TE, slot, H-back). NEVER for C, G, T, or QB. Motion path must be purely lateral (y stays flat) or backward (y increases). MOST PLAYS HAVE NO PRE-SNAP MOTION — default is no motion.' +
+        '\n\nPRIMARY RECEIVER: On ALL pass plays, exactly ONE receiver must have routeYards > 0 — this marks them as the primary read/target. Set routeYards to the expected catch depth in yards (e.g. slant = 5, curl = 10, post = 18, go = 25). All other receivers get routeYards:0. This is critical for the throw animation to identify the target correctly.' +
         '\n\nQB HANDOFF CLARITY on all run plays: QB path must have 3-4 points making direction unambiguous. Inside zone left: x decreases, y decreases slightly. Inside zone right: x increases, y decreases slightly. Counter: fake direction first, then hand opposite. QB routeName must be descriptive: "Handoff Left", "Handoff Right", "Reverse Pivot Right", "Pitch Left", "Bootleg Right", "PA Drop", "5-Step Drop", etc.' +
         '\n\nReturn ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
@@ -1681,14 +1682,15 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             }
           }
 
-          // ── RULE 5: Receivers on routes must end upfield (lower y) ──
+          // ── RULE 5: Receivers on routes must end past the LOS ──
+          // Only correct routes that end at or behind LOS (y >= 42) — not routes that
+          // end between LOS and start (slants, outs, hitches all have valid short y values)
           const isReceiver = ['WR','TE','WR1','WR2','WR3','SL','SLT'].includes(p.label)
           if (isReceiver && p.routeType === 'route' && p.role === 'off') {
-            const startY = p.path[0][1]
             const endY = p.path[p.path.length - 1][1]
-            if (endY >= startY) {
-              // Force route to end upfield
-              p.path[p.path.length - 1][1] = startY - 8
+            if (endY >= 40) {
+              // Route ends behind or at LOS — force it at least 6 yards upfield
+              p.path[p.path.length - 1][1] = 34
             }
           }
 
@@ -2049,6 +2051,90 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       }
     }
 
+    function drawPassIndicator(t) {
+      // Only on football pass plays, only after snap
+      if (isBBall || isBSB) return
+      const players = parsed.players || []
+      const qb = players.find(p => p.label === 'QB' && p.role === 'off')
+      if (!qb) return
+
+      // Detect pass play: QB routeName indicates drop/PA, not a run
+      const qbRoute = (qb.routeName || '').toLowerCase()
+      const isPassPlay = qbRoute.includes('drop') || qbRoute.includes('pa ') || qbRoute.includes('bootleg')
+      if (!isPassPlay) return
+
+      // Find primary receiver — prefer routeYards > 0, then first WR/TE with a route
+      const receivers = players.filter(p =>
+        p.role === 'off' && p.routeType === 'route' &&
+        ['WR','TE','WR1','WR2','WR3','SL','RB','HB','FB'].includes(p.label)
+      )
+      if (!receivers.length) return
+
+      const primary = receivers.find(p => (p.routeYards || 0) > 0) ||
+                      receivers.find(p => (p.routeName || '').toLowerCase().includes('slant')) ||
+                      receivers.find(p => (p.routeName || '').toLowerCase().includes('post')) ||
+                      receivers[0]
+
+      if (!primary) return
+
+      const pt = t < snap ? 0 : Math.min((t - snap) / (1 - snap), 1)
+
+      // Show throw arc after QB has had time to drop (pt > 0.45)
+      const throwStart = 0.45
+      if (pt < throwStart) return
+
+      const throwPt = Math.min(1, (pt - throwStart) / 0.4)
+
+      // QB release point — end of QB's drop path
+      const qbPos = getPos(qb, t)
+
+      // Target point — where the receiver is at catch time
+      const catchT = Math.min(1, snap + (1 - snap) * 0.85)
+      const targetPos = getPos(primary, catchT)
+
+      // Draw dotted throw arc from QB to target
+      const steps = 30
+      const drawSteps = Math.round(steps * throwPt)
+      const arcHeight = sy(6) // arc height for visual interest
+
+      ctx.strokeStyle = 'rgba(245,158,11,0.85)'
+      ctx.lineWidth = 2
+      ctx.setLineDash([6, 4])
+      ctx.beginPath()
+      ctx.moveTo(qbPos.x, qbPos.y)
+
+      for (let i = 1; i <= drawSteps; i++) {
+        const f = i / steps
+        const arcY = qbPos.y + (targetPos.y - qbPos.y) * f - arcHeight * f * (1 - f) * 4
+        const arcX = qbPos.x + (targetPos.x - qbPos.x) * f
+        ctx.lineTo(arcX, arcY)
+      }
+      ctx.stroke()
+      ctx.setLineDash([])
+
+      // Football at tip of arc
+      if (throwPt < 1) {
+        const f = throwPt
+        const ballX = qbPos.x + (targetPos.x - qbPos.x) * f
+        const ballY = qbPos.y + (targetPos.y - qbPos.y) * f - arcHeight * f * (1 - f) * 4
+        ctx.fillStyle = '#92400e'
+        ctx.strokeStyle = 'rgba(245,158,11,0.9)'
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.arc(ballX, ballY, r * 0.55, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+      } else {
+        // Ball arrived — highlight target receiver
+        const pos = getPos(primary, t)
+        ctx.strokeStyle = 'rgba(245,158,11,0.9)'
+        ctx.lineWidth = 2.5
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, r * 1.6, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+    }
+
     function drawBBPass(t) {
       if (!isBBall) return
       const ballHolder = parsed.players.find(p => p.role === 'off' && getBBRole(p) === 'ball')
@@ -2182,6 +2268,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       drawRoutes(t)
       drawBall(t)
       drawBBPass(t)
+      drawPassIndicator(t)
       drawPlayers(t)
       drawSnapFlash(t)
     }
@@ -3326,9 +3413,9 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                       if (p.path[i][1] < p.path[i-1][1]) p.path[i][1] = p.path[i-1][1] + 1
                     }
                   }
-                  // Rule 5: receivers must end upfield
+                  // Rule 5: receivers must end past LOS — only correct if route ends at/behind LOS
                   if (['WR','TE','WR1','WR2','WR3'].includes(p.label) && p.routeType === 'route' && p.role === 'off') {
-                    if (p.path[p.path.length-1][1] >= p.path[0][1]) p.path[p.path.length-1][1] = p.path[0][1] - 8
+                    if (p.path[p.path.length-1][1] >= 40) p.path[p.path.length-1][1] = 34
                   }
                   // Rule 6: keep everyone on field
                   p.path = p.path.map(pt => [Math.max(2,Math.min(98,pt[0])), Math.max(5,Math.min(57,pt[1]))])
