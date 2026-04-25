@@ -1318,9 +1318,33 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
       {/* ── DIAGRAM — collapsed by default, expand on tap ── */}
       <div style={{ marginBottom:10 }}>
         {!showDiagram ? (
-          <button onClick={()=>setShowDiagram(true)} style={{ width:'100%', padding:'8px 12px', background:'#0f1219', border:`1px solid ${hexToRgba(P,0.25)}`, borderRadius:6, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'1px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-          📐 VIEW DIAGRAM
-        </button>
+          /* ── Thumbnail preview — tap to expand ── */
+          <div onClick={()=>setShowDiagram(true)} style={{ cursor:'pointer', position:'relative', borderRadius:6, overflow:'hidden', border:`1px solid ${hexToRgba(P,0.2)}`, background:'#0f1219' }}>
+            {/* Mini static field */}
+            <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.7 }}>
+              <rect width="280" height="100" fill="#f4f4f0"/>
+              {[0,1,2,3].map(i=><line key={i} x1={0} y1={20+i*22} x2={280} y2={20+i*22} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+              <line x1={0} y1={64} x2={280} y2={64} stroke="rgba(0,0,0,0.3)" strokeWidth={1} strokeDasharray="6,4"/>
+              <text x={8} y={61} fontSize={7} fill="rgba(0,0,0,0.25)">LOS</text>
+              {/* Mini OL */}
+              {[-24,-12,0,12,24].map((off,i)=>(
+                <rect key={i} x={140+off-6} y={60} width={12} height={8} fill={P} rx={1} opacity={0.8}/>
+              ))}
+              {/* Mini skill players */}
+              <circle cx={35} cy={62} r={5} fill={P} opacity={0.7}/>
+              <circle cx={245} cy={62} r={5} fill={P} opacity={0.7}/>
+              <circle cx={140} cy={74} r={5} fill={P} opacity={0.7}/>
+              {/* Route suggestions */}
+              <path d="M 35 57 L 35 35 L 55 22" fill="none" stroke={P} strokeWidth={1.5} opacity={0.5}/>
+              <path d="M 245 57 L 245 35 L 225 22" fill="none" stroke={P} strokeWidth={1.5} opacity={0.5}/>
+            </svg>
+            {/* Overlay tap hint */}
+            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.35)' }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'1.5px', color:'white', display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ fontSize:14 }}>📐</span> TAP TO VIEW DIAGRAM
+              </div>
+            </div>
+          </div>
         ) : (
           <div>
             <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key={play.name} preloadedData={preloadedDiagram} />
@@ -1375,14 +1399,19 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
             <TabBtn label="Breakdown" active={showBreakdown} onClick={()=>{ const n=!showBreakdown; setShowBreakdown(n); if(n&&!steps) loadSteps() }} color='#6b9fff' />
             <TabBtn label="Player Roles" active={showRoles} onClick={()=>{ const n=!showRoles; setShowRoles(n); if(n&&!steps) loadSteps() }} color='#f59e0b' />
-            <TabBtn label="Variations" active={showVariations} onClick={()=>{ if(!showVariations) loadVariations(); else setShowVariations(false) }} color='#c084fc' />
+            <TabBtn label="Variations" active={showVariations||variationsLoading} onClick={()=>{ if(!showVariations&&!variationsLoading) loadVariations(); else { setShowVariations(false); } }} color='#c084fc' />
             <TabBtn label="Pro Look" active={showNfl} onClick={()=>{ if(!showNfl) loadNflComp(); else setShowNfl(false) }} color='#4ade80' />
           </div>
 
           {/* Breakdown */}
           {showBreakdown && (
             <div style={{ marginBottom:10 }}>
-              {stepsLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'8px 0' }}>Loading...</div>}
+              {stepsLoading && (
+                <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
+                  <div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                  <div style={{ fontSize:12, color:'#8a94b0' }}>Loading breakdown...</div>
+                </div>
+              )}
               {steps && !steps.error && steps.huddleCard && (
                 <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:8, padding:12, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>📋 Huddle Card</div>
@@ -1424,7 +1453,12 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           {/* Player Roles */}
           {showRoles && (
             <div style={{ marginBottom:10 }}>
-              {stepsLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'4px 0' }}>Loading roles...</div>}
+              {stepsLoading && (
+                <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
+                  <div style={{ width:16, height:16, borderRadius:'50%', border:'2px solid #f59e0b', borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                  <div style={{ fontSize:12, color:'#8a94b0' }}>Loading player roles...</div>
+                </div>
+              )}
               {steps && !steps.error && steps.playerRoles && steps.playerRoles.map((role,i) => (
                 <div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}>
                   <div style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:4 }}>
@@ -1438,9 +1472,14 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           )}
 
           {/* Variations */}
-          {showVariations && (
+          {(showVariations || variationsLoading) && (
             <div style={{ marginBottom:10 }}>
-              {variationsLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'4px 0' }}>Generating...</div>}
+              {variationsLoading && (
+                <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
+                  <div style={{ width:16, height:16, borderRadius:'50%', border:'2px solid #c084fc', borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                  <div style={{ fontSize:12, color:'#8a94b0' }}>Generating variations...</div>
+                </div>
+              )}
               {variations && variations.map((v,i) => (
                 <div key={i} style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:6 }}>
                   <div style={{ display:'flex', gap:8, marginBottom:3 }}>
@@ -1457,7 +1496,12 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           {/* Pro Look */}
           {showNfl && (
             <div style={{ marginBottom:10 }}>
-              {nflLoading && <div style={{ fontSize:11, color:'#8a94b0', padding:'4px 0' }}>Finding pro comparison...</div>}
+              {nflLoading && (
+                <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
+                  <div style={{ width:16, height:16, borderRadius:'50%', border:'2px solid #4ade80', borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                  <div style={{ fontSize:12, color:'#8a94b0' }}>Finding pro comparison...</div>
+                </div>
+              )}
               {nflComp && !nflComp.error && (
                 <div style={{ background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:12 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>🏆 Pro Comparison</div>
