@@ -1607,7 +1607,14 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n\nCRITICAL — DIAGRAM ACCURACY IS EVERYTHING: This diagram must be a direct, accurate schematic of the specific play called. Every player position, every route, every blocking assignment, every path must match what this play actually looks like when drawn up on a real whiteboard by an NFL or college coach. An NFL coach must be able to look at this and recognize it immediately.' +
         '\n\nFORMATION AND ALIGNMENT: Place every player in their correct pre-snap alignment for this specific play and formation. Get the formation right first — spread, I-formation, pistol, shotgun, Wing-T, single wing, etc. Spacing between OL should be realistic (about 3 units apart). WRs split wide at x=10-20 and x=80-90 unless slot or tight formation. TE tight to tackle at x=65-68 or off-ball. FB lined up at y=47-48 directly behind C in I-formation, or offset in other sets. HB/RB at y=50-52 in I, or offset in other backfield sets. QB under center at y=44, or y=46 in shotgun with snap distance.' +
         '\n\nROUTE AND BLOCKING ACCURACY: Every route must match the actual route concept for this play. Inside zone = OL all step playside, no pulling. Outside zone = OL reach block playside. Counter = backside G and T pull. Power = one guard pulls, FB kicks out. Trap = opposite guard pulls and traps. Sweep = multiple blockers lead outside. Pass plays = correct route combinations (flood, mesh, smash, four verts, etc). Every assignment must be what a real coach would draw.' +
-        '\n\nPATH RULES: All forward motion (routes, runs, blocks) goes to LOWER y. OL blocking paths decrease y by 3-4 units. RB run paths continuously decrease y. Receiver routes go to lower y. DL/LB defensive reactions: DL charge to higher y, coverage drops to lower y.' +
+        '\n\nPATH RULES — READ CAREFULLY:' +
+        '\n• OFFENSE attacking forward (routes, runs, OL blocks): goes to LOWER y (y=0 is the end zone being attacked).' +
+        '\n• QB DROPBACK — EXCEPTION: dropping back = moving AWAY from LOS = HIGHER y. QB under center starts y=44. On a 3-step drop he moves to y=49-50. On a 5-step drop to y=52-54. On a 7-step drop to y=55-57. This is moving BACKWARD = HIGHER y. QB path on pure pass plays: starts y=44, moves to higher y (backward). NEVER lower y on a dropback.' +
+        '\n• QB PLAY ACTION — drop back first then bootleg: Start y=44, fake toward run direction (small x shift, y stays ~44), then roll to edge ending at x=15-25 (left) or x=75-85 (right) at y=48-52 (behind LOS with space). Bootleg ends BEHIND the LOS = HIGHER y than snap.' +
+        '\n• RB run paths: continuously lower y (attacking forward).' +
+        '\n• OL blocking paths: decrease y 3-4 units (blocking forward).' +
+        '\n• DL charge: higher y (toward offense).' +
+        '\n• Coverage drops: lower y (deeper into coverage = lower y toward their own end zone).' +
         '\n\npathDelay field rules — ONLY assign non-zero when the play actually requires it:' +
         '\n• DEFAULT is pathDelay:0 for almost every player on almost every play.' +
         '\n• Pulling linemen (G or T who pull on counter/power/trap): pathDelay:0. They fire ON the snap — they just pull laterally instead of straight ahead. Their path shows the pull route (lateral then upfield). NEVER negative pathDelay for any lineman.' +
@@ -1616,9 +1623,15 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n• PRE-SNAP MOTION: ONLY assign pathDelay:-0.30 if the play name or description explicitly mentions motion (jet motion, fly motion, orbit motion, shifting). Motion is ONLY for eligible receivers (WR, TE, slot, H-back). NEVER for C, G, T, or QB. Motion path must be purely lateral (y stays flat) or backward (y increases). MOST PLAYS HAVE NO PRE-SNAP MOTION — default is no motion.' +
         '\n\nPRIMARY RECEIVER: On ALL pass plays, exactly ONE receiver must have routeYards > 0 — this marks them as the primary read/target. Set routeYards to the expected catch depth in yards (e.g. slant = 5, curl = 10, post = 18, go = 25). All other receivers get routeYards:0. This is critical for the throw animation to identify the target correctly.' +
         '\n\nRECEIVER ALIGNMENT AND COLLISION AVOIDANCE: WRs always start OUTSIDE the offensive tackles (OL occupies x=36-64). Left WR starts at x=10-22, right WR at x=78-90. Slot WR starts at x=24-34 or x=66-76. On short routes (slant, hitch, quick out, smoke under 6 yards): the receiver path must NEVER cross through x=36-64 (the OL body zone) — route must stay outside or above the OL. A slant from the left WR goes from x=18,y=42 diagonally to x=32,y=32 — staying outside-to-inside but ABOVE the LOS and outside OL. It does NOT cut through the linemen. On crossing routes (dig, mesh, cross over 8 yards): receiver crosses through x=36-64 only AFTER clearing y=32 (well past the OL line of engagement at y=38-42). Linemen never end up in front of skill players on pass plays.' +
-        '\n\nPLAY ACTION QB: On all play action plays (routeName contains "PA" or "Bootleg"), the QB path must show: (1) short fake step toward the run direction (2 points near center), then (2) a clear rollout to the edge — ending at x=15-25 for left bootleg or x=75-85 for right bootleg, at y=36-38 (behind LOS but with clear throwing lane). QB must end up OUTSIDE the tackle box (outside x=36 or outside x=64) with clear space. The QB on play action is NOT a runner — he needs a lane to see and throw. His path: [[50,44],[45,42],[38,40],[28,38]] for left bootleg. routeName: "PA Bootleg Left" or "PA Bootleg Right".' +
+        '\n\nPLAY ACTION QB — TWO PHASES:' +
+        '\n  PHASE 1 FAKE: QB takes 1-2 steps toward the run direction, y stays ~44, selling handoff. [[50,44],[46,44],[43,44]] for left fake.' +
+        '\n  PHASE 2 ROLLOUT: QB rolls to the edge, y INCREASES (moving backward, away from LOS). Left bootleg: ends x=20-28, y=48-52. Right bootleg: ends x=72-80, y=48-52.' +
+        '\n  Full left PA bootleg path: [[50,44],[46,44],[43,44],[36,46],[28,50]]. Full right: [[50,44],[54,44],[57,44],[64,46],[72,50]].' +
+        '\n  QB NEVER goes to lower y on any pass play. routeName: "PA Bootleg Left" or "PA Bootleg Right".' +
         '\n\nPA PASS THROW: On play action plays, the drawPassIndicator will fire — make sure one receiver has routeYards > 0 so the throw animates correctly. The primary target is typically a crossing route or the backside TE on a seam.' +
-        '\n\nQB HANDOFF CLARITY on all run plays: QB path must have 3-4 points making direction unambiguous. Inside zone left: x decreases, y decreases slightly. Inside zone right: x increases, y decreases slightly. Counter: fake direction first, then hand opposite. QB routeName must be descriptive: "Handoff Left", "Handoff Right", "Reverse Pivot Right", "Pitch Left", "Bootleg Right", "PA Drop", "5-Step Drop", etc.' +
+        '\n\nQB ON PURE DROPBACK PASSES: Path moves to HIGHER y only — dropping back = moving away from LOS. 3-step drop path: [[50,44],[50,47],[50,50]]. 5-step drop: [[50,44],[50,48],[50,53]]. 7-step drop: [[50,44],[50,49],[50,56]]. Shotgun: minimal movement. QB NEVER goes lower y on a pass play.' +
+        '\n\nRB ON PLAY ACTION: RB takes 2-3 steps in the primary run direction to sell the fake, then either stops or swings as a checkdown. This is critical — the fake only works if both QB and RB sell it simultaneously.' +
+        '\n\nQB HANDOFF on run plays: 3-4 path points, direction clear. Inside zone left: x decreases, y decreases slightly. Inside zone right: x increases, y decreases slightly. QB routeName must be: "Handoff Left", "Handoff Right", "Reverse Pivot Left", "Reverse Pivot Right", "Pitch Left", "Pitch Right", "3-Step Drop", "5-Step Drop", "7-Step Drop", "PA Bootleg Left", or "PA Bootleg Right".' +
         '\n\nReturn ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
 
@@ -1704,6 +1717,31 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           ])
           p.x = Math.max(2, Math.min(98, p.x))
           p.y = Math.max(5, Math.min(57, p.y))
+
+          // ── RULE 8: QB on pass plays must drop BACK (higher y), not forward ──
+          if (p.label === 'QB' && p.role === 'off') {
+            const qbRoute = (p.routeName || '').toLowerCase()
+            const isPassDrop = qbRoute.includes('drop') || qbRoute.includes('pa ') ||
+                               qbRoute.includes('bootleg') || qbRoute.includes('pa boot') ||
+                               qbRoute.includes('pass') || qbRoute.includes('throw')
+            if (isPassDrop && p.path.length >= 2) {
+              const startY = p.path[0][1]
+              const endY = p.path[p.path.length - 1][1]
+              // QB on pass must end BEHIND snap (higher y). If he's moving forward, fix it.
+              if (endY < startY + 3) {
+                // Force endpoint to be at least 6 units behind start (dropped back)
+                const isBootlegLeft = qbRoute.includes('left')
+                const isBootlegRight = qbRoute.includes('right')
+                if (isBootlegLeft) {
+                  p.path[p.path.length - 1] = [Math.min(28, p.path[p.path.length-1][0]), startY + 6]
+                } else if (isBootlegRight) {
+                  p.path[p.path.length - 1] = [Math.max(72, p.path[p.path.length-1][0]), startY + 6]
+                } else {
+                  p.path[p.path.length - 1] = [p.path[p.path.length-1][0], startY + 8]
+                }
+              }
+            }
+          }
 
           // ── RULE 7: Short receiver routes must not pass through OL body zone ──
           // OL occupy x=36-64, y=38-42. Short routes (end y > 30) that cross this zone
@@ -3407,15 +3445,15 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   '\n\nDIAGRAM ACCURACY IS EVERYTHING. This must be a direct accurate schematic of this specific play as an NFL or college coach would draw it. Every alignment, route, blocking assignment, and path must be correct for this exact play concept.' +
                   '\n\nFORMATION: Correct pre-snap alignment for this play. OL spaced ~3 units apart centered on C at x=50. WRs at x=10-20 and x=80-90 unless slot. TE at x=65-68. FB directly behind C at y=47-48 in I-formation. HB/RB at y=50-52 in I or offset. QB under center y=44, shotgun y=46.' +
                   '\n\nBLOCKING AND ROUTE ACCURACY: Inside zone = all OL step playside, no pulls. Outside zone = OL reach block. Counter = backside G and T pull through. Power = one G pulls, FB lead blocks. Trap = opposite G traps DL. Sweep = lead blockers outside. Pass plays = correct route combinations matching the concept (flood, mesh, smash, four verts, levels, etc).' +
-                  '\n\nPATH RULES: Forward = LOWER y always. OL block lower y 3-4 units. RB run continuously lower y. DL charge higher y. Coverage drops lower y.' +
+                  '\n\nPATH RULES: Offense attacking (runs/routes/OL blocks) = LOWER y. EXCEPTION — QB: dropping back = HIGHER y (moving away from LOS). QB 3-step drop ends y=49-50. 5-step drop ends y=52-54. 7-step drop ends y=55-57. QB NEVER moves to lower y on a pass play. PA bootleg: fake laterally (y stays ~44), then roll to edge ending at y=48-52 (higher y = behind LOS). DL charge = higher y. Coverage drops = lower y.' +
                   '\n\npathDelay — DEFAULT is 0. Only assign non-zero when the play specifically requires it.' +
                   '\n• Pulling G or T on counter/power/trap: pathDelay:0. They fire ON the snap and pull laterally — never before the snap. Path shows lateral pull route then upfield to block point. NEVER negative pathDelay for any lineman.' +
                   '\n• Ball carrier RB: pathDelay:0.10.' +
                   '\n• Deep routes over 12yd: pathDelay:0.06.' +
                   '\n• PRE-SNAP MOTION: ONLY if play name or description explicitly says motion/jet/fly/orbit. ONLY eligible receivers (WR, TE, slot, H-back). NEVER C, G, T, QB. Motion path must be purely lateral (y flat) or backward (y increases). MOST PLAYS HAVE ZERO PRE-SNAP MOTION.' +
                   '\n\nRECEIVER ALIGNMENT: WRs always outside OL (OL x=36-64). Left WR at x=10-22, right WR at x=78-90, slot at x=24-34 or x=66-76. Short routes (slant/hitch/quick-out under 6yd): path must never cross x=36-64 — stay outside. Slant from left WR: x=18,y=42 → x=32,y=32, staying outside OL. Crossing routes only enter OL x-zone after clearing y=32 (past OL engagement).' +
-                  '\n\nPLAY ACTION QB: Path must show fake step (2 pts near center) then clear rollout to edge — left bootleg ends x=15-28, right bootleg ends x=72-85, both at y=36-38. QB must be OUTSIDE tackle box with throwing lane. Example left bootleg: [[50,44],[45,42],[38,40],[28,38]]. routeName: PA Bootleg Left or PA Bootleg Right. Mark one receiver routeYards > 0 for throw animation.' +
-                  '\n\nQB on run plays: 3-4 path points, direction unambiguous. Left = x decreases y decreases. Right = x increases y decreases. routeName: Handoff Left, Handoff Right, Reverse Pivot Right, Pitch Left, Bootleg Right, PA Drop, 5-Step Drop, etc.' +
+                  '\n\nPA QB: Phase 1 fake — 2 steps in run direction, y stays ~44. Phase 2 rollout — QB rolls to edge, y INCREASES (moving back). Left bootleg ends x=20-28, y=48-52. Right bootleg ends x=72-80, y=48-52. Example left: [[50,44],[46,44],[43,44],[36,46],[28,50]]. NEVER lower y on pass play. RB runs fake path in run direction 2-3 steps to sell fake. Mark one receiver routeYards > 0.' +
+                  '\n\nQB pure pass drop: HIGHER y only. 3-step: [[50,44],[50,47],[50,50]]. 5-step: [[50,44],[50,48],[50,53]]. QB on run plays: x shifts per direction, y decreases slightly. routeName: Handoff Left, Handoff Right, Pitch Left, Pitch Right, 3-Step Drop, 5-Step Drop, 7-Step Drop, PA Bootleg Left, PA Bootleg Right.' +
                   '\n\nReturn ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
               }
               const raw = await callAI(prompt)
@@ -3455,6 +3493,20 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   // Rule 6: keep everyone on field
                   p.path = p.path.map(pt => [Math.max(2,Math.min(98,pt[0])), Math.max(5,Math.min(57,pt[1]))])
                   p.x = Math.max(2,Math.min(98,p.x)); p.y = Math.max(5,Math.min(57,p.y))
+                  // Rule 8: QB on pass plays must end at higher y (dropped back)
+                  if (p.label === 'QB' && p.role === 'off') {
+                    const qbR = (p.routeName || '').toLowerCase()
+                    const isPassQ = qbR.includes('drop')||qbR.includes('pa ')||qbR.includes('bootleg')||qbR.includes('pass')
+                    if (isPassQ && p.path.length >= 2) {
+                      const sY = p.path[0][1], eY = p.path[p.path.length-1][1]
+                      if (eY < sY + 3) {
+                        const bl = p.path[p.path.length-1]
+                        if (qbR.includes('left')) { bl[0] = Math.min(28, bl[0]); bl[1] = sY + 6 }
+                        else if (qbR.includes('right')) { bl[0] = Math.max(72, bl[0]); bl[1] = sY + 6 }
+                        else { bl[1] = sY + 8 }
+                      }
+                    }
+                  }
                   // Rule 7: short receiver routes must not end in OL zone (x=36-64, y>34)
                   const isRecv7 = ['WR','TE','WR1','WR2','WR3','SL'].includes(p.label)
                   if (isRecv7 && p.routeType === 'route' && p.role === 'off') {
