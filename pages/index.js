@@ -5067,9 +5067,9 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
                       {drill.body}
                     </div>
                     {drill.diagram && (
-                      <div style={{ background:'#161922', border:`1px solid ${al(catColor,0.25)}`, borderRadius:6, padding:'10px 12px', marginTop:4 }}>
-                        <div style={{ fontSize:9, color:catColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:6 }}>📐 DIAGRAM</div>
-                        <div style={{ fontSize:11, color:'#a0aec0', fontFamily:'monospace', lineHeight:1.8, whiteSpace:'pre-wrap' }}>{drill.diagram}</div>
+                      <div style={{ marginTop:4 }}>
+                        <div style={{ fontSize:9, color:catColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:4 }}>📐 DIAGRAM</div>
+                        <CoachingDiagram diagramKey={drill.title} P={P} />
                       </div>
                     )}
                   </div>
@@ -5181,6 +5181,394 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
           )}
         </div>
       ))}
+    </div>
+  )
+}
+
+
+// ─── COACHING DRILL DIAGRAM ───────────────────────────────────────────────────
+function CoachingDiagram({ diagramKey, P='#C0392B' }) {
+  const W = 320, H = 160
+  const diagrams = {
+    // ── FOOTBALL ──────────────────────────────────────────────────────────────
+    'three_step_drop': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        {/* Field */}
+        <rect width={W} height={H} fill="#f4f4f0" rx="4"/>
+        {[0,1,2,3,4].map(i=><line key={i} x1={0} y1={32+i*26} x2={W} y2={32+i*26} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+        <line x1={0} y1={106} x2={W} y2={106} stroke="rgba(0,0,0,0.4)" strokeWidth={1} strokeDasharray="8,5"/>
+        <text x={8} y={103} fontSize={8} fill="rgba(0,0,0,0.3)">LOS</text>
+        {/* QB drop steps */}
+        {[0,1,2].map(i=>(
+          <g key={i}>
+            <circle cx={160} cy={112+i*16} r={5} fill="none" stroke={P} strokeWidth={1.5} strokeDasharray="3,2" opacity={0.5+i*0.15}/>
+            <text x={170} y={116+i*16} fontSize={8} fill={P} opacity={0.7}>{i+1}</text>
+          </g>
+        ))}
+        {/* QB at snap */}
+        <circle cx={160} cy={110} r={9} fill={P} stroke="white" strokeWidth={1.5}/>
+        <text x={160} y={114} fontSize={9} fill="white" textAnchor="middle" fontWeight="bold">QB</text>
+        {/* After drop */}
+        <circle cx={160} cy={150} r={8} fill="none" stroke={P} strokeWidth={2}/>
+        <text x={160} y={154} fontSize={8} fill={P} textAnchor="middle" fontWeight="bold">QB</text>
+        {/* Arrow down (drop) */}
+        <line x1={160} y1={120} x2={160} y2={140} stroke={P} strokeWidth={2}/>
+        <polygon points={`156,140 164,140 160,148`} fill={P}/>
+        {/* Receiver */}
+        <circle cx={220} cy={72} r={9} fill={P} stroke="white" strokeWidth={1.5}/>
+        <text x={220} y={76} fontSize={9} fill="white" textAnchor="middle" fontWeight="bold">WR</text>
+        {/* Route line */}
+        <line x1={220} y1={106} x2={220} y2={72} stroke={P} strokeWidth={2}/>
+        <polygon points={`216,76 224,76 220,68`} fill={P}/>
+        {/* Throw arc */}
+        <path d={`M 162 148 Q 200 100 215 76`} fill="none" stroke="rgba(245,158,11,0.8)" strokeWidth={2} strokeDasharray="5,3"/>
+        <circle cx={215} cy={76} r={3} fill="#92400e"/>
+        {/* Labels */}
+        <text x={160} y={18} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">3-STEP DROP → PLANT → THROW</text>
+        <text x={126} y={155} fontSize={8} fill={P} fontFamily="sans-serif">Plant here</text>
+      </svg>
+    ),
+    'angle_tackle': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#f4f4f0" rx="4"/>
+        {[0,1,2,3,4].map(i=><line key={i} x1={0} y1={20+i*28} x2={W} y2={20+i*28} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+        {/* Cone channel */}
+        <rect x={120} y={10} width={80} height={140} fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.4)" strokeWidth={1} strokeDasharray="4,3" rx={2}/>
+        {/* Cones */}
+        {[[120,10],[200,10],[120,150],[200,150]].map(([cx,cy],i)=>(
+          <polygon key={i} points={`${cx},${cy+8} ${cx-5},${cy+16} ${cx+5},${cy+16}`} fill="#f59e0b"/>
+        ))}
+        {/* Ball carrier running down */}
+        <circle cx={160} cy={30} r={9} fill="#666" stroke="white" strokeWidth={1.5}/>
+        <text x={160} y={34} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">BC</text>
+        <line x1={160} y1={40} x2={160} y2={90} stroke="#666" strokeWidth={2}/>
+        <polygon points={`156,88 164,88 160,96`} fill="#666"/>
+        {/* Defender angle approach */}
+        <circle cx={80} cy={100} r={9} fill={P} stroke="white" strokeWidth={1.5}/>
+        <text x={80} y={104} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">DEF</text>
+        <line x1={89} y1={100} x2={147} y2={118} stroke={P} strokeWidth={2.5}/>
+        <polygon points={`143,122 151,114 153,124`} fill={P}/>
+        {/* Angle label */}
+        <text x={98} y={96} fontSize={9} fill={P} fontFamily="sans-serif">45°</text>
+        <path d="M 89 100 A 20 20 0 0 1 100 82" fill="none" stroke={P} strokeWidth={1} strokeDasharray="3,2"/>
+        {/* Wrap label */}
+        <text x={148} y={140} fontSize={8} fill="#5a6480" fontFamily="sans-serif" textAnchor="middle">Wrap up — both arms</text>
+        <text x={160} y={14} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">5-YARD CHANNEL — ANGLE TACKLE</text>
+      </svg>
+    ),
+    'run_blocking': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#f4f4f0" rx="4"/>
+        {[0,1,2,3,4].map(i=><line key={i} x1={0} y1={20+i*28} x2={W} y2={20+i*28} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+        <line x1={0} y1={90} x2={W} y2={90} stroke="rgba(0,0,0,0.35)" strokeWidth={1} strokeDasharray="8,5}"/>
+        <text x={8} y={87} fontSize={8} fill="rgba(0,0,0,0.3)">LOS</text>
+        {/* OL */}
+        {[[-80,-40,0,40,80]].flat().map((offset,i)=>(
+          <g key={i}>
+            <rect x={160+offset-10} y={84} width={20} height={14} fill={P} rx={2}/>
+            <text x={160+offset} y={95} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">{['T','G','C','G','T'][i]}</text>
+            {/* Forward step arrows */}
+            <line x1={160+offset} y1={84} x2={160+offset} y2={66} stroke={P} strokeWidth={1.8}/>
+            <polygon points={`${156+offset},68 ${164+offset},68 ${160+offset},62`} fill={P}/>
+          </g>
+        ))}
+        {/* Defenders */}
+        {[-60,-20,20,60].map((offset,i)=>(
+          <circle key={i} cx={160+offset} cy={72} r={8} fill="none" stroke="#444" strokeWidth={1.5}/>
+        ))}
+        {/* Step labels */}
+        <text x={160} y={150} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">First step toward defender → hands inside → drive</text>
+        <text x={160} y={14} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">RUN BLOCKING — OL FIRE OUT</text>
+      </svg>
+    ),
+    'cover_2': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#f4f4f0" rx="4"/>
+        {[0,1,2,3].map(i=><line key={i} x1={0} y1={30+i*36} x2={W} y2={30+i*36} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+        <line x1={0} y1={118} x2={W} y2={118} stroke="rgba(0,0,0,0.35)" strokeWidth={1} strokeDasharray="8,5"/>
+        <text x={8} y={115} fontSize={8} fill="rgba(0,0,0,0.3)">LOS</text>
+        {/* Deep half zones */}
+        <ellipse cx={84} cy={46} rx={72} ry={28} fill="rgba(30,80,220,0.12)" stroke="rgba(30,80,220,0.4)" strokeWidth={1.5} strokeDasharray="5,3"/>
+        <ellipse cx={236} cy={46} rx={72} ry={28} fill="rgba(30,80,220,0.12)" stroke="rgba(30,80,220,0.4)" strokeWidth={1.5} strokeDasharray="5,3"/>
+        <text x={84} y={38} fontSize={8} fill="rgba(30,80,220,0.8)" textAnchor="middle">Deep Half</text>
+        <text x={236} y={38} fontSize={8} fill="rgba(30,80,220,0.8)" textAnchor="middle">Deep Half</text>
+        {/* Safeties */}
+        <circle cx={84} cy={52} r={9} fill="#333" stroke="white" strokeWidth={1.5}/>
+        <text x={84} y={56} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">SS</text>
+        <circle cx={236} cy={52} r={9} fill="#333" stroke="white" strokeWidth={1.5}/>
+        <text x={236} y={56} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">FS</text>
+        {/* Flat zones */}
+        <ellipse cx={46} cy={98} rx={38} ry={14} fill="rgba(0,140,90,0.12)" stroke="rgba(0,140,90,0.4)" strokeWidth={1} strokeDasharray="4,3"/>
+        <ellipse cx={274} cy={98} rx={38} ry={14} fill="rgba(0,140,90,0.12)" stroke="rgba(0,140,90,0.4)" strokeWidth={1} strokeDasharray="4,3"/>
+        <text x={46} y={100} fontSize={7} fill="rgba(0,140,90,0.8)" textAnchor="middle">Flat</text>
+        <text x={274} y={100} fontSize={7} fill="rgba(0,140,90,0.8)" textAnchor="middle">Flat</text>
+        {/* CBs */}
+        <circle cx={30} cy={114} r={9} fill="#555" stroke="white" strokeWidth={1.5}/>
+        <text x={30} y={118} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">CB</text>
+        <circle cx={290} cy={114} r={9} fill="#555" stroke="white" strokeWidth={1.5}/>
+        <text x={290} y={118} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">CB</text>
+        {/* LBs */}
+        {[120,160,200].map((cx,i)=>(
+          <circle key={i} cx={cx} cy={90} r={8} fill="#555" stroke="white" strokeWidth={1.5}/>
+        ))}
+        <text x={160} y={155} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">CBs jam + drop to flat · Safeties own the deep halves</text>
+        <text x={160} y={14} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">COVER 2 ZONE</text>
+      </svg>
+    ),
+    'redzone': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#f4f4f0" rx="4"/>
+        <rect x={0} y={0} width={W} height={H} fill="rgba(192,57,43,0.04)" rx="4"/>
+        {[0,1,2].map(i=><line key={i} x1={0} y1={30+i*36} x2={W} y2={30+i*36} stroke="rgba(0,0,0,0.07)" strokeWidth={1}/>)}
+        <line x1={0} y1={130} x2={W} y2={130} stroke="rgba(0,0,0,0.35)" strokeWidth={1} strokeDasharray="8,5"/>
+        <text x={8} y={127} fontSize={8} fill="rgba(0,0,0,0.3)">LOS</text>
+        <line x1={0} y1={10} x2={W} y2={10} stroke={P} strokeWidth={3}/>
+        <text x={160} y={22} fontSize={9} fill={P} textAnchor="middle" fontFamily="sans-serif" fontWeight="bold">END ZONE</text>
+        {/* Compressed field indicator */}
+        <rect x={20} y={10} width={280} height={120} fill="none" stroke={P} strokeWidth={1} strokeDasharray="4,3" opacity={0.3}/>
+        <text x={8} y={70} fontSize={8} fill={P} opacity={0.6} transform="rotate(-90,8,70)">10 yds</text>
+        {/* Horizontal routes spread */}
+        {[[60,130,'WR'],[130,130,'TE'],[190,130,'WR'],[260,130,'WR']].map(([cx,cy,lbl],i)=>(
+          <g key={i}>
+            <circle cx={cx} cy={cy} r={8} fill={P} stroke="white" strokeWidth={1.5}/>
+            <text x={cx} y={cy+4} fontSize={7} fill="white" textAnchor="middle" fontWeight="bold">{lbl}</text>
+            <line x1={cx} y1={cy-8} x2={cx} y2={cy-8-(i===1?50:35)} stroke={P} strokeWidth={1.5}/>
+            <line x1={cx} y1={cy-8-(i===1?50:35)} x2={cx+(i<2?30:-30)} y2={cy-8-(i===1?50:35)} stroke={P} strokeWidth={1.5}/>
+            <polygon points={`${cx+(i<2?26:-26)},${cy-8-(i===1?50:35)-4} ${cx+(i<2?26:-26)},${cy-8-(i===1?50:35)+4} ${cx+(i<2?34:-34)},${cy-8-(i===1?50:35)}`} fill={P}/>
+          </g>
+        ))}
+        <text x={160} y={155} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">Horizontal stress — stretch defense laterally</text>
+      </svg>
+    ),
+    'presnap_reads': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#f4f4f0" rx="4"/>
+        {[0,1,2,3].map(i=><line key={i} x1={0} y1={20+i*32} x2={W} y2={20+i*32} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+        <line x1={0} y1={116} x2={W} y2={116} stroke="rgba(0,0,0,0.35)" strokeWidth={1} strokeDasharray="8,5"/>
+        {/* 1-high safety (Cover 1/3) */}
+        <text x={80} y={12} fontSize={8} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif" fontWeight="bold">1 HIGH = Cover 1/3</text>
+        <circle cx={80} cy={32} r={9} fill="#333" stroke="white" strokeWidth={1.5}/>
+        <text x={80} y={36} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">S</text>
+        <circle cx={40} cy={80} r={8} fill="#555" stroke="white" strokeWidth={1.2}/>
+        <text x={40} y={84} fontSize={7} fill="white" textAnchor="middle">CB</text>
+        <circle cx={120} cy={80} r={8} fill="#555" stroke="white" strokeWidth={1.2}/>
+        <text x={120} y={84} fontSize={7} fill="white" textAnchor="middle">CB</text>
+        <line x1={80} y1={12} x2={80} y2={108} stroke="rgba(0,0,0,0.1)" strokeWidth={1} strokeDasharray="3,3"/>
+        {/* 2-high safeties (Cover 2/4) */}
+        <text x={240} y={12} fontSize={8} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif" fontWeight="bold">2 HIGH = Cover 2/4</text>
+        <circle cx={210} cy={32} r={9} fill="#333" stroke="white" strokeWidth={1.5}/>
+        <text x={210} y={36} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">S</text>
+        <circle cx={270} cy={32} r={9} fill="#333" stroke="white" strokeWidth={1.5}/>
+        <text x={270} y={36} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">S</text>
+        <circle cx={200} cy={80} r={8} fill="#555" stroke="white" strokeWidth={1.2}/>
+        <text x={200} y={84} fontSize={7} fill="white" textAnchor="middle">CB</text>
+        <circle cx={280} cy={80} r={8} fill="#555" stroke="white" strokeWidth={1.2}/>
+        <text x={280} y={84} fontSize={7} fill="white" textAnchor="middle">CB</text>
+        <line x1={160} y1={0} x2={160} y2={H} stroke="rgba(0,0,0,0.12)" strokeWidth={1}/>
+        {/* QB eye icon */}
+        <text x={160} y={130} fontSize={11} textAnchor="middle">👁️</text>
+        <text x={160} y={148} fontSize={8} fill={P} textAnchor="middle" fontFamily="sans-serif">QB: Find safeties first, then ID the Mike</text>
+      </svg>
+    ),
+    'zone_blocking': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#f4f4f0" rx="4"/>
+        {[0,1,2,3,4].map(i=><line key={i} x1={0} y1={20+i*28} x2={W} y2={20+i*28} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+        <line x1={0} y1={104} x2={W} y2={104} stroke="rgba(0,0,0,0.35)" strokeWidth={1} strokeDasharray="8,5"/>
+        <text x={8} y={101} fontSize={8} fill="rgba(0,0,0,0.3)">LOS</text>
+        {/* Zone step arrows — all step right */}
+        {[60,100,140,180,220].map((cx,i)=>(
+          <g key={i}>
+            <rect x={cx-10} y={97} width={20} height={14} fill={P} rx={2}/>
+            <text x={cx} y={108} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">{['T','G','C','G','T'][i]}</text>
+            <line x1={cx+10} y1={104} x2={cx+22} y2={94} stroke={P} strokeWidth={2}/>
+            <polygon points={`${cx+18},${90} ${cx+26},${90} ${cx+26},${98}`} fill={P}/>
+          </g>
+        ))}
+        {/* Defenders */}
+        {[80,130,170,210].map((cx,i)=>(
+          <circle key={i} cx={cx} cy={82} r={8} fill="none" stroke="#444" strokeWidth={1.5}/>
+        ))}
+        {/* RB reading the cut */}
+        <circle cx={145} cy={130} r={9} fill={P} stroke="white" strokeWidth={1.5}/>
+        <text x={145} y={134} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">RB</text>
+        <path d="M 145 120 L 145 108 L 175 82" fill="none" stroke={P} strokeWidth={2} strokeDasharray="4,2"/>
+        <polygon points={`170,78 180,80 175,88`} fill={P}/>
+        <text x={160} y={155} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">All OL step playside → RB reads the cut lane</text>
+        <text x={160} y={14} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">ZONE BLOCKING — STEP & READ</text>
+      </svg>
+    ),
+    // ── BASKETBALL ─────────────────────────────────────────────────────────────
+    'defensive_slide': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#c8904a" rx="4"/>
+        <rect x={20} y={10} width={280} height={140} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth={1.5}/>
+        {/* Player */}
+        <circle cx={160} cy={85} r={12} fill={P} stroke="white" strokeWidth={2}/>
+        <text x={160} y={89} fontSize={9} fill="white" textAnchor="middle" fontWeight="bold">DEF</text>
+        {/* Slide arrows */}
+        <path d="M 80 85 L 50 85" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth={2}/>
+        <polygon points={`54,81 46,85 54,89`} fill="rgba(255,255,255,0.8)"/>
+        <path d="M 240 85 L 270 85" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth={2}/>
+        <polygon points={`266,81 274,85 266,89`} fill="rgba(255,255,255,0.8)"/>
+        {/* Feet */}
+        <ellipse cx={151} cy={100} rx={6} ry={4} fill="rgba(255,255,255,0.4)"/>
+        <ellipse cx={169} cy={100} rx={6} ry={4} fill="rgba(255,255,255,0.4)"/>
+        {/* Labels */}
+        <text x={160} y={130} fontSize={9} fill="white" textAnchor="middle" opacity={0.9}>Feet never cross · Stay low · Head up</text>
+        <text x={160} y={22} fontSize={9} fill="white" textAnchor="middle" opacity={0.8}>DEFENSIVE SLIDE DRILL</text>
+      </svg>
+    ),
+    'pick_roll': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#c8904a" rx="4"/>
+        <rect x={20} y={10} width={280} height={140} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth={1.5}/>
+        <circle cx={160} cy={10} r={8} fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.6)" strokeWidth={1.5}/>
+        {/* Ball handler */}
+        <circle cx={160} cy={110} r={10} fill={P} stroke="white" strokeWidth={2}/>
+        <text x={160} y={114} fontSize={9} fill="white" textAnchor="middle" fontWeight="bold">1</text>
+        {/* Screener */}
+        <circle cx={160} cy={78} r={10} fill={P} stroke="white" strokeWidth={2}/>
+        <text x={160} y={82} fontSize={9} fill="white" textAnchor="middle" fontWeight="bold">5</text>
+        {/* Screen icon */}
+        <rect x={152} y={60} width={16} height={22} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} strokeDasharray="3,2"/>
+        {/* Ball handler drives */}
+        <path d="M 160 100 L 200 68" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth={2}/>
+        <polygon points={`196,64 204,66 200,74`} fill="rgba(255,255,255,0.8)"/>
+        {/* Roll */}
+        <path d="M 160 68 L 160 40 L 200 40" fill="none" stroke="rgba(245,158,11,0.9)" strokeWidth={2} strokeDasharray="4,2"/>
+        <polygon points={`196,36 204,40 196,44`} fill="rgba(245,158,11,0.9)"/>
+        <text x={205} y={44} fontSize={8} fill="rgba(245,158,11,0.9)">Roll</text>
+        {/* Defender options */}
+        <circle cx={130} cy={95} r={8} fill="#333" stroke="white" strokeWidth={1.2}/>
+        <text x={130} y={99} fontSize={7} fill="white" textAnchor="middle">D</text>
+        <text x={160} y={150} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Go over screen or switch — communicate!</text>
+      </svg>
+    ),
+    // ── BASEBALL ───────────────────────────────────────────────────────────────
+    'ground_balls': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#2e7d2e" rx="4"/>
+        <rect x={100} y={20} width={120} height={120} fill="#c49055" transform="rotate(45,160,80)" rx="2"/>
+        <circle cx={160} cy={130} r={6} fill="white" stroke="#888" strokeWidth={1}/>
+        <text x={160} y={134} fontSize={6} fill="#333" textAnchor="middle">HP</text>
+        <circle cx={205} cy={85} r={6} fill="white" stroke="#888" strokeWidth={1}/>
+        <text x={205} y={89} fontSize={6} fill="#333" textAnchor="middle">1B</text>
+        <circle cx={160} cy={40} r={6} fill="white" stroke="#888" strokeWidth={1}/>
+        <text x={160} y={44} fontSize={6} fill="#333" textAnchor="middle">2B</text>
+        <circle cx={115} cy={85} r={6} fill="white" stroke="#888" strokeWidth={1}/>
+        <text x={115} y={89} fontSize={6} fill="#333" textAnchor="middle">3B</text>
+        {/* Fielder */}
+        <circle cx={160} cy={75} r={9} fill={P} stroke="white" strokeWidth={1.5}/>
+        <text x={160} y={79} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">SS</text>
+        {/* Ground ball */}
+        <circle cx={160} cy={110} r={4} fill="white" stroke="#888" strokeWidth={1}/>
+        <path d="M 160 110 L 160 84" fill="none" stroke="white" strokeWidth={1.5} strokeDasharray="3,2"/>
+        {/* Charge arrow */}
+        <path d="M 160 88 L 160 76" fill="none" stroke="rgba(255,200,50,0.9)" strokeWidth={2}/>
+        <polygon points={`156,78 164,78 160,70`} fill="rgba(255,200,50,0.9)"/>
+        {/* Throw to 1B */}
+        <path d="M 160 70 Q 190 60 200 82" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth={1.5} strokeDasharray="4,2"/>
+        <text x={160} y={152} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Charge → glove low → field out front → throw</text>
+      </svg>
+    ),
+    // ── SOFTBALL ───────────────────────────────────────────────────────────────
+    'windmill': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#2e7d2e" rx="4"/>
+        {/* Pitcher rubber */}
+        <rect x={145} y={78} width={30} height={8} fill="white" rx={1}/>
+        {/* Pitcher */}
+        <circle cx={160} cy={68} r={12} fill={P} stroke="white" strokeWidth={2}/>
+        <text x={160} y={72} fontSize={9} fill="white" textAnchor="middle" fontWeight="bold">P</text>
+        {/* Windmill circle */}
+        <circle cx={160} cy={68} r={32} fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} strokeDasharray="4,3"/>
+        {/* Arm positions */}
+        {[[160,36,'12'],[192,68,'3'],[160,100,'6'],[128,68,'9']].map(([px,py,lbl],i)=>(
+          <g key={i}>
+            <circle cx={px} cy={py} r={4} fill="rgba(255,255,255,0.5)"/>
+            <text x={px+8} y={py+4} fontSize={7} fill="rgba(255,255,255,0.7)">{lbl}</text>
+          </g>
+        ))}
+        {/* Release arrow */}
+        <path d="M 160 100 L 160 120" fill="none" stroke="rgba(245,158,11,0.9)" strokeWidth={2.5}/>
+        <polygon points={`156,118 164,118 160,126`} fill="rgba(245,158,11,0.9)"/>
+        <text x={185} y={124} fontSize={8} fill="rgba(245,158,11,0.9)">Snap wrist</text>
+        <text x={160} y={148} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Full circle → wrist snap at hip → follow through</text>
+        <text x={160} y={18} fontSize={9} fill="white" textAnchor="middle" opacity={0.8}>WINDMILL PITCHING</text>
+      </svg>
+    ),
+    // ── SOCCER ─────────────────────────────────────────────────────────────────
+    'rondo': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#2e7d2e" rx="4"/>
+        {/* Grid */}
+        <rect x={80} y={20} width={160} height={120} fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5}/>
+        {/* Outside players */}
+        {[[80,20],[240,20],[80,140],[240,140],[160,20],[160,140],[80,80],[240,80]].slice(0,6).map(([cx,cy],i)=>(
+          <circle key={i} cx={cx} cy={cy} r={10} fill={P} stroke="white" strokeWidth={2}/>
+        ))}
+        {/* Inside defenders */}
+        <circle cx={145} cy={75} r={10} fill="#333" stroke="white" strokeWidth={2}/>
+        <circle cx={175} cy={95} r={10} fill="#333" stroke="white" strokeWidth={2}/>
+        {/* Pass lines */}
+        <line x1={80} y1={20} x2={160} y2={20} stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} strokeDasharray="4,3"/>
+        <line x1={160} y1={20} x2={240} y2={80} stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} strokeDasharray="4,3"/>
+        <text x={160} y={155} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Keep ball away from defenders · 1-2 touch max</text>
+        <text x={160} y={13} fontSize={9} fill="white" textAnchor="middle" opacity={0.8}>RONDO — 4v2 POSSESSION</text>
+      </svg>
+    ),
+    'defensive_shape': (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
+        <rect width={W} height={H} fill="#2e7d2e" rx="4"/>
+        <text x={160} y={18} fontSize={9} fill="white" textAnchor="middle" opacity={0.8}>4-4-2 DEFENSIVE SHAPE</text>
+        {/* GK */}
+        <circle cx={160} cy={148} r={9} fill="#f59e0b" stroke="white" strokeWidth={1.5}/>
+        <text x={160} y={152} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">GK</text>
+        {/* 4 defenders */}
+        {[60,113,207,260].map((cx,i)=>(
+          <circle key={i} cx={cx} cy={122} r={9} fill="#333" stroke="white" strokeWidth={1.5}/>
+        ))}
+        {/* 4 midfielders */}
+        {[60,113,207,260].map((cx,i)=>(
+          <circle key={i} cx={cx} cy={88} r={9} fill="#555" stroke="white" strokeWidth={1.5}/>
+        ))}
+        {/* 2 forwards */}
+        {[130,190].map((cx,i)=>(
+          <circle key={i} cx={cx} cy={50} r={9} fill={P} stroke="white" strokeWidth={1.5}/>
+        ))}
+        {/* Compact shape lines */}
+        <line x1={40} y1={88} x2={280} y2={88} stroke="rgba(255,255,255,0.2)" strokeWidth={1} strokeDasharray="4,3"/>
+        <line x1={40} y1={122} x2={280} y2={122} stroke="rgba(255,255,255,0.2)" strokeWidth={1} strokeDasharray="4,3"/>
+        <text x={160} y={155} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Stay compact · No gaps between lines</text>
+      </svg>
+    ),
+  }
+
+  // Map COACHING_CONTENT diagram keys to SVG keys
+  const KEY_MAP = {
+    'The 3-Step Drop': 'three_step_drop',
+    'Angle Tackling Drill': 'angle_tackle',
+    'Run Blocking Fundamentals': 'run_blocking',
+    'Cover 2 Explanation': 'cover_2',
+    'Red Zone Mindset': 'redzone',
+    'Pre-Snap Reads for QBs': 'presnap_reads',
+    'Zone Blocking Scheme': 'zone_blocking',
+    'Defensive Slide Drill': 'defensive_slide',
+    'Pick and Roll Coverage': 'pick_roll',
+    'Fielding Ground Balls': 'ground_balls',
+    'Windmill Pitching Mechanics': 'windmill',
+    'Rondo Passing Drill': 'rondo',
+    'Defensive Shape — 4-4-2': 'defensive_shape',
+  }
+
+  const key = KEY_MAP[diagramKey]
+  const svg = key ? diagrams[key] : null
+  if (!svg) return null
+
+  return (
+    <div style={{ marginTop:8, borderRadius:6, overflow:'hidden', border:'1px solid #1e2330' }}>
+      {svg}
     </div>
   )
 }
