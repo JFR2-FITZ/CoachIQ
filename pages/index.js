@@ -1729,9 +1729,11 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n\nPA PASS THROW: On play action plays, the drawPassIndicator will fire — make sure one receiver has routeYards > 0 so the throw animates correctly. The primary target is typically a crossing route or the backside TE on a seam.' +
         '\n\nQB PURE DROPBACK: HIGHER y only (moving away from LOS). 3-step: [[50,44],[50,47],[50,50]]. 5-step: [[50,44],[50,48],[50,53]]. 7-step: [[50,44],[50,49],[50,56]]. NEVER lower y on any pure pass.' +
         '\n\nQB FOOTWORK ON RUN PLAYS — based on real NFL mechanics:' +
-        '\nUNDER CENTER (QB starts y=44): QB opens to playside (pivot), takes 1-2 short steps toward RB, extends ball at mesh point, then carries out FAKE in the OPPOSITE direction from the run. Inside zone left handoff: [[50,44],[47,43],[44,42],[48,43]]. The last point is the fake going opposite.' +
-        '\nSHOTGUN ZONE READ (QB starts y=50-52): QB takes snap, does J-step (small lateral move toward mesh side, y stays near 50), holds ball out for RB mesh, reads EMOL, then either: GIVE — stays near y=50, moves slightly away from RB direction as a decoy; KEEP — attacks backside gap moving to edge. Show the GIVE by default (most common). Path: [[50,50],[47,50],[44,49],[48,50]] for zone read left, last point is the decoy step.' +
-        '\nCRITICAL: QB should NOT move forward toward LOS before handoff. He opens, meshes, reads. Minimal footwork. The ball carrier does the work.' +
+        '\nQB SNEAK / DIVE (play name contains sneak, dive, plunge, wedge, or short yardage QB run): QB is UNDER CENTER. QB starts at y=44 directly behind center. On a sneak, QB simply dives forward through the A-gap — path: [[50,44],[50,40],[50,36]]. No handoff, no fake. This is the ONLY play where QB goes to lower y with no fake. QB label stays at y=44 at snap.' +
+        '\nUNDER CENTER HANDOFF (QB starts y=44): QB opens to playside (pivot), takes 1-2 short steps toward RB, extends ball at mesh point, then carries out FAKE in the OPPOSITE direction. Inside zone left: [[50,44],[47,43],[44,42],[48,43]].' +
+        '\nPISTOL FORMATION (QB starts y=46-48, RB directly behind at y=52-54): QB is 3-4 yards off ball, closer than shotgun. Zone read pistol left: [[50,46],[47,46],[44,45],[48,46]].' +
+        '\nSHOTGUN ZONE READ (QB starts y=50-52): J-step lateral (y stays ~50), holds for mesh, decoy step after. [[50,50],[47,50],[44,49],[48,50]] for zone read left.' +
+        '\nCRITICAL: QB should NOT move forward toward LOS before handoff EXCEPT on a sneak/dive where the QB IS the ball carrier.' +
         '\nrouteName: "Handoff Left", "Handoff Right", "Zone Read Left", "Zone Read Right", "Reverse Pivot Left", "Reverse Pivot Right", "Pitch Left", "Pitch Right", "Keeper Left", "Keeper Right", "3-Step Drop", "5-Step Drop", "7-Step Drop", "PA Bootleg Left", "PA Bootleg Right".' +
         '\n\nReturn ONLY raw JSON using this template: ' + fbTemplate.replace('PLAYNAME', play.name)
     }
@@ -1827,7 +1829,8 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
                                qbRoute.includes('pass') || qbRoute.includes('throw')) &&
                                !qbRoute.includes('handoff') && !qbRoute.includes('zone read') &&
                                !qbRoute.includes('pitch') && !qbRoute.includes('keeper') &&
-                               !qbRoute.includes('pivot')
+                               !qbRoute.includes('pivot') && !qbRoute.includes('sneak') &&
+                               !qbRoute.includes('dive') && !qbRoute.includes('plunge')
             if (isPassDrop && p.path.length >= 2) {
               const startY = p.path[0][1]
               const endY = p.path[p.path.length - 1][1]
@@ -2151,27 +2154,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 1.9)
           }
 
-          // Route label at midpoint
-          if (!isBlock && player.routeName && !isBSB) {
-            const isMotion = player.routeName.startsWith('MOTION:')
-            const midIdx = Math.max(0, Math.floor(path.length / 2) - 1)
-            const lx = sx(path[midIdx][0])
-            const ly = sy(path[midIdx][1]) - r * 2.4
-            const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:|MOTION:)/, '').trim()
-            const displayText = isMotion
-              ? ('↔ ' + displayName)
-              : player.routeYards > 0
-                ? (displayName ? displayName + ' ' + player.routeYards + 'yd' : player.routeYards + 'yd')
-                : displayName
-            if (displayText) {
-              ctx.fillStyle = isMotion
-                ? 'rgba(245,158,11,0.9)'
-                : isBBall ? 'rgba(200,200,200,0.85)' : hexToRgba(DA, 0.85)
-              ctx.font = `bold ${Math.round(r * 1.65)}px sans-serif`
-              ctx.textAlign = 'center'
-              ctx.fillText(displayText, lx, ly)
-            }
-          }
+          // Route labels collected — drawn as legend below (see drawRouteLegend)
         } else {
           // ── ANIMATED VIEW: draw the traveled portion of each route ──
           const traveled = pt * segs
@@ -2465,6 +2448,81 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       })
     }
 
+    function getPositionLabel(player) {
+      // Returns a specific position label (LT, RT, LG, RG, X, Y, Z, etc.)
+      const id = player.id || ''
+      const lbl = player.label || ''
+      // OL specific labels
+      if (id === 'LT' || (lbl === 'T' && player.x < 45)) return 'LT'
+      if (id === 'RT' || (lbl === 'T' && player.x > 55)) return 'RT'
+      if (id === 'LG' || (lbl === 'G' && player.x < 48)) return 'LG'
+      if (id === 'RG' || (lbl === 'G' && player.x > 52)) return 'RG'
+      if (lbl === 'C') return 'C'
+      // Receivers — X=split left, Z=split right, Y=TE/slot, H=HB/flexback
+      if (lbl === 'WR' || lbl === 'WR1') return player.x < 40 ? 'X' : 'Z'
+      if (lbl === 'WR2' || lbl === 'SL') return player.x < 50 ? 'Y' : 'H'
+      if (lbl === 'WR3') return 'H'
+      if (lbl === 'TE') return 'Y'
+      if (lbl === 'QB') return 'QB'
+      if (lbl === 'RB' || lbl === 'HB') return 'RB'
+      if (lbl === 'FB') return 'FB'
+      return lbl
+    }
+
+    function drawRouteLegend(t) {
+      if (isBBall || isBSB) return
+      const isStatic = t < snap
+      if (!isStatic) return  // legend only on static view
+
+      // Collect all non-lineman routes with names
+      const entries = []
+      ;(parsed.players || []).forEach(player => {
+        if (player.role !== 'off') return
+        const isLineman = ['C','G','T'].includes(player.label)
+        if (isLineman) return
+        if (!player.routeName) return
+        const isMotion = player.routeName.startsWith('MOTION:')
+        const displayName = player.routeName.replace(/^(BALL:|SHOOT:|PASS:|CUT:|MOVE:|SCREEN:|MOTION:)/, '').trim()
+        const displayText = isMotion
+          ? ('↔ ' + displayName)
+          : player.routeYards > 0
+            ? (displayName + (player.routeYards > 0 ? ' ' + player.routeYards + 'yd' : ''))
+            : displayName
+        if (!displayText || displayText.length < 2) return
+        const posLabel = getPositionLabel(player)
+        entries.push({ pos: posLabel, route: displayText, isMotion })
+      })
+
+      if (entries.length === 0) return
+
+      // Draw legend box in bottom-left corner
+      const lineH = H * 0.055
+      const boxPad = W * 0.018
+      const boxW = W * 0.34
+      const boxH = entries.length * lineH + boxPad * 2
+      const boxX = W * 0.01
+      const boxY = H - boxH - H * 0.02
+
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'
+      ctx.beginPath()
+      ctx.roundRect(boxX, boxY, boxW, boxH, 4)
+      ctx.fill()
+
+      const fontSize = Math.round(H * 0.044)
+      entries.forEach((entry, i) => {
+        const y = boxY + boxPad + (i + 0.75) * lineH
+        // Position label in accent color
+        ctx.fillStyle = entry.isMotion ? 'rgba(245,158,11,0.95)' : hexToRgba(DA, 0.95)
+        ctx.font = `bold ${fontSize}px sans-serif`
+        ctx.textAlign = 'left'
+        ctx.fillText(entry.pos + ':', boxX + boxPad, y)
+        // Route name in white
+        ctx.fillStyle = 'rgba(220,220,220,0.9)'
+        ctx.font = `${fontSize}px sans-serif`
+        ctx.fillText(entry.route, boxX + boxPad + fontSize * 2.4, y)
+      })
+    }
+
     function drawSnapFlash(t) {
       if (!isBBall && !isBSB && t >= snap && t < snap + 0.06) {
         ctx.fillStyle = 'rgba(0,0,0,0.7)'
@@ -2483,6 +2541,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       drawBBPass(t)
       drawPassIndicator(t)
       drawPlayers(t)
+      drawRouteLegend(t)
       drawSnapFlash(t)
     }
 
@@ -3660,7 +3719,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   // Rule 8: QB on pass plays must end at higher y (dropped back)
                   if (p.label === 'QB' && p.role === 'off') {
                     const qbR = (p.routeName || '').toLowerCase()
-                    const isPassQ = (qbR.includes('drop')||qbR.includes('pa ')||qbR.includes('bootleg')||qbR.includes('pass')) && !qbR.includes('handoff') && !qbR.includes('zone read') && !qbR.includes('pitch') && !qbR.includes('keeper')
+                    const isPassQ = (qbR.includes('drop')||qbR.includes('pa ')||qbR.includes('bootleg')||qbR.includes('pass')) && !qbR.includes('handoff') && !qbR.includes('zone read') && !qbR.includes('pitch') && !qbR.includes('keeper') && !qbR.includes('sneak') && !qbR.includes('dive')
                     if (isPassQ && p.path.length >= 2) {
                       const sY = p.path[0][1], eY = p.path[p.path.length-1][1]
                       if (eY < sY + 3) {
