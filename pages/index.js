@@ -1761,8 +1761,16 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Show all 9 fielders in correct positions plus batter movement.' +
         ' Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
     } else if (isFlagFootball) {
-      const flagFmt = ((play.note||'').includes('7v7') || (play.name||'').includes('7v7')) ? '7v7' : ((play.note||'').includes('6v6') || (play.name||'').includes('6v6')) ? '6v6' : '5v5'
-      const is5v5 = flagFmt === '5v5', is6v6 = flagFmt === '6v6'
+      // Use _flagFormat if available (most reliable), fallback to text detection
+      const flagFmt = play._flagFormat ||
+        (((play.note||'').includes('7v7') || (play.name||'').includes('7v7')) ? '7v7' :
+         ((play.note||'').includes('6v6') || (play.name||'').includes('6v6')) ? '6v6' : '5v5')
+      const is5v5 = flagFmt === '5v5'
+      const is6v6 = flagFmt === '6v6' || flagFmt === '6v6 + Rusher'
+      const isRusherFormat = flagFmt === '6v6 + Rusher'
+      // 6v6+Rusher: 6 offense, 7 defense (6 coverage + 1 dedicated rusher)
+      const offCount = is5v5 ? 5 : is6v6 ? 6 : 7
+      const defCount = isRusherFormat ? 7 : offCount
       // Offense alignment per format
       const flagOffense = is5v5
         ? [
@@ -1790,7 +1798,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             {id:'H',label:'SL',role:'off',routeType:'route',x:72,y:42,path:[[72,42],[58,30]],routeName:'Slant',routeYards:0},
             {id:'RB',label:'RB',role:'off',routeType:'route',x:44,y:50,path:[[44,50],[28,42]],routeName:'Swing',routeYards:0}
           ]
-      // Defense per format — EXACT player counts: 5v5=5, 6v6=6, 7v7=7
+      // Defense per format — EXACT player counts: 5v5=5, 6v6=6, 6v6+Rusher=7(6+1), 7v7=7
       const flagDefense = is5v5
         ? [
             {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
@@ -1817,19 +1825,27 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             {id:'d6',label:'LB',role:'def',routeType:'route',x:60,y:30,path:[[60,30],[60,22]],routeName:'Zone',routeYards:0},
             {id:'d7',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep Middle',routeYards:0}
           ]
+      // 6v6+Rusher override: 6 offense, but 7 defense (6 coverage + dedicated rusher)
+      const flagDefenseFinal = isRusherFormat ? [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
+            {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0},
+            {id:'d7',label:'CB',role:'def',routeType:'route',x:50,y:36,path:[[50,36],[50,30]],routeName:'Middle',routeYards:0}
+          ] : flagDefense
       const flagTemplate = JSON.stringify({
         formation: 'PLAYNAME', snapPoint: 0.15, duration: 3000,
         _isFlagFootball: true,
-        players: [...flagOffense, ...flagDefense]
+        players: [...flagOffense, ...(typeof flagDefenseFinal !== 'undefined' ? flagDefenseFinal : flagDefense)]
       })
       // Handle 6v6 + Rusher format
-      const totalPlayers = is5v5 ? 5 : is6v6 ? 6 : 7
-      const hasExtraRusher = flagFmt === '6v6 + Rusher'
-      const defCount = hasExtraRusher ? 7 : totalPlayers  // 6 field + 1 designated rusher
+      // offCount and defCount already defined above
       prompt = 'Expert flag football offensive coordinator generating a precise flag football play diagram.' +
         ' Format: ' + flagFmt + '. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
         '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42. Attacking direction = LOWER y.' +
-        '\n\nCRITICAL — EXACT PLAYER COUNTS: ' + flagFmt + ' means EXACTLY ' + totalPlayers + ' offensive players AND EXACTLY ' + totalPlayers + ' defensive players. COUNT THEM. Do not add or remove players — the template has the right number.' +
+        '\n\nCRITICAL — EXACT PLAYER COUNTS: ' + flagFmt + ' means EXACTLY ' + offCount + ' offensive players AND EXACTLY ' + defCount + ' defensive players. COUNT THEM before returning. Do not add or remove players — the template has exactly the right number. 6v6+Rusher = 6 offense, 7 defense.' +
         '\n\nCRITICAL — DEFENSIVE ALIGNMENT: Defenders must align ACROSS THE FORMATION, not stacked on one receiver. Spread CBs to cover the widest receivers (X left, Z right). Do NOT put 2+ defenders on one receiver. The rusher (label "R") lines up at y=35, 7 yards from LOS. Safety lines up over the middle at y=18-22. LBs at y=28-32 between the hashes. CBs at y=36-38 aligned outside across from WRs.' +
         '\n\nFLAG FOOTBALL RULES (STRICTLY ENFORCED):' +
         '\n- QB stays in pocket: QB path is [[50,44],[50,44]] (stationary). QB does NOT drop back. Set routeName "Pocket Pass".' +
@@ -2069,18 +2085,21 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       // ── FLAG FOOTBALL SANITIZER: enforce exact player counts and QB mechanics ──
       if (play?._isFlagFootball && data.players) {
         data._isFlagFootball = true
-        const fmt = ((play.note||'') + (play.name||'')).includes('7v7') ? '7v7'
-                  : ((play.note||'') + (play.name||'')).includes('6v6') ? '6v6' : '5v5'
-        const expectedCount = fmt === '7v7' ? 7 : fmt === '6v6' ? 6 : 5
+        const fmt = play._flagFormat ||
+          (((play.note||'') + (play.name||'')).includes('7v7') ? '7v7' :
+           ((play.note||'') + (play.name||'')).includes('6v6') ? '6v6' : '5v5')
+        const isRusher = fmt === '6v6 + Rusher'
+        const expectedOffCount = fmt === '7v7' ? 7 : (fmt === '6v6' || isRusher) ? 6 : 5
+        const expectedDefCount = isRusher ? 7 : expectedOffCount
         // Trim excess players
         const offP = data.players.filter(p => p.role === 'off')
         const defP = data.players.filter(p => p.role === 'def')
-        if (offP.length > expectedCount) {
-          const keepIds = offP.slice(0, expectedCount).map(p => p.id)
+        if (offP.length > expectedOffCount) {
+          const keepIds = offP.slice(0, expectedOffCount).map(p => p.id)
           data.players = data.players.filter(p => p.role !== 'off' || keepIds.includes(p.id))
         }
-        if (defP.length > expectedCount) {
-          const keepIds = defP.slice(0, expectedCount).map(p => p.id)
+        if (defP.length > expectedDefCount) {
+          const keepIds = defP.slice(0, expectedDefCount).map(p => p.id)
           data.players = data.players.filter(p => p.role !== 'def' || keepIds.includes(p.id))
         }
         // Ensure QB has Pocket Pass routeName so pass indicator fires
@@ -3828,7 +3847,13 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
       const raw = await callAI(cfg.buildPrompt(offFields), null, true) // fast=true: Haiku for structured JSON
       const data = parseJSON(raw)
       if (!data.plays || !data.plays.length) throw new Error('No plays returned — please try again.')
-      if (sport === 'Flag Football' && data.plays) { data.plays.forEach(p => { p._isFlagFootball = true }) }
+      if (sport === 'Flag Football' && data.plays) {
+        const fmt = offFields.format || '5v5'
+        data.plays.forEach(p => {
+          p._isFlagFootball = true
+          p._flagFormat = fmt  // carry exact format through to diagram
+        })
+      }
       setOffResult(data)
       setDiagrams({})
       setGenHistory(prev => ({ ...prev, [sport]: [{ ...data, _sport:sport, _ts:Date.now() }, ...(prev[sport]||[])].slice(0,20) }))
