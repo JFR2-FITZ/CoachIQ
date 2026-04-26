@@ -1842,31 +1842,34 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       })
       // Handle 6v6 + Rusher format
       // offCount and defCount already defined above
-      prompt = 'Expert flag football offensive coordinator generating a precise flag football play diagram.' +
-        ' Format: ' + flagFmt + '. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
-        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42. Attacking direction = LOWER y.' +
-        '\n\nCRITICAL — EXACT PLAYER COUNTS: ' + flagFmt + ' means EXACTLY ' + offCount + ' offensive players AND EXACTLY ' + defCount + ' defensive players. COUNT THEM before returning. Do not add or remove players — the template has exactly the right number. 6v6+Rusher = 6 offense, 7 defense.' +
-        '\n\nCRITICAL — DEFENSIVE ALIGNMENT: Defenders must align ACROSS THE FORMATION, not stacked on one receiver. Spread CBs to cover the widest receivers (X left, Z right). Do NOT put 2+ defenders on one receiver. The rusher (label "R") lines up at y=35, 7 yards from LOS. Safety lines up over the middle at y=18-22. LBs at y=28-32 between the hashes. CBs at y=36-38 aligned outside across from WRs.' +
-        '\n\nFLAG FOOTBALL RULES (STRICTLY ENFORCED):' +
-        '\n- QB stays in pocket: QB path is [[50,44],[50,44]] (stationary). QB does NOT drop back. Set routeName "Pocket Pass".' +
-        '\n- On designed rollout ONLY: QB moves laterally, y stays near 44.' +
-        '\n- NO BLOCKING. All offensive players run routes.' +
-        '\n- ALL players eligible including center.' +
-        '\n- RUSH LINE: rusher (label "R") starts at y=35.' +
-        '\n- ONE receiver gets routeYards > 0 (primary target). Others routeYards:0.' +
-        '\n\nROUTE LIBRARY (adapt depth to play concept):' +
-        '\n- SLANT: 2 steps up, sharp break INWARD. Left X: [[12,42],[12,38],[26,30]]. Right Z: [[88,42],[88,38],[74,30]].' +
-        '\n- HITCH: stem up, break BACK toward LOS. [[12,42],[12,32],[12,36]].' +
-        '\n- QUICK OUT: stem up, 90 break TOWARD sideline. Left: [[12,42],[12,34],[4,34]]. Right: [[88,42],[88,34],[96,34]].' +
-        '\n- CURL: stem 8-10yds, curl back facing QB. [[12,42],[12,26],[12,32]].' +
-        '\n- DIG/IN: stem upfield, sharp 90 break INWARD. [[12,42],[12,22],[50,22]].' +
-        '\n- POST: stem up, diagonal INWARD to goalpost. [[12,42],[12,20],[38,8]].' +
-        '\n- CORNER: stem up, diagonal OUTWARD to corner. [[12,42],[12,20],[4,8]].' +
-        '\n- GO/FLY: straight vertical. [[12,42],[12,8]].' +
-        '\n- WHEEL (RB/slot): flat then vertical. [[38,44],[18,40],[18,18]].' +
-        '\n- CENTER LEAK: center seam after snap. [[50,42],[50,20]].' +
-        '\n- BUBBLE/SCREEN: short lateral screen. [[30,42],[16,40],[8,38]].' +
-        '\nReturn ONLY raw JSON: ' + flagTemplate.replace('PLAYNAME', play.name)
+      // The template already has ALL correct players — AI must ONLY update paths/routeNames
+      prompt = 'You are a flag football play diagram AI. Format: ' + flagFmt + '.' +
+        ' Play: "' + play.name + '". Type: ' + (play.type||'') + '. Description: ' + (play.note||'') +
+        '\n\nYOUR ONLY JOB: Take the JSON template below and update ONLY the "path", "routeName", and "routeYards" fields for each player to match this specific play. DO NOT change "id", "label", "role", "x", "y". DO NOT add or remove ANY players. The template already has exactly the right number of players for ' + flagFmt + '.' +
+        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60. LOS = y=42. Endzone = y=0. Routes go LOWER y. Defenders drop lower y into coverage.' +
+        '\n\nOFFENSIVE PLAYER RULES (update path/routeName/routeYards only):' +
+        '\n- QB: path=[[50,44],[50,44]] (stationary pocket). routeName="Pocket Pass". routeYards=0. On rollout: move laterally only, y stays ~44.' +
+        '\n- C (Center): runs a route after snap (seam, leak, check-down). Start [[50,42]].' +
+        '\n- X (left WR): runs the route matching the play concept.' +
+        '\n- Z (right WR): runs the route matching the play concept.' +
+        '\n- Y, H, SL (slots): run short/intermediate routes.' +
+        '\n- RB: flat, swing, wheel, or check-down.' +
+        '\n- PRIMARY TARGET: exactly ONE player has routeYards > 0. Everyone else routeYards=0.' +
+        '\n\nROUTE SHAPES (mirror for right-side receivers):' +
+        '\n- SLANT: break INWARD at 45deg. Left: [[12,42],[12,38],[28,30]]. Right: [[88,42],[88,38],[72,30]].' +
+        '\n- HITCH: up then back toward LOS. [[12,42],[12,32],[12,36]].' +
+        '\n- OUT: 90deg break to sideline. Left: [[12,42],[12,34],[4,34]]. Right: [[88,42],[88,34],[96,34]].' +
+        '\n- CURL: up then curl back. [[12,42],[12,26],[14,32]].' +
+        '\n- DIG/CROSS: up then 90deg INWARD. [[12,42],[12,22],[52,22]].' +
+        '\n- POST: diagonal toward goalpost. [[12,42],[12,18],[38,6]].' +
+        '\n- CORNER: diagonal toward corner. [[12,42],[12,18],[4,6]].' +
+        '\n- GO/FLY: straight up. [[12,42],[12,6]].' +
+        '\n- WHEEL: flat then vertical. [[30,44],[12,40],[12,16]].' +
+        '\n- CENTER LEAK: seam up middle. [[50,42],[50,18]].' +
+        '\n- SCREEN/BUBBLE: short lateral. [[30,42],[16,40],[8,38]].' +
+        '\n- SWING: quick flat. [[62,46],[78,40]].' +
+        '\n\nDEFENSIVE PLAYER RULES: Keep x/y positions. Update paths to show coverage (lower y) or rush (higher y). Rusher d3: path from y=35 toward y=42. CBs: drop tracking their assigned WR. Safety: drop toward y=22.' +
+        '\n\nReturn ONLY the completed JSON — no commentary, no markdown, just JSON:\n' + flagTemplate.replace('PLAYNAME', play.name)
     } else {
       prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
         '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42 (offense) and y=38 (dashed line). Attacking direction = LOWER y (toward y=0). Defenders at y=34-38, LBs at y=26-32, safeties y=12-22.' +
