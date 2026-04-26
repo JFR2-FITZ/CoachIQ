@@ -1235,7 +1235,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
   async function loadSteps() {
     if (steps) return
     // Check session cache first
-    const stepsCacheKey = 'coachiq_steps_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+    const stepsCacheKey = 'coachiq_steps_v2_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
     try {
       const cached = sessionStorage.getItem(stepsCacheKey)
       if (cached) { setSteps(JSON.parse(cached)); return }
@@ -1416,7 +1416,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           </div>
 
           {/* Breakdown */}
-          {showBreakdown && (
+          {(showBreakdown || (stepsLoading && showBreakdown)) && (
             <div style={{ marginBottom:10 }}>
               {stepsLoading && (
                 <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
@@ -1427,23 +1427,32 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
               {steps && !steps.error && steps.huddleCard && (
                 <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:8, padding:12, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>📋 Huddle Card</div>
-                  {steps.huddleCard.map((item,i) => (
-                    <div key={i} style={{ display:'flex', gap:8, marginBottom:5, alignItems:'flex-start' }}>
-                      <div style={{ minWidth:28, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:4, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0 }}>{item.player}</div>
-                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, flex:1 }}>{item.instruction}{item.termNote&&<span style={{ color:'#8a94b0', fontStyle:'italic' }}> ({item.termNote})</span>}</div>
-                    </div>
-                  ))}
+                  {steps.huddleCard.map((item,i) => {
+                    const isObj = typeof item === 'object' && item !== null
+                    const playerLabel = isObj ? item.player : ['QB','RB','WR','OL'][i] || ''
+                    const instruction = isObj ? item.instruction : String(item)
+                    const termNote = isObj ? item.termNote : ''
+                    return (
+                      <div key={i} style={{ display:'flex', gap:8, marginBottom:5, alignItems:'flex-start' }}>
+                        <div style={{ minWidth:28, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:4, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0 }}>{playerLabel}</div>
+                        <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, flex:1 }}>{instruction}{termNote&&<span style={{ color:'#8a94b0', fontStyle:'italic' }}> ({termNote})</span>}</div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
               {steps && !steps.error && steps.steps && (
                 <div style={{ background:'#161922', borderRadius:8, padding:12, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:P, fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Step-by-Step</div>
-                  {steps.steps.map((step,i) => (
-                    <div key={i} style={{ display:'flex', gap:8, padding:'5px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}>
-                      <div style={{ width:16, height:16, minWidth:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{i+1}</div>
-                      <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div>
-                    </div>
-                  ))}
+                  {steps.steps.map((step,i) => {
+                    const stepText = typeof step === 'object' ? (step.desc || step.title || JSON.stringify(step)) : String(step)
+                    return (
+                      <div key={i} style={{ display:'flex', gap:8, padding:'5px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}>
+                        <div style={{ width:16, height:16, minWidth:16, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{i+1}</div>
+                        <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{stepText}</div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
               <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:10 }}>
@@ -2628,7 +2637,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
   async function loadSteps() {
     if (steps) return
     // Check session cache first
-    const stepsCacheKey = 'coachiq_steps_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+    const stepsCacheKey = 'coachiq_steps_v2_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
     try {
       const cached = sessionStorage.getItem(stepsCacheKey)
       if (cached) { setSteps(JSON.parse(cached)); return }
