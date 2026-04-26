@@ -1409,22 +1409,22 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
       {showMore && (
         <div style={{ animation:'fadeIn 0.2s ease' }}>
           <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
-            <TabBtn label="Breakdown" active={showBreakdown} onClick={()=>{ const n=!showBreakdown; setShowBreakdown(n); if(n&&!steps) loadSteps() }} color='#6b9fff' />
-            <TabBtn label="Player Roles" active={showRoles} onClick={()=>{ const n=!showRoles; setShowRoles(n); if(n&&!steps) loadSteps() }} color='#f59e0b' />
-            <TabBtn label="Variations" active={showVariations||variationsLoading} onClick={()=>{ if(!showVariations&&!variationsLoading) loadVariations(); else { setShowVariations(false); } }} color='#c084fc' />
-            <TabBtn label="Pro Look" active={showNfl||nflLoading} onClick={()=>{ if(!showNfl&&!nflLoading) loadNflComp(); else { setShowNfl(false) } }} color='#4ade80' />
+            <TabBtn label="Breakdown" active={showBreakdown||stepsLoading} onClick={()=>{ if(showBreakdown){setShowBreakdown(false)}else{setShowBreakdown(true);setShowRoles(false);if(!steps&&!stepsLoading)loadSteps()} }} color='#6b9fff' />
+            <TabBtn label="Player Roles" active={showRoles||stepsLoading} onClick={()=>{ if(showRoles){setShowRoles(false)}else{setShowRoles(true);setShowBreakdown(false);if(!steps&&!stepsLoading)loadSteps()} }} color='#f59e0b' />
+            <TabBtn label="Variations" active={showVariations||variationsLoading} onClick={()=>{ if(showVariations){setShowVariations(false)}else if(!variationsLoading){loadVariations()} }} color='#c084fc' />
+            <TabBtn label="Pro Look" active={showNfl||nflLoading} onClick={()=>{ if(showNfl){setShowNfl(false)}else if(!nflLoading){loadNflComp()} }} color='#4ade80' />
           </div>
 
           {/* Breakdown */}
-          {(showBreakdown || (stepsLoading && showBreakdown)) && (
+          {(showBreakdown || stepsLoading) && (
             <div style={{ marginBottom:10 }}>
-              {stepsLoading && (
+              {stepsLoading && showBreakdown && (
                 <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
                   <div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${P}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
                   <div style={{ fontSize:12, color:'#8a94b0' }}>Loading breakdown...</div>
                 </div>
               )}
-              {steps && !steps.error && steps.huddleCard && (
+              {showBreakdown && steps && !steps.error && steps.huddleCard && (
                 <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:8, padding:12, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>📋 Huddle Card</div>
                   {steps.huddleCard.map((item,i) => {
@@ -1441,7 +1441,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
                   })}
                 </div>
               )}
-              {steps && !steps.error && steps.steps && (
+              {showBreakdown && steps && !steps.error && steps.steps && (
                 <div style={{ background:'#161922', borderRadius:8, padding:12, marginBottom:8 }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:P, fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Step-by-Step</div>
                   {steps.steps.map((step,i) => {
@@ -1472,9 +1472,9 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           )}
 
           {/* Player Roles */}
-          {showRoles && (
+          {(showRoles || stepsLoading) && (
             <div style={{ marginBottom:10 }}>
-              {stepsLoading && (
+              {stepsLoading && showRoles && (
                 <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
                   <div style={{ width:16, height:16, borderRadius:'50%', border:'2px solid #f59e0b', borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
                   <div style={{ fontSize:12, color:'#8a94b0' }}>Loading player roles...</div>
