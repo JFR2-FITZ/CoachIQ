@@ -2416,16 +2416,17 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             const s = r * 0.95
             ctx.fillRect(pos.x - s, pos.y - s, s * 2, s * 2)
             ctx.strokeRect(pos.x - s, pos.y - s, s * 2, s * 2)
-            ctx.fillStyle = 'white'; ctx.font = `bold ${Math.round(r * 1.0)}px sans-serif`
+            ctx.fillStyle = 'white'; ctx.font = `bold ${Math.round(r * 0.85)}px sans-serif`
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-            ctx.fillText(player.label, pos.x, pos.y)
+            ctx.fillText((!isBBall && !isBSB) ? getPositionLabel(player) : player.label, pos.x, pos.y)
           } else {
-            // Skill positions = circles
+            // Skill positions = circles — use position label (X/Y/Z/H/QB/RB/FB) not generic WR/TE
+            const canvasLabel = (!isBBall && !isBSB) ? getPositionLabel(player) : player.label
             ctx.fillStyle = DA; ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1.5
             ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
             ctx.fillStyle = 'white'; ctx.font = `bold ${Math.round(r * 1.0)}px sans-serif`
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-            ctx.fillText(player.label, pos.x, pos.y)
+            ctx.fillText(canvasLabel, pos.x, pos.y)
           }
         } else {
           // Defensive players
