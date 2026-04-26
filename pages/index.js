@@ -32,7 +32,7 @@ const FEATURES = {
   sport_baseball:    { status:'live',        name:'Baseball',                  tier:'free'     },
   sport_soccer:      { status:'live',        name:'Soccer',                    tier:'free'     },
   sport_softball:    { status:'live',        name:'Softball',                  tier:'free'     },
-  sport_flag:        { status:'coming_soon', name:'Flag Football',             tier:'free'     },
+  sport_flag:        { status:'live',        name:'Flag Football',             tier:'free'     },
   athlete_iq:        { status:'planned',     name:'AthleteIQ',                 tier:'pro'      },
   coach_network:     { status:'planned',     name:'Coach Network',             tier:'pro'      },
   league_manager:    { status:'planned',     name:'League Manager',            tier:'league'   },
@@ -467,6 +467,7 @@ function MascotAvatar({ mascotId, color='#C0392B', size=40, locked=false, custom
       )}
     </div>
   )
+
 }
 
 const TEAM_FONTS = [
@@ -566,6 +567,17 @@ const COACHING_TIPS = {
     "Defensive headers should be won early and cleared with purpose.",
     "The pivot player links defense and attack. Develop your sixes carefully.",
     "Celebrate recovery runs. Culture is built in the moments no one is watching.",
+  ],
+  'Flag Football': [
+    "Every player is a receiver — spread the field and make the defense cover all of it.",
+    "The 7-second throw clock is your shot clock. If you don't have a read by 5 seconds, check down and live to play again.",
+    "Flag guarding is a penalty. Teach runners to accelerate through contact, not protect their flags with hands.",
+    "Pre-snap motion is your best weapon in any format. A receiver in motion at the snap is harder to cover than a stationary one.",
+    "In 5v5 and 6v6, your center is an eligible receiver the moment the ball is snapped. The center leak is one of the best plays in flag football.",
+    "In 6v6, the extra player lets you run true Trips (3x1) with a back. Use it — most defenses aren't built to stop both.",
+    "In 7v7, treat your slot receivers like tight ends. Seam routes and crossing routes behind zone coverage win games.",
+    "The rush line is 7 yards from the LOS. Your receivers should be past it on short routes — create natural conflict for the rusher.",
+    "Run the same formation for multiple plays. Defenders key on formation — if your plays look the same pre-snap, they can't cheat.",
   ],
   Softball: [
     "The rise ball up in the zone is the most effective pitch in softball. Develop it.",
@@ -837,7 +849,27 @@ const DEMO_TEAMS = {
       {id:'dsbs2',type:'Practice',opponent:'Practice',date:'2026-04-23',time:'15:00',homeAway:'Home',rsvp:'yes'},
     ],
     practicePlans: [],
-  },
+  },,
+  'Flag Football': {
+    id: 'demo_flag', name: 'Tolland Renegades', season: 'Spring 2026', mascot: 'wolves',
+    teamFont: 'barlow', hometown: 'Tolland, CT', primary: '#E65100', secondary: '#0a1a2a',
+    accent1: '#f59e0b', accent2: '#4ade80', sport: 'Flag Football', _isDemo: true,
+    players: [
+      {id:'fp1',name:'Marcus Williams',number:'1',position:'QB',active:true},
+      {id:'fp2',name:'Jaylen Carter',number:'2',position:'WR',active:true},
+      {id:'fp3',name:'Devon Brooks',number:'3',position:'WR',active:true},
+      {id:'fp4',name:'Tyler Mason',number:'4',position:'WR',active:true},
+      {id:'fp5',name:'Chris Hall',number:'5',position:'C/Receiver',active:true},
+    ],
+    gameHistory: [
+      {id:'fg1',opponent:'Ellington Bolts',date:'2026-03-14',us:21,them:14},
+      {id:'fg2',opponent:'Coventry Rush',date:'2026-03-21',us:7,them:21},
+    ],
+    schedule: [
+      {id:'fs1',type:'Game',opponent:'Stafford Speed',date:'2026-04-12',time:'10:00',homeAway:'Home',rsvp:'yes'},
+    ],
+    practicePlans: [],
+  }
 }
 
 // ─── SPORT COLORS ────────────────────────────────────────────────────────────
@@ -847,6 +879,7 @@ const SPORT_COLORS = {
   Baseball:   { primary: '#1B5E20', secondary: '#1a1208', accent: '#e8f5e9', label: 'Baseball' },
   Soccer:     { primary: '#0D6E3D', secondary: '#0a1a0a', accent: '#e8f5e9', label: 'Soccer' },
   Softball:   { primary: '#7B1FA2', secondary: '#1a081a', accent: '#f3e5f5', label: 'Softball' },
+  'Flag Football': { primary: '#E65100', secondary: '#0a1a2a', accent: '#fff3e0', label: 'Flag Football' },
 }
 
 // ─── DEFAULT PLAYBOOK FOLDERS ────────────────────────────────────────────────
@@ -856,6 +889,7 @@ const DEFAULT_FOLDERS = {
   Baseball:   ['Base Offense','Late Innings','Small Ball','Pitching Strategy','Defensive Sets','My Favorites'],
   Soccer:     ['Attacking Patterns','Set Pieces','Defensive Shape','Transitions','Restarts','My Favorites'],
   Softball:   ['Base Offense','Late Innings','Small Ball','Pitching Strategy','Defensive Sets','My Favorites'],
+  'Flag Football': ['5v5 Offense','7v7 Offense','Red Zone','2-Minute Drill','Base Defense','My Favorites'],
 }
 
 // ─── SPORTS CONFIG ───────────────────────────────────────────────────────────
@@ -1555,7 +1589,8 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
   const cacheKey = 'coachiq_anim2_' + (play?.name||'').replace(/\s/g,'_').slice(0,30)
 
   // Detect sport from play type
-  const isBasketball = !!(play?.type && (
+  const isFlagFootball = !!(play?._isFlagFootball || (play?.type && play.type.includes('FLAG')))
+  const isBasketball = !isFlagFootball && !!(play?.type && (
     play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') ||
     play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK') ||
     play.type.includes('TRANSITION') || play.type.includes('QUICK HITTER') || play.type.includes('MOTION') ||
@@ -1692,7 +1727,40 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Show all 9 fielders in correct positions plus batter movement.' +
         ' Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
     } else {
-      prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
+      if (isFlagFootball) {
+        // Detect format from play note/name
+        const flagFmt = (play.note||'').includes('7v7') || (play.name||'').includes('7v7') ? '7v7'
+                      : (play.note||'').includes('6v6') || (play.name||'').includes('6v6') ? '6v6' : '5v5'
+        const flagFormation = flagFmt === '5v5'
+          ? 'QB at x=50 y=44. Center at x=50 y=42 (snaps then immediately runs seam route — center IS an eligible receiver). Left WR (X) at x=12 y=42. Right WR (Z) at x=88 y=42. Slot/RB offset at x=38 or x=62 at y=48.'
+          : flagFmt === '6v6'
+          ? 'QB at x=50 y=44. Center at x=50 y=42 (eligible after snap). Left WR (X) at x=12 y=42. Right WR (Z) at x=88 y=42. Slot (Y) at x=30 or x=70 at y=42. RB at x=44 or x=56 at y=48.'
+          : 'QB at x=50 y=44. Center at x=50 y=42. Left WR (X) at x=10 y=42. Right WR (Z) at x=90 y=42. Slot (Y) at x=28 y=42. Second Slot (H) at x=72 y=42. RB at x=44 y=50.'
+        prompt = 'You are a flag football offensive coordinator generating a precise play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
+          '\n\nFLAG FOOTBALL COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42. Attacking direction = LOWER y (toward y=0). NO offensive linemen blocking — this is flag football.' +
+          '\n\nFORMAT: ' + flagFmt + '. PRE-SNAP ALIGNMENT: ' + flagFormation +
+          '\n\nSTRICT FLAG FOOTBALL RULES:' +
+          '\n• QB CANNOT run forward unless ball was first handed off. QB either stays in pocket (y=44-48, minimal movement) or rolls laterally to edge (x=15-30 or x=70-85, y stays ~44). NEVER moves to lower y unless it was a keeper after handoff.' +
+          '\n• 7-SECOND THROW CLOCK: no route should require more than 6-7 steps from LOS. Maximum depth approximately y=10 (30 yards). Quick game and slants are primary weapons.' +
+          '\n• NO BLOCKING: all offensive players run routes only. No player paths should look like blocking assignments.' +
+          '\n• ALL PLAYERS ELIGIBLE including center (in 5v5 and 6v6 always). Include center release route in 5v5 and 6v6 plays.' +
+          '\n• RUSH LINE: add one defensive rusher at y=35 (7 yards from LOS). Other defenders at y=28-38 in coverage.' +
+          '\n\nROUTE LIBRARY — use these exact shapes:' +
+          '\n• QUICK SLANT: [[12,42],[12,38],[26,30]] (left X). [[88,42],[88,38],[74,30]] (right Z). Diagonal INWARD.' +
+          '\n• HITCH: [[12,42],[12,32],[12,36]] (back toward LOS). Short and fast.' +
+          '\n• QUICK OUT: [[12,42],[12,34],[4,34]] (left). [[88,42],[88,34],[96,34]] (right). 90° break to sideline.' +
+          '\n• CURL: [[12,42],[12,24],[12,30]] curl back facing QB.' +
+          '\n• IN/DIG: [[12,42],[12,20],[50,20]] cross inside.' +
+          '\n• POST: [[12,42],[12,20],[38,8]] diagonal to goalpost.' +
+          '\n• CORNER: [[12,42],[12,20],[4,8]] diagonal to corner.' +
+          '\n• GO/FLY: [[12,42],[12,16],[12,6]] straight vertical.' +
+          '\n• WHEEL (RB): [[45,48],[68,42],[68,18]] flat then vertical.' +
+          '\n• BUBBLE/SCREEN: [[30,42],[18,40],[10,38]] short lateral screen.' +
+          '\n• CENTER LEAK (5v5/6v6): [[50,42],[50,26],[50,14]] center seam after snap.' +
+          '\n\nAdjust all paths based on formation and play concept. ONE receiver gets routeYards > 0 (the primary read).' +
+          '\nReturn ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+      } else {
+        prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
         '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42 (offense) and y=38 (dashed line). Attacking direction = LOWER y (toward y=0). Defenders at y=34-38, LBs at y=26-32, safeties y=12-22.' +
         '\n\nCRITICAL — DIAGRAM ACCURACY IS EVERYTHING: This diagram must be a direct, accurate schematic of the specific play called. Every player position, every route, every blocking assignment, every path must match what this play actually looks like when drawn up on a real whiteboard by an NFL or college coach. An NFL coach must be able to look at this and recognize it immediately.' +
         '\n\nSCHEME SPECIFICITY: The play was generated for a specific system, personnel, and age group as described in the play name and note. Honor this completely — a Wing-T play looks different from a Spread play. A youth 6-8yr play has simpler assignments than a High School Varsity play. The formation, personnel grouping, and blocking scheme must all reflect the actual system this play belongs to, not a generic template.' +
@@ -3617,12 +3685,14 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
       const raw = await callAI(cfg.buildPrompt(offFields), null, true) // fast=true: Haiku for structured JSON
       const data = parseJSON(raw)
       if (!data.plays || !data.plays.length) throw new Error('No plays returned — please try again.')
+      if (isFlagSport && data.plays) { data.plays.forEach(p => { p._isFlagFootball = true }) }
       setOffResult(data)
       setDiagrams({})
       setGenHistory(prev => ({ ...prev, [sport]: [{ ...data, _sport:sport, _ts:Date.now() }, ...(prev[sport]||[])].slice(0,20) }))
       // Pre-generate all play diagrams in parallel — ready before user taps any card
       if (data.plays && data.plays.length) {
         const sportCfg = SPORTS[sport] || SPORTS.Football
+      const isFlagSport = sport === 'Flag Football'
         const isBasketball = sport === 'Basketball'
         const isBaseball = sport === 'Baseball' || sport === 'Softball'
         data.plays.forEach((play, playIdx) => {
@@ -3657,7 +3727,40 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               } else if (isBSB) {
                 prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
               } else {
-                prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
+                if (isFlagFootball) {
+        // Detect format from play note/name
+        const flagFmt = (play.note||'').includes('7v7') || (play.name||'').includes('7v7') ? '7v7'
+                      : (play.note||'').includes('6v6') || (play.name||'').includes('6v6') ? '6v6' : '5v5'
+        const flagFormation = flagFmt === '5v5'
+          ? 'QB at x=50 y=44. Center at x=50 y=42 (snaps then immediately runs seam route — center IS an eligible receiver). Left WR (X) at x=12 y=42. Right WR (Z) at x=88 y=42. Slot/RB offset at x=38 or x=62 at y=48.'
+          : flagFmt === '6v6'
+          ? 'QB at x=50 y=44. Center at x=50 y=42 (eligible after snap). Left WR (X) at x=12 y=42. Right WR (Z) at x=88 y=42. Slot (Y) at x=30 or x=70 at y=42. RB at x=44 or x=56 at y=48.'
+          : 'QB at x=50 y=44. Center at x=50 y=42. Left WR (X) at x=10 y=42. Right WR (Z) at x=90 y=42. Slot (Y) at x=28 y=42. Second Slot (H) at x=72 y=42. RB at x=44 y=50.'
+        prompt = 'You are a flag football offensive coordinator generating a precise play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
+          '\n\nFLAG FOOTBALL COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42. Attacking direction = LOWER y (toward y=0). NO offensive linemen blocking — this is flag football.' +
+          '\n\nFORMAT: ' + flagFmt + '. PRE-SNAP ALIGNMENT: ' + flagFormation +
+          '\n\nSTRICT FLAG FOOTBALL RULES:' +
+          '\n• QB CANNOT run forward unless ball was first handed off. QB either stays in pocket (y=44-48, minimal movement) or rolls laterally to edge (x=15-30 or x=70-85, y stays ~44). NEVER moves to lower y unless it was a keeper after handoff.' +
+          '\n• 7-SECOND THROW CLOCK: no route should require more than 6-7 steps from LOS. Maximum depth approximately y=10 (30 yards). Quick game and slants are primary weapons.' +
+          '\n• NO BLOCKING: all offensive players run routes only. No player paths should look like blocking assignments.' +
+          '\n• ALL PLAYERS ELIGIBLE including center (in 5v5 and 6v6 always). Include center release route in 5v5 and 6v6 plays.' +
+          '\n• RUSH LINE: add one defensive rusher at y=35 (7 yards from LOS). Other defenders at y=28-38 in coverage.' +
+          '\n\nROUTE LIBRARY — use these exact shapes:' +
+          '\n• QUICK SLANT: [[12,42],[12,38],[26,30]] (left X). [[88,42],[88,38],[74,30]] (right Z). Diagonal INWARD.' +
+          '\n• HITCH: [[12,42],[12,32],[12,36]] (back toward LOS). Short and fast.' +
+          '\n• QUICK OUT: [[12,42],[12,34],[4,34]] (left). [[88,42],[88,34],[96,34]] (right). 90° break to sideline.' +
+          '\n• CURL: [[12,42],[12,24],[12,30]] curl back facing QB.' +
+          '\n• IN/DIG: [[12,42],[12,20],[50,20]] cross inside.' +
+          '\n• POST: [[12,42],[12,20],[38,8]] diagonal to goalpost.' +
+          '\n• CORNER: [[12,42],[12,20],[4,8]] diagonal to corner.' +
+          '\n• GO/FLY: [[12,42],[12,16],[12,6]] straight vertical.' +
+          '\n• WHEEL (RB): [[45,48],[68,42],[68,18]] flat then vertical.' +
+          '\n• BUBBLE/SCREEN: [[30,42],[18,40],[10,38]] short lateral screen.' +
+          '\n• CENTER LEAK (5v5/6v6): [[50,42],[50,26],[50,14]] center seam after snap.' +
+          '\n\nAdjust all paths based on formation and play concept. ONE receiver gets routeYards > 0 (the primary read).' +
+          '\nReturn ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+      } else {
+        prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
                   '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS offense y=42, dashed y=38. Forward = LOWER y. Defenders y=34-38, LBs y=26-32, safeties y=12-22.' +
                   '\n\nDIAGRAM ACCURACY IS EVERYTHING. This must be a direct accurate schematic of this specific play as an NFL or college coach would draw it. Every alignment, route, blocking assignment, and path must be correct for this exact play concept.' +
                   '\n\nSCHEME SPECIFICITY: Honor the system, personnel, and age group from the play name and description. Wing-T looks different from Spread. Youth plays are simpler than varsity. The formation and blocking must match the actual system.' +
@@ -5142,6 +5245,17 @@ const RULEBOOK_LINKS = {
     { name:'US Youth Soccer',        org:'US Youth Soccer',                                      url:'https://www.usyouthsoccer.org',search:'US Youth Soccer rules regulations official',  level:'Youth' },
     { name:'AYSO Official Site',    org:'American Youth Soccer Organization',                   url:'https://www.ayso.org',       search:'AYSO soccer rules recreational youth official',  level:'Recreational Youth' },
   ],
+  'Flag Football': [
+    "Every player is a receiver — spread the field and make the defense cover all of it.",
+    "The 7-second throw clock is your shot clock. If you don't have a read by 5 seconds, check down and live to play again.",
+    "Flag guarding is a penalty. Teach runners to accelerate through contact, not protect their flags with hands.",
+    "Pre-snap motion is your best weapon in any format. A receiver in motion at the snap is harder to cover than a stationary one.",
+    "In 5v5 and 6v6, your center is an eligible receiver the moment the ball is snapped. The center leak is one of the best plays in flag football.",
+    "In 6v6, the extra player lets you run true Trips (3x1) with a back. Use it — most defenses aren't built to stop both.",
+    "In 7v7, treat your slot receivers like tight ends. Seam routes and crossing routes behind zone coverage win games.",
+    "The rush line is 7 yards from the LOS. Your receivers should be past it on short routes — create natural conflict for the rusher.",
+    "Run the same formation for multiple plays. Defenders key on formation — if your plays look the same pre-snap, they can't cheat.",
+  ],
   Softball: [
     { name:'USA Softball Official',  org:'USA Softball / ASA',                                  url:'https://www.usasoftball.com',search:'USA Softball ASA official rulebook',             level:'Official Rules' },
     { name:'Little League Softball', org:'Little League International',                          url:'https://www.littleleague.org',search:'Little League softball playing rules official', level:'Youth' },
@@ -5273,7 +5387,18 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
       { title:'Corner Kick Attack', category:'STRATEGY', body:'Near post runner, far post runner, and a player at the top of the box for clearances. Near post flick-on is the most dangerous — practice the timing between the corner taker and near post attacker.', diagram:'Corner→near post flick or far post run→top of box cleanup' },
       { title:'1v1 Defending', category:'DRILL', body:'Stay on your feet. Jockey — delay and slow the attacker. Force them to their weak foot. Never dive in unless sure. Practice patience: let your teammates recover before committing to the tackle.' },
     ],
-    Softball: [
+    'Flag Football': [
+    "Every player is a receiver — spread the field and make the defense cover all of it.",
+    "The 7-second throw clock is your shot clock. If you don't have a read by 5 seconds, check down and live to play again.",
+    "Flag guarding is a penalty. Teach runners to accelerate through contact, not protect their flags with hands.",
+    "Pre-snap motion is your best weapon in any format. A receiver in motion at the snap is harder to cover than a stationary one.",
+    "In 5v5 and 6v6, your center is an eligible receiver the moment the ball is snapped. The center leak is one of the best plays in flag football.",
+    "In 6v6, the extra player lets you run true Trips (3x1) with a back. Use it — most defenses aren't built to stop both.",
+    "In 7v7, treat your slot receivers like tight ends. Seam routes and crossing routes behind zone coverage win games.",
+    "The rush line is 7 yards from the LOS. Your receivers should be past it on short routes — create natural conflict for the rusher.",
+    "Run the same formation for multiple plays. Defenders key on formation — if your plays look the same pre-snap, they can't cheat.",
+  ],
+  Softball: [
       { title:'Windmill Pitching Mechanics', category:'DEVELOPMENT', body:'Full arm circle — wrist snap at release is the key to speed. Drive off the rubber with the push leg. Follow through across the body. Practice the wrist snap separately with a light ball before full throws.', diagram:'Wind up→full circle→snap wrist at hip→follow through' },
       { title:'Slap Hitting', category:'STRATEGY', body:'Left-handed hitters can use the running slap — start moving toward first base mid-swing. Contact point is out front, ball goes to the left side of the infield. Forces infield in and opens gaps.', diagram:'LHH steps→slap contact out front→ball to 3rd/SS→run' },
       { title:'Outfield Communication', category:'DRILL', body:'Any ball between two outfielders: center fielder has priority over all. Call "I got it!" twice, loudly. Practice fly ball communication daily — more errors come from miscommunication than misplays.', diagram:'CF calls twice→other OF peels off→CF catches' },
@@ -7803,8 +7928,8 @@ export default function CoachIQ() {
   const [sport, setSport] = useState('Football')
   const [iq, setIQ] = useState(500)
   const [gauntlets, setGauntlets] = useState(0)
-  const [playbook, setPlaybook] = useState({ Football:{}, Basketball:{}, Baseball:{}, Soccer:{}, Softball:{} })
-  const [genHistory, setGenHistory] = useState({ Football:[], Basketball:[], Baseball:[], Soccer:[], Softball:[] })
+  const [playbook, setPlaybook] = useState({ Football:{}, 'Flag Football':{}, Basketball:{}, Baseball:{}, Soccer:{}, Softball:{} })
+  const [genHistory, setGenHistory] = useState({ Football:[], 'Flag Football':[], Basketball:[], Baseball:[], Soccer:[], Softball:[] })
   const [teams, setTeams] = useState(() => {
     try {
       const s = localStorage.getItem('coachiq_teams')
@@ -7829,7 +7954,7 @@ export default function CoachIQ() {
       const s = localStorage.getItem('coachiq_activeTeam')
       if (s) return JSON.parse(s)
     } catch(e) {}
-    return { Football:null, Basketball:null, Baseball:null, Soccer:null, Softball:null }
+    return { Football:null, 'Flag Football':null, Basketball:null, Baseball:null, Soccer:null, Softball:null }
   })
 
   // SSR guard - prevents crash during Next.js prerendering
@@ -8052,8 +8177,8 @@ export default function CoachIQ() {
                 setSport(newSport)
               }
             }} style={{ background:'#161922', border:`1px solid ${al(P,0.35)}`, borderRadius:3, padding:'4px 22px 4px 6px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'0.3px', outline:'none', appearance:'none', cursor:'pointer', maxWidth:130 }}>
-              {['Football','Basketball','Baseball','Soccer','Softball'].map(s=>(
-                <option key={s} value={s}>{{ Football:'🏈', Basketball:'🏀', Baseball:'⚾', Soccer:'⚽', Softball:'🥎' }[s]} {s}</option>
+              {['Football','Flag Football','Basketball','Baseball','Soccer','Softball'].map(s=>(
+                <option key={s} value={s}>{{ Football:'🏈', 'Flag Football':'🚩', Basketball:'🏀', Baseball:'⚾', Soccer:'⚽', Softball:'🥎' }[s]} {s}</option>
               ))}
             </select>
             <span style={{ position:'absolute', right:7, top:'50%', transform:'translateY(-50%)', fontSize:9, color:P, pointerEvents:'none' }}>▾</span>
@@ -8282,7 +8407,18 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
     Basketball: ['Balanced / Full Team','Offense Only','Defense Only','Press Break','Transition','End of Game Situations','Free Throws','Post Play','Perimeter'],
     Baseball: ['Balanced / Full Team','Hitting Only','Pitching / Bullpen','Fielding / Defense','Baserunning','Situations','Batting Practice','Infield / Outfield'],
     Soccer: ['Balanced / Full Team','Attacking','Defending','Set Pieces','Transition','Pressing','Finishing','Passing & Possession'],
-    Softball: ['Balanced / Full Team','Hitting Only','Pitching / Bullpen','Fielding / Defense','Baserunning','Situations'],
+    'Flag Football': [
+    "Every player is a receiver — spread the field and make the defense cover all of it.",
+    "The 7-second throw clock is your shot clock. If you don't have a read by 5 seconds, check down and live to play again.",
+    "Flag guarding is a penalty. Teach runners to accelerate through contact, not protect their flags with hands.",
+    "Pre-snap motion is your best weapon in any format. A receiver in motion at the snap is harder to cover than a stationary one.",
+    "In 5v5 and 6v6, your center is an eligible receiver the moment the ball is snapped. The center leak is one of the best plays in flag football.",
+    "In 6v6, the extra player lets you run true Trips (3x1) with a back. Use it — most defenses aren't built to stop both.",
+    "In 7v7, treat your slot receivers like tight ends. Seam routes and crossing routes behind zone coverage win games.",
+    "The rush line is 7 yards from the LOS. Your receivers should be past it on short routes — create natural conflict for the rusher.",
+    "Run the same formation for multiple plays. Defenders key on formation — if your plays look the same pre-snap, they can't cheat.",
+  ],
+  Softball: ['Balanced / Full Team','Hitting Only','Pitching / Bullpen','Fielding / Defense','Baserunning','Situations'],
   }
 
   async function generatePlan() {
@@ -10525,3 +10661,58 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P='#
     </div>
   )
 }
+  'Flag Football': {
+    emoji:'FF',
+    fields:[
+      {id:'format',    label:'Format',              opts:['5v5','6v6','7v7']},
+      {id:'system',    label:'Offensive System',    opts:['Spread / All Vertical','Run and Shoot','Trips / 3x1','Twins / 2x2 Balanced','Bunch / Stack','Empty Set','Motion Heavy','Wing / Offset Back']},
+      {id:'personnel', label:'Best Athletes',       opts:['Athletic QB / Scrambler','Fast Receivers / Deep Threat','Shifty Slot / YAC Machine','Strong RB / Run Game','Balanced / Well-Rounded','Small Quick Players']},
+      {id:'age',       label:'Age Group',           opts:['5-7 yrs (NFL Flag Jr)','8-10 yrs','11-12 yrs','13-14 yrs','High School / Adult']},
+      {id:'skill',     label:'Team Skill Level',    opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+      {id:'focus',     label:'Offensive Focus',     opts:['Quick Game / Beat the Rush Clock','Deep Shots / Vertical','Screen / Bubble Game','Run After Catch / YAC','Red Zone (Inside 10)','2-Minute Drill','Pre-Snap Motion Attack']},
+      {id:'defense',   label:'Opponent Defense',    opts:['Unknown / Surprise Me','1-Rusher Zone','2-Rusher Blitz','Man-to-Man Press','Off-Man / Soft Coverage','Cover 2 Zone','Bracket / Double Coverage','Spy / QB Contain','Zone Blitz']},
+      {id:'qbRun',     label:'QB Run Rules',        opts:['QB Cannot Run (must hand off or pass)','QB Can Scramble (past LOS)','QB Unlimited Run (league allows)']},
+    ],
+    positions:['Quarterback','Center / Snapper','Wide Receiver (X)','Wide Receiver (Z)','Slot Receiver (Y)','Running Back','Safety','Cornerback / Rusher'],
+    buildPrompt:(f)=>{
+      const fmt = f.format || '5v5'
+      const is5 = fmt === '5v5'
+      const is6 = fmt === '6v6'
+      const is7 = fmt === '7v7'
+      const qbCanRun = f.qbRun && !f.qbRun.includes('Cannot')
+      const d = f.defense==='Unknown / Surprise Me' ? 'Generate best all-around flag football plays.' : 'Design plays to specifically attack '+f.defense+'.'
+      const st = Object.keys(f).map(k=>k+': '+f[k]).join('; ')
+      const ps = '{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}'
+
+      const formatDesc = is5
+        ? '5v5 FORMAT: 4 skill players + QB. No offensive linemen — center snaps and immediately releases as an eligible receiver (center leak is a core weapon). Formations: Spread 2x2 (2 WRs each side), Trips 3x1 (3 WRs one side, 1 other), Bunch (3 WRs clustered), Empty (4 WRs no back).'
+        : is6
+        ? '6v6 FORMAT: 5 skill players + QB. One designated RB in backfield OR use center-eligible with 4 WRs. Key advantage over 5v5: can run true 3x1 Trips WITH a back, 2x2 Twins with RB, or Bunch with weak-side single WR. Center is eligible after snap. Real run game with RB handoffs is viable. Best formations: Twins (2x2 balanced), Trips (3x1 with RB), Bunch (3-man cluster + single + RB), Empty (5 out when ahead or 2-minute).'
+        : '7v7 FORMAT: 6 skill players + QB (or center may be ineligible depending on league — check rules). 1-2 backs in backfield, 4-5 WRs. Closest to tackle football strategy. Layered route combos (shallow cross + dig + post combinations). Real run-pass option (RPO) viable. 2-high safety looks common. Formations: Pro (TE-type + 3 WRs + RB), Trips (3x1 + 2 backs), Empty (5 WRs no back), Spread (4 WRs + 1 back).'
+
+      const types = is5
+        ? 'PASS QUICK GAME,PASS DEEP SHOT,PASS SCREEN BUBBLE,PASS MOTION ATTACK,RUN HANDOFF,PASS RED ZONE'
+        : is6
+        ? 'PASS QUICK GAME,PASS DEEP SHOT,RUN HANDOFF,PASS SCREEN BUBBLE,PASS MOTION ATTACK,PASS RED ZONE'
+        : 'PASS QUICK GAME,PASS DEEP SHOT,RUN HANDOFF,PASS RPO READ,PASS MOTION ATTACK,PASS RED ZONE'
+
+      return 'You are an expert flag football offensive coordinator. ' + formatDesc +
+        ' === UNIVERSAL FLAG FOOTBALL RULES (enforce strictly) ===' +
+        ' QB RUN: ' + (qbCanRun ? 'QB may scramble and run in this league.' : 'QB CANNOT run forward with the ball unless it was first handed off behind LOS. QB must pass or hand off.') +
+        ' THROW CLOCK: 7-second throw clock from snap. ALL routes must be designed to come open within 7 seconds — no route should require more than 7 steps. Quick game, slants, hitches, and screens are primary weapons.' +
+        ' NO BLOCKING: In all formats, offensive players cannot block defenders. Receivers run routes only. Absolutely no OL-style fire-out or pulling schemes — this is flag football.' +
+        ' ALL PLAYERS ELIGIBLE: Every offensive player can receive a forward pass including center (in 5v5 and 6v6 always eligible; in 7v7 check league rules).' +
+        ' RUSH LINE: The defensive rusher must line up 7 yards from the LOS and cannot cross until the snap. Design routes to attack past the rush line quickly.' +
+        ' FLAG GUARDING: Ball carrier cannot use hands, arms, or spin to prevent flag from being pulled — design run plays that use speed and cuts, not contact.' +
+        ' PRE-SNAP MOTION: Legal and highly effective. Only 1 player may be in motion at snap. Motion can be lateral or away from LOS (same as tackle rules).' +
+        ' SCORING: TD = 6 pts. PAT: 1 pt from 5-yd line, 2 pts from 10-yd line. Safety = 2 pts.' +
+        ' Create a 6-play package. ' + st + '. ' + d +
+        ' Each play must use flag football route concepts — no tackle football OL schemes. Focus on spacing, route combos, and pre-snap motion to stress the defense.' +
+        ' Types: ' + types + '. JSON only: {"packageName":"","summary":"","plays":[' +
+        [1,2,3,4,5,6].map(n=>ps.replace('N',String(n))).join(',') +
+        '],"defenseTip":"","coachingCue":""}'
+    },
+    scenarioPrompt:(diff)=>`You are a flag football coaching AI with deep knowledge of 5v5, 6v6, and 7v7 formats. Create a realistic flag football coaching scenario. Difficulty: ${diff}.
+Key flag football rules to reference: QB cannot run directly in most leagues (must hand off first), 7-second throw clock, all players eligible, rush line 7 yards from LOS, flag guarding = penalty, no blocking, pre-snap motion allowed (1 player, lateral or backward only).
+Return ONLY valid JSON: {"situation":"e.g. 3RD DOWN NEED 8 OWN 25 DOWN 6 — 5v5","phase":"OFFENSE or DEFENSE or 2-MINUTE or RED ZONE","question":"2-3 sentence flag football scenario referencing specific format rules","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation referencing flag football rules"} Rules: exactly 1 correct, randomize which letter.`,
+  },
