@@ -1762,12 +1762,91 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         ' Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
     } else if (isFlagFootball) {
       const flagFmt = ((play.note||'').includes('7v7') || (play.name||'').includes('7v7')) ? '7v7' : ((play.note||'').includes('6v6') || (play.name||'').includes('6v6')) ? '6v6' : '5v5'
-      const flagAln = flagFmt === '5v5' ? 'QB x=50 y=44. Center x=50 y=42 eligible after snap. Left WR x=12 y=42. Right WR x=88 y=42. Slot x=38 y=48.' : flagFmt === '6v6' ? 'QB x=50 y=44. Center x=50 y=42 eligible. WRs x=12,x=88,x=30 y=42. RB x=44 y=48.' : 'QB x=50 y=44. Center x=50 y=42. WRs x=10,x=90,x=28,x=72 y=42. RB x=44 y=50.'
-      prompt = 'Flag football OC diagram ' + flagFmt + ': ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
-        ' Alignment: ' + flagAln +
-        ' RULES: QB cannot run forward unless handed off. 7-second clock max depth y=10. No blocking. All eligible including center. Rush line defender y=35.' +
-        ' ROUTES: SLANT inward [[12,42],[18,38],[30,30]]. HITCH [[12,42],[12,32],[12,36]]. OUT [[12,42],[12,34],[4,34]]. GO [[12,42],[12,8]]. WHEEL [[45,48],[68,42],[68,18]]. CENTER LEAK [[50,42],[50,26],[50,14]]. ONE receiver routeYards>0.' +
-        ' Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+      const is5v5 = flagFmt === '5v5', is6v6 = flagFmt === '6v6'
+      // Offense alignment per format
+      const flagOffense = is5v5
+        ? [
+            {id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},
+            {id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,22]],routeName:'Center Leak',routeYards:0},
+            {id:'X',label:'WR',role:'off',routeType:'route',x:12,y:42,path:[[12,42],[12,26]],routeName:'Go',routeYards:0},
+            {id:'Z',label:'WR',role:'off',routeType:'route',x:88,y:42,path:[[88,42],[88,26]],routeName:'Go',routeYards:12},
+            {id:'SL',label:'SL',role:'off',routeType:'route',x:36,y:44,path:[[36,44],[52,36]],routeName:'Slant',routeYards:0}
+          ]
+        : is6v6
+        ? [
+            {id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},
+            {id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,24]],routeName:'Center Leak',routeYards:0},
+            {id:'X',label:'WR',role:'off',routeType:'route',x:12,y:42,path:[[12,42],[12,26]],routeName:'Go',routeYards:0},
+            {id:'Z',label:'WR',role:'off',routeType:'route',x:88,y:42,path:[[88,42],[88,26]],routeName:'Go',routeYards:12},
+            {id:'Y',label:'SL',role:'off',routeType:'route',x:30,y:42,path:[[30,42],[46,30]],routeName:'Slant',routeYards:0},
+            {id:'RB',label:'RB',role:'off',routeType:'route',x:62,y:46,path:[[62,46],[78,38]],routeName:'Swing',routeYards:0}
+          ]
+        : [
+            {id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},
+            {id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,22]],routeName:'Seam',routeYards:0},
+            {id:'X',label:'WR',role:'off',routeType:'route',x:10,y:42,path:[[10,42],[10,26]],routeName:'Go',routeYards:0},
+            {id:'Z',label:'WR',role:'off',routeType:'route',x:90,y:42,path:[[90,42],[90,26]],routeName:'Go',routeYards:12},
+            {id:'Y',label:'SL',role:'off',routeType:'route',x:28,y:42,path:[[28,42],[44,30]],routeName:'Slant',routeYards:0},
+            {id:'H',label:'SL',role:'off',routeType:'route',x:72,y:42,path:[[72,42],[58,30]],routeName:'Slant',routeYards:0},
+            {id:'RB',label:'RB',role:'off',routeType:'route',x:44,y:50,path:[[44,50],[28,42]],routeName:'Swing',routeYards:0}
+          ]
+      // Defense per format — EXACT player counts: 5v5=5, 6v6=6, 7v7=7
+      const flagDefense = is5v5
+        ? [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:32,path:[[36,32],[36,26]],routeName:'Zone',routeYards:0},
+            {id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,26]],routeName:'Deep Middle',routeYards:0}
+          ]
+        : is6v6
+        ? [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
+            {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}
+          ]
+        : [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:10,y:38,path:[[10,38],[10,28]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:90,y:38,path:[[90,38],[90,28]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'CB',role:'def',routeType:'route',x:28,y:36,path:[[28,36],[28,28]],routeName:'Man',routeYards:0},
+            {id:'d4',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d5',label:'LB',role:'def',routeType:'route',x:40,y:30,path:[[40,30],[40,22]],routeName:'Zone',routeYards:0},
+            {id:'d6',label:'LB',role:'def',routeType:'route',x:60,y:30,path:[[60,30],[60,22]],routeName:'Zone',routeYards:0},
+            {id:'d7',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep Middle',routeYards:0}
+          ]
+      const flagTemplate = JSON.stringify({
+        formation: 'PLAYNAME', snapPoint: 0.15, duration: 3000,
+        _isFlagFootball: true,
+        players: [...flagOffense, ...flagDefense]
+      })
+      prompt = 'Expert flag football offensive coordinator generating a precise flag football play diagram.' +
+        ' Format: ' + flagFmt + '. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
+        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42. Attacking direction = LOWER y.' +
+        '\n\nCRITICAL — EXACT PLAYER COUNTS: ' + flagFmt + ' means EXACTLY ' + (is5v5 ? '5' : is6v6 ? '6' : '7') + ' offensive players AND EXACTLY ' + (is5v5 ? '5' : is6v6 ? '6' : '7') + ' defensive players. NO MORE. Do not add extra players.' +
+        '\n\nFLAG FOOTBALL RULES (STRICTLY ENFORCED):' +
+        '\n- QB stays in pocket: QB path is [[50,44],[50,44]] or tiny movement (max 2 units). QB DOES NOT DROP BACK or move forward. Flag football QB is stationary or near-stationary. Set routeName to "Pocket Pass".' +
+        '\n- On designed rollout plays ONLY: QB moves laterally to edge, y stays near 44. Left rollout: [[50,44],[28,44]]. Right: [[50,44],[72,44]].' +
+        '\n- NO BLOCKING PATHS. All offensive players run pass routes. No OL-style blocks.' +
+        '\n- ALL players eligible. Center releases after snap and runs a route.' +
+        '\n- RUSH LINE: one defensive player starts at y=35 (7 yards off LOS) — this is the rusher.' +
+        '\n- ONE receiver gets routeYards > 0 (the primary target). All others routeYards:0.' +
+        '\n\nQB MECHANICS: In flag football, the QB takes the snap and immediately looks to throw. Path should be [[50,44],[50,44]] (stationary in pocket). The THROW INDICATOR (drawPassIndicator) will draw the arc to the receiver — set routeName "Pocket Pass" so it triggers.' +
+        '\n\nROUTE LIBRARY (adapt depth to play concept):' +
+        '\n- SLANT: 2 steps up, sharp break INWARD. Left X: [[12,42],[12,38],[26,30]]. Right Z: [[88,42],[88,38],[74,30]].' +
+        '\n- HITCH: stem up, break BACK toward LOS. [[12,42],[12,32],[12,36]].' +
+        '\n- QUICK OUT: stem up, 90 break TOWARD sideline. Left: [[12,42],[12,34],[4,34]]. Right: [[88,42],[88,34],[96,34]].' +
+        '\n- CURL: stem 8-10yds, curl back facing QB. [[12,42],[12,26],[12,32]].' +
+        '\n- DIG/IN: stem upfield, sharp 90 break INWARD. [[12,42],[12,22],[50,22]].' +
+        '\n- POST: stem up, diagonal INWARD to goalpost. [[12,42],[12,20],[38,8]].' +
+        '\n- CORNER: stem up, diagonal OUTWARD to corner. [[12,42],[12,20],[4,8]].' +
+        '\n- GO/FLY: straight vertical. [[12,42],[12,8]].' +
+        '\n- WHEEL (RB/slot): flat then vertical. [[38,44],[18,40],[18,18]].' +
+        '\n- CENTER LEAK: center seam after snap. [[50,42],[50,20]].' +
+        '\n- BUBBLE/SCREEN: short lateral screen. [[30,42],[16,40],[8,38]].' +
+        '\nReturn ONLY raw JSON: ' + flagTemplate.replace('PLAYNAME', play.name)
     } else {
       prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
         '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42 (offense) and y=38 (dashed line). Attacking direction = LOWER y (toward y=0). Defenders at y=34-38, LBs at y=26-32, safeties y=12-22.' +
@@ -2337,18 +2416,24 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       // Detect pass play: QB routeName indicates drop/PA, not a run
       const qbRoute = (qb.routeName || '').toLowerCase()
       const playType = (parsed.formation || '').toLowerCase()
-      const isPassPlay = qbRoute.includes('drop') || qbRoute.includes('pa ') ||
-                         qbRoute.includes('bootleg') || qbRoute.includes('pa boot') ||
-                         qbRoute.includes('pass') || qbRoute.includes('throw') ||
-                         playType.includes('pass') || playType.includes('action') ||
-                         // Also detect by play type label from the play object
-                         ((parsed._playType||'').toLowerCase().includes('pass'))
+      // Flag football: all plays are passes except handoffs
+      const isFlagPlay = !!(parsed._isFlagFootball)
+      const isPassPlay = isFlagPlay
+        ? !(qbRoute.includes('handoff') || qbRoute.includes('hand off') || qbRoute.includes('pitch'))
+        : (qbRoute.includes('drop') || qbRoute.includes('pa ') ||
+           qbRoute.includes('bootleg') || qbRoute.includes('pa boot') ||
+           qbRoute.includes('pass') || qbRoute.includes('throw') ||
+           qbRoute.includes('pocket') || qbRoute.includes('hold') ||
+           playType.includes('pass') || playType.includes('action') ||
+           ((parsed._playType||'').toLowerCase().includes('pass')))
       if (!isPassPlay) return
 
       // Find primary receiver — prefer routeYards > 0, then first WR/TE with a route
       const receivers = players.filter(p =>
         p.role === 'off' && p.routeType === 'route' &&
-        ['WR','TE','WR1','WR2','WR3','SL','RB','HB','FB'].includes(p.label)
+        (isFlagPlay
+          ? !['QB'].includes(p.label)  // in flag, anyone can receive except QB
+          : ['WR','TE','WR1','WR2','WR3','SL','RB','HB','FB'].includes(p.label))
       )
       if (!receivers.length) return
 
@@ -3737,8 +3822,20 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                 prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
               } else if (isFlagBg) {
                 const fFmt = ((play.note||'').includes('7v7') || (play.name||'').includes('7v7')) ? '7v7' : ((play.note||'').includes('6v6') || (play.name||'').includes('6v6')) ? '6v6' : '5v5'
-                const fAln = fFmt === '5v5' ? 'QB x=50 y=44, C x=50 y=42 eligible, WRs x=12,x=88 y=42, Slot x=38 y=48' : fFmt === '6v6' ? 'QB x=50 y=44, C x=50 y=42, WRs x=12,x=88,x=30 y=42, RB x=44 y=48' : 'QB x=50 y=44, C x=50 y=42, WRs x=10,x=28,x=72,x=90 y=42, RB x=44 y=50'
-                prompt = 'Flag ' + fFmt + ' diagram: ' + play.name + ' ' + (play.note||'') + ' Align: ' + fAln + ' No blocking, all eligible, rush line y=35, QB no run unless handoff, 7sec clock. SLANT inward [[12,42],[18,38],[30,30]]. GO [[12,42],[12,8]]. HITCH [[12,42],[12,32],[12,36]]. CENTER LEAK [[50,42],[50,14]]. One routeYards>0. JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+                const fIs5 = fFmt === '5v5', fIs6 = fFmt === '6v6'
+                const fOff = fIs5
+                  ? [{id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},{id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,22]],routeName:'Center Leak',routeYards:0},{id:'X',label:'WR',role:'off',routeType:'route',x:12,y:42,path:[[12,42],[12,26]],routeName:'Go',routeYards:0},{id:'Z',label:'WR',role:'off',routeType:'route',x:88,y:42,path:[[88,42],[88,26]],routeName:'Go',routeYards:12},{id:'SL',label:'SL',role:'off',routeType:'route',x:36,y:44,path:[[36,44],[52,36]],routeName:'Slant',routeYards:0}]
+                  : fIs6
+                  ? [{id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},{id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,24]],routeName:'Center Leak',routeYards:0},{id:'X',label:'WR',role:'off',routeType:'route',x:12,y:42,path:[[12,42],[12,26]],routeName:'Go',routeYards:0},{id:'Z',label:'WR',role:'off',routeType:'route',x:88,y:42,path:[[88,42],[88,26]],routeName:'Go',routeYards:12},{id:'Y',label:'SL',role:'off',routeType:'route',x:30,y:42,path:[[30,42],[46,30]],routeName:'Slant',routeYards:0},{id:'RB',label:'RB',role:'off',routeType:'route',x:62,y:46,path:[[62,46],[78,38]],routeName:'Swing',routeYards:0}]
+                  : [{id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},{id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,22]],routeName:'Seam',routeYards:0},{id:'X',label:'WR',role:'off',routeType:'route',x:10,y:42,path:[[10,42],[10,26]],routeName:'Go',routeYards:0},{id:'Z',label:'WR',role:'off',routeType:'route',x:90,y:42,path:[[90,42],[90,26]],routeName:'Go',routeYards:12},{id:'Y',label:'SL',role:'off',routeType:'route',x:28,y:42,path:[[28,42],[44,30]],routeName:'Slant',routeYards:0},{id:'H',label:'SL',role:'off',routeType:'route',x:72,y:42,path:[[72,42],[58,30]],routeName:'Slant',routeYards:0},{id:'RB',label:'RB',role:'off',routeType:'route',x:44,y:50,path:[[44,50],[28,42]],routeName:'Swing',routeYards:0}]
+                const fDef = fIs5
+                  ? [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:32,path:[[36,32],[36,26]],routeName:'Zone',routeYards:0},{id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,26]],routeName:'Deep',routeYards:0}]
+                  : fIs6
+                  ? [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},{id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}]
+                  : [{id:'d1',label:'CB',role:'def',routeType:'route',x:10,y:38,path:[[10,38],[10,28]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:90,y:38,path:[[90,38],[90,28]],routeName:'Man',routeYards:0},{id:'d3',label:'CB',role:'def',routeType:'route',x:28,y:36,path:[[28,36],[28,28]],routeName:'Man',routeYards:0},{id:'d4',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:40,y:30,path:[[40,30],[40,22]],routeName:'Zone',routeYards:0},{id:'d6',label:'LB',role:'def',routeType:'route',x:60,y:30,path:[[60,30],[60,22]],routeName:'Zone',routeYards:0},{id:'d7',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep',routeYards:0}]
+                const fTemplate = JSON.stringify({formation:'PLAYNAME',snapPoint:0.15,duration:3000,_isFlagFootball:true,players:[...fOff,...fDef]})
+                prompt = 'Flag ' + fFmt + ' OC diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' EXACTLY ' + (fIs5?'5':fIs6?'6':'7') + ' off and ' + (fIs5?'5':fIs6?'6':'7') + ' def players. QB stationary in pocket routeName Pocket Pass path [[50,44],[50,44]]. No blocking. All eligible. Rush line defender y=35. One routeYards>0. Routes: SLANT inward, HITCH back, GO vertical, CENTER LEAK seam, WHEEL flat-then-vertical, DIG cross, POST inward diagonal, CORNER outward diagonal. JSON: ' + fTemplate.replace('PLAYNAME', play.name)
               } else {
                 prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
                   '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS offense y=42, dashed y=38. Forward = LOWER y. Defenders y=34-38, LBs y=26-32, safeties y=12-22.' +
