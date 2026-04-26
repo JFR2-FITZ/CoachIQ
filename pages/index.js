@@ -968,7 +968,7 @@ const SPORTS = {
   'Flag Football': {
     emoji:'FF',
     fields:[
-      {id:'format',    label:'Format',              opts:['5v5','6v6','7v7']},
+      {id:'format',    label:'Format',              opts:['5v5','6v6','6v6 + Rusher','7v7']},
       {id:'system',    label:'Offensive System',    opts:['Spread / All Vertical','Run and Shoot','Trips / 3x1','Twins / 2x2 Balanced','Bunch / Stack','Empty Set','Motion Heavy','Wing / Offset Back']},
       {id:'personnel', label:'Best Athletes',       opts:['Athletic QB / Scrambler','Fast Receivers / Deep Threat','Shifty Slot / YAC Machine','Strong RB / Run Game','Balanced / Well-Rounded','Small Quick Players']},
       {id:'age',       label:'Age Group',           opts:['5-7 yrs (NFL Flag Jr)','8-10 yrs','11-12 yrs','13-14 yrs','High School / Adult']},
@@ -980,7 +980,7 @@ const SPORTS = {
     positions:['Quarterback','Center / Snapper','Wide Receiver (X)','Wide Receiver (Z)','Slot Receiver (Y)','Running Back','Safety','Cornerback / Rusher'],
     buildPrompt:(f)=>{
       const fmt = f.format || '5v5'
-      const is5 = fmt === '5v5', is6 = fmt === '6v6'
+      const is5 = fmt === '5v5', is6 = fmt === '6v6' || fmt === '6v6 + Rusher', hasRusher = fmt === '6v6 + Rusher'
       const qbCanRun = f.qbRun && !f.qbRun.includes('Cannot')
       const d = f.defense === 'Unknown / Surprise Me' ? 'Best all-around flag football plays.' : 'Design plays to attack ' + f.defense + '.'
       const st = Object.keys(f).map(k => k + ': ' + f[k]).join('; ')
@@ -1822,18 +1822,22 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         _isFlagFootball: true,
         players: [...flagOffense, ...flagDefense]
       })
+      // Handle 6v6 + Rusher format
+      const totalPlayers = is5v5 ? 5 : is6v6 ? 6 : 7
+      const hasExtraRusher = flagFmt === '6v6 + Rusher'
+      const defCount = hasExtraRusher ? 7 : totalPlayers  // 6 field + 1 designated rusher
       prompt = 'Expert flag football offensive coordinator generating a precise flag football play diagram.' +
         ' Format: ' + flagFmt + '. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
         '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS at y=42. Attacking direction = LOWER y.' +
-        '\n\nCRITICAL — EXACT PLAYER COUNTS: ' + flagFmt + ' means EXACTLY ' + (is5v5 ? '5' : is6v6 ? '6' : '7') + ' offensive players AND EXACTLY ' + (is5v5 ? '5' : is6v6 ? '6' : '7') + ' defensive players. NO MORE. Do not add extra players.' +
+        '\n\nCRITICAL — EXACT PLAYER COUNTS: ' + flagFmt + ' means EXACTLY ' + totalPlayers + ' offensive players AND EXACTLY ' + totalPlayers + ' defensive players. COUNT THEM. Do not add or remove players — the template has the right number.' +
+        '\n\nCRITICAL — DEFENSIVE ALIGNMENT: Defenders must align ACROSS THE FORMATION, not stacked on one receiver. Spread CBs to cover the widest receivers (X left, Z right). Do NOT put 2+ defenders on one receiver. The rusher (label "R") lines up at y=35, 7 yards from LOS. Safety lines up over the middle at y=18-22. LBs at y=28-32 between the hashes. CBs at y=36-38 aligned outside across from WRs.' +
         '\n\nFLAG FOOTBALL RULES (STRICTLY ENFORCED):' +
-        '\n- QB stays in pocket: QB path is [[50,44],[50,44]] or tiny movement (max 2 units). QB DOES NOT DROP BACK or move forward. Flag football QB is stationary or near-stationary. Set routeName to "Pocket Pass".' +
-        '\n- On designed rollout plays ONLY: QB moves laterally to edge, y stays near 44. Left rollout: [[50,44],[28,44]]. Right: [[50,44],[72,44]].' +
-        '\n- NO BLOCKING PATHS. All offensive players run pass routes. No OL-style blocks.' +
-        '\n- ALL players eligible. Center releases after snap and runs a route.' +
-        '\n- RUSH LINE: one defensive player starts at y=35 (7 yards off LOS) — this is the rusher.' +
-        '\n- ONE receiver gets routeYards > 0 (the primary target). All others routeYards:0.' +
-        '\n\nQB MECHANICS: In flag football, the QB takes the snap and immediately looks to throw. Path should be [[50,44],[50,44]] (stationary in pocket). The THROW INDICATOR (drawPassIndicator) will draw the arc to the receiver — set routeName "Pocket Pass" so it triggers.' +
+        '\n- QB stays in pocket: QB path is [[50,44],[50,44]] (stationary). QB does NOT drop back. Set routeName "Pocket Pass".' +
+        '\n- On designed rollout ONLY: QB moves laterally, y stays near 44.' +
+        '\n- NO BLOCKING. All offensive players run routes.' +
+        '\n- ALL players eligible including center.' +
+        '\n- RUSH LINE: rusher (label "R") starts at y=35.' +
+        '\n- ONE receiver gets routeYards > 0 (primary target). Others routeYards:0.' +
         '\n\nROUTE LIBRARY (adapt depth to play concept):' +
         '\n- SLANT: 2 steps up, sharp break INWARD. Left X: [[12,42],[12,38],[26,30]]. Right Z: [[88,42],[88,38],[74,30]].' +
         '\n- HITCH: stem up, break BACK toward LOS. [[12,42],[12,32],[12,36]].' +
@@ -2061,6 +2065,51 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         })
       }
       // ── END SANITIZER ────────────────────────────────────────────────────────
+
+      // ── FLAG FOOTBALL SANITIZER: enforce exact player counts and QB mechanics ──
+      if (play?._isFlagFootball && data.players) {
+        data._isFlagFootball = true
+        const fmt = ((play.note||'') + (play.name||'')).includes('7v7') ? '7v7'
+                  : ((play.note||'') + (play.name||'')).includes('6v6') ? '6v6' : '5v5'
+        const expectedCount = fmt === '7v7' ? 7 : fmt === '6v6' ? 6 : 5
+        // Trim excess players
+        const offP = data.players.filter(p => p.role === 'off')
+        const defP = data.players.filter(p => p.role === 'def')
+        if (offP.length > expectedCount) {
+          const keepIds = offP.slice(0, expectedCount).map(p => p.id)
+          data.players = data.players.filter(p => p.role !== 'off' || keepIds.includes(p.id))
+        }
+        if (defP.length > expectedCount) {
+          const keepIds = defP.slice(0, expectedCount).map(p => p.id)
+          data.players = data.players.filter(p => p.role !== 'def' || keepIds.includes(p.id))
+        }
+        // Ensure QB has Pocket Pass routeName so pass indicator fires
+        const qbP = data.players.find(p => p.label === 'QB' && p.role === 'off')
+        if (qbP) {
+          if (!qbP.routeName || (!qbP.routeName.toLowerCase().includes('pass') && !qbP.routeName.toLowerCase().includes('pocket') && !qbP.routeName.toLowerCase().includes('rollout'))) {
+            qbP.routeName = 'Pocket Pass'
+          }
+          // QB stays near pocket in flag football
+          if (qbP.path && qbP.path.length >= 2) {
+            const startX = qbP.path[0][0], startY = qbP.path[0][1]
+            qbP.path = qbP.path.map(pt => [
+              Math.max(startX - 6, Math.min(startX + 6, pt[0])),  // max 6 units lateral
+              Math.max(startY - 2, Math.min(startY + 4, pt[1]))   // max 4 units depth
+            ])
+          }
+        }
+        // Ensure at least one receiver has routeYards > 0
+        const routeP = data.players.filter(p => p.role === 'off' && p.label !== 'QB' && p.routeType === 'route')
+        if (routeP.length > 0 && !routeP.some(p => (p.routeYards||0) > 0)) {
+          routeP[0].routeYards = 8
+        }
+        // Spread defenders: rusher at y=35, others distributed
+        const defPlayers = data.players.filter(p => p.role === 'def')
+        const rusher = defPlayers.find(p => (p.label||'').toLowerCase().includes('r') || (p.routeName||'').toLowerCase().includes('rush'))
+        if (rusher && rusher.y > 36) rusher.y = 35  // push rusher to correct rush line
+      }
+      // ── END FLAG SANITIZER ──
+
       setParsed(data)
     } catch(e) { setError(e.message) }
     setLoading(false)
