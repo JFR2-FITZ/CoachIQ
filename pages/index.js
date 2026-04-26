@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-// ─── APP VERSION & FEATURE FLAGS ─────────────────────────────────────────────
+// --- APP VERSION & FEATURE FLAGS ---------------------------------------------
 // Update APP_VERSION with each major push.
 // STATUS: 'live' | 'beta' | 'coming_soon' | 'planned'
 // TIER: 'free' | 'founding' | 'pro' | 'league'
 const APP_VERSION = '1.5.2'
 const FEATURES = {
-  hub:               { status:'live',        name:'C·IQ Hub',                  tier:'free'     },
+  hub:               { status:'live',        name:'C.IQ Hub',                  tier:'free'     },
   schemes_offense:   { status:'live',        name:'Offense Scheme Generator',  tier:'free'     },
   schemes_defense:   { status:'live',        name:'Defense Scheme Generator',  tier:'free'     },
   play_name_builder: { status:'live',        name:'Play Name Builder',         tier:'free'     },
@@ -39,7 +39,7 @@ const FEATURES = {
   certifications:    { status:'planned',     name:'Coaching Certifications',   tier:'pro'      },
   advanced_analytics:{ status:'planned',     name:'Advanced Analytics',        tier:'founding' },
 }
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 
 function useWindowSize() {
@@ -61,7 +61,7 @@ function useBreakpoint() {
 
 import Head from 'next/head'
 
-// ─── BRAND CONFIG ────────────────────────────────────────────────────────────
+// --- BRAND CONFIG ------------------------------------------------------------
 const BRAND_PALETTES = {
   'Red -- C+IQ colored':   { accent: '#C0392B', accentOn: 'CIQ', name: 'Red -- C+IQ colored' },
   'Red -- oach colored':   { accent: '#C0392B', accentOn: 'oach', name: 'Red -- oach colored' },
@@ -71,7 +71,7 @@ const BRAND_PALETTES = {
 }
 
 
-// ─── MASCOTS ──────────────────────────────────────────────────────────────────
+// --- MASCOTS ------------------------------------------------------------------
 const MASCOT_SVGS = {
   eagles: (col='#C0392B') => {
     const _r=parseInt(col.slice(1,3),16),_g=parseInt(col.slice(3,5),16),_b=parseInt(col.slice(5,7),16)
@@ -478,7 +478,7 @@ const TEAM_FONTS = [
   { id:'mono',     name:'DM Mono',         style:"'DM Mono', monospace",                 preview:'Monospace' },
 ]
 
-// ─── COACHING TIPS ────────────────────────────────────────────────────────────
+// --- COACHING TIPS ------------------------------------------------------------
 const COACHING_TIPS = {
   Football: [
     "Pad level wins -- the lower player wins the battle every time.",
@@ -608,7 +608,7 @@ function getRandomTip(sport) {
   return tips[Math.floor(Math.random() * tips.length)]
 }
 
-// ─── TUTORIAL DATA ────────────────────────────────────────────────────────────
+// --- TUTORIAL DATA ------------------------------------------------------------
 const TUTORIAL_STEPS = [
   { tab:'home', icon:'\u{1F3E0}', title:'Welcome to CoachIQ', action:null, actionLabel:null,
     desc:'Your coaching assistant. This tour walks you through every feature. Tap Next to continue or Exit Tour anytime.',
@@ -682,7 +682,7 @@ const FEATURE_GUIDE = [
 
 
 
-// ─── DEMO TEAMS (guest/just-exploring mode only -- session only, never persisted) ──
+// --- DEMO TEAMS (guest/just-exploring mode only -- session only, never persisted) --
 const DEMO_TEAMS = {
   Football: {
     id: 'demo_football', name: 'Tolland Eagles', season: 'Fall 2025', mascot: 'eagles',
@@ -872,7 +872,7 @@ const DEMO_TEAMS = {
   }
 }
 
-// ─── SPORT COLORS ────────────────────────────────────────────────────────────
+// --- SPORT COLORS ------------------------------------------------------------
 const SPORT_COLORS = {
   Football:   { primary: '#C0392B', secondary: '#1a3a1a', accent: '#e8f5e9', label: 'Football' },
   Basketball: { primary: '#D4600A', secondary: '#1a1208', accent: '#fff3e0', label: 'Basketball' },
@@ -882,7 +882,7 @@ const SPORT_COLORS = {
   'Flag Football': { primary: '#E65100', secondary: '#0a1a2a', accent: '#fff3e0', label: 'Flag Football' },
 }
 
-// ─── DEFAULT PLAYBOOK FOLDERS ────────────────────────────────────────────────
+// --- DEFAULT PLAYBOOK FOLDERS ------------------------------------------------
 const DEFAULT_FOLDERS = {
   Football:   ['Base Offense','Red Zone','2-Minute Drill','Base Defense','Special Teams','My Favorites'],
   Basketball: ['Base Offense','End of Game','Press Break','Zone Attack','Inbounds','My Favorites'],
@@ -892,7 +892,7 @@ const DEFAULT_FOLDERS = {
   'Flag Football': ['5v5 Offense','7v7 Offense','Red Zone','2-Minute Drill','Base Defense','My Favorites'],
 }
 
-// ─── SPORTS CONFIG ───────────────────────────────────────────────────────────
+// --- SPORTS CONFIG -----------------------------------------------------------
 const SPORTS = {
   Football: {
     emoji:'FB',
@@ -1030,7 +1030,7 @@ Return ONLY valid JSON: {"situation":"e.g. 3RD DOWN NEED 8 OWN 25 DOWN 6 -- 5v5"
 }
 
 
-// ─── LOGO COMPONENT ──────────────────────────────────────────────────────────
+// --- LOGO COMPONENT ----------------------------------------------------------
 function CoachIQLogo({ size=22, brand='Red -- C+IQ colored' }) {
   const p = BRAND_PALETTES[brand] || BRAND_PALETTES['Red -- C+IQ colored']
   const CIQ = p.accentOn === 'CIQ'
@@ -1046,7 +1046,7 @@ function CoachIQLogo({ size=22, brand='Red -- C+IQ colored' }) {
   )
 }
 
-// ─── SHARED UI ───────────────────────────────────────────────────────────────
+// --- SHARED UI ---------------------------------------------------------------
 function safeAccent(hex, fallback='#C0392B') {
   // Returns a version of hex that is always dark enough to be visible on dark backgrounds
   // and always different enough from white to be readable
@@ -1141,7 +1141,7 @@ function ErrBox({ msg }) {
   return <div style={{ marginTop:10, background:'#161922', border:'1px solid rgba(192,57,43,0.3)', borderRadius:4, padding:10, fontSize:11, color:'#8a94b0', wordBreak:'break-all' }}>Error: {msg}</div>
 }
 
-// ─── QUICK TOUR MODAL ─────────────────────────────────────────────────────────
+// --- QUICK TOUR MODAL ---------------------------------------------------------
 function QuickTourModal({ onDone, P='#C0392B', al, setPage }) {
   const [step, setStep] = useState(0)
   const current = TUTORIAL_STEPS[step]
@@ -1187,7 +1187,7 @@ function QuickTourModal({ onDone, P='#C0392B', al, setPage }) {
         <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
           {current.action && (
             <button onClick={()=>goTo(current.action)} style={{ width:'100%', padding:'11px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1px' }}>
-              {current.actionLabel || 'Go There →'}
+              {current.actionLabel || 'Go There ->'}
             </button>
           )}
           <div style={{ display:'flex', gap:8 }}>
@@ -1195,7 +1195,7 @@ function QuickTourModal({ onDone, P='#C0392B', al, setPage }) {
               <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'9px', background:'#161922', border:'1px solid #1e2330', borderRadius:5, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← Back</button>
             )}
             <button onClick={()=>{ if(isLast) onDone(); else setStep(s=>s+1) }} style={{ flex:2, padding:'9px', background:current.action?'#0f1219':P, border:current.action?'1px solid #1e2330':'none', borderRadius:5, color:current.action?'#6b7a96':'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>
-              {isLast ? 'Start Coaching! 🏈' : current.action ? 'Skip this step →' : 'Next →'}
+              {isLast ? 'Start Coaching! 🏈' : current.action ? 'Skip this step ->' : 'Next ->'}
             </button>
           </div>
           <button onClick={onDone} style={{ background:'#161922', border:'none', color:'#5a6480', cursor:'pointer', fontSize:11, fontFamily:"'Barlow Condensed',sans-serif", padding:'4px', textAlign:'center' }}>Exit tour</button>
@@ -1232,7 +1232,7 @@ function FeatureGuide({ P='#C0392B', al, onClose }) {
   )
 }
 
-// ─── FIRST-TIME WELCOME ───────────────────────────────────────────────────────
+// --- FIRST-TIME WELCOME -------------------------------------------------------
 function FirstTimeWelcome({ onChoice, P, al }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', zIndex:500, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
@@ -1252,7 +1252,7 @@ function FirstTimeWelcome({ onChoice, P, al }) {
 }
 
 
-// ─── FOOTBALL HOLE NUMBER DIAGRAM ─────────────────────────────────────────────
+// --- FOOTBALL HOLE NUMBER DIAGRAM ---------------------------------------------
 function FootballHoleDiagram({ P }) {
   return (
     <div style={{ background:'#0f1117', borderRadius:6, padding:'10px 8px', marginTop:6 }}>
@@ -1406,7 +1406,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
   return (
     <div style={{ borderBottom:'1px solid #1e2330', padding:'12px 0' }}>
 
-      {/* ── PLAY HEADER ── */}
+      {/* -- PLAY HEADER -- */}
       <div style={{ display:'flex', alignItems:'flex-start', gap:10, marginBottom:10 }}>
         <div style={{ width:24, height:24, minWidth:24, background:P, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{play.number}</div>
         <div style={{ flex:1, minWidth:0 }}>
@@ -1417,10 +1417,10 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
       </div>
 
-      {/* ── DIAGRAM -- collapsed by default, expand on tap ── */}
+      {/* -- DIAGRAM -- collapsed by default, expand on tap -- */}
       <div style={{ marginBottom:10 }}>
         {!showDiagram ? (
-          /* ── Thumbnail preview -- tap to expand ── */
+          /* -- Thumbnail preview -- tap to expand -- */
           <div onClick={()=>setShowDiagram(true)} style={{ cursor:'pointer', position:'relative', borderRadius:6, overflow:'hidden', border:`1px solid ${hexToRgba(P,0.2)}`, background:'#0f1219' }}>
             {/* Mini static field */}
             <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.7 }}>
@@ -1455,7 +1455,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         )}
       </div>
 
-      {/* ── TOGGLE BUTTONS ── */}
+      {/* -- TOGGLE BUTTONS -- */}
       <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:(showSummary||showMore)?10:0 }}>
         <button onClick={()=>setShowSummary(v=>!v)} style={{ padding:'5px 12px', background:showSummary?P:'transparent', border:'1px solid ' + (showSummary?P:'#1e2330'), borderRadius:4, color:showSummary?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
           📋 Summary {showSummary?'▲':'▼'}
@@ -1465,7 +1465,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         </button>
       </div>
 
-      {/* ── SUMMARY ── */}
+      {/* -- SUMMARY -- */}
       {showSummary && (
         <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:10, animation:'fadeIn 0.2s ease' }}>
           {play.presnap && (
@@ -1495,7 +1495,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         </div>
       )}
 
-      {/* ── MORE ── */}
+      {/* -- MORE -- */}
       {showMore && (
         <div style={{ animation:'fadeIn 0.2s ease' }}>
           <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
@@ -1633,7 +1633,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
   )
 }
 
-// ─── PLAY ANIMATOR ────────────────────────────────────────────────────────────
+// --- PLAY ANIMATOR ------------------------------------------------------------
 function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, preloadedData=null }) {
   const canvasRef = useRef(null)
   const animRef = useRef(null)
@@ -1670,7 +1670,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
   async function generateAnim() {
     setLoading(true); setError(null); setParsed(null)
 
-    // ── COORDINATE SYSTEM ────────────────────────────────────────────────────
+    // -- COORDINATE SYSTEM ----------------------------------------------------
     // x: 0=left, 100=right  (both sports)
     // y: 0=top of canvas, 60=bottom of canvas
     // FOOTBALL: offense lines up at y=42 (LOS=dashed line), attacks UPWARD toward y=0 (defense side)
@@ -1824,7 +1824,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n\nROUTE AND BLOCKING ACCURACY: Every route must match the actual route concept for this play. Inside zone = OL all step playside, no pulling. Outside zone = OL reach block playside. Counter = backside G and T pull. Power = one guard pulls, FB kicks out. Trap = opposite guard pulls and traps. Sweep = multiple blockers lead outside. Pass plays = correct route combinations (flood, mesh, smash, four verts, etc). Every assignment must be what a real coach would draw.' +
         '\n\nPATH RULES:' +
         '\n• All offense attacking forward (runs/routes/OL blocks) = LOWER y.' +
-        '\n• QB DROPBACK = HIGHER y (moving away from LOS). 3-step: y=44→50. 5-step: y=44→53. 7-step: y=44→57. NEVER lower y on a pass drop.' +
+        '\n• QB DROPBACK = HIGHER y (moving away from LOS). 3-step: y=44->50. 5-step: y=44->53. 7-step: y=44->57. NEVER lower y on a pass drop.' +
         '\n• DL charge = higher y. Coverage drops = lower y (deeper).' +
         '\n\nROUTE SHAPE LIBRARY -- use these exact shapes, scaled to the WR alignment:' +
         '\n• HITCH/COMEBACK: stem 4-6 yds upfield (lower y), then sharp break BACK toward LOS (higher y). Left WR hitch: [[18,42],[18,32],[18,38]]. Break back toward where they came from.' +
@@ -1877,7 +1877,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       if (!data.players || data.players.length === 0) throw new Error('No players returned')
       data._sportType = isBasketball ? 'basketball' : isBaseball ? 'baseball' : 'football'
       try { sessionStorage.setItem(cacheKey, JSON.stringify(data)) } catch(e) {}
-      // ── FULL DIAGRAM SANITIZER ──────────────────────────────────────────────
+      // -- FULL DIAGRAM SANITIZER ----------------------------------------------
       // Enforces real football rules on AI-returned coordinates before rendering.
       // No matter what the model returns, these rules hold.
       if (data.players) {
@@ -1889,12 +1889,12 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         data.players.forEach(p => {
           if (!p.path || p.path.length < 2) return
 
-          // ── RULE 1: No OL, DL, or QB moves before the snap ──────────────────
+          // -- RULE 1: No OL, DL, or QB moves before the snap ------------------
           if ((INELIGIBLE.has(p.label) || p.label === 'QB') && (p.pathDelay || 0) < 0) {
             p.pathDelay = 0
           }
 
-          // ── RULE 2: Offensive linemen on run plays must move FORWARD (lower y) ──
+          // -- RULE 2: Offensive linemen on run plays must move FORWARD (lower y) --
           // A blocker can never retreat backward -- that's surrendering the block
           if (OL_LABELS.has(p.label) && p.role === 'off' && p.routeType === 'block') {
             for (let i = 1; i < p.path.length; i++) {
@@ -1909,7 +1909,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             }
           }
 
-          // ── RULE 3: RB/ball carrier run paths must continuously go forward ──
+          // -- RULE 3: RB/ball carrier run paths must continuously go forward --
           // An RB path can have a single lateral jab step but must trend lower y
           if ((p.id === 'RB' || p.id === 'HB' || p.id === 'FB') && p.routeType === 'route' && p.role === 'off') {
             const isRunPlay = !isBasketball && !isBaseball
@@ -1925,7 +1925,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             }
           }
 
-          // ── RULE 4: Defensive linemen must attack toward offense (higher y) ──
+          // -- RULE 4: Defensive linemen must attack toward offense (higher y) --
           if (DL_LABELS.has(p.label) && p.role === 'def') {
             for (let i = 1; i < p.path.length; i++) {
               if (p.path[i][1] < p.path[i-1][1]) {
@@ -1934,7 +1934,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             }
           }
 
-          // ── RULE 5: Receivers on routes must end past the LOS ──
+          // -- RULE 5: Receivers on routes must end past the LOS --
           // Only correct routes that end at or behind LOS (y >= 42) -- not routes that
           // end between LOS and start (slants, outs, hitches all have valid short y values)
           const isReceiver = ['WR','TE','WR1','WR2','WR3','SL','SLT'].includes(p.label)
@@ -1946,7 +1946,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             }
           }
 
-          // ── RULE 6: No player starts below y=55 or above y=5 ──
+          // -- RULE 6: No player starts below y=55 or above y=5 --
           p.path = p.path.map(pt => [
             Math.max(2, Math.min(98, pt[0])),
             Math.max(5, Math.min(57, pt[1]))
@@ -1954,7 +1954,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           p.x = Math.max(2, Math.min(98, p.x))
           p.y = Math.max(5, Math.min(57, p.y))
 
-          // ── RULE 8: QB on pass plays must drop BACK (higher y), not forward ──
+          // -- RULE 8: QB on pass plays must drop BACK (higher y), not forward --
           if (p.label === 'QB' && p.role === 'off') {
             const qbRoute = (p.routeName || '').toLowerCase()
             const isPassDrop = (qbRoute.includes('drop') || qbRoute.includes('pa ') ||
@@ -1983,7 +1983,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             }
           }
 
-          // ── RULE 7: Route shape enforcement ──
+          // -- RULE 7: Route shape enforcement --
           const isRecv = ['WR','TE','WR1','WR2','WR3','SL'].includes(p.label)
           if (isRecv && p.routeType === 'route' && p.role === 'off' && !isBasketball && !isBaseball) {
             const startX = p.path[0][0]
@@ -2028,7 +2028,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           }
         })
       }
-      // ── END SANITIZER ────────────────────────────────────────────────────────
+      // -- END SANITIZER --------------------------------------------------------
       setParsed(data)
     } catch(e) { setError(e.message) }
     setLoading(false)
@@ -2039,7 +2039,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     const W = canvas.width, H = canvas.height
-    // x: 0-100 → 0-W, y: 0-60 → 0-H
+    // x: 0-100 -> 0-W, y: 0-60 -> 0-H
     const sx = x => (x / 100) * W
     const sy = y => (y / 60) * H
     const dur = parsed.duration || 3200
@@ -2061,7 +2061,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 
       if (delay < 0) {
         // NEGATIVE delay: player starts moving BEFORE the snap
-        const motionStart = snap + delay  // e.g. snap=0.18, delay=-0.30 → motionStart=-0.12 (clamped to 0)
+        const motionStart = snap + delay  // e.g. snap=0.18, delay=-0.30 -> motionStart=-0.12 (clamped to 0)
         const effectiveStart = Math.max(0, motionStart)
         if (t < effectiveStart) return { x: sx(path[0][0]), y: sy(path[0][1]) }
         const pt = Math.min((t - effectiveStart) / (1 - effectiveStart), 1)
@@ -2263,7 +2263,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         const segs = path.length - 1
 
         if (isStatic) {
-          // ── STATIC VIEW: draw full route as ghost lines so coach can read the play ──
+          // -- STATIC VIEW: draw full route as ghost lines so coach can read the play --
           // Full route -- dashed for receivers, solid-thin for linemen/blockers
           ctx.strokeStyle = isLineman ? 'rgba(120,120,120,0.4)' : hexToRgba(P, isBBall ? 0.5 : 0.45)
           ctx.lineWidth = isLineman ? 1 : 1.8
@@ -2289,7 +2289,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 
           // Route labels collected -- drawn as legend below (see drawRouteLegend)
         } else {
-          // ── ANIMATED VIEW: draw the traveled portion of each route ──
+          // -- ANIMATED VIEW: draw the traveled portion of each route --
           const traveled = pt * segs
 
           ctx.strokeStyle = routeColor
@@ -3446,13 +3446,13 @@ function FilmPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
 }
 
 
-// ─── SCHEME PREVIEW (mini interactive diagrams for home card) ─────────────────
+// --- SCHEME PREVIEW (mini interactive diagrams for home card) -----------------
 function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
   const diagColor = safeHex(P, '#C0392B') // safeHex already rejects near-white
   const isOff = type === 'offense'
   const col = isOff ? P : '#6b9fff'
 
-  // ── BASKETBALL -- full court LANDSCAPE, numbered positions ─────────────────
+  // -- BASKETBALL -- full court LANDSCAPE, numbered positions -----------------
   if (sport === 'Basketball') {
     return (
       <svg viewBox="0 0 200 100" preserveAspectRatio="xMidYMid meet" style={{ width:'100%', height:'100%', display:'block', maxWidth:'100%', overflow:'hidden' }}>
@@ -3518,7 +3518,7 @@ function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
     )
   }
 
-  // ── BASEBALL / SOFTBALL -- top-down diamond, home at bottom ─────────────────
+  // -- BASEBALL / SOFTBALL -- top-down diamond, home at bottom -----------------
   if (sport === 'Baseball' || sport === 'Softball') {
     return (
       <svg viewBox="0 0 160 150" style={{ width:'100%', height:'100%' }}>
@@ -3573,7 +3573,7 @@ function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
     )
   }
 
-  // ── SOCCER -- LANDSCAPE full field (like reference image) ──────────────────
+  // -- SOCCER -- LANDSCAPE full field (like reference image) ------------------
   if (sport === 'Soccer') {
     return (
       <svg viewBox="0 0 200 120" style={{ width:'100%', height:'100%' }}>
@@ -3637,7 +3637,7 @@ function SchemePreviewMini({ type='offense', P='#C0392B', sport='Football' }) {
     )
   }
 
-  // ── FOOTBALL -- landscape overhead, accurate formations ────────────────────
+  // -- FOOTBALL -- landscape overhead, accurate formations --------------------
   return (
     <svg viewBox="0 0 200 110" style={{ width:'100%', height:'100%' }}>
       <rect x="0" y="0" width="200" height="110" fill="#0a1a0a" rx="2"/>
@@ -3840,7 +3840,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   '\n• Ball carrier RB: pathDelay:0.10.' +
                   '\n• Deep routes over 12yd: pathDelay:0.06.' +
                   '\n• PRE-SNAP MOTION: ONLY if play name or description explicitly says motion/jet/fly/orbit. ONLY eligible receivers (WR, TE, slot, H-back). NEVER C, G, T, QB. Motion path must be purely lateral (y flat) or backward (y increases). MOST PLAYS HAVE ZERO PRE-SNAP MOTION.' +
-                  '\n\nRECEIVER ALIGNMENT: WRs always outside OL (OL x=36-64). Left WR at x=10-22, right WR at x=78-90, slot at x=24-34 or x=66-76. Short routes (slant/hitch/quick-out under 6yd): path must never cross x=36-64 -- stay outside. Slant from left WR: x=18,y=42 → x=32,y=32, staying outside OL. Crossing routes only enter OL x-zone after clearing y=32 (past OL engagement).' +
+                  '\n\nRECEIVER ALIGNMENT: WRs always outside OL (OL x=36-64). Left WR at x=10-22, right WR at x=78-90, slot at x=24-34 or x=66-76. Short routes (slant/hitch/quick-out under 6yd): path must never cross x=36-64 -- stay outside. Slant from left WR: x=18,y=42 -> x=32,y=32, staying outside OL. Crossing routes only enter OL x-zone after clearing y=32 (past OL engagement).' +
                   '\n\nPA: Play description dictates QB and RB roles. QB fakes toward run direction (y stays ~44, x shifts), then rolls out or drops back (y INCREASES). Left bootleg ends x=20-28 y=48-52. Right bootleg ends x=72-80 y=48-52. Pocket PA: y=52-56. RB role is play-specific: fake into run lane, checkdown flat, or misdirection opposite -- read the play description. QB and RB should NOT go same direction unless play requires it. NEVER lower y for QB. Mark one receiver routeYards > 0.' +
                   '\n\nQB pure pass: HIGHER y. 3-step: [[50,44],[50,50]]. 5-step: [[50,44],[50,53]]. NEVER lower y on pass.' +
                   '\n\nQB run footwork (real NFL mechanics): Under center -- opens to playside, 1-2 steps to mesh, fake opposite. Shotgun zone read -- J-step lateral (y stays ~50), holds ball for mesh, then decoy step away from RB. QB does NOT move forward before handoff. Minimal footwork until after mesh. routeName: Handoff Left, Handoff Right, Zone Read Left, Zone Read Right, Pitch Left, Pitch Right, Keeper Left, Keeper Right, 3-Step Drop, 5-Step Drop, PA Bootleg Left, PA Bootleg Right.' +
@@ -3850,7 +3850,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               const parsed3 = parseJSON(raw)
               if (parsed3 && parsed3.players && parsed3.players.length > 0) {
                 parsed3._sportType = detectedSport
-                // ── SANITIZER (mirrors PlayAnimator sanitizer) ──────────────────
+                // -- SANITIZER (mirrors PlayAnimator sanitizer) ------------------
                 const OL_SET = new Set(['C','G','T'])
                 const DL_SET = new Set(['DE','DT','NT','DL','D'])
                 const INELIG_SET = new Set(['C','G','T','DE','DT','NT','DL','D'])
@@ -3913,7 +3913,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                     }
                   }
                 })
-                // ── END SANITIZER ────────────────────────────────────────────────
+                // -- END SANITIZER ------------------------------------------------
                 try { sessionStorage.setItem(cacheKey, JSON.stringify(parsed3)) } catch(e) {}
                 setDiagrams(prev => ({ ...prev, [play.number]: parsed3 }))
               }
@@ -3971,7 +3971,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               </div>
             )}
             <PBtn onClick={generateOffense} disabled={offLoading} color={P}>{offLoading ? 'GENERATING...' : sport==='Baseball' ? 'GENERATE GAME PLAN' : 'GENERATE SCHEME'}</PBtn>
-            {offLoading && (<div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your scheme...</div><div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5 }}>This takes 20–40 seconds. Please keep this screen open.</div></div>)}
+            {offLoading && (<div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your scheme...</div><div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.5 }}>This takes 20-40 seconds. Please keep this screen open.</div></div>)}
             {offError && (
             <div style={{ marginTop:8, padding:'12px 14px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6 }}>
               <div style={{ fontSize:11, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Generation Failed</div>
@@ -4022,7 +4022,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
   )
 }
 
-// ─── PLAY CARD WITH SAVE TO PLAYBOOK ─────────────────────────────────────────
+// --- PLAY CARD WITH SAVE TO PLAYBOOK -----------------------------------------
 function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, sport, playbook, onAddToPlaybook, onCreateAndAdd, preloadedDiagram=null }) {
   const [showSaveMenu, setShowSaveMenu] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
@@ -4068,7 +4068,7 @@ function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSO
   )
 }
 
-// ─── DEFENSIVE GEN COLLAPSIBLE ────────────────────────────────────────────────
+// --- DEFENSIVE GEN COLLAPSIBLE ------------------------------------------------
 function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook, guestMode=false, setGuestSchemeCount }) {
   const [open, setOpen] = useState(defaultOpen)
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball'
@@ -4147,7 +4147,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
             {activeCfg.map(f => (<Sel key={f.id} label={f.label} value={fields[f.id]||f.opts[0]} onChange={v=>setFields(prev=>({...prev,[f.id]:v}))} options={f.opts} />))}
           </div>
           <PBtn onClick={generate} disabled={loading} color={S}>{loading ? 'BUILDING...' : isBSB ? 'BUILD DEFENSIVE PLAN' : 'BUILD DEFENSIVE SCHEME'}</PBtn>
-          {loading && <div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${S}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your defensive scheme...</div><div style={{ fontSize:11, color:'#8a94b0' }}>This takes 20–40 seconds. Please keep this screen open.</div></div>}
+          {loading && <div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330', marginTop:8 }}><div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${S}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 10px' }}/><div style={{ fontSize:12, color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginBottom:4 }}>Building your defensive scheme...</div><div style={{ fontSize:11, color:'#8a94b0' }}>This takes 20-40 seconds. Please keep this screen open.</div></div>}
           {error && <ErrBox msg={error} />}
           {result && (
             <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(S,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
@@ -4204,7 +4204,7 @@ function DefFormationCardWithSave({ formation: f, S, P='#C0392B', al, callAI, pa
 }
 
 
-// ─── PLAYBOOK PAGE (restructured) ────────────────────────────────────────────
+// --- PLAYBOOK PAGE (restructured) --------------------------------------------
 function PlaybookPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, playbook, setPlaybook }) {
   const sportFolders = playbook[sport] || {}
   const allFolderNames = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
@@ -4275,7 +4275,7 @@ function PlaybookPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, 
   )
 }
 
-// ─── SCOUT PAGE ────────────────────────────────────────────────────────────────
+// --- SCOUT PAGE ----------------------------------------------------------------
 function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
   const [opponents, setOpponents] = useState([])
   const [activeOpp, setActiveOpp] = useState(null)
@@ -4428,8 +4428,8 @@ function ScoutPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON }) {
 }
 
 
-// ─── MORE PAGE (restructured) ─────────────────────────────────────────────────
-// ─── TEAM QUICK SWITCHER (top bar) ────────────────────────────────────────────
+// --- MORE PAGE (restructured) -------------------------------------------------
+// --- TEAM QUICK SWITCHER (top bar) --------------------------------------------
 function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, setPage, P='#C0392B', al, iq }) {
   const [open, setOpen] = useState(false)
   const sportTeams = teams[sport] || []
@@ -4480,7 +4480,7 @@ function TeamQuickSwitcher({ sport, teams, activeTeam, setActiveTeam, setCfg, se
               <MascotAvatar mascotId={t.mascot} color={t.primary||P} size={28} />
               <div style={{ flex:1 }}>
                 <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, color:current?.id===t.id?P:'#f2f4f8' }}>{t.name}</div>
-                <div style={{ fontSize:9, color:'#8a94b0' }}>{t.season}{t.hometown?' · '+t.hometown:''}</div>
+                <div style={{ fontSize:9, color:'#8a94b0' }}>{t.season}{t.hometown?' . '+t.hometown:''}</div>
               </div>
               {current?.id===t.id && <span style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>ACTIVE</span>}
             </div>
@@ -4723,7 +4723,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
     },
     { id:'indicator', label:'Signal Indicator (Key)', optional:false,
       desc:'The indicator is the touch that ACTIVATES the real sign. Everything before it is fake. This is the most important part of the signal system.',
-      note:'The sequence works like this: coach gives several touches. Only the touch AFTER the indicator counts. Example: if indicator is belt, coach touches cap → ear → BELT (activates) → arm (this is the real sign) → wipe off.',
+      note:'The sequence works like this: coach gives several touches. Only the touch AFTER the indicator counts. Example: if indicator is belt, coach touches cap -> ear -> BELT (activates) -> arm (this is the real sign) -> wipe off.',
       opts:[
         {v:'belt',   label:'Belt',    ex:'Touch belt = indicator is live'},
         {v:'cap',    label:'Cap',     ex:'Touch cap = indicator is live'},
@@ -4854,7 +4854,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
               : sport==='Softball'   ? sbSteps
               : fbSteps
 
-  // ── SIGNAL CREATOR VISUAL (Baseball / Softball) ────────────────────────────
+  // -- SIGNAL CREATOR VISUAL (Baseball / Softball) ----------------------------
   function buildSignalSequence(indicator, call, wipeoff) {
     const bodyParts = ['cap','chin','ear','belt','chest','arm','wrist','letters','sleeve']
     const callToSign = {
@@ -4884,7 +4884,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
     return { sequence: seq, realSign, indicator, wipeoff, call }
   }
 
-  // ── INCREMENTAL DIAGRAM ────────────────────────────────────────────────────
+  // -- INCREMENTAL DIAGRAM ----------------------------------------------------
   function LiveDiagram() {
     // Ensure player color is visible on dark field background
     const diagColor = P === '#ffffff' || P === '#fff' || P === 'white' ? '#c0c0c0' : P
@@ -4909,12 +4909,12 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                   <span style={{ fontSize:9, color: s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', lineHeight:1.2 }}>{s.touch.toUpperCase()}</span>
                 </div>
                 <span style={{ fontSize:9, color: s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, textAlign:'center', maxWidth:44 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</span>
-                {i < sig.sequence.length-1 && <div style={{ position:'absolute', right:-8, top:14, color:'#5a6480', fontSize:10 }}>→</div>}
+                {i < sig.sequence.length-1 && <div style={{ position:'absolute', right:-8, top:14, color:'#5a6480', fontSize:10 }}>-></div>}
               </div>
             ))}
           </div>
           <div style={{ textAlign:'center', marginTop:6, fontSize:9, color:'#8a94b0' }}>
-            After <span style={{ color:'#f59e0b', fontWeight:700 }}>{choices.indicator?.toUpperCase()}</span> → next touch is live → wipe-off: <span style={{ color:'#ef4444', fontWeight:700 }}>{choices.wipeoff}</span>
+            After <span style={{ color:'#f59e0b', fontWeight:700 }}>{choices.indicator?.toUpperCase()}</span> -> next touch is live -> wipe-off: <span style={{ color:'#ef4444', fontWeight:700 }}>{choices.wipeoff}</span>
           </div>
         </div>
       )
@@ -4978,7 +4978,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
       )
     }
 
-    // ── FOOTBALL DIAGRAM ─────────────────────────────────────────────────────
+    // -- FOOTBALL DIAGRAM -----------------------------------------------------
     const fmtPositions = {
       'Ace Right':          { wr:[[14,50],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
       'Ace Left':           { wr:[[14,50],[148,50]], qb:[84,60], rb:[[84,72]], fb:[] },
@@ -5126,7 +5126,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
       setResult({ name: parts.filter(Boolean).join(' '), explanation: `"${choices.setName}" = the set name tells everyone which series to run. "${choices.action}" = the primary screening/cutting action. "${choices.read}" = what the ball handler does. "${choices.finish}" = how the play ends.`, ytSearch: choices.setName + ' ' + choices.action + ' basketball' })
     } else if (sport === 'Baseball' || sport === 'Softball') {
       const sig = buildSignalSequence(choices.indicator||'belt', choices.call||'Take', choices.wipeoff||'swipe jersey')
-      const seqStr = sig.sequence.map(s=>s.touch).join(' → ')
+      const seqStr = sig.sequence.map(s=>s.touch).join(' -> ')
       setResult({
         name: choices.call || 'Signal',
         isSignal: true,
@@ -5201,7 +5201,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
             {choices[currentStep?.id] !== undefined && choices[currentStep?.id] !== null && (
               <div style={{ marginTop:4, padding:'5px 10px', background:al(P,0.07), borderRadius:4, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif" }}>
                 {step > 0 ? <span style={{ color:'#8a94b0' }}>Built: </span> : null}
-                {steps.slice(0,step+1).map(s=>choices[s.id]).filter(Boolean).join(' · ')}
+                {steps.slice(0,step+1).map(s=>choices[s.id]).filter(Boolean).join(' . ')}
               </div>
             )}
 
@@ -5209,12 +5209,12 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
               {step > 0 && <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'10px', background:'#161922', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer' }}>← BACK</button>}
               {!isLastStep && (
                 <button onClick={()=>{ if(canAdvance||currentStep.optional) setStep(s=>s+1) }} style={{ flex:2, padding:'10px', background:canAdvance?P:currentStep.optional?al(P,0.4):'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:(canAdvance||currentStep.optional)?'pointer':'not-allowed', letterSpacing:'1px' }}>
-                  {currentStep.optional && !canAdvance ? 'SKIP →' : 'NEXT →'}
+                  {currentStep.optional && !canAdvance ? 'SKIP ->' : 'NEXT ->'}
                 </button>
               )}
               {isLastStep && (
                 <button onClick={buildResult} style={{ flex:2, padding:'10px', background:canAdvance||currentStep.optional?P:'#3d4559', border:'none', borderRadius:4, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:(canAdvance||currentStep.optional)?'pointer':'not-allowed', letterSpacing:'1px' }}>
-                  {sport==='Baseball'||sport==='Softball'?'GENERATE SIGNAL →':'BUILD CALL →'}
+                  {sport==='Baseball'||sport==='Softball'?'GENERATE SIGNAL ->':'BUILD CALL ->'}
                 </button>
               )}
             </div>
@@ -5232,7 +5232,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                           <div style={{ fontSize:11, fontWeight:700, color:s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif" }}>{s.touch.toUpperCase()}</div>
                           <div style={{ fontSize:10, color:s.type==='indicator'?'#f59e0b':s.type==='live'?P:'#3d4559', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, marginTop:2 }}>{s.type==='indicator'?'KEY':s.type==='live'?'SIGN':'FAKE'}</div>
                         </div>
-                        {i < result.signalData.sequence.length-1 && <span style={{ color:'#5a6480', fontSize:14 }}>→</span>}
+                        {i < result.signalData.sequence.length-1 && <span style={{ color:'#5a6480', fontSize:14 }}>-></span>}
                       </div>
                     ))}
                   </div>
@@ -5265,11 +5265,11 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
                   <div style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>WATCH ON YOUTUBE</div>
                   <div style={{ fontSize:11, color:'#8a94b0' }}>{result.ytSearch}</div>
                 </div>
-                <span style={{ fontSize:11, color:'#ef4444' }}>→</span>
+                <span style={{ fontSize:11, color:'#ef4444' }}>-></span>
               </a>
             )}
             <button onClick={reset} style={{ width:'100%', padding:'10px', background:'#0f1219', border:`1px solid ${al(P,0.4)}`, borderRadius:4, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1px' }}>
-              {sport==='Baseball'||sport==='Softball'?'BUILD ANOTHER SIGNAL →':'BUILD ANOTHER CALL →'}
+              {sport==='Baseball'||sport==='Softball'?'BUILD ANOTHER SIGNAL ->':'BUILD ANOTHER CALL ->'}
             </button>
           </div>
         )}
@@ -5279,7 +5279,7 @@ function PlayNameBuilder({ P='#C0392B', S='#002868', al, sport }) {
 }
 
 
-// ─── RULEBOOK LINKS ───────────────────────────────────────────────────────────
+// --- RULEBOOK LINKS -----------------------------------------------------------
 const RULEBOOK_LINKS = {
   Football: [
     { name:'NFHS Football Rules',   org:'National Federation of State High School Associations', url:'https://www.nfhs.org',       search:'NFHS football rules official',                  level:'High School' },
@@ -5355,7 +5355,7 @@ function RulebookPage({ sport, P='#C0392B', al, callAI }) {
                 <div style={{ fontSize:9, color:P, marginTop:2, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>{link.level}</div>
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:4, flexShrink:0 }}>
-                <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:`1px solid ${al(P,0.4)}`, borderRadius:3, textDecoration:'none', textAlign:'center' }}>VISIT →</a>
+                <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:`1px solid ${al(P,0.4)}`, borderRadius:3, textDecoration:'none', textAlign:'center' }}>VISIT -></a>
                 <a href={'https://www.google.com/search?q='+encodeURIComponent(link.search)} target="_blank" rel="noopener noreferrer" style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, padding:'3px 8px', border:'1px solid #1e2330', borderRadius:3, textDecoration:'none', textAlign:'center' }}>SEARCH</a>
               </div>
             </div>
@@ -5376,7 +5376,7 @@ function RulebookPage({ sport, P='#C0392B', al, callAI }) {
               <div style={{ padding:'10px 12px', background:al(P,0.08), border:`1px solid ${al(P,0.25)}`, borderRadius:6, marginBottom:8 }}>
                 <div style={{ fontSize:9, letterSpacing:1.5, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Governing Body</div>
                 <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600, marginBottom:6 }}>{leagueResult.governingBody}</div>
-                <a href={'https://www.google.com/search?q='+encodeURIComponent((leagueResult.governingBody||'')+(sport ? ' '+sport : '')+' official rules')} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:P, display:'inline-block', padding:'4px 10px', background:al(P,0.1), borderRadius:3, textDecoration:'none' }}>🔍 Search official rules →</a>
+                <a href={'https://www.google.com/search?q='+encodeURIComponent((leagueResult.governingBody||'')+(sport ? ' '+sport : '')+' official rules')} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:P, display:'inline-block', padding:'4px 10px', background:al(P,0.1), borderRadius:3, textDecoration:'none' }}>🔍 Search official rules -></a>
                 <div style={{ fontSize:9, color:'#5a6480', marginTop:4, fontStyle:'italic' }}>Opens Google. CoachIQ is not responsible for third-party results.</div>
               </div>
               {leagueResult.commonModifications && leagueResult.commonModifications.length > 0 && (
@@ -5399,7 +5399,7 @@ function RulebookPage({ sport, P='#C0392B', al, callAI }) {
     </div>
   )
 }
-// ─── NEWS PAGE ────────────────────────────────────────────────────────────────
+// --- NEWS PAGE ----------------------------------------------------------------
 function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
   const [activeChannel, setActiveChannel] = useState('sport')
   const [newsItems, setNewsItems] = useState([])
@@ -5412,35 +5412,35 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
     { id:'sportNews', label:sport+' News',      icon:'⚡' },
   ]
 
-  // ── STATIC COACHING CONTENT -- loads instantly, no AI needed ──
+  // -- STATIC COACHING CONTENT -- loads instantly, no AI needed --
   const COACHING_CONTENT = {
     Football: [
-      { title:'The 3-Step Drop', category:'DRILL', body:'QB takes a 3-step drop on short routes. Count 1-2-3 out loud, plant on the third step, and throw. Practice daily with targets at 5-7 yards. Builds rhythm and timing.', diagram:'🏈→QB steps back 3 times→throw to receiver at 6 yards' },
-      { title:'Angle Tackling Drill', category:'DRILL', body:'Set up cones in a channel 5 yards wide. Ball carrier runs straight, defender attacks at an angle -- not straight on. Focus on wrapping up with both arms, never leading with the head.', diagram:'📐Defender at 45° angle→wrap tackle→secure' },
-      { title:'Run Blocking Fundamentals', category:'STRATEGY', body:'First step is the most important -- it should always be toward the defender. Drive block: explode out of stance, aim for defender\'s numbers, drive feet on contact. Teach leverage before power.', diagram:'OL→short first step→hands inside→drive' },
-      { title:'Cover 2 Explanation', category:'STRATEGY', body:'Two safeties split the deep field into halves. Corners jam receivers at the line and drop to the flat. Attack Cover 2 with corner routes and seam throws between the safety and linebacker.', diagram:'S  S\nCB  LB LB LB  CB\n——Cover 2——' },
-      { title:'Red Zone Mindset', category:'GAME DAY', body:'In the red zone, the field is compressed. Switch from vertical to horizontal routes. Motion and misdirection create confusion. Pick plays that stress defenders laterally, not vertically.', diagram:'📍10 yards to endzone→spread the field→horizontal stress' },
+      { title:'The 3-Step Drop', category:'DRILL', body:'QB takes a 3-step drop on short routes. Count 1-2-3 out loud, plant on the third step, and throw. Practice daily with targets at 5-7 yards. Builds rhythm and timing.', diagram:'🏈->QB steps back 3 times->throw to receiver at 6 yards' },
+      { title:'Angle Tackling Drill', category:'DRILL', body:'Set up cones in a channel 5 yards wide. Ball carrier runs straight, defender attacks at an angle -- not straight on. Focus on wrapping up with both arms, never leading with the head.', diagram:'📐Defender at 45° angle->wrap tackle->secure' },
+      { title:'Run Blocking Fundamentals', category:'STRATEGY', body:'First step is the most important -- it should always be toward the defender. Drive block: explode out of stance, aim for defender\'s numbers, drive feet on contact. Teach leverage before power.', diagram:'OL->short first step->hands inside->drive' },
+      { title:'Cover 2 Explanation', category:'STRATEGY', body:'Two safeties split the deep field into halves. Corners jam receivers at the line and drop to the flat. Attack Cover 2 with corner routes and seam throws between the safety and linebacker.', diagram:'S  S\nCB  LB LB LB  CB\n----Cover 2----' },
+      { title:'Red Zone Mindset', category:'GAME DAY', body:'In the red zone, the field is compressed. Switch from vertical to horizontal routes. Motion and misdirection create confusion. Pick plays that stress defenders laterally, not vertically.', diagram:'📍10 yards to endzone->spread the field->horizontal stress' },
       { title:'Pre-Snap Reads for QBs', category:'DEVELOPMENT', body:'Before the snap, find the safeties first. One high safety = Cover 1 or 3. Two high = Cover 2 or 4. Then identify the Mike linebacker -- he sets the protection. Teach this at every age level.', diagram:'1 Safety high=Cover 1/3 | 2 Safeties high=Cover 2/4' },
-      { title:'Zone Blocking Scheme', category:'STRATEGY', body:'All linemen step playside and block the area around them, not a specific person. Running back reads the first down lineman and cuts off his block. Great for youth teams because mistakes are less costly.', diagram:'OL all step right→RB reads cut lane→burst through' },
+      { title:'Zone Blocking Scheme', category:'STRATEGY', body:'All linemen step playside and block the area around them, not a specific person. Running back reads the first down lineman and cuts off his block. Great for youth teams because mistakes are less costly.', diagram:'OL all step right->RB reads cut lane->burst through' },
       { title:'Flat-Footed Stance', category:'DEVELOPMENT', body:'Youth players often default to standing straight up. Teach the athletic position: feet shoulder-width, slight bend in knees, weight on balls of feet, hands ready. Use it at every position, every play.' },
     ],
     Basketball: [
-      { title:'Defensive Slide Drill', category:'DRILL', body:'Players start in defensive stance, slide laterally without crossing feet. Coach points left or right. Add a tennis ball toss to force heads up. 30 seconds on, 15 off. Never let feet touch.', diagram:'←Slide→←Slide→heads up, feet apart' },
-      { title:'Pick and Roll Coverage', category:'STRATEGY', body:'Three options: go under (for poor shooters), go over (for shooters), or switch. Youth teams: default to switching to avoid confusion. Practice the verbal communication -- "SCREEN LEFT!" every time.', diagram:'Ball handler + screener→defender goes over or switches' },
-      { title:'Triple Threat Position', category:'DEVELOPMENT', body:'Every player who catches the ball should land in triple threat: one foot ahead, ball at hip, eyes up. From here you can shoot, pass, or drive. Make it a habit before anything else.', diagram:'Catch ball→feet set→ball at hip→read defense' },
-      { title:'Motion Offense Basics', category:'STRATEGY', body:'No set plays -- players read and react. Rule 1: if your defender helps on a drive, cut backdoor. Rule 2: if you pass, cut or screen. Rule 3: space the floor -- never stand next to a teammate.', diagram:'Pass→cut or screen→space→read→repeat' },
-      { title:'Free Throw Routine', category:'DEVELOPMENT', body:'Same routine every time: take the ball, two dribbles, spin it, one breath, shoot. The routine triggers muscle memory under pressure. Practice the routine as much as the shot itself.', diagram:'2 dribbles→spin→breath→bend→follow through' },
+      { title:'Defensive Slide Drill', category:'DRILL', body:'Players start in defensive stance, slide laterally without crossing feet. Coach points left or right. Add a tennis ball toss to force heads up. 30 seconds on, 15 off. Never let feet touch.', diagram:'←Slide->←Slide->heads up, feet apart' },
+      { title:'Pick and Roll Coverage', category:'STRATEGY', body:'Three options: go under (for poor shooters), go over (for shooters), or switch. Youth teams: default to switching to avoid confusion. Practice the verbal communication -- "SCREEN LEFT!" every time.', diagram:'Ball handler + screener->defender goes over or switches' },
+      { title:'Triple Threat Position', category:'DEVELOPMENT', body:'Every player who catches the ball should land in triple threat: one foot ahead, ball at hip, eyes up. From here you can shoot, pass, or drive. Make it a habit before anything else.', diagram:'Catch ball->feet set->ball at hip->read defense' },
+      { title:'Motion Offense Basics', category:'STRATEGY', body:'No set plays -- players read and react. Rule 1: if your defender helps on a drive, cut backdoor. Rule 2: if you pass, cut or screen. Rule 3: space the floor -- never stand next to a teammate.', diagram:'Pass->cut or screen->space->read->repeat' },
+      { title:'Free Throw Routine', category:'DEVELOPMENT', body:'Same routine every time: take the ball, two dribbles, spin it, one breath, shoot. The routine triggers muscle memory under pressure. Practice the routine as much as the shot itself.', diagram:'2 dribbles->spin->breath->bend->follow through' },
     ],
     Baseball: [
-      { title:'Fielding Ground Balls', category:'DRILL', body:'Charge the ball -- never wait for it to come to you. Get in front, low glove (thumb down for slow rollers), and field out front. Crow hop to throw. Practice 20 ground balls before every practice.', diagram:'Charge→glove low→field out front→crow hop→throw' },
-      { title:'Two-Strike Approach', category:'STRATEGY', body:'With two strikes, shorten the swing. Choke up one inch, protect the outer half, put the ball in play. Strikeouts help nobody -- groundouts and line outs keep innings alive.', diagram:'2 strikes→choke up→compact swing→contact focus' },
-      { title:'Pitcher Fielding Practice', category:'DRILL', body:'After every pitch, the pitcher is a fielder. Practice comebackers, covering first on groundouts, and backing up bases. Run PFP drills for 10 minutes every practice -- most youth teams skip this.', diagram:'Pitch→comebacker→throw to first→cover and back up' },
-      { title:'First and Third Situation', category:'STRATEGY', body:'Runner on first steals second. Runner on third reads the catcher\'s throw. If throw goes to second, runner on third breaks. Defense must decide: let the steal happen or throw and risk a run.', diagram:'Runner 1st breaks→catcher throws?→runner 3rd reads and goes' },
+      { title:'Fielding Ground Balls', category:'DRILL', body:'Charge the ball -- never wait for it to come to you. Get in front, low glove (thumb down for slow rollers), and field out front. Crow hop to throw. Practice 20 ground balls before every practice.', diagram:'Charge->glove low->field out front->crow hop->throw' },
+      { title:'Two-Strike Approach', category:'STRATEGY', body:'With two strikes, shorten the swing. Choke up one inch, protect the outer half, put the ball in play. Strikeouts help nobody -- groundouts and line outs keep innings alive.', diagram:'2 strikes->choke up->compact swing->contact focus' },
+      { title:'Pitcher Fielding Practice', category:'DRILL', body:'After every pitch, the pitcher is a fielder. Practice comebackers, covering first on groundouts, and backing up bases. Run PFP drills for 10 minutes every practice -- most youth teams skip this.', diagram:'Pitch->comebacker->throw to first->cover and back up' },
+      { title:'First and Third Situation', category:'STRATEGY', body:'Runner on first steals second. Runner on third reads the catcher\'s throw. If throw goes to second, runner on third breaks. Defense must decide: let the steal happen or throw and risk a run.', diagram:'Runner 1st breaks->catcher throws?->runner 3rd reads and goes' },
     ],
     Soccer: [
-      { title:'Rondo Passing Drill', category:'DRILL', body:'4v1 or 5v2 in a small grid. Defenders try to win the ball, attackers keep possession. One-touch or two-touch limit. Best drill for passing accuracy, movement, and decision speed. 10 minutes daily.', diagram:'4 players outside→1 inside→keep ball→switch on turnover' },
+      { title:'Rondo Passing Drill', category:'DRILL', body:'4v1 or 5v2 in a small grid. Defenders try to win the ball, attackers keep possession. One-touch or two-touch limit. Best drill for passing accuracy, movement, and decision speed. 10 minutes daily.', diagram:'4 players outside->1 inside->keep ball->switch on turnover' },
       { title:'Defensive Shape -- 4-4-2', category:'STRATEGY', body:'Two banks of four stay compact. When ball is on one side, the opposite winger tucks in. Midfielders never ball-chase -- they hold their line. No gaps between lines is the goal.', diagram:'GK\n4 defenders\n4 midfielders\n2 forwards -- stay compact' },
-      { title:'Corner Kick Attack', category:'STRATEGY', body:'Near post runner, far post runner, and a player at the top of the box for clearances. Near post flick-on is the most dangerous -- practice the timing between the corner taker and near post attacker.', diagram:'Corner→near post flick or far post run→top of box cleanup' },
+      { title:'Corner Kick Attack', category:'STRATEGY', body:'Near post runner, far post runner, and a player at the top of the box for clearances. Near post flick-on is the most dangerous -- practice the timing between the corner taker and near post attacker.', diagram:'Corner->near post flick or far post run->top of box cleanup' },
       { title:'1v1 Defending', category:'DRILL', body:'Stay on your feet. Jockey -- delay and slow the attacker. Force them to their weak foot. Never dive in unless sure. Practice patience: let your teammates recover before committing to the tackle.' },
     ],
     'Flag Football': [
@@ -5455,9 +5455,9 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
     "Run the same formation for multiple plays. Defenders key on formation -- if your plays look the same pre-snap, they can't cheat.",
   ],
   Softball: [
-      { title:'Windmill Pitching Mechanics', category:'DEVELOPMENT', body:'Full arm circle -- wrist snap at release is the key to speed. Drive off the rubber with the push leg. Follow through across the body. Practice the wrist snap separately with a light ball before full throws.', diagram:'Wind up→full circle→snap wrist at hip→follow through' },
-      { title:'Slap Hitting', category:'STRATEGY', body:'Left-handed hitters can use the running slap -- start moving toward first base mid-swing. Contact point is out front, ball goes to the left side of the infield. Forces infield in and opens gaps.', diagram:'LHH steps→slap contact out front→ball to 3rd/SS→run' },
-      { title:'Outfield Communication', category:'DRILL', body:'Any ball between two outfielders: center fielder has priority over all. Call "I got it!" twice, loudly. Practice fly ball communication daily -- more errors come from miscommunication than misplays.', diagram:'CF calls twice→other OF peels off→CF catches' },
+      { title:'Windmill Pitching Mechanics', category:'DEVELOPMENT', body:'Full arm circle -- wrist snap at release is the key to speed. Drive off the rubber with the push leg. Follow through across the body. Practice the wrist snap separately with a light ball before full throws.', diagram:'Wind up->full circle->snap wrist at hip->follow through' },
+      { title:'Slap Hitting', category:'STRATEGY', body:'Left-handed hitters can use the running slap -- start moving toward first base mid-swing. Contact point is out front, ball goes to the left side of the infield. Forces infield in and opens gaps.', diagram:'LHH steps->slap contact out front->ball to 3rd/SS->run' },
+      { title:'Outfield Communication', category:'DRILL', body:'Any ball between two outfielders: center fielder has priority over all. Call "I got it!" twice, loudly. Practice fly ball communication daily -- more errors come from miscommunication than misplays.', diagram:'CF calls twice->other OF peels off->CF catches' },
     ],
   }
 
@@ -5538,7 +5538,7 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
     <div style={{ padding:'16px 0 8px' }}>
       {/* Header */}
       <div style={{ marginBottom:14 }}>
-        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} · News + Coaching</div>
+        <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#5a6480', letterSpacing:'2px', textTransform:'uppercase', marginBottom:2 }}>{sport} . News + Coaching</div>
         <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:28, lineHeight:1, color:'#f2f4f8' }}>News + Feed</div>
       </div>
 
@@ -5555,7 +5555,7 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
         )}
       </div>
 
-      {/* ── COACHING TAB -- static, instant, expandable ── */}
+      {/* -- COACHING TAB -- static, instant, expandable -- */}
       {activeChannel === 'sport' && (
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {drills.map((drill, i) => {
@@ -5591,11 +5591,11 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
               </div>
             )
           })}
-          <div style={{ marginTop:4, fontSize:9, color:'#5a6480', textAlign:'center' }}>Tap any card to expand · More content coming</div>
+          <div style={{ marginTop:4, fontSize:9, color:'#5a6480', textAlign:'center' }}>Tap any card to expand . More content coming</div>
         </div>
       )}
 
-      {/* ── NEWS TAB -- RSS, pre-loaded ── */}
+      {/* -- NEWS TAB -- RSS, pre-loaded -- */}
       {activeChannel === 'sportNews' && (
         <div>
           {newsLoading && (
@@ -5632,11 +5632,11 @@ function NewsPage({ P='#C0392B', S='#002868', al, sport, callAI }) {
                     </div>
                   )}
                   {item.link && (
-                    <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>READ ARTICLE →</div>
+                    <div style={{ marginTop:8, fontSize:10, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'0.5px' }}>READ ARTICLE -></div>
                   )}
                 </div>
               ))}
-              <div style={{ marginTop:4, fontSize:9, color:'#5a6480', textAlign:'center' }}>Real-time news · Tap any article to read in full</div>
+              <div style={{ marginTop:4, fontSize:9, color:'#5a6480', textAlign:'center' }}>Real-time news . Tap any article to read in full</div>
             </div>
           )}
         </div>
@@ -5663,7 +5663,7 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
     { id:'scout',   icon:'🔍', title:'Scout + Film',
       content: `The Scout page has two sections. Opponent Scout: build a scouting report on an upcoming opponent -- describe their tendencies and get AI-generated defensive game plan suggestions. Film Room: log your team footage notes and tag plays by category. Individual player film analysis is on the roadmap as AthleteIQ.` },
     { id:'settings',icon:'⚙️', title:'Settings + Customization',
-      content: `More → Settings has: CoachIQ Logo Style (choose your brand color palette), Home Location (for weather), Team Colors (adjust primary/secondary/accent colors), and Home Widget Settings (choose which widgets rotate, or pin one permanently). Your name is set during onboarding and shows in the welcome greeting.` },
+      content: `More -> Settings has: CoachIQ Logo Style (choose your brand color palette), Home Location (for weather), Team Colors (adjust primary/secondary/accent colors), and Home Widget Settings (choose which widgets rotate, or pin one permanently). Your name is set during onboarding and shows in the welcome greeting.` },
     { id:'iq',      icon:'🧠', title:'Coach IQ Score',
       content: `Your Coach IQ starts at 500 (average). Answer Gauntlet questions correctly to earn points: Rookie = +8, Varsity = +15, Elite = +25. Wrong answers cost: Rookie = -4, Varsity = -7, Elite = -12. Every 3 correct answers in a row earns a +10 streak bonus. Score is capped at 1000 and floored at 100. Battle Mode in the Gauntlet lets you chain scenarios -- your score updates live.` },
   ]
@@ -5685,12 +5685,12 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
           {openSection === sec.id && (
             <div style={{ padding:'0 4px 16px 32px', animation:'fadeIn 0.2s ease' }}>
               <div style={{ fontSize:12, color:'#9aa0b0', lineHeight:1.8 }}>{sec.content}</div>
-              {sec.id === 'home' && <button onClick={()=>setPage('home')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Go to Home</button>}
-              {sec.id === 'schemes' && <button onClick={()=>setPage('schemes')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Schemes</button>}
-              {sec.id === 'team' && <button onClick={()=>setPage('team')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Team</button>}
-              {sec.id === 'news' && <button onClick={()=>setPage('news')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open News</button>}
-              {sec.id === 'learn' && <button onClick={()=>setPage('learn')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Learn</button>}
-              {sec.id === 'settings' && <button onClick={()=>setPage('more')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>→ Open Settings</button>}
+              {sec.id === 'home' && <button onClick={()=>setPage('home')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>-> Go to Home</button>}
+              {sec.id === 'schemes' && <button onClick={()=>setPage('schemes')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>-> Open Schemes</button>}
+              {sec.id === 'team' && <button onClick={()=>setPage('team')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>-> Open Team</button>}
+              {sec.id === 'news' && <button onClick={()=>setPage('news')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>-> Open News</button>}
+              {sec.id === 'learn' && <button onClick={()=>setPage('learn')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>-> Open Learn</button>}
+              {sec.id === 'settings' && <button onClick={()=>setPage('more')} style={{ marginTop:10, padding:'6px 12px', background:al(P,0.12), border:`1px solid ${al(P,0.3)}`, borderRadius:4, color:P, fontSize:11, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>-> Open Settings</button>}
             </div>
           )}
         </div>
@@ -5700,11 +5700,11 @@ function HelpPage({ P='#C0392B', al, setPage, sport }) {
 }
 
 
-// ─── COACHING DRILL DIAGRAM ───────────────────────────────────────────────────
+// --- COACHING DRILL DIAGRAM ---------------------------------------------------
 function CoachingDiagram({ diagramKey, P='#C0392B' }) {
   const W = 320, H = 160
   const diagrams = {
-    // ── FOOTBALL ──────────────────────────────────────────────────────────────
+    // -- FOOTBALL --------------------------------------------------------------
     'three_step_drop': (
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
         {/* Field */}
@@ -5738,7 +5738,7 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         <path d={`M 162 148 Q 200 100 215 76`} fill="none" stroke="rgba(245,158,11,0.8)" strokeWidth={2} strokeDasharray="5,3"/>
         <circle cx={215} cy={76} r={3} fill="#92400e"/>
         {/* Labels */}
-        <text x={160} y={18} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">3-STEP DROP → PLANT → THROW</text>
+        <text x={160} y={18} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">3-STEP DROP -> PLANT -> THROW</text>
         <text x={126} y={155} fontSize={8} fill={P} fontFamily="sans-serif">Plant here</text>
       </svg>
     ),
@@ -5791,7 +5791,7 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
           <circle key={i} cx={160+offset} cy={72} r={8} fill="none" stroke="#444" strokeWidth={1.5}/>
         ))}
         {/* Step labels */}
-        <text x={160} y={150} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">First step toward defender → hands inside → drive</text>
+        <text x={160} y={150} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">First step toward defender -> hands inside -> drive</text>
         <text x={160} y={14} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">RUN BLOCKING -- OL FIRE OUT</text>
       </svg>
     ),
@@ -5825,7 +5825,7 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         {[120,160,200].map((cx,i)=>(
           <circle key={i} cx={cx} cy={90} r={8} fill="#555" stroke="white" strokeWidth={1.5}/>
         ))}
-        <text x={160} y={155} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">CBs jam + drop to flat · Safeties own the deep halves</text>
+        <text x={160} y={155} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">CBs jam + drop to flat . Safeties own the deep halves</text>
         <text x={160} y={14} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">COVER 2 ZONE</text>
       </svg>
     ),
@@ -5908,11 +5908,11 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         <text x={145} y={134} fontSize={8} fill="white" textAnchor="middle" fontWeight="bold">RB</text>
         <path d="M 145 120 L 145 108 L 175 82" fill="none" stroke={P} strokeWidth={2} strokeDasharray="4,2"/>
         <polygon points={`170,78 180,80 175,88`} fill={P}/>
-        <text x={160} y={155} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">All OL step playside → RB reads the cut lane</text>
+        <text x={160} y={155} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">All OL step playside -> RB reads the cut lane</text>
         <text x={160} y={14} fontSize={9} fill="#5a6480" textAnchor="middle" fontFamily="sans-serif">ZONE BLOCKING -- STEP & READ</text>
       </svg>
     ),
-    // ── BASKETBALL ─────────────────────────────────────────────────────────────
+    // -- BASKETBALL -------------------------------------------------------------
     'defensive_slide': (
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
         <rect width={W} height={H} fill="#c8904a" rx="4"/>
@@ -5929,7 +5929,7 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         <ellipse cx={151} cy={100} rx={6} ry={4} fill="rgba(255,255,255,0.4)"/>
         <ellipse cx={169} cy={100} rx={6} ry={4} fill="rgba(255,255,255,0.4)"/>
         {/* Labels */}
-        <text x={160} y={130} fontSize={9} fill="white" textAnchor="middle" opacity={0.9}>Feet never cross · Stay low · Head up</text>
+        <text x={160} y={130} fontSize={9} fill="white" textAnchor="middle" opacity={0.9}>Feet never cross . Stay low . Head up</text>
         <text x={160} y={22} fontSize={9} fill="white" textAnchor="middle" opacity={0.8}>DEFENSIVE SLIDE DRILL</text>
       </svg>
     ),
@@ -5959,7 +5959,7 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         <text x={160} y={150} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Go over screen or switch -- communicate!</text>
       </svg>
     ),
-    // ── BASEBALL ───────────────────────────────────────────────────────────────
+    // -- BASEBALL ---------------------------------------------------------------
     'ground_balls': (
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
         <rect width={W} height={H} fill="#2e7d2e" rx="4"/>
@@ -5983,10 +5983,10 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         <polygon points={`156,78 164,78 160,70`} fill="rgba(255,200,50,0.9)"/>
         {/* Throw to 1B */}
         <path d="M 160 70 Q 190 60 200 82" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth={1.5} strokeDasharray="4,2"/>
-        <text x={160} y={152} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Charge → glove low → field out front → throw</text>
+        <text x={160} y={152} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Charge -> glove low -> field out front -> throw</text>
       </svg>
     ),
-    // ── SOFTBALL ───────────────────────────────────────────────────────────────
+    // -- SOFTBALL ---------------------------------------------------------------
     'windmill': (
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
         <rect width={W} height={H} fill="#2e7d2e" rx="4"/>
@@ -6008,11 +6008,11 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         <path d="M 160 100 L 160 120" fill="none" stroke="rgba(245,158,11,0.9)" strokeWidth={2.5}/>
         <polygon points={`156,118 164,118 160,126`} fill="rgba(245,158,11,0.9)"/>
         <text x={185} y={124} fontSize={8} fill="rgba(245,158,11,0.9)">Snap wrist</text>
-        <text x={160} y={148} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Full circle → wrist snap at hip → follow through</text>
+        <text x={160} y={148} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Full circle -> wrist snap at hip -> follow through</text>
         <text x={160} y={18} fontSize={9} fill="white" textAnchor="middle" opacity={0.8}>WINDMILL PITCHING</text>
       </svg>
     ),
-    // ── SOCCER ─────────────────────────────────────────────────────────────────
+    // -- SOCCER -----------------------------------------------------------------
     'rondo': (
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', display:'block' }}>
         <rect width={W} height={H} fill="#2e7d2e" rx="4"/>
@@ -6028,7 +6028,7 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         {/* Pass lines */}
         <line x1={80} y1={20} x2={160} y2={20} stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} strokeDasharray="4,3"/>
         <line x1={160} y1={20} x2={240} y2={80} stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} strokeDasharray="4,3"/>
-        <text x={160} y={155} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Keep ball away from defenders · 1-2 touch max</text>
+        <text x={160} y={155} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Keep ball away from defenders . 1-2 touch max</text>
         <text x={160} y={13} fontSize={9} fill="white" textAnchor="middle" opacity={0.8}>RONDO -- 4v2 POSSESSION</text>
       </svg>
     ),
@@ -6054,7 +6054,7 @@ function CoachingDiagram({ diagramKey, P='#C0392B' }) {
         {/* Compact shape lines */}
         <line x1={40} y1={88} x2={280} y2={88} stroke="rgba(255,255,255,0.2)" strokeWidth={1} strokeDasharray="4,3"/>
         <line x1={40} y1={122} x2={280} y2={122} stroke="rgba(255,255,255,0.2)" strokeWidth={1} strokeDasharray="4,3"/>
-        <text x={160} y={155} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Stay compact · No gaps between lines</text>
+        <text x={160} y={155} fontSize={8} fill="white" textAnchor="middle" opacity={0.9}>Stay compact . No gaps between lines</text>
       </svg>
     ),
   }
@@ -6177,7 +6177,7 @@ function LearnPage({ P='#C0392B', S='#002868', al, sport, iq, setIQ, gauntlets, 
                 </div>
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0 }}>
                   <span style={{ fontSize:10, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, color:cat.color, padding:'2px 6px', background:al(cat.color,0.1), borderRadius:3 }}>{tool.tag}</span>
-                  <span style={{ fontSize:13, color:'#5a6480' }}>→</span>
+                  <span style={{ fontSize:13, color:'#5a6480' }}>-></span>
                 </div>
               </div>
             ))}
@@ -6425,7 +6425,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
           {/* App info */}
           <div style={{ padding:'12px 14px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, textAlign:'center' }}>
             <CoachIQLogo size={20} brand={brand} />
-            <div style={{ fontSize:10, color:'#5a6480', marginTop:6 }}>v1.0 · Built for youth coaches</div>
+            <div style={{ fontSize:10, color:'#5a6480', marginTop:6 }}>v1.0 . Built for youth coaches</div>
           </div>
         </div>
       )}
@@ -6434,7 +6434,7 @@ function MorePage({ P='#C0392B', S='#002868', al, cfg, setCfg, brand, setBrand, 
 }
 
 
-// ─── HOME PAGE ────────────────────────────────────────────────────────────────
+// --- HOME PAGE ----------------------------------------------------------------
 function HomePage({ P='#C0392B', S='#002868', al, lastName, sport, iq, setIQ, gauntlets, setGauntlets, callAI, parseJSON, brand, teams, setTeams, activeTeam, setActiveTeam, setSport, setCfg, homeLocation, setPage }) {
   const [feed, setFeed] = useState(null)
   const [feedLoading, setFeedLoading] = useState(false)
@@ -6529,9 +6529,9 @@ function HomePage({ P='#C0392B', S='#002868', al, lastName, sport, iq, setIQ, ga
             <div style={{ padding: ct ? '14px 16px' : '10px 16px', display:'flex', alignItems:'center', gap:12, position:'relative', zIndex:1 }}>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:al(P,0.7), letterSpacing:'2px', textTransform:'uppercase', marginBottom:1 }}>Welcome back</div>
-                <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:ct?22:20, color:'#f2f4f8', lineHeight:1, marginBottom:ct?3:0 }}>Coach {lastName||'—'}</div>
+                <div style={{ fontFamily:"'Kalam',cursive", fontWeight:700, fontSize:ct?22:20, color:'#f2f4f8', lineHeight:1, marginBottom:ct?3:0 }}>Coach {lastName||'--'}</div>
                 {ct && <div style={{ fontFamily:teamFont, fontStyle:'italic', fontSize:13, color:ct.primary, letterSpacing:'0.5px', marginBottom:2 }}>{mascotObj?.emoji} {ct.name}</div>}
-                {ct?.season && <div style={{ fontSize:9, color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif" }}>{ct.season}{ct.hometown?' · '+ct.hometown:''}</div>}
+                {ct?.season && <div style={{ fontSize:9, color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif" }}>{ct.season}{ct.hometown?' . '+ct.hometown:''}</div>}
               </div>
               <RotatingInfoWidget
                 sport={sport}
@@ -6550,7 +6550,7 @@ function HomePage({ P='#C0392B', S='#002868', al, lastName, sport, iq, setIQ, ga
       {/* Ticker */}
       <div style={{ background:'#0a0c14', display:'flex', alignItems:'center', overflow:'hidden', borderTop:'1px solid #0e1220', borderBottom:'1px solid #0e1220', height:26, margin:'0 -14px' }}>
         <div style={{ background:P, padding:'0 10px 0 14px', height:'100%', display:'flex', alignItems:'center', flexShrink:0, clipPath:'polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, fontWeight:700, color:'white', letterSpacing:'1.5px' }}>LIVE</span></div>
-        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 90s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' · '):`🏈 CoachIQ -- Prepare. Lead. Inspire. · Generate schemes · Scout opponents · Build your playbook`}</div></div>
+        <div style={{ overflow:'hidden', flex:1, paddingLeft:8 }}><div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:'#4a5470', whiteSpace:'nowrap', animation:'ticker 90s linear infinite', letterSpacing:'0.5px' }}>{feed&&feed.items?.length>0?feed.items.map(i=>`${i.title}: ${i.body}`).join(' . '):`🏈 CoachIQ -- Prepare. Lead. Inspire. . Generate schemes . Scout opponents . Build your playbook`}</div></div>
       </div>
 
       {/* Next Event Card -- only shown when there's an upcoming event */}
@@ -6574,12 +6574,12 @@ function HomePage({ P='#C0392B', S='#002868', al, lastName, sport, iq, setIQ, ga
             <div style={{ display:'flex', alignItems:'center', gap:12 }}>
               <div style={{ fontSize:24, flexShrink:0 }}>{typeIcon}</div>
               <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:9, color:typeColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:2 }}>{next.type.toUpperCase()} · {next.homeAway?.toUpperCase()}</div>
+                <div style={{ fontSize:9, color:typeColor, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:2 }}>{next.type.toUpperCase()} . {next.homeAway?.toUpperCase()}</div>
                 <div style={{ fontSize:15, fontWeight:700, color:'#f2f4f8', lineHeight:1.1, marginBottom:2 }}>{next.opponent || next.type}</div>
                 <div style={{ fontSize:10, color:'#8a94b0' }}>
                   {new Date(next.date+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
-                  {next.time && ' · ' + next.time}
-                  {next.location && ' · 📍 ' + next.location.split(',')[0]}
+                  {next.time && ' . ' + next.time}
+                  {next.location && ' . 📍 ' + next.location.split(',')[0]}
                 </div>
               </div>
               <div style={{ textAlign:'right', flexShrink:0 }}>
@@ -6614,7 +6614,7 @@ function HomePage({ P='#C0392B', S='#002868', al, lastName, sport, iq, setIQ, ga
               <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,0.55)', lineHeight:1.5, maxWidth:200 }}>Build plays your athletes <span style={{ color:'#C0392B', fontWeight:600 }}>actually understand</span> -- animated diagrams and coaching cues built in.</div>
             </div>
             <div style={{ display:'flex', gap:6, flexDirection:'column', alignItems:'flex-end' }}>
-              <div onClick={()=>setActiveMode('schemes_offense')} style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)', cursor:'pointer' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN →</span></div>
+              <div onClick={()=>setActiveMode('schemes_offense')} style={{ background:'#C0392B', padding:'4px 10px', borderRadius:2, clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)', cursor:'pointer' }}><span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:'white', letterSpacing:'1px' }}>OPEN -></span></div>
             </div>
           </div>
           {/* Interactive mini diagrams -- click to navigate */}
@@ -6668,7 +6668,7 @@ function HomePage({ P='#C0392B', S='#002868', al, lastName, sport, iq, setIQ, ga
           <div key={i} style={{ background:'#0f1219', border:'0.5px solid #1e2330', borderRadius:4, padding:'10px 12px', marginBottom:7, borderLeft:`2px solid ${feedTypeColor(item.type)}` }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
               <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, color:feedTypeColor(item.type), textTransform:'uppercase', letterSpacing:'1px' }}>{item.type==='drill'?'Drill of the Day':item.type==='science'?'Coaching Science':item.type==='play'?'Play Concept':item.type==='practice'?'Practice Drill':'Coaching Concept'}</span>
-              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#5a6480' }}>· {item.source}</span>}
+              {item.source && <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#5a6480' }}>. {item.source}</span>}
             </div>
             <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{item.body}</div>
             <div style={{ display:'flex', gap:6, marginTop:6, flexWrap:'wrap' }}>
@@ -6763,7 +6763,7 @@ function SplashScreen({ onDone, alreadyAuthed, brand='Red -- C+IQ colored' }) {
           <button onClick={() => onDone(false)} style={{ width:'100%', background:accent, border:'none', borderRadius:4, padding:'15px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:'pointer', textTransform:'uppercase' }}>Get Started -- Free</button>
           <button onClick={() => onDone(false)} style={{ width:'100%', background:'#161922', border:'1px solid #1c2235', borderRadius:4, padding:'14px', fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#6b7896', cursor:'pointer' }}>Sign In</button>
           <div style={{ textAlign:'center', paddingTop:4 }}>
-            <span onClick={() => onDone(true)} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:accent, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first →</span>
+            <span onClick={() => onDone(true)} style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, color:accent, fontWeight:600, cursor:'pointer', letterSpacing:'0.5px' }}>Preview first -></span>
           </div>
         </div>
       )}
@@ -6797,7 +6797,7 @@ function Onboarding({ onLaunch, onBack, brand='Red -- C+IQ colored' }) {
       <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
         {options.map(opt => (
           <button key={opt} onClick={()=>onChange(opt)} style={{ width:'100%', padding:'10px 14px', background:value===opt?accent:'#161922', border:`1px solid ${value===opt?accent:'#1e2330'}`, borderRadius:6, color:value===opt?'white':'#9aa0b0', fontFamily:"'DM Sans',sans-serif", fontSize:13, cursor:'pointer', textAlign:'left', transition:'all 0.15s' }}>
-            {value===opt ? '→ ' : ''}{opt}
+            {value===opt ? '-> ' : ''}{opt}
           </button>
         ))}
       </div>
@@ -6830,10 +6830,10 @@ function Onboarding({ onLaunch, onBack, brand='Red -- C+IQ colored' }) {
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'2px', textTransform:'uppercase', color:'#8a94b0', marginBottom:6 }}>Your name</div>
               <input value={coachName} onChange={e=>setCoachName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleStart()} placeholder="e.g. Coach Regisford" style={{ width:'100%', background:'#161922', border:`1px solid ${accent}`, borderRadius:4, padding:'13px 14px', fontSize:14, color:'#f2f4f8', outline:'none', fontFamily:'inherit' }} />
             </div>
-            <button onClick={handleStart} disabled={!coachName.trim()} style={{ width:'100%', background:coachName.trim()?accent:'#3d4559', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:coachName.trim()?'pointer':'not-allowed', textTransform:'uppercase', marginTop:6 }}>Next →</button>
+            <button onClick={handleStart} disabled={!coachName.trim()} style={{ width:'100%', background:coachName.trim()?accent:'#3d4559', border:'none', borderRadius:4, padding:'14px', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:15, letterSpacing:'2px', color:'white', cursor:coachName.trim()?'pointer':'not-allowed', textTransform:'uppercase', marginTop:6 }}>Next -></button>
             <div style={{ textAlign:'center' }}><span style={{ fontSize:11, color:'#5a6480' }}>You can create and manage teams from the home screen</span></div>
             <div style={{ textAlign:'center', paddingTop:4 }}>
-              <span onClick={()=>onLaunch({ guest:true, sport:'Football' })} style={{ fontSize:11, color:'#5a6480', cursor:'pointer', letterSpacing:'0.5px' }}>Just exploring → limited access</span>
+              <span onClick={()=>onLaunch({ guest:true, sport:'Football' })} style={{ fontSize:11, color:'#5a6480', cursor:'pointer', letterSpacing:'0.5px' }}>Just exploring -> limited access</span>
             </div>
           </div>
         ) : (
@@ -6849,7 +6849,7 @@ function Onboarding({ onLaunch, onBack, brand='Red -- C+IQ colored' }) {
                   { val:'A mix of all four', emoji:'⚖️', count:'728' },
                 ].map(opt => (
                   <button key={opt.val} onClick={()=>setPhilosophy(p=>({...p,priority:opt.val}))} style={{ width:'100%', padding:'10px 14px', background:philosophy.priority===opt.val?accent:'#161922', border:`1px solid ${philosophy.priority===opt.val?accent:'#1e2330'}`, borderRadius:6, color:philosophy.priority===opt.val?'white':'#9aa0b0', fontFamily:"'DM Sans',sans-serif", fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', textAlign:'left' }}>
-                    <span>{philosophy.priority===opt.val?'→ ':''}{opt.emoji} {opt.val}</span>
+                    <span>{philosophy.priority===opt.val?'-> ':''}{opt.emoji} {opt.val}</span>
                     <span style={{ fontSize:10, opacity:0.55, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>{opt.count} coaches</span>
                   </button>
                 ))}
@@ -6864,7 +6864,7 @@ function Onboarding({ onLaunch, onBack, brand='Red -- C+IQ colored' }) {
                   { val:'Competitive / Experienced', emoji:'🔥', count:'503' },
                 ].map(opt => (
                   <button key={opt.val} onClick={()=>setPhilosophy(p=>({...p,who:opt.val}))} style={{ width:'100%', padding:'10px 14px', background:philosophy.who===opt.val?accent:'#161922', border:`1px solid ${philosophy.who===opt.val?accent:'#1e2330'}`, borderRadius:6, color:philosophy.who===opt.val?'white':'#9aa0b0', fontFamily:"'DM Sans',sans-serif", fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', textAlign:'left' }}>
-                    <span>{philosophy.who===opt.val?'→ ':''}{opt.emoji} {opt.val}</span>
+                    <span>{philosophy.who===opt.val?'-> ':''}{opt.emoji} {opt.val}</span>
                     <span style={{ fontSize:10, opacity:0.55, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>{opt.count} coaches</span>
                   </button>
                 ))}
@@ -6879,7 +6879,7 @@ function Onboarding({ onLaunch, onBack, brand='Red -- C+IQ colored' }) {
 }
 
 
-// ─── C·IQ HUB PAGE ────────────────────────────────────────────────────────────
+// --- C.IQ HUB PAGE ------------------------------------------------------------
 function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, genHistory, playbook, iq, setPage, setActiveMode, setLearnMode, callAI, homeLocation, setTeams, guestMode=false, guestDemoTeam, setGuestDemoTeam, onGuestSignUp }) {
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   const gameHistory = currentTeam?.gameHistory || []
@@ -7331,7 +7331,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
             <>
               <div style={{ fontSize:20, marginBottom:4 }}>🌡️</div>
               <div style={{ fontSize:10, fontWeight:700, color:'#8a94b0', lineHeight:1.4 }}>Set your location for weather</div>
-              <div style={{ fontSize:9, color:'#5a6480', marginTop:4 }}>Settings → Location</div>
+              <div style={{ fontSize:9, color:'#5a6480', marginTop:4 }}>Settings -> Location</div>
             </>
           )}
         </div>
@@ -7373,7 +7373,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                     <div style={{ fontSize:32 }}>{wxEmoji(weatherData.current.weathercode)}</div>
                     <div>
                       <div style={{ fontSize:28, fontWeight:900, color:'#f2f4f8', lineHeight:1 }}>{Math.round(weatherData.current.temperature_2m)}°F</div>
-                      <div style={{ fontSize:11, color:'#8a94b0' }}>{wxDesc(weatherData.current.weathercode)} · Wind {Math.round(weatherData.current.windspeed_10m)}mph</div>
+                      <div style={{ fontSize:11, color:'#8a94b0' }}>{wxDesc(weatherData.current.weathercode)} . Wind {Math.round(weatherData.current.windspeed_10m)}mph</div>
                       <div style={{ fontSize:10, color:'#5a6480' }}>{homeLocation}</div>
                     </div>
                   </div>
@@ -7383,7 +7383,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                 {pred && nextEvent && (
                   <div style={{ background:'#161922', borderRadius:8, padding:'12px 14px', marginBottom:12, borderLeft:`3px solid ${pred.riskColor}` }}>
                     <div style={{ fontSize:9, color:pred.riskColor, fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:6 }}>
-                      {nextEvent.type} · {new Date(nextEvent.date+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}
+                      {nextEvent.type} . {new Date(nextEvent.date+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}
                     </div>
                     <div style={{ display:'flex', gap:10, marginBottom:8 }}>
                       <div style={{ textAlign:'center' }}>
@@ -7392,7 +7392,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                       </div>
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:13, fontWeight:700, color:pred.riskColor, marginBottom:3 }}>{pred.riskLabel}</div>
-                        <div style={{ fontSize:11, color:'#8a94b0' }}>Rain chance: {pred.precip}% · Wind: {Math.round(pred.wind)}mph</div>
+                        <div style={{ fontSize:11, color:'#8a94b0' }}>Rain chance: {pred.precip}% . Wind: {Math.round(pred.wind)}mph</div>
                         <div style={{ fontSize:11, color:'#8a94b0' }}>Hi {Math.round(pred.maxTemp)}° Lo {Math.round(pred.minTemp)}°</div>
                       </div>
                     </div>
@@ -7481,7 +7481,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           <div style={{ width:38, height:38, borderRadius:'50%', background:'#C0392B', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:900, color:'white', flexShrink:0 }}>{(coachName||'C')[0].toUpperCase()}</div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{coachName}</div>
-            <div style={{ fontSize:10, color:'#8a94b0' }}>{currentTeam?.name || <span style={{color:'#f59e0b',cursor:'pointer'}} onClick={()=>setPage('team')}>+ Create your first team</span>} · {sport}</div>
+            <div style={{ fontSize:10, color:'#8a94b0' }}>{currentTeam?.name || <span style={{color:'#f59e0b',cursor:'pointer'}} onClick={()=>setPage('team')}>+ Create your first team</span>} . {sport}</div>
           </div>
           <div style={{ background:'rgba(192,57,43,0.15)', border:'1px solid rgba(192,57,43,0.4)', borderRadius:4, padding:'3px 8px' }}>
             <div style={{ fontSize:10, fontWeight:700, color:'#C0392B', letterSpacing:1 }}>FREE</div>
@@ -7519,27 +7519,27 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                 <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8' }}>{{ Football:'Offense', Basketball:'Offense', Baseball:'Game Plan', Soccer:'Attack', Softball:'Game Plan' }[sport]||'Offense'}</div>
                 {nextGame && <div style={{ background:'#C0392B', borderRadius:3, padding:'1px 6px', fontSize:9, fontWeight:700, color:'white', letterSpacing:1 }}>GAME WEEK</div>}
               </div>
-              <div style={{ fontSize:9, color:'rgba(192,57,43,0.9)', fontWeight:700 }}>{{ Football:'Build your attack →', Basketball:'Build your offense →', Baseball:'Build your game plan →', Soccer:'Build your attack →', Softball:'Build your game plan →' }[sport]||'Build your attack →'}</div>
+              <div style={{ fontSize:9, color:'rgba(192,57,43,0.9)', fontWeight:700 }}>{{ Football:'Build your attack ->', Basketball:'Build your offense ->', Baseball:'Build your game plan ->', Soccer:'Build your attack ->', Softball:'Build your game plan ->' }[sport]||'Build your attack ->'}</div>
             </div>
           </div>
         </div>
         <div style={{ display:'flex', borderTop:'1px solid rgba(192,57,43,0.15)', borderBottom:'1px solid rgba(192,57,43,0.15)' }}>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
-            <div style={{ fontSize:17, fontWeight:700, color: ppg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{ppg!==null?ppg:'—'}</div>
+            <div style={{ fontSize:17, fontWeight:700, color: ppg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{ppg!==null?ppg:'--'}</div>
             <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Off. PPG', Basketball:'Off. PPG', Baseball:'Runs/game', Soccer:'Goals/game', Softball:'Runs/game' }[sport]||'PPG'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(192,57,43,0.15)' }}>
-            <div style={{ fontSize:17, fontWeight:700, color:'#5a6480', lineHeight:1 }}>—</div>
+            <div style={{ fontSize:17, fontWeight:700, color:'#5a6480', lineHeight:1 }}>--</div>
             <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds/play', Basketball:'Pts/poss', Baseball:'Hits/game', Soccer:'Shots/game', Softball:'Hits/game' }[sport]||'Stat'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
-            <div style={{ fontSize:lastOffScheme?9:14, fontWeight:700, color:lastOffScheme?'#C0392B':'#3d4559', lineHeight:1.2 }}>{lastOffScheme ? lastOffScheme.slice(0,14) : '—'}</div>
+            <div style={{ fontSize:lastOffScheme?9:14, fontWeight:700, color:lastOffScheme?'#C0392B':'#3d4559', lineHeight:1.2 }}>{lastOffScheme ? lastOffScheme.slice(0,14) : '--'}</div>
             <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
           </div>
         </div>
         <div style={{ padding:'7px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ fontSize:9, color:'#8a94b0', fontStyle:'italic' }}>{{ Football:'Track offensive yards in Live Scoring to see this', Basketball:'Track possessions in Live Scoring to see this', Baseball:'Track hits in Live Scoring to see this', Soccer:'Track shots in Live Scoring to see this', Softball:'Track hits in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
-          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#C0392B', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics →</div>
+          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#C0392B', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics -></div>
         </div>
       </div>
 
@@ -7551,26 +7551,26 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           </div>
           <div style={{ padding:'10px 14px 8px' }}>
             <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>{{ Football:'Defense', Basketball:'Defense', Baseball:'Pitching & Defense', Soccer:'Defensive Shape', Softball:'Pitching & Defense' }[sport]||'Defense'}</div>
-            <div style={{ fontSize:9, color:'rgba(107,154,255,0.9)', fontWeight:700 }}>{{ Football:'Shut them down →', Basketball:'Lock it down →', Baseball:'Hold them here →', Soccer:'Keep the clean sheet →', Softball:'Hold them here →' }[sport]||'Shut them down →'}</div>
+            <div style={{ fontSize:9, color:'rgba(107,154,255,0.9)', fontWeight:700 }}>{{ Football:'Shut them down ->', Basketball:'Lock it down ->', Baseball:'Hold them here ->', Soccer:'Keep the clean sheet ->', Softball:'Hold them here ->' }[sport]||'Shut them down ->'}</div>
           </div>
         </div>
         <div style={{ display:'flex', borderTop:'1px solid rgba(107,154,255,0.15)', borderBottom:'1px solid rgba(107,154,255,0.15)' }}>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
-            <div style={{ fontSize:17, fontWeight:700, color: papg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{papg!==null?papg:'—'}</div>
+            <div style={{ fontSize:17, fontWeight:700, color: papg!==null?'#f2f4f8':'#3d4559', lineHeight:1 }}>{papg!==null?papg:'--'}</div>
             <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Pts allowed avg', Basketball:'Pts allowed avg', Baseball:'Runs allowed avg', Soccer:'Goals allowed avg', Softball:'Runs allowed avg' }[sport]||'Pts allowed'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center', borderRight:'1px solid rgba(107,154,255,0.15)' }}>
-            <div style={{ fontSize:17, fontWeight:700, color:'#5a6480', lineHeight:1 }}>—</div>
+            <div style={{ fontSize:17, fontWeight:700, color:'#5a6480', lineHeight:1 }}>--</div>
             <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>{{ Football:'Yds allowed/play', Basketball:'Opp pts/poss', Baseball:'ERA', Soccer:'Shots allowed', Softball:'ERA' }[sport]||'Stat'}</div>
           </div>
           <div style={{ flex:1, padding:'9px 8px', textAlign:'center' }}>
-            <div style={{ fontSize:lastDefScheme?9:14, fontWeight:700, color:lastDefScheme?'#6b9fff':'#3d4559', lineHeight:1.2 }}>{lastDefScheme ? lastDefScheme.slice(0,14) : '—'}</div>
+            <div style={{ fontSize:lastDefScheme?9:14, fontWeight:700, color:lastDefScheme?'#6b9fff':'#3d4559', lineHeight:1.2 }}>{lastDefScheme ? lastDefScheme.slice(0,14) : '--'}</div>
             <div style={{ fontSize:9, color:'#8a94b0', letterSpacing:'0.5px', marginTop:2 }}>Last scheme</div>
           </div>
         </div>
         <div style={{ padding:'7px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ fontSize:9, color:'#8a94b0', fontStyle:'italic' }}>{{ Football:'Track yards allowed in Live Scoring to see this', Basketball:'Track opponent scoring in Live Scoring', Baseball:'Track runs allowed in Live Scoring to see this', Soccer:'Track shots allowed in Live Scoring', Softball:'Track runs allowed in Live Scoring to see this' }[sport]||'Track stats in Live Scoring'}</div>
-          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#6b9fff', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics →</div>
+          <div onClick={()=>setPage('team')} style={{ fontSize:9, color:'#6b9fff', fontWeight:700, cursor:'pointer', flexShrink:0, marginLeft:8 }}>Analytics -></div>
         </div>
       </div>
 
@@ -7583,7 +7583,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           </div>
           <div style={{ padding:'10px 12px 8px' }}>
             <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Practice Plan</div>
-            <div style={{ fontSize:9, color:'rgba(74,222,128,0.8)', fontWeight:700 }}>{{ Football:'Run a sharp session →', Basketball:'Run a sharp session →', Baseball:'Build your practice →', Soccer:'Run a sharp session →', Softball:'Build your practice →' }[sport]||'Run a sharp session →'}</div>
+            <div style={{ fontSize:9, color:'rgba(74,222,128,0.8)', fontWeight:700 }}>{{ Football:'Run a sharp session ->', Basketball:'Run a sharp session ->', Baseball:'Build your practice ->', Soccer:'Run a sharp session ->', Softball:'Build your practice ->' }[sport]||'Run a sharp session ->'}</div>
           </div>
           <div style={{ borderTop:'1px solid rgba(74,222,128,0.15)', padding:'8px 12px' }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
@@ -7592,13 +7592,13 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
               <div style={{ fontSize:10, color:'#8a94b0' }}>Last focus</div>
-              <div style={{ fontSize:9, fontWeight:700, color:'#f2f4f8', textAlign:'right', maxWidth:70, lineHeight:1.2 }}>{lastPlan?.focus || '—'}</div>
+              <div style={{ fontSize:9, fontWeight:700, color:'#f2f4f8', textAlign:'right', maxWidth:70, lineHeight:1.2 }}>{lastPlan?.focus || '--'}</div>
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
               <div style={{ fontSize:10, color:'#8a94b0' }}>Since last</div>
-              <div style={{ fontSize:13, fontWeight:700, color: daysSincePractice!==null&&daysSincePractice>5?'#f59e0b':'#f2f4f8' }}>{daysSincePractice!==null?daysSincePractice+'d':'—'}</div>
+              <div style={{ fontSize:13, fontWeight:700, color: daysSincePractice!==null&&daysSincePractice>5?'#f59e0b':'#f2f4f8' }}>{daysSincePractice!==null?daysSincePractice+'d':'--'}</div>
             </div>
-            <div style={{ fontSize:10, color:'#4ade80', fontWeight:700 }}>View all plans →</div>
+            <div style={{ fontSize:10, color:'#4ade80', fontWeight:700 }}>View all plans -></div>
           </div>
         </div>
 
@@ -7609,7 +7609,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
           </div>
           <div style={{ padding:'10px 12px 8px' }}>
             <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8', marginBottom:2 }}>Scout</div>
-            <div style={{ fontSize:9, color:'rgba(245,158,11,0.8)', fontWeight:700 }}>Know your opponent →</div>
+            <div style={{ fontSize:9, color:'rgba(245,158,11,0.8)', fontWeight:700 }}>Know your opponent -></div>
           </div>
           <div style={{ borderTop:'1px solid rgba(245,158,11,0.15)', padding:'8px 12px' }}>
             {nextOpponent ? (
@@ -7619,12 +7619,12 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
                 <div style={{ background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:4, padding:'3px 6px', textAlign:'center', marginBottom:6 }}>
                   <div style={{ fontSize:9, color:'#f59e0b', fontWeight:700 }}>NO SCOUT BUILT YET</div>
                 </div>
-                <div style={{ fontSize:10, color:'#f59e0b', fontWeight:700 }}>Build one now →</div>
+                <div style={{ fontSize:10, color:'#f59e0b', fontWeight:700 }}>Build one now -></div>
               </>
             ) : (
               <>
                 <div style={{ fontSize:10, color:'#5a6480', lineHeight:1.4, marginBottom:6 }}>Add a game to your schedule to prep a scout report</div>
-                <div onClick={()=>setPage('team')} style={{ fontSize:10, color:'#f59e0b', fontWeight:700, cursor:'pointer' }}>Add to schedule →</div>
+                <div onClick={()=>setPage('team')} style={{ fontSize:10, color:'#f59e0b', fontWeight:700, cursor:'pointer' }}>Add to schedule -></div>
               </>
             )}
           </div>
@@ -7668,13 +7668,13 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
       <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:12, padding:'12px 14px', marginBottom:8 }}>
         <div style={{ fontSize:10, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:10 }}>What's coming</div>
         {[
-          { color:'#4ade80', label:'Just added', items:'Live scoring · Practice plans · Post-game summary · Player editing · CoachIQ Hub · Film analysis · Wristband printing · Situational Advisor' },
-          { color:'#f59e0b', label:'In progress', items:'Flag football · Full play breakdown · Position tracker · Yards tracking in live scoring' },
-          { color:'#5a6480', label:'Planned', items:'AthleteIQ · Coach Network · League Manager · Advanced Analytics · Coaching Certifications' },
+          { color:'#4ade80', label:'Just added', items:'Live scoring . Practice plans . Post-game summary . Player editing . CoachIQ Hub . Film analysis . Wristband printing . Situational Advisor' },
+          { color:'#f59e0b', label:'In progress', items:'Flag football . Full play breakdown . Position tracker . Yards tracking in live scoring' },
+          { color:'#5a6480', label:'Planned', items:'AthleteIQ . Coach Network . League Manager . Advanced Analytics . Coaching Certifications' },
         ].map(row => (
           <div key={row.label} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:8 }}>
             <div style={{ width:7, height:7, borderRadius:'50%', background:row.color, flexShrink:0, marginTop:3 }}></div>
-            <div><span style={{ fontSize:9, fontWeight:700, color:row.color }}>{row.label} · </span><span style={{ fontSize:9, color:row.color==='#3d4559'?'#3d4559':'#6b7a96' }}>{row.items}</span></div>
+            <div><span style={{ fontSize:9, fontWeight:700, color:row.color }}>{row.label} . </span><span style={{ fontSize:9, color:row.color==='#3d4559'?'#3d4559':'#6b7a96' }}>{row.items}</span></div>
           </div>
         ))}
       </div>
@@ -7694,8 +7694,8 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
               <button onClick={()=>setGuestDemoTeam(null)} style={{ fontSize:9, color:'#8a94b0', background:'transparent', border:'none', cursor:'pointer', padding:'4px 6px' }}>✕ Remove</button>
             </div>
           )}
-          <button onClick={onGuestSignUp} style={{ width:'100%', padding:'13px', background:'#C0392B', border:'none', borderRadius:8, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Coach Account →</button>
-          <div style={{ textAlign:'center', fontSize:10, color:'#5a6480' }}>No credit card required · Unlock teams, roster, analytics & more</div>
+          <button onClick={onGuestSignUp} style={{ width:'100%', padding:'13px', background:'#C0392B', border:'none', borderRadius:8, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Coach Account -></button>
+          <div style={{ textAlign:'center', fontSize:10, color:'#5a6480' }}>No credit card required . Unlock teams, roster, analytics & more</div>
         </div>
       )}
 
@@ -7716,7 +7716,7 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
 }
 
 
-// ─── GUEST MODE COMPONENTS ────────────────────────────────────────────────────
+// --- GUEST MODE COMPONENTS ----------------------------------------------------
 function GuestBanner({ onSignUp }) {
   return (
     <div style={{ background:'rgba(192,57,43,0.1)', border:'1px solid rgba(192,57,43,0.3)', borderRadius:8, padding:'10px 14px', marginBottom:12, display:'flex', alignItems:'center', gap:10 }}>
@@ -7724,7 +7724,7 @@ function GuestBanner({ onSignUp }) {
         <div style={{ fontSize:10, fontWeight:700, color:'#C0392B', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, marginBottom:2 }}>GUEST MODE -- LIMITED ACCESS</div>
         <div style={{ fontSize:11, color:'#8a94b0' }}>Create a free account to unlock teams, roster, scheduling, analytics and more.</div>
       </div>
-      <button onClick={onSignUp} style={{ flexShrink:0, padding:'8px 12px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>FREE ACCOUNT →</button>
+      <button onClick={onSignUp} style={{ flexShrink:0, padding:'8px 12px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>FREE ACCOUNT -></button>
     </div>
   )
 }
@@ -7738,13 +7738,13 @@ function GuestGate({ feature, onSignUp, children }) {
       <div style={{ fontSize:12, color:'#8a94b0', lineHeight:1.6, marginBottom:16, maxWidth:280, margin:'0 auto 16px' }}>
         This feature is available to CoachIQ members. Create your free account to unlock teams, roster, scheduling, live scoring, analytics, and more.
       </div>
-      <button onClick={onSignUp} style={{ width:'100%', maxWidth:280, padding:'13px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Account →</button>
+      <button onClick={onSignUp} style={{ width:'100%', maxWidth:280, padding:'13px', background:'#C0392B', border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer', letterSpacing:'1.5px', textTransform:'uppercase' }}>Create Free Account -></button>
       <div style={{ marginTop:10, fontSize:10, color:'#5a6480' }}>No credit card required</div>
     </div>
   )
 }
 
-// ─── GUEST TEAM PREVIEW (read-only demo team view for guest mode) ─────────────
+// --- GUEST TEAM PREVIEW (read-only demo team view for guest mode) -------------
 function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp }) {
   const [tab, setTab] = useState('roster')
   const players = team?.players || []
@@ -7787,7 +7787,7 @@ function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp 
           <div style={{ padding:'8px 0' }}>
             {players.map((p,i) => (
               <div key={p.id||i} style={{ display:'flex', alignItems:'center', gap:12, padding:'9px 14px', borderBottom:i<players.length-1?'1px solid #1e2330':'none' }}>
-                <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, color:P, flexShrink:0 }}>#{p.number||'—'}</div>
+                <div style={{ width:28, height:28, borderRadius:'50%', background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, color:P, flexShrink:0 }}>#{p.number||'--'}</div>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{p.name}</div>
                   <div style={{ fontSize:10, color:'#8a94b0' }}>{p.position}</div>
@@ -7796,7 +7796,7 @@ function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp 
             ))}
           </div>
           <div style={{ padding:'10px 14px', borderTop:'1px solid #1e2330', textAlign:'center' }}>
-            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Create Your Roster -- Free →</button>
+            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Create Your Roster -- Free -></button>
           </div>
         </div>
       )}
@@ -7817,7 +7817,7 @@ function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp 
                   <span style={{ fontSize:16, flexShrink:0 }}>{typeIcons[e.type]||'📅'}</span>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{e.opponent||e.type}</div>
-                    <div style={{ fontSize:10, color:'#8a94b0' }}>{d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}{e.time?' · '+e.time:''}</div>
+                    <div style={{ fontSize:10, color:'#8a94b0' }}>{d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}{e.time?' . '+e.time:''}</div>
                   </div>
                   <div style={{ fontSize:10, fontWeight:700, color:P, fontFamily:"'Barlow Condensed',sans-serif" }}>{e.homeAway}</div>
                 </div>
@@ -7825,7 +7825,7 @@ function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp 
             })}
           </div>
           <div style={{ padding:'10px 14px', borderTop:'1px solid #1e2330', textAlign:'center' }}>
-            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Build Your Schedule -- Free →</button>
+            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Build Your Schedule -- Free -></button>
           </div>
         </div>
       )}
@@ -7867,13 +7867,13 @@ function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp 
                 <div key={g.id||i} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 10px', background:'#161922', borderRadius:5, marginBottom:5, borderLeft:`3px solid ${rc}` }}>
                   <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:14, color:rc, width:14 }}>{r}</div>
                   <div style={{ flex:1, fontSize:11, color:'#f2f4f8' }}>{g.opponent}</div>
-                  <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{g.us}–{g.them}</div>
+                  <div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{g.us}-{g.them}</div>
                 </div>
               )
             })}
           </div>
           <div style={{ padding:'10px 14px', borderTop:'1px solid #1e2330', textAlign:'center' }}>
-            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Track Your Own Stats -- Free →</button>
+            <button onClick={onSignUp} style={{ padding:'8px 16px', background:P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>Track Your Own Stats -- Free -></button>
           </div>
         </div>
       )}
@@ -7881,7 +7881,7 @@ function GuestTeamPreview({ team, sport, P='#C0392B', S='#002868', al, onSignUp 
   )
 }
 
-// ─── NEWS TICKER ──────────────────────────────────────────────────────────────
+// --- NEWS TICKER --------------------------------------------------------------
 function NewsTicker({ sport, P }) {
   const [headlines, setHeadlines] = useState([])
   const RSS_URLS = {
@@ -7909,14 +7909,14 @@ function NewsTicker({ sport, P }) {
     <div style={{ flex:1, overflow:'hidden', margin:'0 6px' }}>
       <div style={{ overflow:'hidden', whiteSpace:'nowrap' }}>
         <div style={{ display:'inline-block', animation:'ticker 120s linear infinite', fontSize:9, color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.3px' }}>
-          {headlines.slice(0,5).join('   ·   ')}   ·   {headlines.slice(0,5).join('   ·   ')}
+          {headlines.slice(0,5).join('   .   ')}   .   {headlines.slice(0,5).join('   .   ')}
         </div>
       </div>
     </div>
   )
 }
 
-// ─── NAV BUTTON WITH LONG PRESS ──────────────────────────────────────────────
+// --- NAV BUTTON WITH LONG PRESS ----------------------------------------------
 function NavButton({ id, icon, label, isActive, P='#C0392B', al, setPage, badge=0 }) {
   return (
     <div style={{ flex:1, position:'relative' }}>
@@ -8014,7 +8014,7 @@ export default function CoachIQ() {
   })
 
   // SSR guard - prevents crash during Next.js prerendering
-  // ── PERSISTENCE -- must be before any early returns (React Rules of Hooks) ──
+  // -- PERSISTENCE -- must be before any early returns (React Rules of Hooks) --
   useEffect(() => { try { localStorage.setItem('coachiq_teams', JSON.stringify(teams)) } catch(e){} }, [teams])
   useEffect(() => { try { localStorage.setItem('coachiq_activeTeam', JSON.stringify(activeTeam)) } catch(e){} }, [activeTeam])
   useEffect(() => { try { localStorage.setItem('coachiq_cfg', JSON.stringify(cfg)) } catch(e){} }, [cfg])
@@ -8159,7 +8159,7 @@ export default function CoachIQ() {
           @keyframes float7 { 0%,100%{transform:translate(0,0) rotate(-5deg)} 35%{transform:translate(-16px,6px) rotate(-12deg)} 70%{transform:translate(8px,-10px) rotate(0deg)} }
           @keyframes logoReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
           @keyframes ctaReveal { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
-          /* ── GLOBAL INPUT RESET -- applies on ALL devices ── */
+          /* -- GLOBAL INPUT RESET -- applies on ALL devices -- */
           input, select, textarea {
             -webkit-appearance: none !important;
             appearance: none !important;
@@ -8282,12 +8282,12 @@ export default function CoachIQ() {
         <div style={{ position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)', width:'100%', maxWidth:'min(640px,100%)', zIndex:50, background:'#07090d' }}>
           {/* Nav bar -- 4 tabs, Hub first */}
           <div style={{ borderTop:'1px solid #0e1220', display:'flex', paddingBottom:'env(safe-area-inset-bottom,0px)' }}>
-            {/* C·IQ Hub button */}
+            {/* C.IQ Hub button */}
             <div style={{ flex:1, position:'relative' }}>
               <button onClick={()=>setPage('hub')} style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', padding:'8px 2px 5px', cursor:'pointer', gap:2, background:'none', border:'none', position:'relative', minHeight:54, WebkitTapHighlightColor:'transparent', touchAction:'manipulation' }}>
                 {page==='hub' && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:28, height:2, background:'#C0392B', borderRadius:1 }} />}
                 <div style={{ background:page==='hub'?'#C0392B':'#161922', border:`1px solid ${page==='hub'?'#C0392B':'#1e2330'}`, borderRadius:5, padding:'2px 7px', marginBottom:1 }}>
-                  <span style={{ fontSize:11, fontWeight:900, color:'white', letterSpacing:'-0.5px', fontFamily:"'Barlow Condensed',sans-serif" }}>C·IQ</span>
+                  <span style={{ fontSize:11, fontWeight:900, color:'white', letterSpacing:'-0.5px', fontFamily:"'Barlow Condensed',sans-serif" }}>C.IQ</span>
                 </div>
                 <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, color:page==='hub'?'#C0392B':'#5a6480', fontWeight:900, letterSpacing:'1px', textTransform:'uppercase' }}>HUB</span>
               </button>
@@ -8304,7 +8304,7 @@ export default function CoachIQ() {
   )
 }
 
-// ─── TEAM MANAGER CARD ────────────────────────────────────────────────────────
+// --- TEAM MANAGER CARD --------------------------------------------------------
 function RosterSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
   const players = team?.players || []
   const [newFirstName, setNewFirstName] = useState('')
@@ -8349,7 +8349,7 @@ function RosterSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
 
   const posDropdown = (val, onChange, open, setOpen) => (
     <div onClick={()=>setOpen(o=>!o)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'8px 10px', color:val?'#f2f4f8':'#3d4559', fontFamily:'inherit', fontSize:12, cursor:'pointer', position:'relative', userSelect:'none' }}>
-      {val||'—'}
+      {val||'--'}
       {open && (
         <div onClick={e=>e.stopPropagation()} style={{ position:'absolute', top:'100%', left:0, right:0, background:'#161922', border:'1px solid #1e2330', borderRadius:4, zIndex:50, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
           {(positions[sport]||[]).map(pos => {
@@ -8533,7 +8533,7 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
             <span style={{ fontSize:15 }}>📋</span>
             <div style={{ flex:1 }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'1px', color:'#f2f4f8', textTransform:'uppercase' }}>{plan.title}</div>
-              <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{plan.date} · {plan.duration}</div>
+              <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{plan.date} . {plan.duration}</div>
             </div>
             {!plan._linkedTo && (team.schedule||[]).filter(e=>e.type==='Practice').length > 0 && (
               <select onChange={e=>{ if(e.target.value) setPlanLinked(plan.id, parseInt(e.target.value)) }} style={{ fontSize:10, background:'#161922', border:`1px solid ${al(P,0.3)}`, borderRadius:3, color:P, padding:'3px 6px', cursor:'pointer', colorScheme:'dark', maxWidth:130 }}>
@@ -8550,7 +8550,7 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
               <div key={i} style={{ padding:'10px 12px', background:'#161922', border:'1px solid #1e2330', borderRadius:8, marginBottom:8 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
                   <div style={{ width:22, height:22, minWidth:22, background:al(P,0.15), border:`1px solid ${al(P,0.3)}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:P }}>{i+1}</div>
-                  <div><div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{seg.name}</div><div style={{ fontSize:10, color:'#8a94b0' }}>{seg.time} · {seg.reps}</div></div>
+                  <div><div style={{ fontSize:12, fontWeight:700, color:'#f2f4f8' }}>{seg.name}</div><div style={{ fontSize:10, color:'#8a94b0' }}>{seg.time} . {seg.reps}</div></div>
                 </div>
                 <div style={{ fontSize:11, color:'#dde1f0', marginBottom:4, fontWeight:600 }}>📍 {seg.drill}</div>
                 <div style={{ fontSize:11, color:'#8a94b0', marginBottom:4 }}>Purpose: {seg.purpose}</div>
@@ -8563,12 +8563,12 @@ function PracticePlanSection({ team, P='#C0392B', S='#002868', al, callAI, parse
             <button onClick={()=>{
               const win = window.open('','_blank')
               const html = `<html><head><title>${plan.title}</title><style>body{font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto;color:#111}h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;color:#666;margin-bottom:16px;font-weight:normal}.section{margin-bottom:16px;padding:12px;border:1px solid #ddd;border-radius:6px}.section-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:6px;font-weight:bold}.drill{font-size:13px;font-weight:bold;margin-bottom:3px}.detail{font-size:12px;color:#555;margin-bottom:2px}.num{display:inline-block;width:22px;height:22px;background:#C0392B;color:white;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:bold;margin-right:8px}.footer{margin-top:20px;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:8px}@media print{body{padding:12px}}</style></head><body>
-              <h1>${plan.title}</h1><h2>${plan.date} · ${plan.duration}${team?.name?' · '+team.name:''}</h2>
+              <h1>${plan.title}</h1><h2>${plan.date} . ${plan.duration}${team?.name?' . '+team.name:''}</h2>
               ${plan.warmup?`<div class="section"><div class="section-title">Warmup -- ${plan.warmup.time}</div>${(plan.warmup.activities||[]).map(a=>`<div class="detail">• ${a}</div>`).join('')}</div>`:''}
               ${(plan.segments||[]).map((seg,i)=>`<div class="section"><div class="section-title">Segment ${i+1} -- ${seg.time}</div><div class="drill"><span class="num">${i+1}</span>${seg.drill}</div><div class="detail">Purpose: ${seg.purpose}</div><div class="detail">Reps: ${seg.reps}</div><div class="detail" style="color:#C0392B">Coach: "${seg.coaching}"</div></div>`).join('')}
               ${plan.teamPeriod?`<div class="section"><div class="section-title">Team Period -- ${plan.teamPeriod.time}</div><div class="drill">${plan.teamPeriod.activity}</div><div class="detail">${plan.teamPeriod.notes}</div></div>`:''}
               ${plan.coachNote?`<div class="section" style="border-left:3px solid #C0392B"><div class="section-title">Coach's Note</div><div class="detail" style="font-style:italic">"${plan.coachNote}"</div></div>`:''}
-              <div class="footer">Generated by CoachIQ · ${new Date().toLocaleDateString()}</div>
+              <div class="footer">Generated by CoachIQ . ${new Date().toLocaleDateString()}</div>
               <script>window.onload=()=>window.print()</script></body></html>`
               win.document.write(html); win.document.close()
             }} style={{ width:'100%', marginTop:12, padding:'10px', background:'transparent', border:`1px solid ${al(P,0.4)}`, borderRadius:6, color:P, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer', letterSpacing:1 }}>🖨 PRINT PRACTICE PLAN</button>
@@ -8606,8 +8606,8 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
   const gamesPlayed = history.length
   const ptsFor  = history.reduce((s,g) => s + (g.us||0), 0)
   const ptsAgainst = history.reduce((s,g) => s + (g.them||0), 0)
-  const ppg    = gamesPlayed ? (ptsFor / gamesPlayed).toFixed(1) : '—'
-  const papg   = gamesPlayed ? (ptsAgainst / gamesPlayed).toFixed(1) : '—'
+  const ppg    = gamesPlayed ? (ptsFor / gamesPlayed).toFixed(1) : '--'
+  const papg   = gamesPlayed ? (ptsAgainst / gamesPlayed).toFixed(1) : '--'
   const winPct = gamesPlayed ? Math.round((wins/gamesPlayed)*100) : null
   const streak = (() => {
     if (!history.length) return null
@@ -8682,7 +8682,7 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
           {/* Game log -- inline editable */}
           {history.length > 0 && (
             <div>
-              <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:8 }}>GAME RESULTS <span style={{ color:'#5a6480', fontWeight:400 }}>· tap to edit</span></div>
+              <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:8 }}>GAME RESULTS <span style={{ color:'#5a6480', fontWeight:400 }}>. tap to edit</span></div>
               {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((g,i)=>{
                 const result = g.us>g.them?'W':g.us<g.them?'L':'T'
                 const rc = result==='W'?'#4ade80':result==='L'?'#e74c3c':'#f59e0b'
@@ -8695,7 +8695,7 @@ function AnalyticsSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                         <div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{g.opponent}</div>
                         <div style={{ fontSize:10, color:'#8a94b0' }}>{g.date ? new Date(g.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}) : ''}</div>
                       </div>
-                      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8' }}>{g.us}–{g.them}</div>
+                      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:16, color:'#f2f4f8' }}>{g.us}-{g.them}</div>
                       <span style={{ fontSize:10, color:'#5a6480', marginLeft:4 }}>{isExpanded?'▲':'✏️'}</span>
                     </div>
                     {isExpanded && (
@@ -8827,8 +8827,8 @@ function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport, playb
     </style></head><body>
     <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid ${P}">
       <strong style="font-size:14px">${team.name}</strong>
-      <span style="font-size:11px;color:#666;margin-left:8px">${sport} · ${team.season||''}</span>
-      <span style="font-size:10px;color:#aaa;float:right">Generated by CoachIQ · ${new Date().toLocaleDateString()}</span>
+      <span style="font-size:11px;color:#666;margin-left:8px">${sport} . ${team.season||''}</span>
+      <span style="font-size:10px;color:#aaa;float:right">Generated by CoachIQ . ${new Date().toLocaleDateString()}</span>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:6px">
       ${cards}
@@ -8951,7 +8951,7 @@ function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport, playb
                     )
                   })}
                   {selectedPlays.length > 0 && (
-                    <div style={{ marginTop:8, fontSize:10, color:'#4ade80', textAlign:'center' }}>{selectedPlays.length} plays selected · {Math.ceil(selectedPlays.length/playsPerCard)} card{Math.ceil(selectedPlays.length/playsPerCard)!==1?'s':''}</div>
+                    <div style={{ marginTop:8, fontSize:10, color:'#4ade80', textAlign:'center' }}>{selectedPlays.length} plays selected . {Math.ceil(selectedPlays.length/playsPerCard)} card{Math.ceil(selectedPlays.length/playsPerCard)!==1?'s':''}</div>
                   )}
                 </div>
               )}
@@ -8962,7 +8962,7 @@ function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport, playb
           {printType === 'wristband' && selectedPlays.length > 0 && (
             <div style={{ background:'rgba(74,222,128,0.07)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6, padding:'10px 12px', marginBottom:12 }}>
               <div style={{ fontSize:10, color:'#4ade80', fontWeight:700, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, marginBottom:3 }}>READY TO PRINT</div>
-              <div style={{ fontSize:11, color:'#f2f4f8' }}>{selectedPlays.length} plays · {Math.ceil(selectedPlays.length/playsPerCard)} wristband card{Math.ceil(selectedPlays.length/playsPerCard)!==1?'s':''} · {wristWidth}" × {wristHeight}"</div>
+              <div style={{ fontSize:11, color:'#f2f4f8' }}>{selectedPlays.length} plays . {Math.ceil(selectedPlays.length/playsPerCard)} wristband card{Math.ceil(selectedPlays.length/playsPerCard)!==1?'s':''} . {wristWidth}" × {wristHeight}"</div>
             </div>
           )}
 
@@ -8979,7 +8979,7 @@ function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport, playb
             style={{ width:'100%', padding:'13px', background: printType==='wristband'&&noPlays ? '#3d4559' : P, border:'none', borderRadius:6, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, cursor: printType==='wristband'&&noPlays ? 'not-allowed' : 'pointer', letterSpacing:'1.5px', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
             <span>🖨</span> OPEN PRINT DIALOG
           </button>
-          <div style={{ marginTop:8, fontSize:10, color:'#5a6480', textAlign:'center' }}>Opens a print-ready page · Use your browser's Print dialog to save as PDF or print</div>
+          <div style={{ marginTop:8, fontSize:10, color:'#5a6480', textAlign:'center' }}>Opens a print-ready page . Use your browser's Print dialog to save as PDF or print</div>
         </div>
       </Card>
     </div>
@@ -8987,7 +8987,7 @@ function PrintSection({ team, P='#C0392B', S='#002868', al, callAI, sport, playb
 }
 
 
-// ─── TEAM PAGE ─────────────────────────────────────────────────────────────────
+// --- TEAM PAGE -----------------------------------------------------------------
 function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, activeTeam, setActiveTeam, callAI, parseJSON, setCfg, setPage, playbook={} }) {
   const [section, setSection] = useState('roster')
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
@@ -9043,7 +9043,7 @@ function TeamPage({ P='#C0392B', S='#002868', al, sport, teams, setTeams, active
 
 
 
-// ─── CREATE-A-MASCOT BUILDER ──────────────────────────────────────────────────
+// --- CREATE-A-MASCOT BUILDER --------------------------------------------------
 function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
   const [step, setStep] = useState(0) // 0=pick animal, 1=pick shape, 2=pick colors, 3=preview
   const [selected, setSelected] = useState({
@@ -9188,7 +9188,7 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
                 <input value={selected.label} onChange={e=>setSelected(s=>({...s,label:e.target.value.toUpperCase().slice(0,12)}))}
                   placeholder={ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label?.toUpperCase() || 'TEAM NAME'}
                   style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'10px 12px', color:'#f2f4f8', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:14, letterSpacing:'2px', outline:'none' }}/>
-                <div style={{ fontSize:10, color:'#5a6480', marginTop:4 }}>Max 12 characters · auto-UPPERCASE</div>
+                <div style={{ fontSize:10, color:'#5a6480', marginTop:4 }}>Max 12 characters . auto-UPPERCASE</div>
               </div>
               {/* Live preview */}
               <div style={{ textAlign:'center', padding:'16px', background:'#161922', borderRadius:8, border:'1px solid #1e2330' }}>
@@ -9214,7 +9214,7 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
               <div style={{ background:'#161922', borderRadius:6, padding:'10px 14px', border:'1px solid #1e2330', marginBottom:16, textAlign:'left' }}>
                 <div style={{ fontSize:10, color:'#8a94b0', marginBottom:4 }}>Mascot summary</div>
                 <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, color:'#f2f4f8' }}>
-                  {ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label} · {selected.primaryColor}
+                  {ANIMAL_OPTIONS.find(a=>a.id===selected.animal)?.label} . {selected.primaryColor}
                 </div>
                 {selected.label && <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:P, marginTop:2 }}>Label: {selected.label}</div>}
               </div>
@@ -9245,7 +9245,7 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
               <button onClick={()=>{ if(step===0&&!selected.animal) return; setStep(s=>s+1) }}
                 disabled={step===0&&!selected.animal}
                 style={{ flex:2, padding:'10px', background:step===0&&!selected.animal?'#2a3040':P, border:'none', borderRadius:5, color:'white', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:13, cursor:step===0&&!selected.animal?'not-allowed':'pointer', opacity:step===0&&!selected.animal?0.5:1 }}>
-                {step===0&&!selected.animal?'Select an animal first':'Next →'}
+                {step===0&&!selected.animal?'Select an animal first':'Next ->'}
               </button>
             )}
           </div>
@@ -9256,7 +9256,7 @@ function MascotBuilder({ P='#C0392B', al, onSave, onClose, currentColor }) {
 }
 
 
-// ─── MASCOT BUILDER ───────────────────────────────────────────────────────────
+// --- MASCOT BUILDER -----------------------------------------------------------
 
 function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P='#C0392B', al, setCfg, onOpenTeamTab }) {
   const [mode, setMode] = useState('view')
@@ -9347,17 +9347,17 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
       <div style={{ marginTop:14 }}>
         <div onClick={()=>{
               if (current && onOpenTeamTab) {
-                // Has team + on home page → go to team tab
+                // Has team + on home page -> go to team tab
                 onOpenTeamTab()
               } else if (sportTeams.length === 0 && onOpenTeamTab) {
-                // No teams + on home page → go to team tab to create
+                // No teams + on home page -> go to team tab to create
                 onOpenTeamTab()
               } else if (sportTeams.length === 0 && !onOpenTeamTab) {
-                // No teams + on team page → expand and open create form
+                // No teams + on team page -> expand and open create form
                 setExpanded(true)
                 setMode('create')
               } else {
-                // Has teams + on team page → toggle expand
+                // Has teams + on team page -> toggle expand
                 setExpanded(e=>!e)
               }
             }} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', background:'#0f1219', border:`1px solid ${current?al(P,0.3):'#1e2330'}`, borderRadius:expanded?'4px 4px 0 0':4, cursor:'pointer', borderLeft:`3px solid ${P}` }}>
@@ -9366,7 +9366,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
             <div style={{ fontFamily:fontStyle, fontWeight:700, fontSize:current?15:13, color:'#f2f4f8', textTransform:'uppercase' }}>
               {current ? current.name : 'No '+sport+' Team Selected'}
             </div>
-            {current && <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{current.season}{current.hometown?' · '+current.hometown:''} · {sportTeams.length}/{MAX_TEAMS} teams</div>}
+            {current && <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{current.season}{current.hometown?' . '+current.hometown:''} . {sportTeams.length}/{MAX_TEAMS} teams</div>}
             {!current && <div style={{ fontSize:10, color:'#5a6480', marginTop:1 }}>Tap to create or select a team</div>}
 
           </div>
@@ -9390,7 +9390,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
                           <MascotAvatar mascotId={team.mascot} color={current?.id===team.id?P:'#607080'} size={32} />
                           <div style={{ flex:1 }} onClick={()=>{ selectTeam(team); setTimeout(()=>{ if(onOpenTeamTab) onOpenTeamTab() }, 50) }}>
                             <div style={{ fontFamily:fs, fontWeight:700, fontSize:13, color:'#f2f4f8' }}>{team.name}</div>
-                            <div style={{ fontSize:10, color:'#8a94b0' }}>{team.season}{team.hometown?' · '+team.hometown:''}</div>
+                            <div style={{ fontSize:10, color:'#8a94b0' }}>{team.season}{team.hometown?' . '+team.hometown:''}</div>
                           </div>
                           <div style={{ display:'flex', gap:4, alignItems:'center' }}>
                             {current?.id===team.id && <button onClick={deselectTeam} style={{ padding:'3px 7px', background:'rgba(107,154,255,0.1)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:3, color:'#6b9fff', fontSize:9, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>DESELECT</button>}
@@ -9541,7 +9541,7 @@ function TeamManagerCard({ sport, teams, setTeams, activeTeam, setActiveTeam, P=
 }
 
 
-// ─── CITY SEARCH ─────────────────────────────────────────────────────────────
+// --- CITY SEARCH -------------------------------------------------------------
 function CitySearch({ value, onChange, placeholder, P, al }) {
   const [query, setQuery] = useState(value || '')
   const [results, setResults] = useState([])
@@ -9608,7 +9608,7 @@ function CitySearch({ value, onChange, placeholder, P, al }) {
 }
 
 
-// ─── ADDRESS SEARCH ───────────────────────────────────────────────────────────
+// --- ADDRESS SEARCH -----------------------------------------------------------
 function AddressSearch({ value, onChange, placeholder, P, al }) {
   const [query, setQuery] = useState(value || '')
   const [results, setResults] = useState([])
@@ -9709,7 +9709,7 @@ function AddressSearch({ value, onChange, placeholder, P, al }) {
 }
 
 
-// ─── LINEUP BUILDER ───────────────────────────────────────────────────────────
+// --- LINEUP BUILDER -----------------------------------------------------------
 const FIELD_POSITIONS = {
   Football: {
     offense: [
@@ -9962,7 +9962,7 @@ function LineupBuilder({ team, sport, P='#C0392B', S='#002868', al, teams, setTe
                 Assign player to {selectedSlot}
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:4, maxHeight:150, overflowY:'auto' }}>
-                <div onClick={()=>assignPlayer(selectedSlot, null)} style={{ padding:'6px 10px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, cursor:'pointer', fontSize:11, color:'#8a94b0' }}>— Remove assignment</div>
+                <div onClick={()=>assignPlayer(selectedSlot, null)} style={{ padding:'6px 10px', background:'#0f1219', border:'1px solid #1e2330', borderRadius:4, cursor:'pointer', fontSize:11, color:'#8a94b0' }}>-- Remove assignment</div>
                 {players.map(p => (
                   <div key={p.id} onClick={()=>assignPlayer(selectedSlot, p.id)} style={{ padding:'6px 10px', background:currentLineup.slots[selectedSlot]===p.id?al(P,0.12):'#0f1219', border:`1px solid ${currentLineup.slots[selectedSlot]===p.id?P:'#1e2330'}`, borderRadius:4, cursor:'pointer', display:'flex', alignItems:'center', gap:8 }}>
                     <span style={{ fontSize:11, color:'#f2f4f8', fontWeight:500 }}>{p.lastName||''}{p.lastName&&p.firstName?', ':''}{p.firstName||''}</span>
@@ -9983,8 +9983,8 @@ function LineupBuilder({ team, sport, P='#C0392B', S='#002868', al, teams, setTe
 }
 
 
-// ─── SCHEDULE SECTION ─────────────────────────────────────────────────────────
-// ─── LIVE SCORING SECTION ────────────────────────────────────────────────────
+// --- SCHEDULE SECTION ---------------------------------------------------------
+// --- LIVE SCORING SECTION ----------------------------------------------------
 function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, setTeams, callAI, parseJSON }) {
   const EMPTY_GAME = {
     id: null, opponent:'', date:'', quarter:1, clock:'',
@@ -10088,7 +10088,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
     const result = g.us > g.them ? 'WIN' : g.us < g.them ? 'LOSS' : 'TIE'
     const scorers = g.log.filter(e=>e.side==='us'&&e.player).map(e=>`${e.player} (${e.label}, Q${e.quarter})`).join('; ') || 'Not recorded'
     const scoreByQ = `Q1: ${g.quarters.us[0]}-${g.quarters.them[0]}, Q2: ${g.quarters.us[1]}-${g.quarters.them[1]}, Q3: ${g.quarters.us[2]}-${g.quarters.them[2]}, Q4: ${g.quarters.us[3]}-${g.quarters.them[3]}`
-    const prompt = `You are an encouraging youth ${sport} coach writing a brief post-game summary. Team: ${team?.name||'Us'}. Opponent: ${g.opponent}. Final: ${g.us}–${g.them} (${result}). Scoring by quarter: ${scoreByQ}. Scoring plays: ${scorers}. Return ONLY valid JSON: {"headline":"one energetic headline line","recap":"2-3 sentence game recap mentioning specific scores and key moments","standout":"one standout performer or play (can be team-level if no individual stats)","positives":["positive 1","positive 2","positive 3"],"focusNext":"one specific thing to work on next practice based on the game","motivationalClose":"one short inspiring line for the team"}`
+    const prompt = `You are an encouraging youth ${sport} coach writing a brief post-game summary. Team: ${team?.name||'Us'}. Opponent: ${g.opponent}. Final: ${g.us}-${g.them} (${result}). Scoring by quarter: ${scoreByQ}. Scoring plays: ${scorers}. Return ONLY valid JSON: {"headline":"one energetic headline line","recap":"2-3 sentence game recap mentioning specific scores and key moments","standout":"one standout performer or play (can be team-level if no individual stats)","positives":["positive 1","positive 2","positive 3"],"focusNext":"one specific thing to work on next practice based on the game","motivationalClose":"one short inspiring line for the team"}`
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
@@ -10147,7 +10147,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
         <div style={{ background:'#0d1117', borderRadius:8, padding:'16px 12px', marginBottom:12, border:`1px solid ${al(P,0.2)}` }}>
           <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
             {bigScore(game.us,'us')}
-            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:36, fontWeight:900, color:'#5a6480' }}>—</div>
+            <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontSize:36, fontWeight:900, color:'#5a6480' }}>--</div>
             {bigScore(game.them,'them')}
           </div>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:10 }}>
@@ -10221,7 +10221,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
               <div style={{ marginBottom:10 }}>
                 <label style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:4, display:'block' }}>Scored by (optional)</label>
                 <select value={scoringPlayer} onChange={e=>setScoringPlayer(e.target.value)} style={{ width:'100%', background:'#161922', border:'1px solid #1e2330', borderRadius:4, padding:'9px 12px', color:'#f2f4f8', fontFamily:'inherit', fontSize:16, outline:'none' }}>
-                  <option value="">—</option>
+                  <option value="">--</option>
                   {players.map(p=><option key={p.id} value={`#${p.jersey} ${p.firstName}`}>#{p.jersey} {p.firstName} {p.lastName}</option>)}
                 </select>
               </div>
@@ -10264,7 +10264,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
         </div>
         {game.final && (
           <div style={{ textAlign:'center', marginTop:10, fontSize:11, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>
-            FINAL -- {game.us > game.them ? '🏆 WIN' : game.us < game.them ? 'LOSS' : 'TIE'} · {game.us}–{game.them}
+            FINAL -- {game.us > game.them ? '🏆 WIN' : game.us < game.them ? 'LOSS' : 'TIE'} . {game.us}-{game.them}
           </div>
         )}
 
@@ -10339,7 +10339,7 @@ function LiveScoringSection({ team, P='#C0392B', S='#002868', al, sport, teams, 
 }
 
 
-// ─── SCHEDULE SECTION ────────────────────────────────────────────────────────
+// --- SCHEDULE SECTION --------------------------------------------------------
 function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
   const [showAdd, setShowAdd] = useState(false)
   const [savedOpponents, setSavedOpponents] = useState([])
@@ -10465,7 +10465,7 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                     </div>
                   </div>
                 ) : (
-                  <button onClick={()=>{ setPostponingId(event.id); setPostponeDate('') }} style={{ width:'100%', padding:'7px', background:'#f59e0b', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SET NEW DATE →</button>
+                  <button onClick={()=>{ setPostponingId(event.id); setPostponeDate('') }} style={{ width:'100%', padding:'7px', background:'#f59e0b', border:'none', borderRadius:4, color:'#0f1219', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer', letterSpacing:1 }}>SET NEW DATE -></button>
                 )}
               </div>
             ))}
@@ -10490,13 +10490,13 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:2 }}>
                     <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{event.opponent || event.type}</div>
-                    <span style={{ fontSize:10, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} · {event.homeAway}</span>
+                    <span style={{ fontSize:10, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(tc,0.15), color:tc, fontFamily:"'Barlow Condensed',sans-serif" }}>{event.type} . {event.homeAway}</span>
                     {rsvp && <span style={{ fontSize:10, fontWeight:700, padding:'1px 5px', borderRadius:2, background:al(rsvpColor[rsvp],0.15), color:rsvpColor[rsvp], fontFamily:"'Barlow Condensed',sans-serif" }}>{rsvpLabel[rsvp]}</span>}
                   </div>
                   <div style={{ fontSize:11, color:'#8a94b0' }}>
                     {d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
-                    {event.time && ' · ' + event.time}
-                    {event.arrivalTime && ' · Arrive ' + event.arrivalTime}
+                    {event.time && ' . ' + event.time}
+                    {event.arrivalTime && ' . Arrive ' + event.arrivalTime}
                   </div>
                   {event.location && <div style={{ fontSize:10, color:'#5a6480', marginTop:1 }}>📍 {event.location}</div>}
                 </div>
@@ -10570,7 +10570,7 @@ function ScheduleSection({ team, P='#C0392B', al, teams, setTeams, sport }) {
 
 
 
-// ─── WEATHER UTILITIES ────────────────────────────────────────────────────────
+// --- WEATHER UTILITIES --------------------------------------------------------
 const GAME_THRESHOLDS = {
   Football:   { thunderstorm:10, heavyRain:60, lightRain:85, snow:70, wind:5  },
   Basketball: { thunderstorm:100,heavyRain:100,lightRain:100,snow:100,wind:100 },
@@ -10624,7 +10624,7 @@ function useWeather(location) {
   return weather
 }
 
-// ─── ROTATING INFO WIDGET ─────────────────────────────────────────────────────
+// --- ROTATING INFO WIDGET -----------------------------------------------------
 function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P='#C0392B', al, onSetLocation }) {
   const [slot, setSlot] = useState(0)
   const [now, setNow] = useState(() => new Date())
@@ -10683,7 +10683,7 @@ function RotatingInfoWidget({ sport, homeLocation, awayLocation, nextEvent, P='#
 
     <div key="evt" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
       <div style={{ fontSize:14 }}>{nextEvent && nextEvent.type === 'Practice' ? '📋' : '🏆'}</div>
-      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, lineHeight:1, textAlign:'center' }}>{getCountdown() || '—'}</div>
+      <div style={{ fontFamily:"'Big Shoulders Display',sans-serif", fontWeight:900, fontSize:13, color:P, lineHeight:1, textAlign:'center' }}>{getCountdown() || '--'}</div>
       <div style={{ fontSize:9, color:'#8a94b0', textAlign:'center', lineHeight:1.3, maxWidth:64 }}>{nextEvent ? (nextEvent.opponent || nextEvent.type) : 'No events'}</div>
     </div>,
 
