@@ -849,7 +849,7 @@ const DEMO_TEAMS = {
       {id:'dsbs2',type:'Practice',opponent:'Practice',date:'2026-04-23',time:'15:00',homeAway:'Home',rsvp:'yes'},
     ],
     practicePlans: [],
-  },,
+  },
   'Flag Football': {
     id: 'demo_flag', name: 'Tolland Renegades', season: 'Spring 2026', mascot: 'wolves',
     teamFont: 'barlow', hometown: 'Tolland, CT', primary: '#E65100', secondary: '#0a1a2a',
