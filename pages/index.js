@@ -1245,7 +1245,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
       const isBBPlay = play.type && (play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') || play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK'))
       const isBSBPlay = !isBBPlay && play.type && (play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('PITCHING') || play.type.includes('OFFENSE SITUATIONAL') || play.type.includes('DEFENSE ALIGN'))
       const sportLabel = isBBPlay ? 'basketball' : isBSBPlay ? 'baseball' : 'football'
-      const raw = await callAI('You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' Return ONLY valid JSON with these exact keys: {"steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2"],"playerRoles":[{"position":"pos","job":"job","whyTheyDoIt":"explain why"},{"position":"pos2","job":"job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"job","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"QB","instruction":"one sentence","termNote":""},{"player":"RB","instruction":"one sentence","termNote":""},{"player":"WR","instruction":"one sentence","termNote":""},{"player":"OL","instruction":"one sentence","termNote":""}]}')
+      const raw = await callAI('You are a youth ' + sportLabel + ' coach educator. Break down this play: ' + play.name + ' (' + play.type + '). ' + play.note + ' IMPORTANT — For ALL instructions and coaching points: use real football terminology but immediately follow any technical term with a plain-language synonym in parentheses. Format: "technical term (plain meaning)". Examples: "lateral (sideways)", "mesh point (where QB and RB exchange the ball)", "press the line (attack the line of scrimmage)", "stalk block (controlled block on a defender in space)", "leverage (low body position for power)", "gap (hole between linemen)", "contain (keep the ball carrier inside)", "shed (break free from a block)", "flat (the area near the sideline behind the LOS)". Use this format in every instruction so coaches and young players learn vocabulary while understanding the concept. Return ONLY valid JSON with these exact keys: {"steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2"],"playerRoles":[{"position":"pos","job":"job","whyTheyDoIt":"explain why"},{"position":"pos2","job":"job","whyTheyDoIt":"explain why"},{"position":"pos3","job":"job","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"QB","instruction":"one sentence","termNote":""},{"player":"RB","instruction":"one sentence","termNote":""},{"player":"WR","instruction":"one sentence","termNote":""},{"player":"OL","instruction":"one sentence","termNote":""}]}')
       const parsedSteps = parseJSON(raw)
       try { sessionStorage.setItem(stepsCacheKey, JSON.stringify(parsedSteps)) } catch(e) {}
       setSteps(parsedSteps)
@@ -1412,7 +1412,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
             <TabBtn label="Breakdown" active={showBreakdown} onClick={()=>{ const n=!showBreakdown; setShowBreakdown(n); if(n&&!steps) loadSteps() }} color='#6b9fff' />
             <TabBtn label="Player Roles" active={showRoles} onClick={()=>{ const n=!showRoles; setShowRoles(n); if(n&&!steps) loadSteps() }} color='#f59e0b' />
             <TabBtn label="Variations" active={showVariations||variationsLoading} onClick={()=>{ if(!showVariations&&!variationsLoading) loadVariations(); else { setShowVariations(false); } }} color='#c084fc' />
-            <TabBtn label="Pro Look" active={showNfl} onClick={()=>{ if(!showNfl) loadNflComp(); else setShowNfl(false) }} color='#4ade80' />
+            <TabBtn label="Pro Look" active={showNfl||nflLoading} onClick={()=>{ if(!showNfl&&!nflLoading) loadNflComp(); else { setShowNfl(false) } }} color='#4ade80' />
           </div>
 
           {/* Breakdown */}
@@ -1506,7 +1506,7 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
           )}
 
           {/* Pro Look */}
-          {showNfl && (
+          {(showNfl || nflLoading) && (
             <div style={{ marginBottom:10 }}>
               {nflLoading && (
                 <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
@@ -2495,31 +2495,29 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 
       if (entries.length === 0) return
 
-      // Draw legend box in bottom-left corner
-      const lineH = H * 0.055
-      const boxPad = W * 0.018
-      const boxW = W * 0.34
-      const boxH = entries.length * lineH + boxPad * 2
-      const boxX = W * 0.01
-      const boxY = H - boxH - H * 0.02
+      // Draw legend box in top-right corner — small and compact
+      const lineH = H * 0.042
+      const boxPad = W * 0.012
+      const fontSize = Math.round(H * 0.033)
+      const boxW = W * 0.28
+      const boxH = entries.length * lineH + boxPad * 1.5
+      const boxX = W - boxW - W * 0.01
+      const boxY = H * 0.02
 
-      ctx.fillStyle = 'rgba(0,0,0,0.55)'
+      ctx.fillStyle = 'rgba(0,0,0,0.5)'
       ctx.beginPath()
-      ctx.roundRect(boxX, boxY, boxW, boxH, 4)
+      ctx.roundRect(boxX, boxY, boxW, boxH, 3)
       ctx.fill()
 
-      const fontSize = Math.round(H * 0.044)
       entries.forEach((entry, i) => {
-        const y = boxY + boxPad + (i + 0.75) * lineH
-        // Position label in accent color
+        const y = boxY + boxPad + (i + 0.72) * lineH
         ctx.fillStyle = entry.isMotion ? 'rgba(245,158,11,0.95)' : hexToRgba(DA, 0.95)
         ctx.font = `bold ${fontSize}px sans-serif`
         ctx.textAlign = 'left'
         ctx.fillText(entry.pos + ':', boxX + boxPad, y)
-        // Route name in white
-        ctx.fillStyle = 'rgba(220,220,220,0.9)'
+        ctx.fillStyle = 'rgba(210,210,210,0.9)'
         ctx.font = `${fontSize}px sans-serif`
-        ctx.fillText(entry.route, boxX + boxPad + fontSize * 2.4, y)
+        ctx.fillText(entry.route, boxX + boxPad + fontSize * 2.2, y)
       })
     }
 
