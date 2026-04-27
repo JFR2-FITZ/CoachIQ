@@ -4403,7 +4403,15 @@ function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSO
 // ─── DEFENSIVE GEN COLLAPSIBLE ────────────────────────────────────────────────
 function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook, guestMode=false, setGuestSchemeCount }) {
   const [open, setOpen] = useState(defaultOpen)
-  const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball'
+  const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball', isFF=sport==='Flag Football'
+  const ffFields = [
+    {id:'format',    label:'Format',                  opts:['5v5','6v6','6v6 + Rusher','7v7']},
+    {id:'coverage',  label:'Coverage Style',          opts:['Man-to-Man','Zone (Cover 2)','Zone (Cover 1 / Single High)','Mixed Man/Zone','Bracket / Double Coverage','Press Coverage','Off / Soft Coverage']},
+    {id:'rushStyle', label:'Rush Strategy',           opts:['1 Designated Rusher','2-Rusher Blitz','Delayed Rusher','Spy / QB Contain','Rotating Rushers (stunt)','Drop Rusher into Coverage']},
+    {id:'threat',    label:'Opponent Key Threat',     opts:['Speed / Deep Ball','Quick Slants / Short Game','Motion / Pre-snap Chaos','Athletic Scrambling QB','Run-Heavy / Handoffs','Bunch / Stack Routes','Screen / Bubble Heavy']},
+    {id:'age',       label:'Age Group',               opts:['5-7 yrs (NFL Flag Jr)','8-10 yrs','11-12 yrs','13-14 yrs','High School / Adult']},
+    {id:'skill',     label:'Your Defensive Skill',   opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+  ]
   const fbFields = [
     {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option','Flexbone']},
     {id:'personnel',label:'Their Key Threat',opts:['Dual Threat QB / Scrambler','Big Physical RB','Speed Receivers','Multiple TE Sets','Strong OL Run Game','Pass Heavy No Run','Option/Triple Option']},
