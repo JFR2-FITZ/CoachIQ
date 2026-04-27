@@ -4446,13 +4446,24 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
   async function generate() {
     setLoading(true); setResult(null); setError('')
     const inputSummary = Object.keys(fields).map(k=>k+': '+fields[k]).join(', ')
-    const prompt = isFB
-      ? 'You are an elite youth football defensive coordinator. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive formation name","type":"BASE or NICKEL or BLITZ or ZONE or MAN","assignment":"specific gap assignments and coverage","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important thing to stop","adjustmentTip":"halftime adjustment","coachingCue":"phrase"}'
+    const jsonShape = '{"packageName":"name","summary":"2 sentences","formations":[{"number":1,"name":"name","type":"type","assignment":"specific assignments","whenToUse":"situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"primary key","adjustmentTip":"adjustment","coachingCue":"phrase"}'
+    const prompt = isFF
+      ? 'You are an elite flag football defensive coordinator. Build a defensive package for: '+inputSummary+'. Format is '+fields.format+'. Coverage: '+fields.coverage+'. Rush strategy: '+fields.rushStyle+'. Key threat to stop: '+fields.threat+'. Skill: '+fields.skill+'. Age: '+fields.age+'.'
+        +' Flag football rules: no blocking, 7-second rush clock, all receivers eligible, rush line 7yds from LOS.'
+        +' Each formation must be realistic for flag football. Types: MAN / ZONE-2 / ZONE-1 / BRACKET / PRESS / MIXED / PREVENT.'
+        +' Describe how CBs, LBs, Safety and Rusher align and react for each formation.'
+        +' Return ONLY valid JSON: '+jsonShape
+      : isFB
+      ? 'You are an elite youth football defensive coordinator. Build a defensive game plan for: '+inputSummary+'. Return ONLY valid JSON: '+jsonShape
       : isBB
-      ? 'You are an elite youth basketball defensive coach. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive scheme name","type":"MAN or ZONE or PRESS or TRAP","assignment":"specific assignments and rotations","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important thing to take away","adjustmentTip":"halftime adjustment","coachingCue":"phrase"}'
-      : 'You are an elite youth baseball manager. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive alignment name","type":"STANDARD or SHIFT or WHEEL or FIVE MAN INFIELD","assignment":"specific positioning for all fielders","whenToUse":"exact situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important out to get","adjustmentTip":"adjustment tip","coachingCue":"phrase"}'
+      ? 'You are an elite youth basketball defensive coach. Build a defensive game plan for: '+inputSummary+'. Return ONLY valid JSON: '+jsonShape
+      : isBSB
+      ? 'You are an elite youth baseball manager. Build a defensive positioning plan for: '+inputSummary+'. Return ONLY valid JSON: '+jsonShape
+      : 'You are an elite defensive coordinator. Build a defensive game plan for: '+inputSummary+'. Return ONLY valid JSON: '+jsonShape
     try {
-      const raw = await callAI(prompt, null, true) // fast=true: Haiku for structured JSON
+      const raw = await callAI(prompt, null, true)
+      const data = parseJSON(raw)
+      if (!data || !data.formations) throw new Error('Invalid response — no formations returned')
       setResult(data)
       if (guestMode && setGuestSchemeCount) setGuestSchemeCount(n => n + 1)
     } catch(e) {
