@@ -2094,41 +2094,127 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         const isRusher = fmt === '6v6 + Rusher'
         const expectedOffCount = fmt === '7v7' ? 7 : (fmt === '6v6' || isRusher) ? 6 : 5
         const expectedDefCount = isRusher ? 7 : expectedOffCount
+
+        // Canonical templates per format — used to FILL IN missing players
+        const offTemplates = {
+          '5v5': [
+            {id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},
+            {id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,22]],routeName:'Center Leak',routeYards:0},
+            {id:'X',label:'WR',role:'off',routeType:'route',x:12,y:42,path:[[12,42],[12,26]],routeName:'Go',routeYards:0},
+            {id:'Z',label:'WR',role:'off',routeType:'route',x:88,y:42,path:[[88,42],[88,26]],routeName:'Go',routeYards:8},
+            {id:'SL',label:'SL',role:'off',routeType:'route',x:36,y:44,path:[[36,44],[52,36]],routeName:'Slant',routeYards:0}
+          ],
+          '6v6': [
+            {id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},
+            {id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,24]],routeName:'Center Leak',routeYards:0},
+            {id:'X',label:'WR',role:'off',routeType:'route',x:12,y:42,path:[[12,42],[12,26]],routeName:'Go',routeYards:0},
+            {id:'Z',label:'WR',role:'off',routeType:'route',x:88,y:42,path:[[88,42],[88,26]],routeName:'Go',routeYards:8},
+            {id:'Y',label:'SL',role:'off',routeType:'route',x:30,y:42,path:[[30,42],[46,30]],routeName:'Slant',routeYards:0},
+            {id:'RB',label:'RB',role:'off',routeType:'route',x:62,y:46,path:[[62,46],[78,38]],routeName:'Swing',routeYards:0}
+          ],
+          '7v7': [
+            {id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},
+            {id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,22]],routeName:'Seam',routeYards:0},
+            {id:'X',label:'WR',role:'off',routeType:'route',x:10,y:42,path:[[10,42],[10,26]],routeName:'Go',routeYards:0},
+            {id:'Z',label:'WR',role:'off',routeType:'route',x:90,y:42,path:[[90,42],[90,26]],routeName:'Go',routeYards:8},
+            {id:'Y',label:'SL',role:'off',routeType:'route',x:28,y:42,path:[[28,42],[44,30]],routeName:'Slant',routeYards:0},
+            {id:'H',label:'SL',role:'off',routeType:'route',x:72,y:42,path:[[72,42],[58,30]],routeName:'Slant',routeYards:0},
+            {id:'RB',label:'RB',role:'off',routeType:'route',x:44,y:50,path:[[44,50],[28,42]],routeName:'Swing',routeYards:0}
+          ]
+        }
+        const defTemplates = {
+          '5v5': [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:32,path:[[36,32],[36,26]],routeName:'Zone',routeYards:0},
+            {id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,26]],routeName:'Deep',routeYards:0}
+          ],
+          '6v6': [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
+            {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}
+          ],
+          '6v6 + Rusher': [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
+            {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0},
+            {id:'d7',label:'CB',role:'def',routeType:'route',x:50,y:36,path:[[50,36],[50,30]],routeName:'Middle',routeYards:0}
+          ],
+          '7v7': [
+            {id:'d1',label:'CB',role:'def',routeType:'route',x:10,y:38,path:[[10,38],[10,28]],routeName:'Man',routeYards:0},
+            {id:'d2',label:'CB',role:'def',routeType:'route',x:90,y:38,path:[[90,38],[90,28]],routeName:'Man',routeYards:0},
+            {id:'d3',label:'CB',role:'def',routeType:'route',x:28,y:36,path:[[28,36],[28,28]],routeName:'Man',routeYards:0},
+            {id:'d4',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
+            {id:'d5',label:'LB',role:'def',routeType:'route',x:40,y:30,path:[[40,30],[40,22]],routeName:'Zone',routeYards:0},
+            {id:'d6',label:'LB',role:'def',routeType:'route',x:60,y:30,path:[[60,30],[60,22]],routeName:'Zone',routeYards:0},
+            {id:'d7',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep',routeYards:0}
+          ]
+        }
+        const fmtKey = isRusher ? '6v6 + Rusher' : fmt
+        const canonicalOff = offTemplates[fmt] || offTemplates['6v6']
+        const canonicalDef = defTemplates[fmtKey] || defTemplates['6v6']
+
         // Trim excess players
-        const offP = data.players.filter(p => p.role === 'off')
-        const defP = data.players.filter(p => p.role === 'def')
+        let offP = data.players.filter(p => p.role === 'off')
+        let defP = data.players.filter(p => p.role === 'def')
         if (offP.length > expectedOffCount) {
           const keepIds = offP.slice(0, expectedOffCount).map(p => p.id)
           data.players = data.players.filter(p => p.role !== 'off' || keepIds.includes(p.id))
+          offP = data.players.filter(p => p.role === 'off')
         }
         if (defP.length > expectedDefCount) {
           const keepIds = defP.slice(0, expectedDefCount).map(p => p.id)
           data.players = data.players.filter(p => p.role !== 'def' || keepIds.includes(p.id))
+          defP = data.players.filter(p => p.role === 'def')
         }
+
+        // FILL IN missing players from canonical template
+        const existingOffIds = new Set(offP.map(p => p.id))
+        for (const tmpl of canonicalOff) {
+          if (!existingOffIds.has(tmpl.id) && offP.length < expectedOffCount) {
+            data.players.push({ ...tmpl })
+            offP = data.players.filter(p => p.role === 'off')
+          }
+        }
+        const existingDefIds = new Set(defP.map(p => p.id))
+        for (const tmpl of canonicalDef) {
+          if (!existingDefIds.has(tmpl.id) && defP.length < expectedDefCount) {
+            data.players.push({ ...tmpl })
+            defP = data.players.filter(p => p.role === 'def')
+          }
+        }
+
         // Ensure QB has Pocket Pass routeName so pass indicator fires
         const qbP = data.players.find(p => p.label === 'QB' && p.role === 'off')
         if (qbP) {
           if (!qbP.routeName || (!qbP.routeName.toLowerCase().includes('pass') && !qbP.routeName.toLowerCase().includes('pocket') && !qbP.routeName.toLowerCase().includes('rollout'))) {
             qbP.routeName = 'Pocket Pass'
           }
-          // QB stays near pocket in flag football
           if (qbP.path && qbP.path.length >= 2) {
             const startX = qbP.path[0][0], startY = qbP.path[0][1]
             qbP.path = qbP.path.map(pt => [
-              Math.max(startX - 6, Math.min(startX + 6, pt[0])),  // max 6 units lateral
-              Math.max(startY - 2, Math.min(startY + 4, pt[1]))   // max 4 units depth
+              Math.max(startX - 6, Math.min(startX + 6, pt[0])),
+              Math.max(startY - 2, Math.min(startY + 4, pt[1]))
             ])
           }
         }
+
         // Ensure at least one receiver has routeYards > 0
         const routeP = data.players.filter(p => p.role === 'off' && p.label !== 'QB' && p.routeType === 'route')
         if (routeP.length > 0 && !routeP.some(p => (p.routeYards||0) > 0)) {
           routeP[0].routeYards = 8
         }
-        // Spread defenders: rusher at y=35, others distributed
-        const defPlayers = data.players.filter(p => p.role === 'def')
-        const rusher = defPlayers.find(p => (p.label||'').toLowerCase().includes('r') || (p.routeName||'').toLowerCase().includes('rush'))
-        if (rusher && rusher.y > 36) rusher.y = 35  // push rusher to correct rush line
+
+        // Rusher at correct rush line
+        const rusher = data.players.find(p => p.role === 'def' && ((p.label||'').toUpperCase() === 'R' || (p.routeName||'').toLowerCase().includes('rush')))
+        if (rusher && rusher.y > 36) rusher.y = 35
       }
       // ── END FLAG SANITIZER ──
 
