@@ -968,7 +968,7 @@ const SPORTS = {
   'Flag Football': {
     emoji:'FF',
     fields:[
-      {id:'format',    label:'Format',              opts:['5v5','6v6','6v6 + Rusher','7v7']},
+      {id:'format',    label:'Format',              opts:['5v5','5v5 (Screen Block)','6v6','6v6 (Screen Block)','6v6 + Rusher','7v7','7v7 (Screen Block)']},
       {id:'system',    label:'Offensive System',    opts:['Spread / All Vertical','Run and Shoot','Trips / 3x1','Twins / 2x2 Balanced','Bunch / Stack','Empty Set','Motion Heavy','Wing / Offset Back']},
       {id:'personnel', label:'Best Athletes',       opts:['Athletic QB / Scrambler','Fast Receivers / Deep Threat','Shifty Slot / YAC Machine','Strong RB / Run Game','Balanced / Well-Rounded','Small Quick Players']},
       {id:'age',       label:'Age Group',           opts:['5-7 yrs (NFL Flag Jr)','8-10 yrs','11-12 yrs','13-14 yrs','High School / Adult']},
@@ -980,7 +980,7 @@ const SPORTS = {
     positions:['Quarterback','Center / Snapper','Wide Receiver (X)','Wide Receiver (Z)','Slot Receiver (Y)','Running Back','Safety','Cornerback / Rusher'],
     buildPrompt:(f)=>{
       const fmt = f.format || '5v5'
-      const is5 = fmt === '5v5', is6 = fmt === '6v6' || fmt === '6v6 + Rusher', hasRusher = fmt === '6v6 + Rusher'
+      const is5 = fmt.startsWith('5v5'), is6 = fmt.startsWith('6v6'), hasRusher = fmt === '6v6 + Rusher', hasBlock = fmt.includes('Screen Block')
       const qbCanRun = f.qbRun && !f.qbRun.includes('Cannot')
       const d = f.defense === 'Unknown / Surprise Me' ? 'Best all-around flag football plays.' : 'Design plays to attack ' + f.defense + '.'
       const st = Object.keys(f).map(k => k + ': ' + f[k]).join('; ')
@@ -1731,26 +1731,52 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '{"id":"OTa","label":"T","role":"off","routeType":"block","x":38,"y":42,"path":[[38,42],[38,42]],"routeName":"","routeYards":0},' +
         '{"id":"OTb","label":"T","role":"off","routeType":"block","x":62,"y":42,"path":[[62,42],[62,42]],"routeName":"","routeYards":0}]}'
     } else if (isDefPlay) {
-      prompt = 'Generate DEFENSIVE football diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
-        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Offense at y=42 (LOS). Defense lines up at y=34-38. Safeties at y=12-22. Deep zones at y=10-22. LBs at y=26-32.' +
-        ' Defender movement: DL attack DOWNWARD (y increases toward offense). Coverage defenders drop UPWARD (y decreases = deeper).' +
-        ' Include 5 static offensive linemen as reference. Return ONLY raw JSON: {"formation":"' + play.name.replace(/"/g,'') + '","snapPoint":0.15,"duration":3000,"players":[' +
-        '{"id":"DEa","label":"DE","role":"def","routeType":"block","x":36,"y":34,"path":[[36,34],[34,38]],"routeName":"Gap B","routeYards":0},' +
-        '{"id":"DTa","label":"DT","role":"def","routeType":"block","x":44,"y":34,"path":[[44,34],[44,38]],"routeName":"Gap A","routeYards":0},' +
-        '{"id":"DTb","label":"DT","role":"def","routeType":"block","x":56,"y":34,"path":[[56,34],[56,38]],"routeName":"Gap A","routeYards":0},' +
-        '{"id":"DEb","label":"DE","role":"def","routeType":"block","x":64,"y":34,"path":[[64,34],[66,38]],"routeName":"Gap B","routeYards":0},' +
-        '{"id":"WLB","label":"WLB","role":"def","routeType":"route","x":34,"y":28,"path":[[34,28],[30,34]],"routeName":"Flat Zone","routeYards":0},' +
-        '{"id":"MLB","label":"MLB","role":"def","routeType":"route","x":50,"y":26,"path":[[50,26],[50,32]],"routeName":"Hook Zone","routeYards":0},' +
-        '{"id":"SLB","label":"SLB","role":"def","routeType":"route","x":66,"y":28,"path":[[66,28],[70,34]],"routeName":"Flat Zone","routeYards":0},' +
-        '{"id":"CBa","label":"CB","role":"def","routeType":"route","x":14,"y":36,"path":[[14,36],[14,24]],"routeName":"Man Coverage","routeYards":0},' +
-        '{"id":"CBb","label":"CB","role":"def","routeType":"route","x":86,"y":36,"path":[[86,36],[86,24]],"routeName":"Man Coverage","routeYards":0},' +
-        '{"id":"SS","label":"SS","role":"def","routeType":"route","x":66,"y":20,"path":[[66,20],[58,26]],"routeName":"Deep Half","routeYards":0},' +
-        '{"id":"FS","label":"FS","role":"def","routeType":"route","x":34,"y":14,"path":[[34,14],[42,20]],"routeName":"Deep Half","routeYards":0},' +
-        '{"id":"OLT","label":"T","role":"off","routeType":"block","x":38,"y":42,"path":[[38,42],[38,42]],"routeName":"","routeYards":0},' +
-        '{"id":"OLG","label":"G","role":"off","routeType":"block","x":44,"y":42,"path":[[44,42],[44,42]],"routeName":"","routeYards":0},' +
-        '{"id":"OC","label":"C","role":"off","routeType":"block","x":50,"y":42,"path":[[50,42],[50,42]],"routeName":"","routeYards":0},' +
-        '{"id":"ORG","label":"G","role":"off","routeType":"block","x":56,"y":42,"path":[[56,42],[56,42]],"routeName":"","routeYards:0},' +
-        '{"id":"ORT","label":"T","role":"off","routeType":"block","x":62,"y":42,"path":[[62,42],[62,42]],"routeName":"","routeYards":0}]}'
+      // ── Sport-aware defensive diagram templates ──
+      const sportCtx = play._sport || (isFlagFootball ? 'Flag Football' : isBasketball ? 'Basketball' : isBaseball ? 'Baseball' : 'Football')
+      const isDefFF = isFlagFootball || sportCtx === 'Flag Football'
+      const isDefBB = isBasketball || sportCtx === 'Basketball'
+      const isDefBSB = isBaseball || sportCtx === 'Baseball'
+
+      if (isDefFF) {
+        // Flag Football defensive diagram — correct player counts, generic offense as reference
+        const dFmt = play._flagFormat || '6v6'
+        const dIs5 = dFmt === '5v5', dIs6 = dFmt === '6v6' || dFmt === '6v6 + Rusher', dIsRusher = dFmt === '6v6 + Rusher'
+        const dOffCount = dIs5 ? 5 : dIs6 ? 6 : 7
+        const dDefCount = dIsRusher ? 7 : dOffCount
+        // Generic offense (reference only — static, no routes)
+        const dOff = dIs5
+          ? [{id:'oQB',label:'QB',role:'off',routeType:'block',x:50,y:44,path:[[50,44],[50,44]],routeName:'',routeYards:0},{id:'oC',label:'C',role:'off',routeType:'block',x:50,y:42,path:[[50,42],[50,42]],routeName:'',routeYards:0},{id:'oX',label:'WR',role:'off',routeType:'block',x:12,y:42,path:[[12,42],[12,42]],routeName:'',routeYards:0},{id:'oZ',label:'WR',role:'off',routeType:'block',x:88,y:42,path:[[88,42],[88,42]],routeName:'',routeYards:0},{id:'oSL',label:'SL',role:'off',routeType:'block',x:36,y:44,path:[[36,44],[36,44]],routeName:'',routeYards:0}]
+          : dIs6
+          ? [{id:'oQB',label:'QB',role:'off',routeType:'block',x:50,y:44,path:[[50,44],[50,44]],routeName:'',routeYards:0},{id:'oC',label:'C',role:'off',routeType:'block',x:50,y:42,path:[[50,42],[50,42]],routeName:'',routeYards:0},{id:'oX',label:'WR',role:'off',routeType:'block',x:12,y:42,path:[[12,42],[12,42]],routeName:'',routeYards:0},{id:'oZ',label:'WR',role:'off',routeType:'block',x:88,y:42,path:[[88,42],[88,42]],routeName:'',routeYards:0},{id:'oY',label:'SL',role:'off',routeType:'block',x:30,y:42,path:[[30,42],[30,42]],routeName:'',routeYards:0},{id:'oRB',label:'RB',role:'off',routeType:'block',x:62,y:46,path:[[62,46],[62,46]],routeName:'',routeYards:0}]
+          : [{id:'oQB',label:'QB',role:'off',routeType:'block',x:50,y:44,path:[[50,44],[50,44]],routeName:'',routeYards:0},{id:'oC',label:'C',role:'off',routeType:'block',x:50,y:42,path:[[50,42],[50,42]],routeName:'',routeYards:0},{id:'oX',label:'WR',role:'off',routeType:'block',x:10,y:42,path:[[10,42],[10,42]],routeName:'',routeYards:0},{id:'oZ',label:'WR',role:'off',routeType:'block',x:90,y:42,path:[[90,42],[90,42]],routeName:'',routeYards:0},{id:'oY',label:'SL',role:'off',routeType:'block',x:28,y:42,path:[[28,42],[28,42]],routeName:'',routeYards:0},{id:'oH',label:'SL',role:'off',routeType:'block',x:72,y:42,path:[[72,42],[72,42]],routeName:'',routeYards:0},{id:'oRB',label:'RB',role:'off',routeType:'block',x:44,y:50,path:[[44,50],[44,50]],routeName:'',routeYards:0}]
+        // Defensive template — these are the starting positions AI adjusts
+        const dDef5 = [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,28]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,28]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:30,path:[[36,30],[36,24]],routeName:'Zone',routeYards:0},{id:'d5',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}]
+        const dDef6 = [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,28]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,28]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:30,path:[[30,30],[30,24]],routeName:'Zone',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:30,path:[[65,30],[65,24]],routeName:'Zone',routeYards:0},{id:'d6',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep',routeYards:0}]
+        const dDef7Rusher = [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,28]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,28]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:30,path:[[30,30],[30,24]],routeName:'Zone',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:30,path:[[65,30],[65,24]],routeName:'Zone',routeYards:0},{id:'d6',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep',routeYards:0},{id:'d7',label:'CB',role:'def',routeType:'route',x:50,y:34,path:[[50,34],[50,28]],routeName:'Middle',routeYards:0}]
+        const dDef7 = [{id:'d1',label:'CB',role:'def',routeType:'route',x:10,y:38,path:[[10,38],[10,28]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:90,y:38,path:[[90,38],[90,28]],routeName:'Man',routeYards:0},{id:'d3',label:'CB',role:'def',routeType:'route',x:28,y:36,path:[[28,36],[28,28]],routeName:'Man',routeYards:0},{id:'d4',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:40,y:30,path:[[40,30],[40,22]],routeName:'Zone',routeYards:0},{id:'d6',label:'LB',role:'def',routeType:'route',x:60,y:30,path:[[60,30],[60,22]],routeName:'Zone',routeYards:0},{id:'d7',label:'S',role:'def',routeType:'route',x:50,y:14,path:[[50,14],[50,20]],routeName:'Deep',routeYards:0}]
+        const dDefPlayers = dIs5 ? dDef5 : dIsRusher ? dDef7Rusher : dIs6 ? dDef6 : dDef7
+        const dTemplate = JSON.stringify({formation:play.name.replace(/"/g,''),snapPoint:0.15,duration:3000,_isFlagFootball:true,_flagFormat:dFmt,players:[...dOff,...dDefPlayers]})
+        prompt = 'Flag football defensive diagram. Formation: "' + play.name + '" Type: ' + (play.type||'') + '. Assignment: ' + play.note +
+          ' Format: ' + dFmt + ' — EXACTLY ' + dOffCount + ' offense (reference, static) and ' + dDefCount + ' defense.' +
+          ' YOUR JOB: Update ONLY the defender paths and routeNames to match this specific defensive formation and coverage. Do NOT move offensive players. Do NOT add or remove any players.' +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. LOS=y=42. Defense attacks TOWARD higher y (toward LOS). Coverage drops to LOWER y (deeper).' +
+          ' CB(d1) covers left WR. CB(d2) covers right WR. Rusher(d3) attacks QB from y=35. LBs drop into zones. Safety drops deep.' +
+          ' Adjust positions and paths to accurately show: ' + play.note +
+          ' Return ONLY raw JSON:\n' + dTemplate
+      } else if (isDefBB) {
+        prompt = 'Generate DEFENSIVE basketball diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + play.note +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket at y=6. Players attack upward (lower y). Show 5 defenders (D) guarding 5 offensive players.' +
+          ' Defenders move to intercept/cover their assignments. Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
+      } else if (isDefBSB) {
+        prompt = 'Generate DEFENSIVE baseball/softball positioning diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + play.note +
+          ' Show all 9 fielders in their shifted/aligned positions. Home y=50 x=50. 1B y=36 x=74. 2B y=22 x=50. 3B y=36 x=26. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
+      } else {
+        // Tackle football defensive diagram
+        prompt = 'Generate DEFENSIVE football diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + play.note +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. LOS at y=42. Defense lines up y=34-38. Safeties y=12-22. LBs y=26-32.' +
+          ' DL attack DOWNWARD (higher y toward offense). Coverage drops UPWARD (lower y = deeper).' +
+          ' Include 5 static offensive players as reference (OL at y=42). Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+      }
     } else if (isBasketball) {
       prompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
         ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 (top). Half court line at y=55. Players attack UPWARD (toward lower y = toward basket).' +
@@ -1765,9 +1791,10 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       const flagFmt = play._flagFormat ||
         (((play.note||'').includes('7v7') || (play.name||'').includes('7v7')) ? '7v7' :
          ((play.note||'').includes('6v6') || (play.name||'').includes('6v6')) ? '6v6' : '5v5')
-      const is5v5 = flagFmt === '5v5'
-      const is6v6 = flagFmt === '6v6' || flagFmt === '6v6 + Rusher'
+      const is5v5 = flagFmt === '5v5' || flagFmt === '5v5 (Screen Block)'
+      const is6v6 = flagFmt === '6v6' || flagFmt === '6v6 + Rusher' || flagFmt === '6v6 (Screen Block)'
       const isRusherFormat = flagFmt === '6v6 + Rusher'
+      const hasScreenBlock = (flagFmt||'').includes('Screen Block')
       // 6v6+Rusher: 6 offense, 7 defense (6 coverage + 1 dedicated rusher)
       const offCount = is5v5 ? 5 : is6v6 ? 6 : 7
       const defCount = isRusherFormat ? 7 : offCount
@@ -2976,7 +3003,25 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
     setStepsLoading(true)
     try {
       const sportLabel = sport || 'football'
-      const raw = await callAI('You are a youth ' + sportLabel + ' defensive coordinator educator. Break down this defensive formation: "' + f.name + '" (' + f.type + '). Assignment: ' + f.assignment + '. When to use: ' + f.whenToUse + ' Return ONLY valid JSON: {"keyAssignment":"most important assignment","coverageType":"zone, man, or combination","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this defense works","playerRoles":[{"position":"DL","job":"assignment","whyTheyDoIt":"explain to a 12yr old"},{"position":"LB","job":"assignment","whyTheyDoIt":"explain why"},{"position":"CB","job":"assignment","whyTheyDoIt":"explain why"},{"position":"Safety","job":"assignment","whyTheyDoIt":"explain why"}],"huddleCard":[{"player":"DL","instruction":"one sentence","termNote":"explain jargon or empty string"},{"player":"LB","instruction":"one sentence","termNote":""},{"player":"CB","instruction":"one sentence","termNote":""},{"player":"S","instruction":"one sentence","termNote":""}]}')
+      // Build sport-aware position lists for the breakdown
+      const isFFDef = sport === 'Flag Football'
+      const isBBDef = sport === 'Basketball'
+      const isBSBDef = sport === 'Baseball' || sport === 'Softball'
+      const playerRolesShape = isFFDef
+        ? '[{"position":"CB","job":"coverage assignment","whyTheyDoIt":"explain to a 12yr old"},{"position":"Rusher","job":"rush assignment","whyTheyDoIt":"explain why"},{"position":"LB","job":"zone/hook assignment","whyTheyDoIt":"explain why"},{"position":"Safety","job":"deep assignment","whyTheyDoIt":"explain why"}]'
+        : isBBDef
+        ? '[{"position":"On-Ball Defender","job":"assignment","whyTheyDoIt":"explain to a 12yr old"},{"position":"Help Side","job":"assignment","whyTheyDoIt":"explain why"},{"position":"Weak Side","job":"assignment","whyTheyDoIt":"explain why"},{"position":"Post Defender","job":"assignment","whyTheyDoIt":"explain why"}]'
+        : isBSBDef
+        ? '[{"position":"Pitcher","job":"assignment","whyTheyDoIt":"explain to a 12yr old"},{"position":"Infield","job":"positioning","whyTheyDoIt":"explain why"},{"position":"Outfield","job":"positioning","whyTheyDoIt":"explain why"},{"position":"Catcher","job":"assignment","whyTheyDoIt":"explain why"}]'
+        : '[{"position":"DL","job":"gap assignment","whyTheyDoIt":"explain to a 12yr old"},{"position":"LB","job":"assignment","whyTheyDoIt":"explain why"},{"position":"CB","job":"coverage","whyTheyDoIt":"explain why"},{"position":"Safety","job":"deep assignment","whyTheyDoIt":"explain why"}]'
+      const huddleShape = isFFDef
+        ? '[{"player":"CB","instruction":"one sentence","termNote":"explain jargon or empty string"},{"player":"Rusher","instruction":"one sentence","termNote":""},{"player":"LB","instruction":"one sentence","termNote":""},{"player":"Safety","instruction":"one sentence","termNote":""}]'
+        : isBBDef
+        ? '[{"player":"PG","instruction":"one sentence","termNote":""},{"player":"Wings","instruction":"one sentence","termNote":""},{"player":"Post","instruction":"one sentence","termNote":""}]'
+        : isBSBDef
+        ? '[{"player":"P","instruction":"one sentence","termNote":""},{"player":"IF","instruction":"one sentence","termNote":""},{"player":"OF","instruction":"one sentence","termNote":""}]'
+        : '[{"player":"DL","instruction":"one sentence","termNote":"explain jargon or empty string"},{"player":"LB","instruction":"one sentence","termNote":""},{"player":"CB","instruction":"one sentence","termNote":""},{"player":"S","instruction":"one sentence","termNote":""}]'
+      const raw = await callAI('You are a youth ' + sportLabel + ' defensive coordinator educator. Break down this defensive formation: "' + f.name + '" (' + f.type + '). Assignment: ' + f.assignment + '. When to use: ' + f.whenToUse + ' Return ONLY valid JSON: {"keyAssignment":"most important assignment","coverageType":"zone, man, or combination","steps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"keyCoachingPoints":["point 1","point 2","point 3"],"whyItWorks":"why this defense works","playerRoles":' + playerRolesShape + ',"huddleCard":' + huddleShape + '}')
       const s = raw.replace(/```[\w]*\n?/gi,'').replace(/```/g,'').trim()
       setSteps(JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}')+1)))
     } catch(e) { setSteps({ error: e.message }) }
@@ -3105,7 +3150,7 @@ function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) 
   const isFB = sport==='Football', isBB = sport==='Basketball', isBSB = sport==='Baseball'
   const isFF = sport==='Flag Football'
   const ffFields = [
-    {id:'format',    label:'Format',                  opts:['5v5','6v6','6v6 + Rusher','7v7']},
+    {id:'format',    label:'Format',                  opts:['5v5','5v5 (Screen Block)','6v6','6v6 (Screen Block)','6v6 + Rusher','7v7','7v7 (Screen Block)']},
     {id:'coverage',  label:'Coverage Style',          opts:['Man-to-Man','Zone (Cover 2)','Zone (Cover 1 / Single High)','Mixed Man/Zone','Bracket / Double Coverage','Press Coverage','Off / Soft Coverage']},
     {id:'rushStyle', label:'Rush Strategy',           opts:['1 Designated Rusher','2-Rusher Blitz','Delayed Rusher','Spy / QB Contain','Rotating Rushers (stunt)','Drop Rusher into Coverage']},
     {id:'threat',    label:'Opponent Key Threat',     opts:['Speed / Deep Ball','Quick Slants / Short Game','Motion / Pre-snap Chaos','Athletic Scrambling QB','Run-Heavy / Handoffs','Bunch / Stack Routes','Screen / Bubble Heavy']},
@@ -4405,7 +4450,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
   const [open, setOpen] = useState(defaultOpen)
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball', isFF=sport==='Flag Football'
   const ffFields = [
-    {id:'format',    label:'Format',                  opts:['5v5','6v6','6v6 + Rusher','7v7']},
+    {id:'format',    label:'Format',                  opts:['5v5','5v5 (Screen Block)','6v6','6v6 (Screen Block)','6v6 + Rusher','7v7','7v7 (Screen Block)']},
     {id:'coverage',  label:'Coverage Style',          opts:['Man-to-Man','Zone (Cover 2)','Zone (Cover 1 / Single High)','Mixed Man/Zone','Bracket / Double Coverage','Press Coverage','Off / Soft Coverage']},
     {id:'rushStyle', label:'Rush Strategy',           opts:['1 Designated Rusher','2-Rusher Blitz','Delayed Rusher','Spy / QB Contain','Rotating Rushers (stunt)','Drop Rusher into Coverage']},
     {id:'threat',    label:'Opponent Key Threat',     opts:['Speed / Deep Ball','Quick Slants / Short Game','Motion / Pre-snap Chaos','Athletic Scrambling QB','Run-Heavy / Handoffs','Bunch / Stack Routes','Screen / Bubble Heavy']},
