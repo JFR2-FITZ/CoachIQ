@@ -1868,7 +1868,15 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n- CENTER LEAK: seam up middle. [[50,42],[50,18]].' +
         '\n- SCREEN/BUBBLE: short lateral. [[30,42],[16,40],[8,38]].' +
         '\n- SWING: quick flat. [[62,46],[78,40]].' +
-        '\n\nDEFENSIVE PLAYER RULES: Keep x/y positions. Update paths to show coverage (lower y) or rush (higher y). Rusher d3: path from y=35 toward y=42. CBs: drop tracking their assigned WR. Safety: drop toward y=22.' +
+        '\n\nDEFENSIVE PLAYER RULES — update paths to show coverage movement:' +
+        '\n- CB (d1 left side): mirrors X receiver. Drop lower y tracking that WR. Start x near WR x, y=36-38.' +
+        '\n- CB (d2 right side): mirrors Z receiver. Drop lower y tracking that WR. Start x near WR x, y=36-38.' +
+        '\n- Rusher (d3, label R): always at x=50-60, y=35. Path goes from y=35 toward y=42 (rushing QB). NEVER changes x/y start.' +
+        '\n- LB (d4): underneath zone x=28-40, y=30-34. Drops to y=26-28 covering slot or RB.' +
+        '\n- LB (d5): underneath zone x=60-72, y=30-34. Drops to y=26-28 covering slot or RB.' +
+        '\n- Safety (d6): deep middle at x=44-56, y=16-22. Drops lower on deep routes. NEVER stacked with another player.' +
+        '\n- Extra CB/S (d7 if present): secondary deep or middle hole player. y=28-36, x spread from others.' +
+        '\n- DO NOT move any defender to the same x/y as another. Each defender has a distinct coverage lane.' +
         '\n\nReturn ONLY the completed JSON — no commentary, no markdown, just JSON:\n' + flagTemplate.replace('PLAYNAME', play.name)
     } else {
       prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
@@ -3095,6 +3103,15 @@ function PlaybookCard({ play, packageName, packageIndex, P='#C0392B', S='#002868
 
 function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) {
   const isFB = sport==='Football', isBB = sport==='Basketball', isBSB = sport==='Baseball'
+  const isFF = sport==='Flag Football'
+  const ffFields = [
+    {id:'format',    label:'Format',                  opts:['5v5','6v6','6v6 + Rusher','7v7']},
+    {id:'coverage',  label:'Coverage Style',          opts:['Man-to-Man','Zone (Cover 2)','Zone (Cover 1 / Single High)','Mixed Man/Zone','Bracket / Double Coverage','Press Coverage','Off / Soft Coverage']},
+    {id:'rushStyle', label:'Rush Strategy',           opts:['1 Designated Rusher','2-Rusher Blitz','Delayed Rusher','Spy / QB Contain','Rotating Rushers (stunt)','Drop Rusher into Coverage']},
+    {id:'threat',    label:'Opponent Key Threat',     opts:['Speed / Deep Ball','Quick Slants / Short Game','Motion / Pre-snap Chaos','Athletic Scrambling QB','Run-Heavy / Handoffs','Bunch / Stack Routes','Screen / Bubble Heavy']},
+    {id:'age',       label:'Age Group',               opts:['5-7 yrs (NFL Flag Jr)','8-10 yrs','11-12 yrs','13-14 yrs','High School / Adult']},
+    {id:'skill',     label:'Your Defensive Skill',   opts:['First Year / Beginner','2nd-3rd Year Average','Experienced / Athletic','Elite / Competitive']},
+  ]
   const fbFields = [
     {id:'formation',label:'Opponent Offensive Formation',opts:['Unknown / Scout First','Spread','Wing-T','I-Formation','Single Wing','Pistol','Double Wing','Option','Flexbone']},
     {id:'personnel',label:'Their Key Threat',opts:['Dual Threat QB / Scrambler','Big Physical RB','Speed Receivers','Multiple TE Sets','Strong OL Run Game','Pass Heavy No Run','Option/Triple Option']},
@@ -3119,8 +3136,8 @@ function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) 
     {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Competitive']},
     {id:'style',label:'Pitching Approach',opts:['Fastball First','Breaking Ball Setup','Change of Speed','Attack the Zone','Work the Corners','Keep Off Balance']},
   ]
-  const cfg = isBB?bbFields:isBSB?bsbFields:fbFields
-  const initF = () => { const f={}; cfg.forEach(x=>{f[x.id]=x.opts[0]}); return f }
+  const cfg = isFF?ffFields:isBB?bbFields:isBSB?bsbFields:fbFields
+  const initF = (c) => { const f={}; (c||cfg).forEach(x=>{f[x.id]=x.opts[0]}); return f }
   const [fields, setFields] = useState(initF)
   const [prevSport, setPrevSport] = useState(sport)
   const [loading, setLoading] = useState(false)
@@ -3129,20 +3146,27 @@ function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) 
   const [expanded, setExpanded] = useState(false)
 
   if (sport !== prevSport) { setPrevSport(sport); setFields(initF()); setResult(null); setError('') }
-  const activeCfg = isBB?bbFields:isBSB?bsbFields:fbFields
+  const activeCfg = isFF?ffFields:isBB?bbFields:isBSB?bsbFields:fbFields
 
   async function generate() {
     setLoading(true); setResult(null); setError('')
     const inputSummary = Object.keys(fields).map(k=>k+': '+fields[k]).join(', ')
-    const prompt = isFB
-      ? 'You are an elite youth football defensive coordinator. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive formation name","type":"BASE or NICKEL or BLITZ or ZONE or MAN","assignment":"specific gap assignments and coverage responsibilities","whenToUse":"exact game situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important thing to stop","adjustmentTip":"halftime adjustment","coachingCue":"defensive phrase"}'
+    const jsonShape = '{"packageName":"name","summary":"2 sentences","formations":[{"number":1,"name":"name","type":"type","assignment":"specific assignments","whenToUse":"situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"primary key","adjustmentTip":"adjustment","coachingCue":"phrase"}'
+    const prompt = isFF
+      ? 'You are an elite flag football defensive coordinator. Build a defensive package for: '+inputSummary+'. Format is '+fields.format+'. Coverage: '+fields.coverage+'. Rush strategy: '+fields.rushStyle+'. Key threat to stop: '+fields.threat+'. Skill: '+fields.skill+'. Age: '+fields.age+'.'
+        +' Flag football rules: no blocking, 7-second rush clock, all receivers eligible, rush line 7yds from LOS.'
+        +' Each formation must be realistic for flag football (not tackle). Types: MAN / ZONE-2 / ZONE-1 / BRACKET / PRESS / MIXED / PREVENT.'
+        +' Assignments must describe how each defensive position (CBs, LBs, Safety, Rusher) aligns and reacts.'
+        +' Return ONLY valid JSON: '+jsonShape
+      : isFB
+      ? 'You are an elite youth football defensive coordinator. Build a defensive game plan for: '+inputSummary+'. Return ONLY valid JSON: '+jsonShape
       : isBB
-      ? 'You are an elite youth basketball defensive coach. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive scheme name","type":"MAN or ZONE or PRESS or TRAP","assignment":"specific player assignments and rotations","whenToUse":"exact game situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important thing to take away","adjustmentTip":"halftime adjustment","coachingCue":"defensive motto"}'
-      : 'You are an elite youth baseball manager. Build a defensive game plan. '+inputSummary+'. Return ONLY valid JSON: {"packageName":"name","summary":"1-2 sentences","formations":[{"number":1,"name":"defensive alignment name","type":"STANDARD or SHIFT or WHEEL or FIVE MAN INFIELD or OUTFIELD DEPTH","assignment":"specific positioning for all fielders and pitcher strategy","whenToUse":"exact count or game situation"},{"number":2,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":3,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"},{"number":4,"name":"name","type":"type","assignment":"assignments","whenToUse":"when"}],"keyStop":"most important out to get","adjustmentTip":"adjustment if they hit well","coachingCue":"defensive focus phrase"}'
+      ? 'You are an elite youth basketball defensive coach. Build a defensive game plan for: '+inputSummary+'. Return ONLY valid JSON: '+jsonShape
+      : 'You are an elite youth baseball manager. Build a defensive positioning plan for: '+inputSummary+'. Return ONLY valid JSON: '+jsonShape
     try {
       const raw = await callAI(prompt)
       const data = parseJSON(raw)
-      if (!data.formations) throw new Error('No formations in response')
+      if (!data || !data.formations) throw new Error('Invalid response — no formations returned')
       setResult(data)
     } catch(e) { setError(e.message) }
     setLoading(false)
@@ -4001,7 +4025,10 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   : [{id:'d1',label:'CB',role:'def',routeType:'route',x:10,y:38,path:[[10,38],[10,28]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:90,y:38,path:[[90,38],[90,28]],routeName:'Man',routeYards:0},{id:'d3',label:'CB',role:'def',routeType:'route',x:28,y:36,path:[[28,36],[28,28]],routeName:'Man',routeYards:0},{id:'d4',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:40,y:30,path:[[40,30],[40,22]],routeName:'Zone',routeYards:0},{id:'d6',label:'LB',role:'def',routeType:'route',x:60,y:30,path:[[60,30],[60,22]],routeName:'Zone',routeYards:0},{id:'d7',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep',routeYards:0}]
                 const fTemplate = JSON.stringify({formation:'PLAYNAME',snapPoint:0.15,duration:3000,_isFlagFootball:true,players:[...fOff,...fDef]})
                 prompt = 'Flag ' + fFmt + ' OC diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
-                  ' EXACTLY ' + (fIs5?'5':fIs6?'6':'7') + ' off and ' + (fIs5?'5':fIs6?'6':'7') + ' def players. QB stationary in pocket routeName Pocket Pass path [[50,44],[50,44]]. No blocking. All eligible. Rush line defender y=35. One routeYards>0. Routes: SLANT inward, HITCH back, GO vertical, CENTER LEAK seam, WHEEL flat-then-vertical, DIG cross, POST inward diagonal, CORNER outward diagonal. JSON: ' + fTemplate.replace('PLAYNAME', play.name)
+                  ' EXACTLY ' + (fIs5?'5':fIs6?'6':'7') + ' off and ' + (fIs5?'5':fIs6?'6':'7') + ' def players.' +
+                  ' QB stationary path [[50,44],[50,44]] routeName Pocket Pass. No blocking. All eligible.' +
+                  ' DEFENSE: CB(d1) aligned outside left x near X WR y=36-38. CB(d2) outside right x near Z WR y=36-38. Rusher(d3) x=50-60 y=35 paths toward QB. LB(d4) x=28-40 y=30-34. LB(d5) x=60-72 y=30-34. Safety(d6) x=44-56 y=16-22 deep. No two defenders at same position.' +
+                  ' Routes: SLANT inward, HITCH back, GO vertical, CENTER LEAK seam, WHEEL flat-then-vertical, DIG cross, POST inward, CORNER outward. One routeYards>0. JSON: ' + fTemplate.replace('PLAYNAME', play.name)
               } else {
                 prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + (play.type||'') + '). Description: ' + (play.note||'') +
                   '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. LOS offense y=42, dashed y=38. Forward = LOWER y. Defenders y=34-38, LBs y=26-32, safeties y=12-22.' +
@@ -4401,7 +4428,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
     {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Competitive']},
     {id:'style',label:'Pitching Approach',opts:['Fastball First','Breaking Ball Setup','Change of Speed','Attack the Zone','Work the Corners','Keep Off Balance']},
   ]
-  const activeCfg = isBB?bbFields:isBSB?bsbFields:fbFields
+  const activeCfg = isFF?ffFields:isBB?bbFields:isBSB?bsbFields:fbFields
   const initF = () => { const f={}; activeCfg.forEach(x=>{f[x.id]=x.opts[0]}); return f }
   const [fields, setFields] = useState(initF)
   const [loading, setLoading] = useState(false)
