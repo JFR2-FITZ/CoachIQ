@@ -3061,7 +3061,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
 
   return (
     <div style={{ borderBottom:'1px solid #1e2330' }}>
-      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { const n=!expanded; setExpanded(n); if(n) loadSteps() }}>
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { const n=!expanded; setExpanded(n); if(n) { loadSteps(); setShowAnim(true) } }}>
         <div style={{ width:22, height:22, minWidth:22, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{f.number}</div>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{f.name}</div>
@@ -3070,8 +3070,13 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
           <div style={{ fontSize:11, color:'#8a94b0', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
           <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Expand breakdown + diagram'}</div>
         </div>
-        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);setExpanded(true);loadSteps()}} style={{ padding:'4px 9px', background:showAnim?S:hexToRgba(S,0.12), border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
+        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);if(!expanded){setExpanded(true);loadSteps()}}} style={{ padding:'4px 9px', background:showAnim?S:hexToRgba(S,0.12), border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
       </div>
+      {!expanded && (
+        <div style={{ marginBottom:8, borderRadius:8, overflow:'hidden', cursor:'pointer' }} onClick={() => { setExpanded(true); setShowAnim(true); loadSteps() }}>
+          <PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} thumbnail={true} />
+        </div>
+      )}
       {expanded && (
         <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
           {showAnim && <div style={{ marginBottom:12 }}><PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} /></div>}
@@ -4459,6 +4464,7 @@ function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSO
 // ─── DEFENSIVE GEN COLLAPSIBLE ────────────────────────────────────────────────
 function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook, guestMode=false, setGuestSchemeCount }) {
   const [open, setOpen] = useState(defaultOpen)
+  const [defHistory, setDefHistory] = useState([])
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball', isFF=sport==='Flag Football'
   const ffFields = [
     {id:'format',    label:'Format',                  opts:['5v5','5v5 (Screen Block)','6v6','6v6 (Screen Block)','6v6 + Rusher','7v7','7v7 (Screen Block)']},
@@ -4521,6 +4527,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
       const data = parseJSON(raw)
       if (!data || !data.formations) throw new Error('Invalid response — no formations returned')
       setResult(data)
+      setDefHistory(prev => [data, ...prev].slice(0, 5))
       if (guestMode && setGuestSchemeCount) setGuestSchemeCount(n => n + 1)
     } catch(e) {
       const msg = e.message || 'Generation failed'
@@ -4560,12 +4567,43 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
             <div style={{ marginTop:12, background:'#161922', border:`1px solid ${al(S,0.3)}`, borderRadius:10, padding:13, animation:'fadeIn 0.3s ease' }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:17, letterSpacing:1, color:S, marginBottom:6 }}>{result.packageName}</div>
               <p style={{ fontSize:12, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
-              {result.keyStop && (<div style={{ padding:'8px 12px', background:al(S,0.1), border:`1px solid ${al(S,0.25)}`, borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Primary Assignment</div><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{result.keyStop}</div></div>)}
+              {result.keyStop && (
+                <div style={{ padding:'8px 12px', background:'rgba(107,154,255,0.08)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:8, marginBottom:10 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:'#6b9fff', textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Primary Assignment</div>
+                  <div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600, lineHeight:1.5 }}>{result.keyStop}</div>
+                </div>
+              )}
               {(result.formations||[]).map(f => (
                 <DefFormationCardWithSave key={f.number} formation={{...f, _flagFormat: fields[Object.keys(fields).find(k=>k==='format')]||f._flagFormat, format: fields.format||f.format}} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addDefToPlaybook} />
               ))}
-              {result.adjustmentTip && (<div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div></div>)}
-              {result.coachingCue && (<div style={{ marginTop:8, padding:10, background:al(S,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defensive Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{result.coachingCue}"</div></div>)}
+              {result.adjustmentTip && (
+                <div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>
+                    {isBB ? 'Halftime Adjustment' : isBSB ? 'Between-Inning Adjustment' : isFF ? 'Sideline Adjustment' : 'Halftime Adjustment'}
+                  </div>
+                  <div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div>
+                </div>
+              )}
+              {result.coachingCue && (
+                <div style={{ marginTop:8, padding:10, background:al(S,0.1), borderRadius:8 }}>
+                  <div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defensive Cue</div>
+                  <div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{result.coachingCue}"</div>
+                </div>
+              )}
+            </div>
+          )}
+          {defHistory.length > 0 && (
+            <div style={{ marginTop:14 }}>
+              <div style={{ fontSize:9, letterSpacing:2, color:'#5a6480', textTransform:'uppercase', fontWeight:700, marginBottom:8 }}>Recent Generations</div>
+              {defHistory.slice(0,5).map((h,i) => (
+                <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'#0f1117', border:'1px solid #1e2330', borderRadius:6, marginBottom:6 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#dde1f0' }}>{h.packageName}</div>
+                    <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{h.formations?.length} formations</div>
+                  </div>
+                  <button onClick={() => setResult(h)} style={{ fontSize:9, color:S, background:al(S,0.1), border:`1px solid ${al(S,0.3)}`, borderRadius:3, padding:'3px 8px', cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>VIEW</button>
+                </div>
+              ))}
             </div>
           )}
         </div>
