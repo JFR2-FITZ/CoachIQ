@@ -2989,6 +2989,10 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
   const [disguise, setDisguise] = useState(null)
   const [disguiseLoading, setDisguiseLoading] = useState(false)
   const [showDisguise, setShowDisguise] = useState(false)
+  const [showSummary, setShowSummary] = useState(true)
+  const [showMore, setShowMore] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
+  const [showRoles, setShowRoles] = useState(false)
 
   const defPlay = {
     name: f.name, type: f.type, note: f.assignment, _isDefense: true,
@@ -3080,44 +3084,136 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
       {expanded && (
         <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
           {showAnim && <div style={{ marginBottom:12 }}><PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} /></div>}
-          {stepsLoading && <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, display:'flex', alignItems:'center', gap:10 }}><div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${S}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} /><div style={{ fontSize:12, color:'#8a94b0' }}>Generating breakdown...</div></div>}
-          {steps && steps.huddleCard && steps.huddleCard.length > 0 && (
-            <div style={{ background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04))', border:'1px solid rgba(245,158,11,0.3)', borderRadius:10, padding:12, marginBottom:12 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}><span style={{ fontSize:14 }}>📋</span><div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#f59e0b', fontWeight:700 }}>Huddle Card</div></div>
-              {steps.huddleCard.map((item,i) => (<div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}><div style={{ minWidth:32, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:5, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0, marginTop:1 }}>{item.player}</div><div style={{ flex:1 }}><span style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{item.instruction}</span>{item.termNote&&<span style={{ fontSize:11, color:'#8a94b0', fontStyle:'italic' }}> ({item.termNote})</span>}</div></div>))}
-            </div>
-          )}
-          {steps && !steps.error && (
-            <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12, border:`1px solid ${hexToRgba(S,0.2)}` }}>
-              <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:S, fontWeight:700, marginBottom:10 }}>Defensive Breakdown</div>
-              {steps.keyAssignment&&<div style={{ padding:'8px 10px', background:hexToRgba(S,0.1), border:`1px solid ${hexToRgba(S,0.25)}`, borderRadius:8, marginBottom:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:S, fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Key Assignment</div><div style={{ fontSize:12, color:'#f2f4f8', fontWeight:600 }}>{steps.keyAssignment}</div></div>}
-              {steps.coverageType&&<div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.08)', borderRadius:8, marginBottom:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#6b9fff', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Coverage Type</div><div style={{ fontSize:12, color:'#f2f4f8' }}>{steps.coverageType}</div></div>}
-              {(steps.steps||[]).map((step,i) => (<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}><div style={{ width:18, height:18, minWidth:18, background:'#0f1117', border:`1px solid ${S}`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, color:S, flexShrink:0, marginTop:1 }}>{i+1}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{step}</div></div>))}
-              {steps.keyCoachingPoints&&steps.keyCoachingPoints.length>0&&(<div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, border:'1px solid rgba(74,222,128,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#4ade80', fontWeight:700, marginBottom:6 }}>Key Coaching Points</div>{steps.keyCoachingPoints.map((pt,i)=><div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>)}</div>)}
-              {steps.whyItWorks&&(<div style={{ marginTop:10, padding:'10px 12px', background:'rgba(107,154,255,0.08)', borderRadius:8, border:'1px solid rgba(107,154,255,0.2)' }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#6b9fff', fontWeight:700, marginBottom:5 }}>Why This Works</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.6 }}>{steps.whyItWorks}</div></div>)}
-              {steps.playerRoles&&steps.playerRoles.length>0&&(<div style={{ marginTop:10 }}><div style={{ fontSize:9, letterSpacing:1.5, textTransform:'uppercase', color:'#f59e0b', fontWeight:700, marginBottom:8 }}>What to Tell Each Player</div>{steps.playerRoles.map((role,i)=>(<div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800 }}>{role.position}</div><div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8' }}>{role.job}</div></div><div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.6, paddingLeft:34, fontStyle:'italic' }}>"Tell your player: {role.whyTheyDoIt}"</div></div>))}</div>)}
-            </div>
-          )}
-          <div style={{ background:'#161922', borderRadius:10, padding:12, marginBottom:12 }}>
-            <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#8a94b0', fontWeight:700, marginBottom:8 }}>Ask About This Formation</div>
-            {qaHistory.map((item,i)=>(<div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:11, fontWeight:600, color:S, marginBottom:3 }}>Q: {item.q}</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.6, padding:'6px 10px', background:'rgba(255,255,255,0.04)', borderRadius:6 }}>{item.a}</div></div>))}
-            {qaLoading&&<div style={{ fontSize:11, color:'#8a94b0', marginBottom:8 }}>Getting answer...</div>}
-            <div style={{ display:'flex', gap:7 }}>
-              <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder="e.g. What is the CB responsible for?" style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:7, padding:'8px 10px', color:'#f2f4f8', fontFamily:'inherit', fontSize:12, outline:'none' }} />
-              <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':S, color:'white', border:'none', borderRadius:7, fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, letterSpacing:1, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
-            </div>
+
+          {/* ── SUMMARY ROW ── */}
+          <div style={{ display:'flex', gap:8, marginBottom:10 }}>
+            <button onClick={()=>setShowSummary(v=>!v)} style={{ padding:'5px 12px', background:showSummary?S:'transparent', border:`1px solid ${showSummary?S:'#1e2330'}`, borderRadius:4, color:showSummary?'white':'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+              📋 Summary {showSummary?'▲':'▼'}
+            </button>
+            <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+              More {showMore?'▲':'▼'}
+            </button>
           </div>
-          {showDisguiseFeature && (
-            <div>
-              <button onClick={loadDisguise} disabled={disguiseLoading} style={{ width:'100%', padding:'10px 14px', background:showDisguise?'rgba(180,0,220,0.12)':'#161922', border:`1px solid ${showDisguise?'rgba(180,0,220,0.4)':'#1e2330'}`, borderRadius:10, color:showDisguise?'#c084fc':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:1, cursor:disguiseLoading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                <span style={{ display:'flex', alignItems:'center', gap:8 }}><span style={{ fontSize:15 }}>🎭</span>{disguiseLoading?'GENERATING DISGUISE...':'DISGUISE THIS COVERAGE'}</span>
-                <span style={{ fontSize:11 }}>{showDisguise?'▲ HIDE':'▼ HOW TO FOOL THE QB'}</span>
-              </button>
-              {showDisguise&&disguise&&!disguise.error&&(
-                <div style={{ marginTop:8, background:'rgba(180,0,220,0.06)', border:'1px solid rgba(180,0,220,0.25)', borderRadius:10, padding:14, animation:'fadeIn 0.2s ease' }}>
+
+          {/* ── SUMMARY PANEL ── */}
+          {showSummary && (
+            <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:10, animation:'fadeIn 0.2s ease' }}>
+              {steps && steps.keyAssignment && (
+                <div style={{ padding:'8px 10px', background:hexToRgba(S,0.1), border:`1px solid ${hexToRgba(S,0.25)}`, borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:S, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>🔑 Key Assignment</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontWeight:600 }}>{steps.keyAssignment}</div>
+                </div>
+              )}
+              {steps && steps.coverageType && (
+                <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>🛡 Coverage Type</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{steps.coverageType}</div>
+                </div>
+              )}
+              {steps && steps.whyItWorks && (
+                <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>✅ Why It Works</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontStyle:'italic' }}>{steps.whyItWorks}</div>
+                </div>
+              )}
+              {stepsLoading && !steps && (
+                <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0' }}>
+                  <div style={{ width:14, height:14, borderRadius:'50%', border:`2px solid ${S}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                  <div style={{ fontSize:11, color:'#8a94b0' }}>Loading summary...</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── MORE PANEL ── */}
+          {showMore && (
+            <div style={{ animation:'fadeIn 0.2s ease' }}>
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
+                <TabBtn label="Breakdown" active={showBreakdown||stepsLoading} onClick={()=>{ if(showBreakdown){setShowBreakdown(false)}else{setShowBreakdown(true);setShowRoles(false);if(!steps&&!stepsLoading)loadSteps()} }} color='#6b9fff' />
+                <TabBtn label="Player Roles" active={showRoles} onClick={()=>{ if(showRoles){setShowRoles(false)}else{setShowRoles(true);setShowBreakdown(false);if(!steps&&!stepsLoading)loadSteps()} }} color='#f59e0b' />
+                {showDisguiseFeature && <TabBtn label="Disguise" active={showDisguise} onClick={()=>{ if(showDisguise){setShowDisguise(false)}else{loadDisguise()} }} color='#c084fc' />}
+              </div>
+
+              {/* Breakdown Tab */}
+              {(showBreakdown || stepsLoading) && (
+                <div style={{ marginBottom:10 }}>
+                  {stepsLoading && showBreakdown && (
+                    <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
+                      <div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${S}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                      <div style={{ fontSize:12, color:'#8a94b0' }}>Loading breakdown...</div>
+                    </div>
+                  )}
+                  {showBreakdown && steps && !steps.error && steps.huddleCard && steps.huddleCard.length > 0 && (
+                    <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:8, padding:12, marginBottom:8 }}>
+                      <div style={{ fontSize:9, letterSpacing:2, color:'#f59e0b', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>📋 Huddle Card</div>
+                      {steps.huddleCard.map((item,i) => (
+                        <div key={i} style={{ display:'flex', gap:8, marginBottom:5, alignItems:'flex-start' }}>
+                          <div style={{ minWidth:28, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', borderRadius:4, padding:'2px 4px', textAlign:'center', fontSize:9, fontWeight:800, color:'#f59e0b', flexShrink:0 }}>{item.player}</div>
+                          <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, flex:1 }}>{item.instruction}{item.termNote&&<span style={{ color:'#8a94b0', fontStyle:'italic' }}> ({item.termNote})</span>}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {showBreakdown && steps && !steps.error && steps.steps && (
+                    <div style={{ background:'#161922', borderRadius:8, padding:12, marginBottom:8 }}>
+                      <div style={{ fontSize:9, letterSpacing:2, color:S, fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Step-by-Step</div>
+                      {steps.steps.map((step,i) => (
+                        <div key={i} style={{ display:'flex', gap:8, padding:'5px 0', borderBottom:i<steps.steps.length-1?'1px solid #1e2330':'none' }}>
+                          <div style={{ width:16, height:16, minWidth:16, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{i+1}</div>
+                          <div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{typeof step === 'object' ? (step.desc||step.title||'') : String(step)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {showBreakdown && steps && steps.keyCoachingPoints && steps.keyCoachingPoints.length > 0 && (
+                    <div style={{ background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, padding:'8px 12px', marginBottom:8 }}>
+                      <div style={{ fontSize:9, letterSpacing:2, color:'#4ade80', fontWeight:700, textTransform:'uppercase', marginBottom:6 }}>Key Coaching Points</div>
+                      {steps.keyCoachingPoints.map((pt,i) => <div key={i} style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5, marginBottom:3 }}>• {pt}</div>)}
+                    </div>
+                  )}
+                  <div style={{ background:'#0f1219', border:'1px solid #1e2330', borderRadius:8, padding:10 }}>
+                    <div style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:8 }}>Ask about this formation</div>
+                    {qaHistory.map((item,i) => (
+                      <div key={i} style={{ marginBottom:8 }}>
+                        <div style={{ fontSize:11, color:S, fontWeight:600, marginBottom:2 }}>Q: {item.q}</div>
+                        <div style={{ fontSize:11, color:'#9aa0b0', lineHeight:1.5 }}>{item.a}</div>
+                      </div>
+                    ))}
+                    <div style={{ display:'flex', gap:6 }}>
+                      <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder="e.g. What is the CB responsible for?" style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:5, padding:'7px 10px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
+                      <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':S, color:'white', border:'none', borderRadius:5, fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Player Roles Tab */}
+              {showRoles && (
+                <div style={{ marginBottom:10 }}>
+                  {stepsLoading && (
+                    <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
+                      <div style={{ width:16, height:16, borderRadius:'50%', border:'2px solid #f59e0b', borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                      <div style={{ fontSize:12, color:'#8a94b0' }}>Loading player roles...</div>
+                    </div>
+                  )}
+                  {steps && !steps.error && steps.playerRoles && steps.playerRoles.map((role,i) => (
+                    <div key={i} style={{ marginBottom:8, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:8, border:'1px solid rgba(245,158,11,0.15)' }}>
+                      <div style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:4 }}>
+                        <div style={{ background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#f59e0b', borderRadius:5, padding:'3px 6px', fontSize:9, fontWeight:800, flexShrink:0, maxWidth:72, lineHeight:1.3, textAlign:'center', wordBreak:'break-word' }}>{role.position}</div>
+                        <div style={{ fontSize:12, fontWeight:600, color:'#f2f4f8', flex:1, lineHeight:1.4 }}>{role.job}</div>
+                      </div>
+                      <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.6, paddingLeft:80, fontStyle:'italic' }}>"{role.whyTheyDoIt}"</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Disguise Tab */}
+              {showDisguise && showDisguiseFeature && disguise && !disguise.error && (
+                <div style={{ marginTop:8, background:'rgba(180,0,220,0.06)', border:'1px solid rgba(180,0,220,0.25)', borderRadius:10, padding:14, animation:'fadeIn 0.2s ease', marginBottom:10 }}>
                   <div style={{ fontSize:9, letterSpacing:2, textTransform:'uppercase', color:'#c084fc', fontWeight:700, marginBottom:10 }}>Pre-Snap Disguise</div>
                   <div style={{ padding:'8px 10px', background:'rgba(180,0,220,0.08)', borderRadius:8, marginBottom:8, borderLeft:'3px solid rgba(180,0,220,0.5)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>What to Show Pre-Snap</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{disguise.presnap}</div></div>
-                  <div style={{ marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:6, textTransform:'uppercase' }}>Disguise Movement Diagram</div><PlayAnimator play={{ name:f.name+' DISGUISE', type:'DISGUISE', note:'Pre-snap: '+(disguise.fakeAlignment||'')+'. At snap: '+(disguise.snapTrigger||'')+'. True assignment: '+f.assignment, _isDefense:true, _isDisguise:true }} P="rgba(180,0,220,0.9)" callAI={callAI} parseJSON={parseJSON} autoLoad={true} /></div>
+                  <div style={{ marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:6, textTransform:'uppercase' }}>Disguise Movement Diagram</div><PlayAnimator play={{ name:f.name+' DISGUISE', type:'DISGUISE', note:'Pre-snap: '+(disguise.fakeAlignment||'')+'. At snap: '+(disguise.snapTrigger||'')+'. True assignment: '+f.assignment, _isDefense:true, _isDisguise:true, _sport:sport }} P="rgba(180,0,220,0.9)" callAI={callAI} parseJSON={parseJSON} autoLoad={true} /></div>
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:8, marginBottom:10 }}>
                     <div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.25)', borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Fake Look</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{disguise.fakeAlignment}</div></div>
                     <div style={{ padding:'8px 10px', background:'rgba(0,0,0,0.25)', borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>At Snap</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.4 }}>{disguise.snapTrigger}</div></div>
@@ -3125,6 +3221,12 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
                   {disguise.qbReads&&(<div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', borderRadius:8, marginBottom:10, border:'1px solid rgba(74,222,128,0.15)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#4ade80', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>What the QB Sees</div><div style={{ fontSize:11, color:'#f2f4f8', lineHeight:1.5 }}>{disguise.qbReads}</div></div>)}
                   {disguise.techniques&&disguise.techniques.length>0&&(<div style={{ marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:6, textTransform:'uppercase' }}>Player-by-Player Disguise Moves</div>{disguise.techniques.map((t,i)=>(<div key={i} style={{ display:'flex', gap:9, padding:'6px 0', borderBottom:i<disguise.techniques.length-1?'1px solid rgba(180,0,220,0.15)':'none' }}><div style={{ width:26, height:26, minWidth:26, background:'rgba(180,0,220,0.15)', border:'1px solid rgba(180,0,220,0.3)', color:'#c084fc', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:800, flexShrink:0 }}>{t.player}</div><div style={{ flex:1 }}><div style={{ fontSize:11, color:'#f2f4f8', fontWeight:600, marginBottom:2 }}>{t.action}</div><div style={{ fontSize:10, color:'#8a94b0', lineHeight:1.4 }}>{t.purpose}</div></div></div>))}</div>)}
                   {disguise.coachingCue&&(<div style={{ padding:'8px 10px', background:'rgba(180,0,220,0.08)', borderRadius:8, borderLeft:'3px solid rgba(180,0,220,0.5)' }}><div style={{ fontSize:9, letterSpacing:1.5, color:'#c084fc', fontWeight:700, marginBottom:3, textTransform:'uppercase' }}>Coaching Cue</div><div style={{ fontSize:12, color:'#f2f4f8', fontStyle:'italic' }}>"{disguise.coachingCue}"</div></div>)}
+                </div>
+              )}
+              {showDisguise && disguiseLoading && (
+                <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 0' }}>
+                  <div style={{ width:16, height:16, borderRadius:'50%', border:'2px solid #c084fc', borderTopColor:'transparent', animation:'spin 0.8s linear infinite', flexShrink:0 }} />
+                  <div style={{ fontSize:12, color:'#8a94b0' }}>Generating disguise...</div>
                 </div>
               )}
             </div>
