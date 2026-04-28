@@ -1623,18 +1623,20 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
   const cacheKey = 'coachiq_anim2_' + (play?.name||'').replace(/\s/g,'_').slice(0,30)
 
   // Detect sport from play type
-  const isFlagFootball = !!(play?._isFlagFootball || (play?.type && play.type.includes('FLAG')))
-  const isBasketball = !isFlagFootball && !!(play?.type && (
+  // ── Single source of truth: play._sport if present, otherwise detect from type ──
+  const _sportName = play?._sport || ''
+  const isFlagFootball = _sportName === 'Flag Football' || !!(play?._isFlagFootball || (play?.type && play.type.includes('FLAG')))
+  const isBasketball = !isFlagFootball && (_sportName === 'Basketball' || !!(play?.type && (
     play.type.includes('COURT') || play.type.includes('PRESS') || play.type.includes('BREAK') ||
     play.type.includes('INBOUND') || play.type.includes('SET PLAY') || play.type.includes('FAST BREAK') ||
     play.type.includes('TRANSITION') || play.type.includes('QUICK HITTER') || play.type.includes('MOTION') ||
     play.type.includes('HALF COURT') || play.type.includes('ZONE ATTACK')
-  ))
-  const isBaseball = !isBasketball && !!(play?.type && (
+  )))
+  const isBaseball = !isFlagFootball && !isBasketball && (_sportName === 'Baseball' || _sportName === 'Softball' || !!(play?.type && (
     play.type.includes('BATTING') || play.type.includes('BASERUN') || play.type.includes('BUNT') ||
     play.type.includes('HIT AND RUN') || play.type.includes('FIRST AND THIRD') || play.type.includes('STEAL') ||
     play.type.includes('PITCHING') || play.type.includes('DEFENSE ALIGN') || play.type.includes('OFFENSIVE APPROACH')
-  ))
+  )))
 
   useEffect(() => {
     if (preloadedData) { setParsed(preloadedData); return }
@@ -2988,7 +2990,12 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
   const [disguiseLoading, setDisguiseLoading] = useState(false)
   const [showDisguise, setShowDisguise] = useState(false)
 
-  const defPlay = { name: f.name, type: f.type, note: f.assignment, _isDefense: true }
+  const defPlay = {
+    name: f.name, type: f.type, note: f.assignment, _isDefense: true,
+    _sport: sport,
+    _isFlagFootball: sport === 'Flag Football',
+    _flagFormat: f._flagFormat || (sport === 'Flag Football' ? (f.format || '6v6') : undefined),
+  }
   const ageGroup = f.ageGroup || ''
   const showDisguiseFeature = !ageGroup || (!ageGroup.includes('6-8') && !ageGroup.includes('9-10'))
 
@@ -4008,11 +4015,14 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
       const raw = await callAI(cfg.buildPrompt(offFields), null, true) // fast=true: Haiku for structured JSON
       const data = parseJSON(raw)
       if (!data.plays || !data.plays.length) throw new Error('No plays returned — please try again.')
-      if (sport === 'Flag Football' && data.plays) {
+      if (data.plays) {
         const fmt = offFields.format || '5v5'
         data.plays.forEach(p => {
-          p._isFlagFootball = true
-          p._flagFormat = fmt  // carry exact format through to diagram
+          p._sport = sport  // single source of truth for all components
+          if (sport === 'Flag Football') {
+            p._isFlagFootball = true
+            p._flagFormat = fmt
+          }
         })
       }
       setOffResult(data)
@@ -4029,7 +4039,8 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
           const typeStr = play.type || ''
           const isBB = typeStr.includes('COURT')||typeStr.includes('PRESS')||typeStr.includes('BREAK')||typeStr.includes('INBOUND')||typeStr.includes('TRANSITION')||typeStr.includes('QUICK HITTER')||typeStr.includes('HALF COURT')
           const isBSB = !isBB && (typeStr.includes('BATTING')||typeStr.includes('BASERUN')||typeStr.includes('BUNT')||typeStr.includes('HIT AND RUN')||typeStr.includes('FIRST AND THIRD')||typeStr.includes('OFFENSIVE APPROACH'))
-          const isFlagBg = !!(play._isFlagFootball)
+          const isFlagBg = !!(play._isFlagFootball || play._sport === 'Flag Football')
+          if (play._sport === undefined) play._sport = isBB ? 'Basketball' : isBSB ? 'Baseball' : isFlagBg ? 'Flag Football' : 'Football'
           const detectedSport = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
           const cacheKey = 'coachiq_anim2_' + (play.name||'').replace(/\s/g,'_').slice(0,30)
           // Check session cache first — skip API call if already cached
@@ -4551,7 +4562,7 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
               <p style={{ fontSize:12, color:'#8a94b0', marginBottom:10, lineHeight:1.5 }}>{result.summary}</p>
               {result.keyStop && (<div style={{ padding:'8px 12px', background:al(S,0.1), border:`1px solid ${al(S,0.25)}`, borderRadius:8, marginBottom:10 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:3 }}>Primary Assignment</div><div style={{ fontSize:13, color:'#f2f4f8', fontWeight:600 }}>{result.keyStop}</div></div>)}
               {(result.formations||[]).map(f => (
-                <DefFormationCardWithSave key={f.number} formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addDefToPlaybook} />
+                <DefFormationCardWithSave key={f.number} formation={{...f, _flagFormat: fields[Object.keys(fields).find(k=>k==='format')]||f._flagFormat, format: fields.format||f.format}} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addDefToPlaybook} />
               ))}
               {result.adjustmentTip && (<div style={{ marginTop:10, padding:10, background:'#0f1117', borderRadius:8, border:'1px solid #1e2330' }}><div style={{ fontSize:9, letterSpacing:2, color:'#8a94b0', textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Halftime Adjustment</div><div style={{ fontSize:12, color:'#f2f4f8', lineHeight:1.5 }}>{result.adjustmentTip}</div></div>)}
               {result.coachingCue && (<div style={{ marginTop:8, padding:10, background:al(S,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:S, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Defensive Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{result.coachingCue}"</div></div>)}
