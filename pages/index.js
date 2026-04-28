@@ -1761,7 +1761,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         prompt = 'Flag football defensive diagram. Formation: "' + play.name + '" Type: ' + (play.type||'') + '. Assignment: ' + play.note +
           ' Format: ' + dFmt + ' — EXACTLY ' + dOffCount + ' offense (reference, static) and ' + dDefCount + ' defense.' +
           ' YOUR JOB: Update ONLY the defender paths and routeNames to match this specific defensive formation and coverage. Do NOT move offensive players. Do NOT add or remove any players.' +
-          ' COORDINATE SYSTEM: x=0-100, y=0-60. LOS=y=42. Defense attacks TOWARD higher y (toward LOS). Coverage drops to LOWER y (deeper).' +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. TOP (y=0) = endzone. LOS=y=42. Defenders above LOS at lower y values. RUSH = move to HIGHER y (toward LOS). COVERAGE DROP = move to LOWER y (deeper, away from LOS). CBs/LBs/Safety all drop to lower y on coverage. DL/Rusher move to higher y on rush.' +
           ' CB(d1) covers left WR. CB(d2) covers right WR. Rusher(d3) attacks QB from y=35. LBs drop into zones. Safety drops deep.' +
           ' Adjust positions and paths to accurately show: ' + play.note +
           ' Return ONLY raw JSON:\n' + dTemplate
@@ -1843,7 +1843,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
             {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
             {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
-            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,10]],routeName:'Deep',routeYards:0}
           ]
         : [
             {id:'d1',label:'CB',role:'def',routeType:'route',x:10,y:38,path:[[10,38],[10,28]],routeName:'Man',routeYards:0},
@@ -1861,7 +1861,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
             {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
             {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
-            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0},
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,10]],routeName:'Deep',routeYards:0},
             {id:'d7',label:'CB',role:'def',routeType:'route',x:50,y:36,path:[[50,36],[50,30]],routeName:'Middle',routeYards:0}
           ] : flagDefense
       const flagTemplate = JSON.stringify({
@@ -1897,15 +1897,16 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n- CENTER LEAK: seam up middle. [[50,42],[50,18]].' +
         '\n- SCREEN/BUBBLE: short lateral. [[30,42],[16,40],[8,38]].' +
         '\n- SWING: quick flat. [[62,46],[78,40]].' +
-        '\n\nDEFENSIVE PLAYER RULES — update paths to show coverage movement:' +
-        '\n- CB (d1 left side): mirrors X receiver. Drop lower y tracking that WR. Start x near WR x, y=36-38.' +
-        '\n- CB (d2 right side): mirrors Z receiver. Drop lower y tracking that WR. Start x near WR x, y=36-38.' +
-        '\n- Rusher (d3, label R): always at x=50-60, y=35. Path goes from y=35 toward y=42 (rushing QB). NEVER changes x/y start.' +
-        '\n- LB (d4): underneath zone x=28-40, y=30-34. Drops to y=26-28 covering slot or RB.' +
-        '\n- LB (d5): underneath zone x=60-72, y=30-34. Drops to y=26-28 covering slot or RB.' +
-        '\n- Safety (d6): deep middle at x=44-56, y=16-22. Drops lower on deep routes. NEVER stacked with another player.' +
-        '\n- Extra CB/S (d7 if present): secondary deep or middle hole player. y=28-36, x spread from others.' +
-        '\n- DO NOT move any defender to the same x/y as another. Each defender has a distinct coverage lane.' +
+        '\n\nDEFENSIVE PLAYER RULES — update paths to show realistic movement:' +
+        '\n- COVERAGE PLAYERS (CBs, LBs, Safety): Drop to LOWER y values (away from LOS toward y=0). Coverage = moving AWAY from y=42.' +
+        '\n- RUSHER (label R): Rushes TOWARD LOS = moves to HIGHER y (from y=35 toward y=42). Path: [[57,35],[50,42]].' +
+        '\n- CB (d1 left): man or flat zone. x near left WR. y=36-38 start, drop to y=24-30 tracking WR route.' +
+        '\n- CB (d2 right): man or flat zone. x near right WR. y=36-38 start, drop to y=24-30 tracking WR route.' +
+        '\n- LB (d4 left): hook/curl zone or man on slot. y=30-34 start, drop to y=22-26.' +
+        '\n- LB (d5 right): hook/curl zone or man on slot. y=30-34 start, drop to y=22-26.' +
+        '\n- Safety (d6): deep half or single-high. y=16-22 start, drop to y=10-16 on deep routes.' +
+        '\n- Extra (d7): nickel or second safety. y=28-34, spread from others. Drop to y=20-28.' +
+        '\n- DO NOT send any coverage defender to y > 42 (past LOS). No stacking defenders at same x/y.' +
         '\n\nReturn ONLY the completed JSON — no commentary, no markdown, just JSON:\n' + flagTemplate.replace('PLAYNAME', play.name)
     } else {
       prompt = 'You are an NFL offensive coordinator generating a precise football play diagram. Play: ' + play.name + ' (' + play.type + '). Description: ' + play.note +
@@ -2165,7 +2166,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
             {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
             {id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:32,path:[[36,32],[36,26]],routeName:'Zone',routeYards:0},
-            {id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,26]],routeName:'Deep',routeYards:0}
+            {id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,12]],routeName:'Deep',routeYards:0}
           ],
           '6v6': [
             {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
@@ -2173,7 +2174,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
             {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
             {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
-            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,10]],routeName:'Deep',routeYards:0}
           ],
           '6v6 + Rusher': [
             {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
@@ -2181,7 +2182,7 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
             {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
             {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
-            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0},
+            {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,10]],routeName:'Deep',routeYards:0},
             {id:'d7',label:'CB',role:'def',routeType:'route',x:50,y:36,path:[[50,36],[50,30]],routeName:'Middle',routeYards:0}
           ],
           '7v7': [
@@ -2760,7 +2761,9 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
               ctx.fillStyle = isBH ? 'rgba(245,158,11,0.2)' : 'rgba(74,222,128,0.15)'
               ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 2.5, 0, Math.PI * 2); ctx.fill()
             }
-            ctx.fillStyle = isBH ? '#f59e0b' : isShooter ? '#4ade80' : isScreener ? '#999' : DA
+            // Static reference offense in defensive diagrams = mid-gray (not team color)
+            const isStaticRef = player.role === 'off' && player.routeType === 'block' && (player.routeName === '' || player.routeName === undefined) && parsed._isFlagFootball
+            ctx.fillStyle = isBH ? '#f59e0b' : isShooter ? '#4ade80' : isScreener ? '#999' : isStaticRef ? 'rgba(120,120,140,0.85)' : DA
             ctx.strokeStyle = 'white'; ctx.lineWidth = 1.8
             ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
             ctx.fillStyle = isBH || isShooter ? '#000' : 'white'
@@ -2793,8 +2796,9 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             const isBlitz = rn2.includes('blitz') || rn2.includes('rush')
             // Rusher in flag gets a red tint like a blitzer; all others dark gray
             const isFlagRusher = !!(parsed._isFlagFootball) && (player.label || '').toUpperCase() === 'R'
-            ctx.fillStyle = (isBlitz || isFlagRusher) ? 'rgba(220,60,0,0.9)' : 'rgba(45,45,55,0.92)'
-            ctx.strokeStyle = 'rgba(200,200,200,0.9)'; ctx.lineWidth = 1.5
+            // Rusher = orange-red, blitzer = red, regular defenders = distinct dark teal/slate
+            ctx.fillStyle = isFlagRusher ? 'rgba(220,80,0,0.95)' : isBlitz ? 'rgba(200,30,30,0.95)' : 'rgba(30,50,80,0.92)'
+            ctx.strokeStyle = 'rgba(180,210,255,0.85)'; ctx.lineWidth = 1.5
             if (isDL) {
               const s = r * 0.95
               ctx.fillRect(pos.x - s, pos.y - s, s * 2, s * 2)
@@ -3162,7 +3166,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
               <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
                 <TabBtn label="Breakdown" active={showBreakdown||stepsLoading} onClick={()=>{ if(showBreakdown){setShowBreakdown(false)}else{setShowBreakdown(true);setShowRoles(false);if(!steps&&!stepsLoading)loadSteps()} }} color='#6b9fff' />
                 <TabBtn label="Player Roles" active={showRoles} onClick={()=>{ if(showRoles){setShowRoles(false)}else{setShowRoles(true);setShowBreakdown(false);if(!steps&&!stepsLoading)loadSteps()} }} color='#f59e0b' />
-                {showDisguiseFeature && <TabBtn label="Disguise" active={showDisguise} onClick={()=>{ if(showDisguise){setShowDisguise(false)}else{loadDisguise()} }} color='#c084fc' />}
+                {showDisguiseFeature && <TabBtn label={disguiseLoading ? 'Loading...' : 'Disguise'} active={showDisguise||disguiseLoading} onClick={()=>{ if(showDisguise&&!disguiseLoading){setShowDisguise(false)}else if(!disguiseLoading){loadDisguise()} }} color='#c084fc' />}
               </div>
 
               {/* Breakdown Tab */}
@@ -4211,9 +4215,9 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   ? [{id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},{id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,24]],routeName:'Center Leak',routeYards:0},{id:'X',label:'WR',role:'off',routeType:'route',x:12,y:42,path:[[12,42],[12,26]],routeName:'Go',routeYards:0},{id:'Z',label:'WR',role:'off',routeType:'route',x:88,y:42,path:[[88,42],[88,26]],routeName:'Go',routeYards:12},{id:'Y',label:'SL',role:'off',routeType:'route',x:30,y:42,path:[[30,42],[46,30]],routeName:'Slant',routeYards:0},{id:'RB',label:'RB',role:'off',routeType:'route',x:62,y:46,path:[[62,46],[78,38]],routeName:'Swing',routeYards:0}]
                   : [{id:'QB',label:'QB',role:'off',routeType:'route',x:50,y:44,path:[[50,44],[50,44]],routeName:'Pocket Pass',routeYards:0},{id:'C',label:'C',role:'off',routeType:'route',x:50,y:42,path:[[50,42],[50,22]],routeName:'Seam',routeYards:0},{id:'X',label:'WR',role:'off',routeType:'route',x:10,y:42,path:[[10,42],[10,26]],routeName:'Go',routeYards:0},{id:'Z',label:'WR',role:'off',routeType:'route',x:90,y:42,path:[[90,42],[90,26]],routeName:'Go',routeYards:12},{id:'Y',label:'SL',role:'off',routeType:'route',x:28,y:42,path:[[28,42],[44,30]],routeName:'Slant',routeYards:0},{id:'H',label:'SL',role:'off',routeType:'route',x:72,y:42,path:[[72,42],[58,30]],routeName:'Slant',routeYards:0},{id:'RB',label:'RB',role:'off',routeType:'route',x:44,y:50,path:[[44,50],[28,42]],routeName:'Swing',routeYards:0}]
                 const fDef = fIs5
-                  ? [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:32,path:[[36,32],[36,26]],routeName:'Zone',routeYards:0},{id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,26]],routeName:'Deep',routeYards:0}]
+                  ? [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:32,path:[[36,32],[36,26]],routeName:'Zone',routeYards:0},{id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,12]],routeName:'Deep',routeYards:0}]
                   : fIs6
-                  ? [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},{id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}]
+                  ? [{id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},{id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},{id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,10]],routeName:'Deep',routeYards:0}]
                   : [{id:'d1',label:'CB',role:'def',routeType:'route',x:10,y:38,path:[[10,38],[10,28]],routeName:'Man',routeYards:0},{id:'d2',label:'CB',role:'def',routeType:'route',x:90,y:38,path:[[90,38],[90,28]],routeName:'Man',routeYards:0},{id:'d3',label:'CB',role:'def',routeType:'route',x:28,y:36,path:[[28,36],[28,28]],routeName:'Man',routeYards:0},{id:'d4',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},{id:'d5',label:'LB',role:'def',routeType:'route',x:40,y:30,path:[[40,30],[40,22]],routeName:'Zone',routeYards:0},{id:'d6',label:'LB',role:'def',routeType:'route',x:60,y:30,path:[[60,30],[60,22]],routeName:'Zone',routeYards:0},{id:'d7',label:'S',role:'def',routeType:'route',x:50,y:16,path:[[50,16],[50,22]],routeName:'Deep',routeYards:0}]
                 const fTemplate = JSON.stringify({formation:'PLAYNAME',snapPoint:0.15,duration:3000,_isFlagFootball:true,players:[...fOff,...fDef]})
                 prompt = 'Flag ' + fFmt + ' OC diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
@@ -4362,7 +4366,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                       {id:'d2',label:'CB',role:'def',routeType:'route',x:88,y:38,path:[[88,38],[88,30]],routeName:'Man',routeYards:0},
                       {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
                       {id:'d4',label:'LB',role:'def',routeType:'route',x:36,y:32,path:[[36,32],[36,26]],routeName:'Zone',routeYards:0},
-                      {id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,26]],routeName:'Deep',routeYards:0}
+                      {id:'d5',label:'S',role:'def',routeType:'route',x:50,y:20,path:[[50,20],[50,12]],routeName:'Deep',routeYards:0}
                     ],
                     '6v6': [
                       {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
@@ -4370,7 +4374,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                       {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
                       {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
                       {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
-                      {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0}
+                      {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,10]],routeName:'Deep',routeYards:0}
                     ],
                     '6v6 + Rusher': [
                       {id:'d1',label:'CB',role:'def',routeType:'route',x:12,y:38,path:[[12,38],[12,30]],routeName:'Man',routeYards:0},
@@ -4378,7 +4382,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                       {id:'d3',label:'R',role:'def',routeType:'block',x:57,y:35,path:[[57,35],[50,40]],routeName:'Rush',routeYards:0},
                       {id:'d4',label:'LB',role:'def',routeType:'route',x:30,y:32,path:[[30,32],[30,26]],routeName:'Zone',routeYards:0},
                       {id:'d5',label:'LB',role:'def',routeType:'route',x:65,y:32,path:[[65,32],[65,26]],routeName:'Zone',routeYards:0},
-                      {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,24]],routeName:'Deep',routeYards:0},
+                      {id:'d6',label:'S',role:'def',routeType:'route',x:50,y:18,path:[[50,18],[50,10]],routeName:'Deep',routeYards:0},
                       {id:'d7',label:'CB',role:'def',routeType:'route',x:50,y:36,path:[[50,36],[50,30]],routeName:'Middle',routeYards:0}
                     ],
                     '7v7': [
