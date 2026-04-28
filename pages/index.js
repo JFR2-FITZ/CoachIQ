@@ -2978,9 +2978,12 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 }
 
 
-function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON, sport }) {
-  const [expanded, setExpanded] = useState(false)
-  const [showAnim, setShowAnim] = useState(false)
+function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON, sport, extraAction=null }) {
+  const [showDiagram, setShowDiagram] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
+  const [showMore, setShowMore] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
+  const [showRoles, setShowRoles] = useState(false)
   const [steps, setSteps] = useState(null)
   const [stepsLoading, setStepsLoading] = useState(false)
   const [qaHistory, setQAHistory] = useState([])
@@ -2989,10 +2992,6 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
   const [disguise, setDisguise] = useState(null)
   const [disguiseLoading, setDisguiseLoading] = useState(false)
   const [showDisguise, setShowDisguise] = useState(false)
-  const [showSummary, setShowSummary] = useState(true)
-  const [showMore, setShowMore] = useState(false)
-  const [showBreakdown, setShowBreakdown] = useState(false)
-  const [showRoles, setShowRoles] = useState(false)
 
   const defPlay = {
     name: f.name, type: f.type, note: f.assignment, _isDefense: true,
@@ -3006,7 +3005,7 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
   async function loadSteps() {
     if (steps) return
     // Check session cache first
-    const stepsCacheKey = 'coachiq_steps_v2_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+    const stepsCacheKey = 'coachiq_steps_v2_def_' + (f.name||'').replace(/\s/g,'_').slice(0,40)
     try {
       const cached = sessionStorage.getItem(stepsCacheKey)
       if (cached) { setSteps(JSON.parse(cached)); return }
@@ -3063,37 +3062,69 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
     setDisguiseLoading(false)
   }
 
-  return (
-    <div style={{ borderBottom:'1px solid #1e2330' }}>
-      <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', cursor:'pointer' }} onClick={() => { const n=!expanded; setExpanded(n); if(n) { loadSteps(); setShowAnim(true) } }}>
-        <div style={{ width:22, height:22, minWidth:22, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{f.number}</div>
-        <div style={{ flex:1 }}>
-          <div style={{ fontSize:13, fontWeight:600, color:'#f2f4f8' }}>{f.name}</div>
-          <div style={{ fontSize:10, color:S, fontFamily:"'DM Mono',monospace", marginTop:1 }}>{f.type}</div>
-          <div style={{ fontSize:11, color:'#f2f4f8', marginTop:3, lineHeight:1.4 }}>{f.assignment}</div>
-          <div style={{ fontSize:11, color:'#8a94b0', marginTop:3, fontStyle:'italic' }}>When: {f.whenToUse}</div>
-          <div style={{ fontSize:10, color:S, marginTop:4 }}>{expanded ? '▲ Collapse' : '▼ Expand breakdown + diagram'}</div>
-        </div>
-        <button onClick={e=>{e.stopPropagation();setShowAnim(a=>!a);if(!expanded){setExpanded(true);loadSteps()}}} style={{ padding:'4px 9px', background:showAnim?S:hexToRgba(S,0.12), border:`1px solid ${S}`, borderRadius:6, color:showAnim?'white':S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
-      </div>
-      {!expanded && (
-        <div style={{ marginBottom:8, borderRadius:8, overflow:'hidden', cursor:'pointer' }} onClick={() => { setExpanded(true); setShowAnim(true); loadSteps() }}>
-          <PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} thumbnail={true} />
-        </div>
-      )}
-      {expanded && (
-        <div style={{ paddingBottom:14, animation:'fadeIn 0.2s ease' }}>
-          {showAnim && <div style={{ marginBottom:12 }}><PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} /></div>}
+  function TabBtn({ label, active, onClick, color }) {
+    const c = color || S
+    return (
+      <button onClick={onClick} style={{ padding:'5px 10px', background:active?c:'transparent', border:'1px solid '+(active?c:'#1e2330'), borderRadius:4, color:active?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer', letterSpacing:'0.5px', whiteSpace:'nowrap', touchAction:'manipulation' }}>
+        {label}
+      </button>
+    )
+  }
 
-          {/* ── SUMMARY ROW ── */}
-          <div style={{ display:'flex', gap:8, marginBottom:10 }}>
-            <button onClick={()=>setShowSummary(v=>!v)} style={{ padding:'5px 12px', background:showSummary?S:'transparent', border:`1px solid ${showSummary?S:'#1e2330'}`, borderRadius:4, color:showSummary?'white':'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
-              📋 Summary {showSummary?'▲':'▼'}
-            </button>
-            <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
-              More {showMore?'▲':'▼'}
-            </button>
+  return (
+    <div style={{ borderBottom:'1px solid #1e2330', padding:'12px 0' }}>
+
+      {/* ── FORMATION HEADER — matches PlayCard exactly ── */}
+      <div style={{ display:'flex', alignItems:'flex-start', gap:10, marginBottom:10 }}>
+        <div style={{ width:24, height:24, minWidth:24, background:S, color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, flexShrink:0, marginTop:2 }}>{f.number}</div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:'#f2f4f8', lineHeight:1.2 }}>{f.name}</div>
+          <div style={{ fontSize:10, color:S, fontFamily:"'DM Mono',monospace", marginTop:2 }}>{f.type}</div>
+          <div style={{ fontSize:12, color:'#9aa0b0', marginTop:4, lineHeight:1.5 }}>{f.assignment}</div>
+          {f.whenToUse && <div style={{ fontSize:11, color:'#8a94b0', marginTop:3, fontStyle:'italic', lineHeight:1.4 }}>When: {f.whenToUse}</div>}
+        </div>
+        {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
+      </div>
+
+      {/* ── DIAGRAM — thumbnail then live, same as PlayCard ── */}
+      <div style={{ marginBottom:10 }}>
+        {!showDiagram ? (
+          <div onClick={()=>setShowDiagram(true)} style={{ cursor:'pointer', position:'relative', borderRadius:6, overflow:'hidden', border:`1px solid ${hexToRgba(S,0.2)}`, background:'#0f1219' }}>
+            <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.7 }}>
+              <rect width="280" height="100" fill="#f4f4f0"/>
+              {[0,1,2,3].map(i=><line key={i} x1={0} y1={20+i*22} x2={280} y2={20+i*22} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
+              <line x1={0} y1={64} x2={280} y2={64} stroke="rgba(0,0,0,0.3)" strokeWidth={1} strokeDasharray="6,4"/>
+              <text x={8} y={61} fontSize={7} fill="rgba(0,0,0,0.25)">LOS</text>
+              {[-24,-12,0,12,24].map((off,i)=>(<rect key={i} x={140+off-6} y={56} width={12} height={8} fill={S} rx={1} opacity={0.6}/>))}
+              <circle cx={35} cy={64} r={5} fill="#444" opacity={0.7}/>
+              <circle cx={245} cy={64} r={5} fill="#444" opacity={0.7}/>
+              <circle cx={140} cy={44} r={5} fill="#444" opacity={0.7}/>
+              <path d="M 35 59 L 35 40 L 20 28" fill="none" stroke="#555" strokeWidth={1.5} opacity={0.4}/>
+              <path d="M 245 59 L 245 40 L 260 28" fill="none" stroke="#555" strokeWidth={1.5} opacity={0.4}/>
+            </svg>
+            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.35)' }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'1.5px', color:'white', display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ fontSize:14 }}>📐</span> TAP TO VIEW DIAGRAM
+              </div>
+            </div>
           </div>
+        ) : (
+          <div>
+            <PlayAnimator play={defPlay} P={S} callAI={callAI} parseJSON={parseJSON} autoLoad={true} key={f.name} />
+            <button onClick={()=>setShowDiagram(false)} style={{ width:'100%', marginTop:4, padding:'4px', background:'transparent', border:'none', color:'#5a6480', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>▲ COLLAPSE DIAGRAM</button>
+          </div>
+        )}
+      </div>
+
+      {/* ── TOGGLE BUTTONS — matches PlayCard exactly ── */}
+      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:(showSummary||showMore)?10:0 }}>
+        <button onClick={()=>{ setShowSummary(v=>!v); if(!steps&&!stepsLoading)loadSteps() }} style={{ padding:'5px 12px', background:showSummary?S:'transparent', border:'1px solid '+(showSummary?S:'#1e2330'), borderRadius:4, color:showSummary?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+          📋 Summary {showSummary?'▲':'▼'}
+        </button>
+        <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+          More {showMore?'▲':'▼'}
+        </button>
+      </div>
 
           {/* ── SUMMARY PANEL ── */}
           {showSummary && (
@@ -3231,8 +3262,6 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
               )}
             </div>
           )}
-        </div>
-      )}
     </div>
   )
 }
@@ -4721,31 +4750,28 @@ function DefFormationCardWithSave({ formation: f, S, P='#C0392B', al, callAI, pa
   const sportFolders = playbook[sport] || {}
   const existingFolders = [...new Set([...DEFAULT_FOLDERS[sport]||[], ...Object.keys(sportFolders)])]
 
+  const saveBtn = saved ? (
+    <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, whiteSpace:'nowrap' }}>✓ SAVED</span>
+  ) : (
+    <button onClick={()=>setShowSaveMenu(s=>!s)} style={{ padding:'4px 10px', background:al(S,0.12), border:`1px solid ${al(S,0.3)}`, borderRadius:4, color:S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px', whiteSpace:'nowrap' }}>+ PLAYBOOK</button>
+  )
+
   return (
     <div style={{ position:'relative' }}>
-      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
-        <div style={{ flex:1 }}><DefFormationCard formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} /></div>
-        <div style={{ flexShrink:0 }}>
-          {saved ? (
-            <span style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>✓</span>
-          ) : (
-            <button onClick={()=>setShowSaveMenu(s=>!s)} style={{ padding:'3px 7px', background:al(S,0.12), border:`1px solid ${al(S,0.3)}`, borderRadius:3, color:S, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif" }}>+PB</button>
-          )}
-          {showSaveMenu && (
-            <div style={{ position:'absolute', right:0, top:'100%', marginTop:4, background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:8, zIndex:50, minWidth:180, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
-              {existingFolders.map(fn => (
-                <div key={fn} onClick={()=>{onAddToPlaybook(f,fn);setSaved(fn);setShowSaveMenu(false)}} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='#161922'}>
-                  <span style={{ fontSize:11 }}>📁</span> {fn}
-                </div>
-              ))}
-              <div style={{ borderTop:'1px solid #1e2330', marginTop:6, paddingTop:6, display:'flex', gap:6 }}>
-                <input value={newFolderName} onChange={e=>setNewFolderName(e.target.value)} placeholder="New folder..." style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:4, padding:'5px 8px', color:'#f2f4f8', fontSize:11, outline:'none', fontFamily:'inherit' }} onKeyDown={e=>{if(e.key==='Enter'&&newFolderName.trim()){onAddToPlaybook(f,newFolderName.trim());setSaved(newFolderName.trim());setNewFolderName('');setShowSaveMenu(false)}}} />
-                <button onClick={()=>{if(newFolderName.trim()){onAddToPlaybook(f,newFolderName.trim());setSaved(newFolderName.trim());setNewFolderName('');setShowSaveMenu(false)}}} style={{ padding:'5px 8px', background:S, border:'none', borderRadius:4, color:'white', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+</button>
-              </div>
+      <DefFormationCard formation={f} S={S} P={P} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} extraAction={saveBtn} />
+      {showSaveMenu && (
+        <div style={{ position:'absolute', right:0, top:40, background:'#161922', border:'1px solid #1e2330', borderRadius:8, padding:8, zIndex:50, minWidth:180, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
+          {existingFolders.map(fn => (
+            <div key={fn} onClick={()=>{onAddToPlaybook(f,fn);setSaved(fn);setShowSaveMenu(false)}} style={{ padding:'7px 10px', fontSize:12, color:'#f2f4f8', cursor:'pointer', borderRadius:5 }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='#161922'}>
+              <span style={{ fontSize:11 }}>📁</span> {fn}
             </div>
-          )}
+          ))}
+          <div style={{ borderTop:'1px solid #1e2330', marginTop:6, paddingTop:6, display:'flex', gap:6 }}>
+            <input value={newFolderName} onChange={e=>setNewFolderName(e.target.value)} placeholder="New folder..." style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:4, padding:'5px 8px', color:'#f2f4f8', fontSize:11, outline:'none', fontFamily:'inherit' }} onKeyDown={e=>{if(e.key==='Enter'&&newFolderName.trim()){onAddToPlaybook(f,newFolderName.trim());setSaved(newFolderName.trim());setNewFolderName('');setShowSaveMenu(false)}}} />
+            <button onClick={()=>{if(newFolderName.trim()){onAddToPlaybook(f,newFolderName.trim());setSaved(newFolderName.trim());setNewFolderName('');setShowSaveMenu(false)}}} style={{ padding:'5px 8px', background:S, border:'none', borderRadius:4, color:'white', fontSize:10, cursor:'pointer', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>+</button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
