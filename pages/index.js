@@ -1545,11 +1545,12 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
     })
 
     const players = frame.players || []
+    // arrows live on the frame top-level: frame.arrows = [{from,to,type,color}]
+    const frameArrows = frame.arrows || []
 
     // ── Draw arrows/lines FIRST (under player circles) ──
-    players.forEach(p => {
-      if (!p.arrows) return
-      p.arrows.forEach(arr => {
+    frameArrows.forEach(arr => {
+      {
         const fx=sx(arr.from[0]), fy=sy(arr.from[1])
         const tx=sx(arr.to[0]), ty=sy(arr.to[1])
         const type = arr.type || 'cut'
@@ -1596,7 +1597,7 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
           ctx.fillStyle=cutColor; ctx.strokeStyle=cutColor
           arrow2(fx,fy,tx,ty,r*1.9)
         }
-      })
+      }
     })
 
     // ── Draw defender movement trails (dashed gray) ──
@@ -1667,7 +1668,7 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const touchStartX = useRef(null)
-  const cacheKey = 'coachiq_bbframes_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
+  const cacheKey = 'coachiq_bbframes_v2_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
 
   useEffect(() => {
     // Use preloaded frames if provided
@@ -1685,31 +1686,30 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
     setLoading(true); setError(null)
     try {
       const frameShape = '{"label":"Phase N","description":"what happens in this phase","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off","role2":"ball"},{"id":"SG","label":"2","x":75,"y":42,"role":"off","role2":"move"},{"id":"SF","label":"3","x":84,"y":32,"role":"off","role2":"move"},{"id":"PF","label":"4","x":62,"y":18,"role":"off","role2":"move"},{"id":"C5","label":"5","x":50,"y":12,"role":"off","role2":"move"},{"id":"d1","label":"X1","x":50,"y":48,"role":"def"},{"id":"d2","label":"X2","x":75,"y":45,"role":"def"},{"id":"d3","label":"X3","x":84,"y":35,"role":"def"},{"id":"d4","label":"X4","x":62,"y":21,"role":"def"},{"id":"d5","label":"X5","x":50,"y":15,"role":"def"}],"arrows":[{"from":[50,45],"to":[72,32],"type":"pass"},{"from":[75,42],"to":[68,22],"type":"cut","color":"rgba(255,255,255,0.9)"}]}'
-      const prompt = 'You are an elite basketball play diagram generator. Generate 2-3 sequential phase frames for this basketball play: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
-        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=4 x=50 (TOP of diagram). Players attack UPWARD = lower y.' +
-        '\n\nPLAYER POSITIONS — Half court standard: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders start 2-4 units below their man (toward basket).' +
-        '\n\nFRAME RULES — Each frame is a STATIC SNAPSHOT showing exactly what happens in that phase:' +
-        '\n• Frame 1: Starting positions + first action (first pass or first movement). Player positions = where they START. Arrows = what HAPPENS in this phase.' +
-        '\n• Frame 2: Positions = where players ARE after phase 1. Arrows = what happens next (cut off screen, roll to basket, fill spot, etc.).' +
-        '\n• Frame 3 (if needed): Positions = after phase 2. Arrows = finishing action (shot, drive, final pass).' +
-        '\n\nARROW TYPES — must be accurate to the play:' +
-        '\n• type:"pass" = dashed yellow arc (ball moves from one player to another)' +
-        '\n• type:"dribble" = wavy amber line (ball handler moves with ball)' +
-        '\n• type:"cut" = solid white arrow (player moves WITHOUT ball)' +
-        '\n• type:"screen" = solid line ending in ⊥ bar (player goes to set a screen)' +
-        '\n\nPLAYER role2 field:' +
-        '\n• "ball" = player currently has the ball (amber circle)' +
-        '\n• "shooter" = player who receives for the scoring opportunity (green circle)' +
-        '\n• "move" = all other offensive players (team color circle)' +
-        '\nOnly ONE player has role2:"ball" per frame. Only ONE has role2:"shooter" in the final scoring frame.' +
-        '\n\nDEFENDER TRAILS — defenders who REACT get a "trail" array showing start and end position: "trail":[[startX,startY],[endX,endY]]. Shown as dashed gray. Defenders not reacting get no trail field.' +
-        '\n\nSPORT IQ — NON-NEGOTIABLE:' +
-        '\n• A player who has beaten their man at the rim (y<18) finishes the play — they do NOT pass backward to the perimeter.' +
-        '\n• Passes flow TOWARD open space or basket, never backward from paint to half-court.' +
-        '\n• Screener sets screen body-adjacent to defender (within 3 units). Cutter drives off screen shoulder.' +
-        '\n• Ball handler defender trails through screen — trail shows them 3-5 units behind the ball handler.' +
-        '\n• Screener defender hedges: trail shows step outward toward ball handler then recovery.' +
-        '\n• In 5-out motion: passer immediately cuts to basket after passing (y=10-14).' +
+      const prompt = 'You are an elite basketball play diagram engine. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=4 x=50 (TOP). Attack UPWARD = lower y.' +
+        '\nHALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders 2-4 units below their man.' +
+        '\n\nFRAMES: Each frame = one phase of the play. 2 frames minimum, 3 if the play has 3 distinct actions.' +
+        '\nFrame 1 = starting positions + what happens FIRST (first pass, first dribble move, first cut).' +
+        '\nFrame 2 = positions AFTER frame 1 + what happens SECOND.' +
+        '\nFrame 3 = positions AFTER frame 2 + finishing action (shot, drive to rim, final pass).' +
+        '\n\nARROWS — the frame.arrows array is the MOST IMPORTANT part. EVERY frame MUST have at least 1-3 arrows. Empty arrows arrays are WRONG.' +
+        '\nEach arrow: {"from":[x,y], "to":[x,y], "type":"pass|dribble|cut|screen", "color":"optional"}' +
+        '\n• type "pass": from the player WITH the ball TO the receiver. Dashed yellow arc.' +
+        '\n• type "dribble": from where ball handler STARTS to where they END UP. Wavy amber line. Use for drives, dribble moves, penetration.' +
+        '\n• type "cut": from where a player WITHOUT ball STARTS to where they CUT TO. Solid white arrow.' +
+        '\n• type "screen": from screener START to screen SET location (adjacent to defender). Shows ⊥ bar.' +
+        '\n\nCONCRETE EXAMPLES by play type:' +
+        '\nDRIVE play Frame 1: PG has ball at [50,46]. arrows=[{"from":[50,46],"to":[50,22],"type":"dribble"},{"from":[75,42],"to":[85,26],"type":"cut"},{"from":[84,32],"to":[84,16],"type":"cut"}]' +
+        '\nDRIVE play Frame 2: PG now at [50,22] in paint. arrows=[{"from":[50,22],"to":[82,32],"type":"pass"},{"from":[82,16],"to":[82,8],"type":"cut"}] OR if drive finishes: arrows=[{"from":[50,22],"to":[50,10],"type":"dribble"}]' +
+        '\nPICK AND ROLL Frame 1: 5 sets screen for 1. arrows=[{"from":[50,14],"to":[50,30],"type":"screen"},{"from":[50,46],"to":[62,32],"type":"dribble"}]' +
+        '\nPICK AND ROLL Frame 2: 1 off screen, 5 rolls. arrows=[{"from":[62,32],"to":[50,18],"type":"dribble"},{"from":[50,30],"to":[50,10],"type":"cut"}]' +
+        '\n5-OUT MOTION Frame 1: 1 passes then cuts. arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,12],"type":"cut"}]' +
+        '\n5-OUT MOTION Frame 2: receiver has ball, others fill. arrows=[{"from":[76,42],"to":[62,24],"type":"dribble"},{"from":[84,32],"to":[76,46],"type":"cut"},{"from":[28,38],"to":[50,46],"type":"cut"}]' +
+        '\n\nPLAYER role2: "ball"=has ball (1 per frame). "shooter"=scoring option in final frame. "move"=everyone else.' +
+        '\nDEFENDER TRAILS: reacting defenders get "trail":[[startX,startY],[endX,endY]] on their player object.' +
+        '\nSPORT IQ: Driver at y<18 finishes at rim (no backward pass). Passes flow toward basket/open space.' +
+        '\nThe arrows MUST reflect what the play description says is happening. Read the play description carefully and draw exactly those actions.' +
         '\n\nReturn ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
       const raw = await callAI(prompt, null, false)
       const data = parseJSON(raw)
@@ -5021,7 +5021,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               let prompt
               if (isBB) {
                 // Basketball uses frames format — skip old animated template, use frames JSON
-                const bbFramesCacheKey = 'coachiq_bbframes_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+                const bbFramesCacheKey = 'coachiq_bbframes_v2_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
                 try {
                   const cached = sessionStorage.getItem(bbFramesCacheKey)
                   if (cached) {
@@ -5031,14 +5031,19 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   }
                 } catch(e) {}
                 const frameShape = '{"label":"Phase N","description":"one sentence","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off","role2":"ball"},{"id":"SG","label":"2","x":75,"y":42,"role":"off","role2":"move"},{"id":"SF","label":"3","x":84,"y":32,"role":"off","role2":"move"},{"id":"PF","label":"4","x":62,"y":18,"role":"off","role2":"move"},{"id":"C5","label":"5","x":50,"y":12,"role":"off","role2":"move"},{"id":"d1","label":"X1","x":50,"y":48,"role":"def"},{"id":"d2","label":"X2","x":75,"y":45,"role":"def"},{"id":"d3","label":"X3","x":84,"y":35,"role":"def"},{"id":"d4","label":"X4","x":62,"y":21,"role":"def"},{"id":"d5","label":"X5","x":50,"y":15,"role":"def"}],"arrows":[{"from":[50,45],"to":[72,32],"type":"pass"},{"from":[75,42],"to":[68,22],"type":"cut"}]}'
-                prompt = 'Elite basketball diagram generator. Generate 2-3 sequential static phase frames for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
-                  ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket y=4 x=50 (TOP). Attack UPWARD = lower y.' +
-                  ' HALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders 2-4 units below their man.' +
-                  ' FRAME RULES: Each frame is a STATIC SNAPSHOT. Frame 1 = starting positions + first action arrows. Frame 2 = positions after phase 1 + next action arrows. Frame 3 = finishing action if needed.' +
-                  ' ARROW TYPES: type:"pass"=dashed yellow arc. type:"dribble"=wavy amber. type:"cut"=solid white arrow. type:"screen"=line + perpendicular bar.' +
-                  ' PLAYER role2: "ball"=has ball(1 per frame). "shooter"=scoring option(last frame). "move"=all others.' +
-                  ' DEFENDERS: X marks on court. Active defenders get "trail":[[startX,startY],[endX,endY]] showing reaction path.' +
-                  ' SPORT IQ: Driver at y<18 finishes at rim. Passes flow toward basket/open space. Screener body-adjacent to defender. 5-out passer cuts to basket immediately.' +
+                prompt = 'Elite basketball diagram engine. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket y=4 x=50 TOP. Attack UPWARD = lower y.' +
+                  ' HALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders 2-4 units below man.' +
+                  ' FRAMES: Frame1=starting positions+first action. Frame2=positions after frame1+next action. Frame3=finishing action.' +
+                  ' ARROWS — frame.arrows MUST have 1-3 arrows per frame. Empty arrows array is WRONG.' +
+                  ' Arrow format: {"from":[x,y],"to":[x,y],"type":"pass|dribble|cut|screen"}' +
+                  ' pass=dashed yellow arc(ball moves). dribble=wavy amber(ball handler moves with ball). cut=solid white arrow(player moves without ball). screen=line+perp bar.' +
+                  ' EXAMPLES: Drive: arrows=[{"from":[50,46],"to":[50,20],"type":"dribble"},{"from":[76,42],"to":[84,20],"type":"cut"}]' +
+                  ' PnR: Frame1 arrows=[{"from":[50,14],"to":[50,30],"type":"screen"},{"from":[50,46],"to":[62,32],"type":"dribble"}]' +
+                  ' 5-out: Frame1 arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,12],"type":"cut"}]' +
+                  ' role2: "ball"=has ball. "shooter"=scoring option final frame. "move"=others. trail:[[x,y],[x,y]] on reacting defenders.' +
+                  ' Read the play description carefully — arrows MUST show exactly those actions.' +
+                  ' SPORT IQ: Driver y<18 finishes at rim. Passes toward basket/open space only.' +
                   ' Return ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
               } else if (isBSB) {
                 const isSoftballBg = play._sport === 'Softball'
