@@ -1475,15 +1475,14 @@ function SportThumbnail({ sport, P='#C0392B', isDefense=false }) {
 
 function BBFrameCanvas({ frame, P, width, height, onClick }) {
   const canvasRef = useRef(null)
+  // Ensure team color is dark enough to be visible on light hardwood
   const DA = (() => {
     const hex = (P||'#C0392B').replace('#','')
     const r2 = parseInt(hex.slice(0,2),16)||0
     const g2 = parseInt(hex.slice(2,4),16)||0
     const b2 = parseInt(hex.slice(4,6),16)||0
     const lum = (0.299*r2 + 0.587*g2 + 0.114*b2)/255
-    if (lum > 0.6) {
-      return '#' + [r2,g2,b2].map(c=>Math.round(c*0.35).toString(16).padStart(2,'0')).join('')
-    }
+    if (lum > 0.6) return '#' + [r2,g2,b2].map(c=>Math.round(c*0.35).toString(16).padStart(2,'0')).join('')
     return P||'#C0392B'
   })()
 
@@ -1494,11 +1493,12 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
     const W = canvas.width, H = canvas.height
     const sx = x => (x/100)*W
     const sy = y => (y/60)*H
-    const r = W * 0.022
+    const r = W * 0.024  // slightly larger player circles
 
+    // Filled arrowhead
     function arrow2(fx, fy, tx, ty, size) {
       const dx=tx-fx, dy=ty-fy, len=Math.sqrt(dx*dx+dy*dy)||1
-      const ux=dx/len, uy=dy/len, a=0.42
+      const ux=dx/len, uy=dy/len, a=0.40
       ctx.beginPath()
       ctx.moveTo(tx,ty)
       ctx.lineTo(tx-size*(ux*Math.cos(a)-uy*Math.sin(a)), ty-size*(uy*Math.cos(a)+ux*Math.sin(a)))
@@ -1506,6 +1506,7 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
       ctx.closePath(); ctx.fill()
     }
 
+    // ⊥ screen bar
     function perpMark2(x,y,dx,dy,size) {
       const len=Math.sqrt(dx*dx+dy*dy)||1
       const px=-dy/len*size, py=dx/len*size
@@ -1514,15 +1515,19 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
 
     ctx.clearRect(0,0,W,H)
 
-    // ── Draw hardwood court ──
-    ctx.fillStyle='#c8904a'; ctx.fillRect(0,0,W,H)
-    ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=1.5
+    // ── Hardwood court background ──
+    ctx.fillStyle='#d4a96a'; ctx.fillRect(0,0,W,H)
+    // Wood grain stripes (subtle)
+    for (let i=0;i<10;i++) {
+      ctx.fillStyle=i%2===0?'rgba(0,0,0,0.03)':'rgba(255,255,255,0.02)'
+      ctx.fillRect(i*(W/10),0,W/10,H)
+    }
+    // Court lines — white, clean
+    ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.8
     ctx.strokeRect(sx(4),sy(2),sx(92),sy(56))
-    // Half court
     ctx.beginPath(); ctx.moveTo(sx(4),sy(55)); ctx.lineTo(sx(96),sy(55)); ctx.stroke()
     ctx.beginPath(); ctx.arc(sx(50),sy(55),sx(12),Math.PI,0); ctx.stroke()
-    // Key
-    ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=1.2
+    ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1.4
     ctx.strokeRect(sx(36),sy(2),sx(28),sy(26))
     ctx.beginPath(); ctx.moveTo(sx(36),sy(28)); ctx.lineTo(sx(64),sy(28)); ctx.stroke()
     ctx.beginPath(); ctx.arc(sx(50),sy(28),sx(14),0,Math.PI,false); ctx.stroke()
@@ -1531,121 +1536,82 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
     ctx.beginPath(); ctx.moveTo(sx(94),sy(2)); ctx.lineTo(sx(94),sy(22)); ctx.stroke()
     const r3=Math.sqrt(Math.pow(sx(44),2)+Math.pow(sy(20),2))
     ctx.beginPath(); ctx.arc(sx(50),sy(6),r3,Math.PI*1.08,Math.PI*1.92,false); ctx.stroke()
-    // Basket
-    ctx.fillStyle='#e05020'
-    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2),0,Math.PI*2); ctx.fill()
-    ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.8
-    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2),0,Math.PI*2); ctx.stroke()
-    ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2
-    ctx.beginPath(); ctx.moveTo(sx(40),sy(2.2)); ctx.lineTo(sx(60),sy(2.2)); ctx.stroke()
+    // Basket rim
+    ctx.strokeStyle='rgba(180,60,20,0.9)'; ctx.lineWidth=2
+    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2.2),0,Math.PI*2); ctx.stroke()
+    // Backboard
+    ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2.5
+    ctx.beginPath(); ctx.moveTo(sx(40),sy(2)); ctx.lineTo(sx(60),sy(2)); ctx.stroke()
     // Lane dots
-    ctx.fillStyle='rgba(255,255,255,0.35)'
+    ctx.fillStyle='rgba(255,255,255,0.4)'
     ;[[36,16],[36,20],[36,24],[64,16],[64,20],[64,24]].forEach(([bx,by])=>{
-      ctx.beginPath(); ctx.arc(sx(bx),sy(by),sx(0.8),0,Math.PI*2); ctx.fill()
+      ctx.beginPath(); ctx.arc(sx(bx),sy(by),sx(0.7),0,Math.PI*2); ctx.fill()
     })
 
-    const players = frame.players || []
-    // arrows live on the frame top-level: frame.arrows = [{from,to,type,color}]
+    // Offense-only: filter out defenders
+    const players = (frame.players || []).filter(p => p.role !== 'def')
     const frameArrows = frame.arrows || []
 
-    // ── Draw arrows/lines FIRST (under player circles) ──
+    // ── ARROWS first (drawn under player circles) ──
+    // RED  = ball movement: pass (arced solid red) + dribble (solid red line)
+    // BLUE = player movement without ball: cut
+    // RED  = screen line + ⊥ bar
+
     frameArrows.forEach(arr => {
-      {
-        const fx=sx(arr.from[0]), fy=sy(arr.from[1])
-        const tx=sx(arr.to[0]), ty=sy(arr.to[1])
-        const type = arr.type || 'cut'
-        if (type === 'pass') {
-          // Dashed yellow pass line
-          ctx.strokeStyle='rgba(255,220,50,0.95)'; ctx.lineWidth=2; ctx.setLineDash([6,4])
-          ctx.beginPath(); ctx.moveTo(fx,fy)
-          const steps=20
-          const passingToward = ty < fy
-          const arcDir = passingToward ? 1 : -1
-          for (let i=1;i<=steps;i++) {
-            const f2=i/steps
-            ctx.lineTo(fx+(tx-fx)*f2, fy+(ty-fy)*f2+arcDir*sy(6)*f2*(1-f2)*4)
-          }
-          ctx.stroke(); ctx.setLineDash([])
-          ctx.fillStyle='rgba(255,220,50,0.95)'
-          arrow2(fx,fy,tx,ty,r*1.8)
-        } else if (type === 'dribble') {
-          // Wavy amber line
-          ctx.strokeStyle='rgba(245,158,11,0.95)'; ctx.lineWidth=2.2; ctx.setLineDash([])
-          ctx.beginPath(); ctx.moveTo(fx,fy)
-          const steps2=16
-          for (let i=1;i<=steps2;i++) {
-            const f2=i/steps2
-            const wave=Math.sin(f2*Math.PI*5)*r*0.7
-            const perp={x:-(ty-fy),y:tx-fx}
-            const pLen=Math.sqrt(perp.x*perp.x+perp.y*perp.y)||1
-            ctx.lineTo(fx+(tx-fx)*f2+perp.x/pLen*wave, fy+(ty-fy)*f2+perp.y/pLen*wave)
-          }
-          ctx.stroke()
-          ctx.fillStyle='rgba(245,158,11,0.95)'
-          arrow2(fx,fy,tx,ty,r*1.8)
-        } else if (type === 'screen') {
-          // Solid line + ⊥ bar
-          ctx.strokeStyle='rgba(200,200,200,0.9)'; ctx.lineWidth=2.2; ctx.setLineDash([])
-          ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke()
-          ctx.strokeStyle='rgba(220,220,220,0.95)'; ctx.lineWidth=3.0
-          perpMark2(tx,ty,tx-fx,ty-fy,r*2.0)
-        } else {
-          // Cut — solid white line with arrowhead
-          const cutColor = arr.color || 'rgba(255,255,255,0.92)'
-          ctx.strokeStyle=cutColor; ctx.lineWidth=2.2; ctx.setLineDash([])
-          ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke()
-          ctx.fillStyle=cutColor; ctx.strokeStyle=cutColor
-          arrow2(fx,fy,tx,ty,r*1.9)
+      if (!arr.from || !arr.to) return
+      const fx=sx(arr.from[0]), fy=sy(arr.from[1])
+      const tx=sx(arr.to[0]), ty=sy(arr.to[1])
+      const type = arr.type || 'cut'
+
+      if (type === 'pass') {
+        // Curved solid red arc — FastDraw style
+        const passingToward = ty < fy
+        const arcDir = passingToward ? 1 : -1
+        ctx.strokeStyle='rgba(220,40,40,0.95)'; ctx.lineWidth=3; ctx.setLineDash([])
+        ctx.beginPath(); ctx.moveTo(fx,fy)
+        const steps=24
+        for (let i=1;i<=steps;i++) {
+          const f2=i/steps
+          ctx.lineTo(fx+(tx-fx)*f2, fy+(ty-fy)*f2+arcDir*sy(7)*f2*(1-f2)*4)
         }
+        ctx.stroke()
+        ctx.fillStyle='rgba(220,40,40,0.95)'
+        arrow2(fx,fy,tx,ty,r*2.0)
+
+      } else if (type === 'dribble') {
+        // Solid red line with arrowhead (dribble drive)
+        ctx.strokeStyle='rgba(220,40,40,0.95)'; ctx.lineWidth=3; ctx.setLineDash([])
+        ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke()
+        ctx.fillStyle='rgba(220,40,40,0.95)'
+        arrow2(fx,fy,tx,ty,r*2.0)
+
+      } else if (type === 'screen') {
+        // Solid red line to screen spot + ⊥ perpendicular bar
+        ctx.strokeStyle='rgba(220,40,40,0.9)'; ctx.lineWidth=2.5; ctx.setLineDash([])
+        ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke()
+        ctx.strokeStyle='rgba(220,40,40,0.95)'; ctx.lineWidth=3.5
+        perpMark2(tx,ty,tx-fx,ty-fy,r*2.2)
+
+      } else {
+        // Cut — solid blue arrow (player without ball)
+        ctx.strokeStyle='rgba(40,90,210,0.95)'; ctx.lineWidth=3; ctx.setLineDash([])
+        ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke()
+        ctx.fillStyle='rgba(40,90,210,0.95)'
+        arrow2(fx,fy,tx,ty,r*2.0)
       }
     })
 
-    // ── Draw defender movement trails (dashed gray) ──
-    players.filter(p=>p.role==='def' && p.trail).forEach(p => {
-      const trail = p.trail
-      if (trail.length < 2) return
-      ctx.strokeStyle='rgba(110,110,130,0.6)'; ctx.lineWidth=1.4; ctx.setLineDash([4,4])
-      ctx.beginPath(); ctx.moveTo(sx(trail[0][0]),sy(trail[0][1]))
-      for (let i=1;i<trail.length;i++) ctx.lineTo(sx(trail[i][0]),sy(trail[i][1]))
-      ctx.stroke(); ctx.setLineDash([])
-      const ep=trail[trail.length-1], pp=trail[trail.length-2]
-      ctx.fillStyle='rgba(110,110,130,0.65)'; ctx.strokeStyle='rgba(110,110,130,0.65)'; ctx.lineWidth=1
-      arrow2(sx(pp[0]),sy(pp[1]),sx(ep[0]),sy(ep[1]),r*1.2)
-    })
-
-    // ── Draw players on top ──
+    // ── PLAYERS (offense only, all same team color) ──
     players.forEach(p => {
       const px=sx(p.x), py=sy(p.y)
-      if (p.role === 'def') {
-        // X mark for defenders
-        const xs=r*0.85
-        ctx.strokeStyle='rgba(70,70,80,0.95)'; ctx.lineWidth=2.2
-        ctx.beginPath()
-        ctx.moveTo(px-xs,py-xs); ctx.lineTo(px+xs,py+xs)
-        ctx.moveTo(px+xs,py-xs); ctx.lineTo(px-xs,py+xs)
-        ctx.stroke()
-        if (p.label) {
-          ctx.fillStyle='rgba(160,160,180,0.85)'
-          ctx.font=`${Math.round(r*0.72)}px sans-serif`
-          ctx.textAlign='center'; ctx.textBaseline='middle'
-          ctx.fillText(p.label,px,py+xs+r*0.8)
-        }
-      } else {
-        // Numbered circle for offense
-        const isBH=(p.role2==='ball')
-        const isShoot=(p.role2==='shooter')
-        if (isBH||isShoot) {
-          ctx.fillStyle=isBH?'rgba(245,158,11,0.18)':'rgba(74,222,128,0.12)'
-          ctx.beginPath(); ctx.arc(px,py,r*2.8,0,Math.PI*2); ctx.fill()
-        }
-        ctx.fillStyle=isBH?'#f59e0b':isShoot?'#4ade80':DA
-        ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.lineWidth=2.2
-        ctx.beginPath(); ctx.arc(px,py,r*1.05,0,Math.PI*2); ctx.fill(); ctx.stroke()
-        ctx.fillStyle=(isBH||isShoot)?'#111':'white'
-        ctx.font=`bold ${Math.round(r*1.15)}px sans-serif`
-        ctx.textAlign='center'; ctx.textBaseline='middle'
-        ctx.fillText(p.label||'',px,py)
-      }
+      // Filled team-color circle, white border, white number
+      ctx.fillStyle=DA
+      ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.lineWidth=2.5
+      ctx.beginPath(); ctx.arc(px,py,r*1.1,0,Math.PI*2); ctx.fill(); ctx.stroke()
+      ctx.fillStyle='white'
+      ctx.font=`bold ${Math.round(r*1.2)}px sans-serif`
+      ctx.textAlign='center'; ctx.textBaseline='middle'
+      ctx.fillText(p.label||'',px,py)
     })
   }, [frame, P, width, height])
 
@@ -1668,7 +1634,7 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const touchStartX = useRef(null)
-  const cacheKey = 'coachiq_bbframes_v2_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
+  const cacheKey = 'coachiq_bbframes_v3_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
 
   useEffect(() => {
     // Use preloaded frames if provided
@@ -1685,31 +1651,40 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
   async function generateFrames() {
     setLoading(true); setError(null)
     try {
-      const frameShape = '{"label":"Phase N","description":"what happens in this phase","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off","role2":"ball"},{"id":"SG","label":"2","x":75,"y":42,"role":"off","role2":"move"},{"id":"SF","label":"3","x":84,"y":32,"role":"off","role2":"move"},{"id":"PF","label":"4","x":62,"y":18,"role":"off","role2":"move"},{"id":"C5","label":"5","x":50,"y":12,"role":"off","role2":"move"},{"id":"d1","label":"X1","x":50,"y":48,"role":"def"},{"id":"d2","label":"X2","x":75,"y":45,"role":"def"},{"id":"d3","label":"X3","x":84,"y":35,"role":"def"},{"id":"d4","label":"X4","x":62,"y":21,"role":"def"},{"id":"d5","label":"X5","x":50,"y":15,"role":"def"}],"arrows":[{"from":[50,45],"to":[72,32],"type":"pass"},{"from":[75,42],"to":[68,22],"type":"cut","color":"rgba(255,255,255,0.9)"}]}'
-      const prompt = 'You are an elite basketball play diagram engine. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
-        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=4 x=50 (TOP). Attack UPWARD = lower y.' +
-        '\nHALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders 2-4 units below their man.' +
-        '\n\nFRAMES: Each frame = one phase of the play. 2 frames minimum, 3 if the play has 3 distinct actions.' +
-        '\nFrame 1 = starting positions + what happens FIRST (first pass, first dribble move, first cut).' +
-        '\nFrame 2 = positions AFTER frame 1 + what happens SECOND.' +
-        '\nFrame 3 = positions AFTER frame 2 + finishing action (shot, drive to rim, final pass).' +
-        '\n\nARROWS — the frame.arrows array is the MOST IMPORTANT part. EVERY frame MUST have at least 1-3 arrows. Empty arrows arrays are WRONG.' +
-        '\nEach arrow: {"from":[x,y], "to":[x,y], "type":"pass|dribble|cut|screen", "color":"optional"}' +
-        '\n• type "pass": from the player WITH the ball TO the receiver. Dashed yellow arc.' +
-        '\n• type "dribble": from where ball handler STARTS to where they END UP. Wavy amber line. Use for drives, dribble moves, penetration.' +
-        '\n• type "cut": from where a player WITHOUT ball STARTS to where they CUT TO. Solid white arrow.' +
-        '\n• type "screen": from screener START to screen SET location (adjacent to defender). Shows ⊥ bar.' +
-        '\n\nCONCRETE EXAMPLES by play type:' +
-        '\nDRIVE play Frame 1: PG has ball at [50,46]. arrows=[{"from":[50,46],"to":[50,22],"type":"dribble"},{"from":[75,42],"to":[85,26],"type":"cut"},{"from":[84,32],"to":[84,16],"type":"cut"}]' +
-        '\nDRIVE play Frame 2: PG now at [50,22] in paint. arrows=[{"from":[50,22],"to":[82,32],"type":"pass"},{"from":[82,16],"to":[82,8],"type":"cut"}] OR if drive finishes: arrows=[{"from":[50,22],"to":[50,10],"type":"dribble"}]' +
-        '\nPICK AND ROLL Frame 1: 5 sets screen for 1. arrows=[{"from":[50,14],"to":[50,30],"type":"screen"},{"from":[50,46],"to":[62,32],"type":"dribble"}]' +
-        '\nPICK AND ROLL Frame 2: 1 off screen, 5 rolls. arrows=[{"from":[62,32],"to":[50,18],"type":"dribble"},{"from":[50,30],"to":[50,10],"type":"cut"}]' +
-        '\n5-OUT MOTION Frame 1: 1 passes then cuts. arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,12],"type":"cut"}]' +
-        '\n5-OUT MOTION Frame 2: receiver has ball, others fill. arrows=[{"from":[76,42],"to":[62,24],"type":"dribble"},{"from":[84,32],"to":[76,46],"type":"cut"},{"from":[28,38],"to":[50,46],"type":"cut"}]' +
-        '\n\nPLAYER role2: "ball"=has ball (1 per frame). "shooter"=scoring option in final frame. "move"=everyone else.' +
-        '\nDEFENDER TRAILS: reacting defenders get "trail":[[startX,startY],[endX,endY]] on their player object.' +
-        '\nSPORT IQ: Driver at y<18 finishes at rim (no backward pass). Passes flow toward basket/open space.' +
-        '\nThe arrows MUST reflect what the play description says is happening. Read the play description carefully and draw exactly those actions.' +
+      const frameShape = '{"label":"Phase N","description":"one sentence describing this phase","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off"},{"id":"SG","label":"2","x":75,"y":42,"role":"off"},{"id":"SF","label":"3","x":84,"y":32,"role":"off"},{"id":"PF","label":"4","x":62,"y":18,"role":"off"},{"id":"C5","label":"5","x":50,"y":12,"role":"off"}],"arrows":[{"from":[50,45],"to":[76,42],"type":"pass"},{"from":[50,45],"to":[50,12],"type":"cut"}]}'
+      const prompt = 'You are an elite basketball play diagram engine used by youth coaches. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=4 x=50 (TOP of diagram). Attack UPWARD = lower y values.' +
+        '\nHALF COURT starting spots: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16.' +
+        '\n\nOFFENSE ONLY — do NOT include defenders. Players array = 5 offensive players only. role field = "off" for all.' +
+        '\n\nFRAMES: 2 frames minimum, 3 if the play has 3 distinct phases.' +
+        '\nFrame 1 = starting positions + FIRST action arrows.' +
+        '\nFrame 2 = positions AFTER frame 1 completes + SECOND action arrows.' +
+        '\nFrame 3 = positions AFTER frame 2 + finishing action (shot, drive, final pass).' +
+        '\n\nARROWS — frame.arrows is MANDATORY. Every frame needs 1-4 arrows showing what happens in that phase.' +
+        '\nArrow format: {"from":[x,y], "to":[x,y], "type":"TYPE"}' +
+        '\nTYPE VALUES:' +
+        '\n  "pass"    = ball moves from one player to another (draws curved RED arc)' +
+        '\n  "dribble" = ball handler moves with the ball (draws solid RED line)' +
+        '\n  "cut"     = player moves WITHOUT the ball (draws solid BLUE arrow)' +
+        '\n  "screen"  = player moves to set a screen (draws RED line + ⊥ bar at endpoint)' +
+        '\n\nCRITICAL: The "from" and "to" coordinates must match the player positions in that frame.' +
+        '\nThe arrow FROM must start at a player position. The arrow TO must end where the action ends.' +
+        '\n\nCONCRETE EXAMPLES:' +
+        '\nPASS AND CUT (5-out) Frame 1: PG at [50,46] passes to SG at [76,42], then cuts to basket.' +
+        '\n  arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,10],"type":"cut"}]' +
+        '\nPASS AND CUT Frame 2: SG has ball at [76,42], adjacent players fill.' +
+        '\n  arrows=[{"from":[76,42],"to":[84,28],"type":"dribble"},{"from":[84,32],"to":[76,46],"type":"cut"}]' +
+        '\nPICK AND ROLL Frame 1: C moves to set screen for PG.' +
+        '\n  arrows=[{"from":[50,12],"to":[50,32],"type":"screen"},{"from":[50,46],"to":[64,34],"type":"dribble"}]' +
+        '\nPICK AND ROLL Frame 2: PG off screen, C rolls to basket.' +
+        '\n  arrows=[{"from":[64,34],"to":[50,20],"type":"dribble"},{"from":[50,32],"to":[50,10],"type":"cut"}]' +
+        '\nDRIVE Frame 1: PG drives to paint, wings space.' +
+        '\n  arrows=[{"from":[50,46],"to":[50,20],"type":"dribble"},{"from":[76,42],"to":[84,22],"type":"cut"}]' +
+        '\nDRIVE Frame 2: PG at rim, kick to corner.' +
+        '\n  arrows=[{"from":[50,20],"to":[84,38],"type":"pass"}]' +
+        '\n\nSPORT IQ: If PG drives to y<20 they finish OR kick out — never pass backward to half court.' +
+        '\nPasses go TOWARD the basket or open space. Cuts go toward the basket.' +
+        '\nRead the play description carefully. Every arrow must reflect exactly what the play says is happening.' +
         '\n\nReturn ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
       const raw = await callAI(prompt, null, false)
       const data = parseJSON(raw)
@@ -5021,7 +4996,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               let prompt
               if (isBB) {
                 // Basketball uses frames format — skip old animated template, use frames JSON
-                const bbFramesCacheKey = 'coachiq_bbframes_v2_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+                const bbFramesCacheKey = 'coachiq_bbframes_v3_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
                 try {
                   const cached = sessionStorage.getItem(bbFramesCacheKey)
                   if (cached) {
@@ -5030,20 +5005,18 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                     return
                   }
                 } catch(e) {}
-                const frameShape = '{"label":"Phase N","description":"one sentence","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off","role2":"ball"},{"id":"SG","label":"2","x":75,"y":42,"role":"off","role2":"move"},{"id":"SF","label":"3","x":84,"y":32,"role":"off","role2":"move"},{"id":"PF","label":"4","x":62,"y":18,"role":"off","role2":"move"},{"id":"C5","label":"5","x":50,"y":12,"role":"off","role2":"move"},{"id":"d1","label":"X1","x":50,"y":48,"role":"def"},{"id":"d2","label":"X2","x":75,"y":45,"role":"def"},{"id":"d3","label":"X3","x":84,"y":35,"role":"def"},{"id":"d4","label":"X4","x":62,"y":21,"role":"def"},{"id":"d5","label":"X5","x":50,"y":15,"role":"def"}],"arrows":[{"from":[50,45],"to":[72,32],"type":"pass"},{"from":[75,42],"to":[68,22],"type":"cut"}]}'
-                prompt = 'Elite basketball diagram engine. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+                const frameShape = '{"label":"Phase N","description":"one sentence","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off"},{"id":"SG","label":"2","x":75,"y":42,"role":"off"},{"id":"SF","label":"3","x":84,"y":32,"role":"off"},{"id":"PF","label":"4","x":62,"y":18,"role":"off"},{"id":"C5","label":"5","x":50,"y":12,"role":"off"}],"arrows":[{"from":[50,45],"to":[76,42],"type":"pass"},{"from":[50,45],"to":[50,12],"type":"cut"}]}'
+                prompt = 'Elite basketball diagram engine for youth coaches. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
                   ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket y=4 x=50 TOP. Attack UPWARD = lower y.' +
-                  ' HALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders 2-4 units below man.' +
-                  ' FRAMES: Frame1=starting positions+first action. Frame2=positions after frame1+next action. Frame3=finishing action.' +
-                  ' ARROWS — frame.arrows MUST have 1-3 arrows per frame. Empty arrows array is WRONG.' +
-                  ' Arrow format: {"from":[x,y],"to":[x,y],"type":"pass|dribble|cut|screen"}' +
-                  ' pass=dashed yellow arc(ball moves). dribble=wavy amber(ball handler moves with ball). cut=solid white arrow(player moves without ball). screen=line+perp bar.' +
-                  ' EXAMPLES: Drive: arrows=[{"from":[50,46],"to":[50,20],"type":"dribble"},{"from":[76,42],"to":[84,20],"type":"cut"}]' +
-                  ' PnR: Frame1 arrows=[{"from":[50,14],"to":[50,30],"type":"screen"},{"from":[50,46],"to":[62,32],"type":"dribble"}]' +
-                  ' 5-out: Frame1 arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,12],"type":"cut"}]' +
-                  ' role2: "ball"=has ball. "shooter"=scoring option final frame. "move"=others. trail:[[x,y],[x,y]] on reacting defenders.' +
-                  ' Read the play description carefully — arrows MUST show exactly those actions.' +
-                  ' SPORT IQ: Driver y<18 finishes at rim. Passes toward basket/open space only.' +
+                  ' HALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16.' +
+                  ' OFFENSE ONLY — no defenders in players array.' +
+                  ' FRAMES: Frame1=starting spots+first action. Frame2=positions after frame1+second action. Frame3=finish if needed.' +
+                  ' ARROWS are MANDATORY — every frame needs 1-4 arrows. Arrow: {"from":[x,y],"to":[x,y],"type":"pass|dribble|cut|screen"}' +
+                  ' pass=ball moves to receiver(RED arc). dribble=ball handler moves with ball(RED line). cut=player without ball moves(BLUE arrow). screen=player sets screen(RED+perp bar).' +
+                  ' EXAMPLES: 5-out Frame1: arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,10],"type":"cut"}]' +
+                  ' PnR Frame1: arrows=[{"from":[50,12],"to":[50,30],"type":"screen"},{"from":[50,46],"to":[64,34],"type":"dribble"}]' +
+                  ' Drive Frame1: arrows=[{"from":[50,46],"to":[50,20],"type":"dribble"},{"from":[76,42],"to":[84,22],"type":"cut"}]' +
+                  ' FROM coord = player starting position. TO coord = where action ends. Read play description — arrows must match.' +
                   ' Return ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
               } else if (isBSB) {
                 const isSoftballBg = play._sport === 'Softball'
