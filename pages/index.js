@@ -909,12 +909,12 @@ const SPORTS = {
       {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
       {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
-      {id:'focus',label:'Offensive Focus',opts:['Half Court','Press Break','Fast Break','End of Game','Zone Attack']},
+      {id:'focus',label:'Offensive Focus',opts:['Half Court','Full Court / Fast Break','Press Break','End of Game','Zone Attack','Secondary Break']},
       {id:'defense',label:'Opponent Defense',opts:['Unknown / Surprise Me','Man-to-Man','2-3 Zone','1-3-1 Zone','Full Court Press','Box-and-One','Multiple / Varies']},
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth basketball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: HALF COURT SET,TRANSITION,PRESS BREAK,OUT OF BOUNDS,QUICK HITTER. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth basketball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: HALF COURT SET,TRANSITION,FULL COURT BREAK,PRESS BREAK,OUT OF BOUNDS,QUICK HITTER. When focus includes Full Court or Fast Break include FULL COURT BREAK plays showing ball from backcourt to finish. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -1780,9 +1780,12 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           ' Include 5 static offensive players as reference (OL at y=42). Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
       }
     } else if (isBasketball) {
-      prompt = 'Generate basketball play diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
-        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 (top). Half court line at y=55. Players attack UPWARD (toward lower y = toward basket).' +
-        ' CRITICAL: ONE player routeName starts with BALL: (has ball), ONE starts with SHOOT: (receives for shot), others use CUT:, MOVE:, or SCREEN:.' +
+      prompt = 'Basketball play diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 center x=50 (top). Half-court line at y=58. Players attack UPWARD (lower y = toward basket).' +
+        ' FULL COURT PLAYS (type FULL COURT BREAK, PRESS BREAK, TRANSITION): Use full court — ball starts y=55-58. PG advances up center. Wings fill sideline lanes x=18 and x=82. Trailer at y=30-40. Defenders sprint back. End positions near basket y=10-25.' +
+        ' HALF COURT PLAYS: PG at x=48-52 y=42-46. SG at x=72-80 y=38-44. SF at x=80-88 y=28-36. PF at x=58-65 y=18-24. C at x=48-52 y=10-16. Defenders 2-3 units toward basket from their man.' +
+        ' SCREEN ACCURACY: Screener path ends ADJACENT to defender they screen (within 3 units). Cutter path passes within 2 units of screener final position then curls to basket. Defender on cutter trails or gets picked (moves same direction as cutter with 0.5 sec delay). Pick and Roll: screener rolls to basket after screen — path continues from screen spot to y=10-14.' +
+        ' ONE routeName starts with BALL:, ONE starts with SHOOT:, others: CUT:, SCREEN:, ROLL:, MOVE:, FILL:. routeYards>0 on primary scorer only.' +
         ' Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
     } else if (isBaseball) {
       prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
@@ -4203,7 +4206,15 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               // Linemen blocking = pathDelay 0
               let prompt
               if (isBB) {
-                prompt = 'Generate basketball play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 (top). Players attack UPWARD (lower y = closer to basket). ONE player routeName starts with BALL:, ONE starts with SHOOT:, others use CUT:, MOVE:, or SCREEN:. Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
+                prompt = 'Basketball play diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 center x=50 (top of diagram). Half-court line at y=58. Players attack UPWARD (lower y = toward basket).' +
+                  ' FULL COURT PLAYS (type FULL COURT BREAK, PRESS BREAK, or TRANSITION): Use full court. Ball starts at y=55-58 (backcourt). Offense advances up. Defense retreats. Show realistic fast break lanes — PG dribbles up center, wings fill sideline lanes at x=20 and x=80, trailer fills at y=30-40. Defenders sprint back to protect basket. End positions: ball handler y=20-30, shooters y=10-20.' +
+                  ' HALF COURT PLAYS: Ball handler (PG) starts at y=40-45. Key y=22. Paint from y=8 to y=22 center x=35-65.' +
+                  ' SCREEN ACCURACY IS CRITICAL: When a player sets a screen, their path ends ADJACENT to the defender they are screening (within 2-4 units). The screener is stationary (short path, routeType block). The player USING the screen must CUT off the screener body — their path passes within 2 units of the screener final position and curls toward the basket. The defender on the cutter must react — show them trailing or getting picked. Example Pick and Roll: PF (screener) moves to x=50 y=30 (ball handler position), path ends there. PG dribbles off screen: path curves from PG start through screener position then attacks basket or pulls up. PF rolls: after screen, path continues to basket at y=8-14.' +
+                  ' PLAYER SPACING: No two players should start within 8 units of each other unless intentional (screens). PG starts at x=45-55 y=42-46. SG at x=70-80 y=38-44. SF at x=80-88 y=28-36. PF at x=55-65 y=18-24. C at x=48-52 y=10-16 (post). Defenders mirror each offensive player — d1 guards PG, d2 guards SG, etc — starting 2-3 units toward basket from their man.' +
+                  ' ONE routeName starts with BALL:, ONE starts with SHOOT: (this player ends near basket or 3pt line), others use CUT:, SCREEN:, ROLL:, MOVE:, or FILL:.' +
+                  ' routeYards > 0 on the primary scoring option only.' +
+                  ' Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
               } else if (isBSB) {
                 prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
               } else if (isFlagBg) {
@@ -4599,7 +4610,14 @@ function PlayCardWithSave({ play, P='#C0392B', S='#002868', al, callAI, parseJSO
 // ─── DEFENSIVE GEN COLLAPSIBLE ────────────────────────────────────────────────
 function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON, defaultOpen=true, playbook, setPlaybook, guestMode=false, setGuestSchemeCount }) {
   const [open, setOpen] = useState(defaultOpen)
-  const [defHistory, setDefHistory] = useState([])
+  // Sport-scoped defensive history — keyed by sport so switching tabs never shows another sport's schemes
+  const [defHistoryBySport, setDefHistoryBySport] = useState({})
+  const defHistory = defHistoryBySport[sport] || []
+  const setDefHistory = (updater) => setDefHistoryBySport(prev => {
+    const cur = prev[sport] || []
+    const next = typeof updater === 'function' ? updater(cur) : updater
+    return { ...prev, [sport]: next }
+  })
   const isFB=sport==='Football', isBB=sport==='Basketball', isBSB=sport==='Baseball', isFF=sport==='Flag Football'
   const ffFields = [
     {id:'format',    label:'Format',                  opts:['5v5','5v5 (Screen Block)','6v6','6v6 (Screen Block)','6v6 + Rusher','7v7','7v7 (Screen Block)']},
@@ -4639,6 +4657,8 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [prevDefSport, setPrevDefSport] = useState(sport)
+  if (sport !== prevDefSport) { setPrevDefSport(sport); setResult(null); setError(''); setFields(initF()) }
 
   async function generate() {
     setLoading(true); setResult(null); setError('')
