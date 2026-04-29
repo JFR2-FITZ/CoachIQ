@@ -1467,6 +1467,362 @@ function SportThumbnail({ sport, P='#C0392B', isDefense=false }) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+
+// ─── BASKETBALL PHASE DIAGRAM SYSTEM ─────────────────────────────────────────
+// Renders static multi-frame basketball diagrams in FastDraw style.
+// Offense = bold numbered circles. Defense = X marks. 
+// Passes = dashed yellow. Cuts = solid white arrows. Screens = ⊥ bar. Dribbles = wavy amber.
+
+function BBFrameCanvas({ frame, P, width, height, onClick }) {
+  const canvasRef = useRef(null)
+  const DA = (() => {
+    const hex = (P||'#C0392B').replace('#','')
+    const r2 = parseInt(hex.slice(0,2),16)||0
+    const g2 = parseInt(hex.slice(2,4),16)||0
+    const b2 = parseInt(hex.slice(4,6),16)||0
+    const lum = (0.299*r2 + 0.587*g2 + 0.114*b2)/255
+    if (lum > 0.6) {
+      return '#' + [r2,g2,b2].map(c=>Math.round(c*0.35).toString(16).padStart(2,'0')).join('')
+    }
+    return P||'#C0392B'
+  })()
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !frame) return
+    const ctx = canvas.getContext('2d')
+    const W = canvas.width, H = canvas.height
+    const sx = x => (x/100)*W
+    const sy = y => (y/60)*H
+    const r = W * 0.022
+
+    function arrow2(fx, fy, tx, ty, size) {
+      const dx=tx-fx, dy=ty-fy, len=Math.sqrt(dx*dx+dy*dy)||1
+      const ux=dx/len, uy=dy/len, a=0.42
+      ctx.beginPath()
+      ctx.moveTo(tx,ty)
+      ctx.lineTo(tx-size*(ux*Math.cos(a)-uy*Math.sin(a)), ty-size*(uy*Math.cos(a)+ux*Math.sin(a)))
+      ctx.lineTo(tx-size*(ux*Math.cos(a)+uy*Math.sin(a)), ty-size*(uy*Math.cos(a)-ux*Math.sin(a)))
+      ctx.closePath(); ctx.fill()
+    }
+
+    function perpMark2(x,y,dx,dy,size) {
+      const len=Math.sqrt(dx*dx+dy*dy)||1
+      const px=-dy/len*size, py=dx/len*size
+      ctx.beginPath(); ctx.moveTo(x-px,y-py); ctx.lineTo(x+px,y+py); ctx.stroke()
+    }
+
+    ctx.clearRect(0,0,W,H)
+
+    // ── Draw hardwood court ──
+    ctx.fillStyle='#c8904a'; ctx.fillRect(0,0,W,H)
+    ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=1.5
+    ctx.strokeRect(sx(4),sy(2),sx(92),sy(56))
+    // Half court
+    ctx.beginPath(); ctx.moveTo(sx(4),sy(55)); ctx.lineTo(sx(96),sy(55)); ctx.stroke()
+    ctx.beginPath(); ctx.arc(sx(50),sy(55),sx(12),Math.PI,0); ctx.stroke()
+    // Key
+    ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=1.2
+    ctx.strokeRect(sx(36),sy(2),sx(28),sy(26))
+    ctx.beginPath(); ctx.moveTo(sx(36),sy(28)); ctx.lineTo(sx(64),sy(28)); ctx.stroke()
+    ctx.beginPath(); ctx.arc(sx(50),sy(28),sx(14),0,Math.PI,false); ctx.stroke()
+    // 3pt arc
+    ctx.beginPath(); ctx.moveTo(sx(6),sy(2)); ctx.lineTo(sx(6),sy(22)); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(sx(94),sy(2)); ctx.lineTo(sx(94),sy(22)); ctx.stroke()
+    const r3=Math.sqrt(Math.pow(sx(44),2)+Math.pow(sy(20),2))
+    ctx.beginPath(); ctx.arc(sx(50),sy(6),r3,Math.PI*1.08,Math.PI*1.92,false); ctx.stroke()
+    // Basket
+    ctx.fillStyle='#e05020'
+    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2),0,Math.PI*2); ctx.fill()
+    ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.8
+    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2),0,Math.PI*2); ctx.stroke()
+    ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2
+    ctx.beginPath(); ctx.moveTo(sx(40),sy(2.2)); ctx.lineTo(sx(60),sy(2.2)); ctx.stroke()
+    // Lane dots
+    ctx.fillStyle='rgba(255,255,255,0.35)'
+    ;[[36,16],[36,20],[36,24],[64,16],[64,20],[64,24]].forEach(([bx,by])=>{
+      ctx.beginPath(); ctx.arc(sx(bx),sy(by),sx(0.8),0,Math.PI*2); ctx.fill()
+    })
+
+    const players = frame.players || []
+
+    // ── Draw arrows/lines FIRST (under player circles) ──
+    players.forEach(p => {
+      if (!p.arrows) return
+      p.arrows.forEach(arr => {
+        const fx=sx(arr.from[0]), fy=sy(arr.from[1])
+        const tx=sx(arr.to[0]), ty=sy(arr.to[1])
+        const type = arr.type || 'cut'
+        if (type === 'pass') {
+          // Dashed yellow pass line
+          ctx.strokeStyle='rgba(255,220,50,0.95)'; ctx.lineWidth=2; ctx.setLineDash([6,4])
+          ctx.beginPath(); ctx.moveTo(fx,fy)
+          const steps=20
+          const passingToward = ty < fy
+          const arcDir = passingToward ? 1 : -1
+          for (let i=1;i<=steps;i++) {
+            const f2=i/steps
+            ctx.lineTo(fx+(tx-fx)*f2, fy+(ty-fy)*f2+arcDir*sy(6)*f2*(1-f2)*4)
+          }
+          ctx.stroke(); ctx.setLineDash([])
+          ctx.fillStyle='rgba(255,220,50,0.95)'
+          arrow2(fx,fy,tx,ty,r*1.8)
+        } else if (type === 'dribble') {
+          // Wavy amber line
+          ctx.strokeStyle='rgba(245,158,11,0.95)'; ctx.lineWidth=2.2; ctx.setLineDash([])
+          ctx.beginPath(); ctx.moveTo(fx,fy)
+          const steps2=16
+          for (let i=1;i<=steps2;i++) {
+            const f2=i/steps2
+            const wave=Math.sin(f2*Math.PI*5)*r*0.7
+            const perp={x:-(ty-fy),y:tx-fx}
+            const pLen=Math.sqrt(perp.x*perp.x+perp.y*perp.y)||1
+            ctx.lineTo(fx+(tx-fx)*f2+perp.x/pLen*wave, fy+(ty-fy)*f2+perp.y/pLen*wave)
+          }
+          ctx.stroke()
+          ctx.fillStyle='rgba(245,158,11,0.95)'
+          arrow2(fx,fy,tx,ty,r*1.8)
+        } else if (type === 'screen') {
+          // Solid line + ⊥ bar
+          ctx.strokeStyle='rgba(200,200,200,0.9)'; ctx.lineWidth=2.2; ctx.setLineDash([])
+          ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke()
+          ctx.strokeStyle='rgba(220,220,220,0.95)'; ctx.lineWidth=3.0
+          perpMark2(tx,ty,tx-fx,ty-fy,r*2.0)
+        } else {
+          // Cut — solid white line with arrowhead
+          const cutColor = arr.color || 'rgba(255,255,255,0.92)'
+          ctx.strokeStyle=cutColor; ctx.lineWidth=2.2; ctx.setLineDash([])
+          ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke()
+          ctx.fillStyle=cutColor; ctx.strokeStyle=cutColor
+          arrow2(fx,fy,tx,ty,r*1.9)
+        }
+      })
+    })
+
+    // ── Draw defender movement trails (dashed gray) ──
+    players.filter(p=>p.role==='def' && p.trail).forEach(p => {
+      const trail = p.trail
+      if (trail.length < 2) return
+      ctx.strokeStyle='rgba(110,110,130,0.6)'; ctx.lineWidth=1.4; ctx.setLineDash([4,4])
+      ctx.beginPath(); ctx.moveTo(sx(trail[0][0]),sy(trail[0][1]))
+      for (let i=1;i<trail.length;i++) ctx.lineTo(sx(trail[i][0]),sy(trail[i][1]))
+      ctx.stroke(); ctx.setLineDash([])
+      const ep=trail[trail.length-1], pp=trail[trail.length-2]
+      ctx.fillStyle='rgba(110,110,130,0.65)'; ctx.strokeStyle='rgba(110,110,130,0.65)'; ctx.lineWidth=1
+      arrow2(sx(pp[0]),sy(pp[1]),sx(ep[0]),sy(ep[1]),r*1.2)
+    })
+
+    // ── Draw players on top ──
+    players.forEach(p => {
+      const px=sx(p.x), py=sy(p.y)
+      if (p.role === 'def') {
+        // X mark for defenders
+        const xs=r*0.85
+        ctx.strokeStyle='rgba(70,70,80,0.95)'; ctx.lineWidth=2.2
+        ctx.beginPath()
+        ctx.moveTo(px-xs,py-xs); ctx.lineTo(px+xs,py+xs)
+        ctx.moveTo(px+xs,py-xs); ctx.lineTo(px-xs,py+xs)
+        ctx.stroke()
+        if (p.label) {
+          ctx.fillStyle='rgba(160,160,180,0.85)'
+          ctx.font=`${Math.round(r*0.72)}px sans-serif`
+          ctx.textAlign='center'; ctx.textBaseline='middle'
+          ctx.fillText(p.label,px,py+xs+r*0.8)
+        }
+      } else {
+        // Numbered circle for offense
+        const isBH=(p.role2==='ball')
+        const isShoot=(p.role2==='shooter')
+        if (isBH||isShoot) {
+          ctx.fillStyle=isBH?'rgba(245,158,11,0.18)':'rgba(74,222,128,0.12)'
+          ctx.beginPath(); ctx.arc(px,py,r*2.8,0,Math.PI*2); ctx.fill()
+        }
+        ctx.fillStyle=isBH?'#f59e0b':isShoot?'#4ade80':DA
+        ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.lineWidth=2.2
+        ctx.beginPath(); ctx.arc(px,py,r*1.05,0,Math.PI*2); ctx.fill(); ctx.stroke()
+        ctx.fillStyle=(isBH||isShoot)?'#111':'white'
+        ctx.font=`bold ${Math.round(r*1.15)}px sans-serif`
+        ctx.textAlign='center'; ctx.textBaseline='middle'
+        ctx.fillText(p.label||'',px,py)
+      }
+    })
+  }, [frame, P, width, height])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width||560}
+      height={height||336}
+      style={{ width:'100%', display:'block', cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
+    />
+  )
+}
+
+// ── BBPhaseViewer: strip of frame thumbnails + fullscreen modal ───────────────
+function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [activeFrame, setActiveFrame] = useState(0)
+  const [parsedFrames, setParsedFrames] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const touchStartX = useRef(null)
+  const cacheKey = 'coachiq_bbframes_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
+
+  useEffect(() => {
+    // Use preloaded frames if provided
+    if (frames && frames.length) { setParsedFrames(frames); return }
+    // Check session cache
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) { setParsedFrames(JSON.parse(cached)); return }
+    } catch(e) {}
+    // Auto-generate
+    generateFrames()
+  }, [play?.name])
+
+  async function generateFrames() {
+    setLoading(true); setError(null)
+    try {
+      const frameShape = '{"label":"Phase N","description":"what happens in this phase","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off","role2":"ball"},{"id":"SG","label":"2","x":75,"y":42,"role":"off","role2":"move"},{"id":"SF","label":"3","x":84,"y":32,"role":"off","role2":"move"},{"id":"PF","label":"4","x":62,"y":18,"role":"off","role2":"move"},{"id":"C5","label":"5","x":50,"y":12,"role":"off","role2":"move"},{"id":"d1","label":"X1","x":50,"y":48,"role":"def"},{"id":"d2","label":"X2","x":75,"y":45,"role":"def"},{"id":"d3","label":"X3","x":84,"y":35,"role":"def"},{"id":"d4","label":"X4","x":62,"y":21,"role":"def"},{"id":"d5","label":"X5","x":50,"y":15,"role":"def"}],"arrows":[{"from":[50,45],"to":[72,32],"type":"pass"},{"from":[75,42],"to":[68,22],"type":"cut","color":"rgba(255,255,255,0.9)"}]}'
+      const prompt = 'You are an elite basketball play diagram generator. Generate 2-3 sequential phase frames for this basketball play: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=4 x=50 (TOP of diagram). Players attack UPWARD = lower y.' +
+        '\n\nPLAYER POSITIONS — Half court standard: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders start 2-4 units below their man (toward basket).' +
+        '\n\nFRAME RULES — Each frame is a STATIC SNAPSHOT showing exactly what happens in that phase:' +
+        '\n• Frame 1: Starting positions + first action (first pass or first movement). Player positions = where they START. Arrows = what HAPPENS in this phase.' +
+        '\n• Frame 2: Positions = where players ARE after phase 1. Arrows = what happens next (cut off screen, roll to basket, fill spot, etc.).' +
+        '\n• Frame 3 (if needed): Positions = after phase 2. Arrows = finishing action (shot, drive, final pass).' +
+        '\n\nARROW TYPES — must be accurate to the play:' +
+        '\n• type:"pass" = dashed yellow arc (ball moves from one player to another)' +
+        '\n• type:"dribble" = wavy amber line (ball handler moves with ball)' +
+        '\n• type:"cut" = solid white arrow (player moves WITHOUT ball)' +
+        '\n• type:"screen" = solid line ending in ⊥ bar (player goes to set a screen)' +
+        '\n\nPLAYER role2 field:' +
+        '\n• "ball" = player currently has the ball (amber circle)' +
+        '\n• "shooter" = player who receives for the scoring opportunity (green circle)' +
+        '\n• "move" = all other offensive players (team color circle)' +
+        '\nOnly ONE player has role2:"ball" per frame. Only ONE has role2:"shooter" in the final scoring frame.' +
+        '\n\nDEFENDER TRAILS — defenders who REACT get a "trail" array showing start and end position: "trail":[[startX,startY],[endX,endY]]. Shown as dashed gray. Defenders not reacting get no trail field.' +
+        '\n\nSPORT IQ — NON-NEGOTIABLE:' +
+        '\n• A player who has beaten their man at the rim (y<18) finishes the play — they do NOT pass backward to the perimeter.' +
+        '\n• Passes flow TOWARD open space or basket, never backward from paint to half-court.' +
+        '\n• Screener sets screen body-adjacent to defender (within 3 units). Cutter drives off screen shoulder.' +
+        '\n• Ball handler defender trails through screen — trail shows them 3-5 units behind the ball handler.' +
+        '\n• Screener defender hedges: trail shows step outward toward ball handler then recovery.' +
+        '\n• In 5-out motion: passer immediately cuts to basket after passing (y=10-14).' +
+        '\n\nReturn ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
+      const raw = await callAI(prompt, null, false)
+      const data = parseJSON(raw)
+      if (!data || !data.frames || !data.frames.length) throw new Error('No frames returned')
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(data.frames)) } catch(e) {}
+      setParsedFrames(data.frames)
+    } catch(e) {
+      setError(e.message || 'Failed to generate diagram')
+    }
+    setLoading(false)
+  }
+
+  function openModal(idx) { setActiveFrame(idx); setModalOpen(true) }
+  function closeModal() { setModalOpen(false) }
+  function prevFrame() { setActiveFrame(i => Math.max(0, i-1)) }
+  function nextFrame() { setActiveFrame(i => Math.min((parsedFrames?.length||1)-1, i+1)) }
+
+  function onTouchStart(e) { touchStartX.current = e.touches[0].clientX }
+  function onTouchEnd(e) {
+    if (touchStartX.current === null) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    if (dx < -40) nextFrame()
+    else if (dx > 40) prevFrame()
+    touchStartX.current = null
+  }
+
+  if (loading) return (
+    <div style={{ padding:'20px 16px', textAlign:'center', background:'#161922', borderRadius:6, border:'1px solid #1e2330' }}>
+      <div style={{ width:18, height:18, borderRadius:'50%', border:`3px solid ${P}`, borderTopColor:'#0f1219', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }}/>
+      <div style={{ fontSize:11, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700 }}>Building play diagram...</div>
+    </div>
+  )
+  if (error) return <div style={{ padding:10, color:'#ef4444', fontSize:11, background:'rgba(239,68,68,0.08)', borderRadius:6, border:'1px solid rgba(239,68,68,0.2)' }}>{error}</div>
+  if (!parsedFrames) return null
+
+  return (
+    <>
+      {/* ── Frame thumbnail strip ── */}
+      <div style={{ background:'#0f1219', borderRadius:8, border:`1px solid ${hexToRgba(P,0.25)}`, overflow:'hidden' }}>
+        <div style={{ padding:'6px 10px', background:'#161922', borderBottom:'1px solid #1e2330', display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:12, letterSpacing:1, color:'#f2f4f8', flex:1, textTransform:'uppercase' }}>{play.name}</span>
+          <span style={{ fontSize:9, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1, textTransform:'uppercase' }}>{play.type}</span>
+        </div>
+        <div style={{ display:'flex', gap:2, padding:6 }}>
+          {parsedFrames.map((frame, idx) => (
+            <div key={idx} onClick={()=>openModal(idx)} style={{ flex:1, cursor:'pointer', borderRadius:5, overflow:'hidden', border:`1px solid ${hexToRgba(P,0.3)}`, position:'relative' }}>
+              <BBFrameCanvas frame={frame} P={P} width={280} height={168} />
+              <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(0,0,0,0.55)', padding:'3px 6px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, color:'white', letterSpacing:'0.5px', textTransform:'uppercase' }}>Phase {idx+1}</span>
+                <span style={{ fontSize:8, color:'rgba(255,255,255,0.55)' }}>tap to enlarge</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding:'4px 10px 6px', textAlign:'center' }}>
+          <span style={{ fontSize:9, color:'#5a6480', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>TAP ANY PHASE TO ENLARGE • SWIPE TO NAVIGATE</span>
+        </div>
+      </div>
+
+      {/* ── Fullscreen modal ── */}
+      {modalOpen && (
+        <div
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.92)', zIndex:9999, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={closeModal}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          {/* Header */}
+          <div style={{ width:'100%', maxWidth:600, display:'flex', alignItems:'center', gap:8, marginBottom:10 }} onClick={e=>e.stopPropagation()}>
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, letterSpacing:1, color:'#f2f4f8', fontWeight:700, textTransform:'uppercase' }}>{play.name}</div>
+              <div style={{ fontSize:10, color:'#8a94b0', marginTop:1 }}>{parsedFrames[activeFrame]?.description || ''}</div>
+            </div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, color:'#8a94b0', fontWeight:600 }}>
+              Phase {activeFrame+1} of {parsedFrames.length}
+            </div>
+            <button onClick={closeModal} style={{ width:28, height:28, background:'rgba(255,255,255,0.1)', border:'none', borderRadius:4, color:'white', fontSize:16, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>✕</button>
+          </div>
+
+          {/* Main frame */}
+          <div style={{ width:'100%', maxWidth:600, borderRadius:8, overflow:'hidden', border:`1px solid ${hexToRgba(P,0.4)}` }} onClick={e=>e.stopPropagation()}>
+            <BBFrameCanvas frame={parsedFrames[activeFrame]} P={P} width={560} height={336} />
+          </div>
+
+          {/* Phase label */}
+          <div style={{ marginTop:10, display:'flex', alignItems:'center', gap:10 }} onClick={e=>e.stopPropagation()}>
+            <button
+              onClick={prevFrame}
+              disabled={activeFrame===0}
+              style={{ padding:'6px 16px', background: activeFrame===0?'rgba(255,255,255,0.05)':hexToRgba(P,0.8), border:`1px solid ${hexToRgba(P,0.3)}`, borderRadius:5, color: activeFrame===0?'#5a6480':'white', fontSize:11, fontWeight:700, cursor: activeFrame===0?'default':'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}
+            >← PREV</button>
+
+            <div style={{ display:'flex', gap:6 }}>
+              {parsedFrames.map((_,idx) => (
+                <div key={idx} onClick={()=>setActiveFrame(idx)} style={{ width:8, height:8, borderRadius:'50%', background: idx===activeFrame?P:'rgba(255,255,255,0.2)', cursor:'pointer', transition:'background 0.15s' }} />
+              ))}
+            </div>
+
+            <button
+              onClick={nextFrame}
+              disabled={activeFrame===parsedFrames.length-1}
+              style={{ padding:'6px 16px', background: activeFrame===parsedFrames.length-1?'rgba(255,255,255,0.05)':hexToRgba(P,0.8), border:`1px solid ${hexToRgba(P,0.3)}`, borderRadius:5, color: activeFrame===parsedFrames.length-1?'#5a6480':'white', fontSize:11, fontWeight:700, cursor: activeFrame===parsedFrames.length-1?'default':'pointer', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}
+            >NEXT →</button>
+          </div>
+
+          <div style={{ marginTop:8, fontSize:9, color:'rgba(255,255,255,0.3)', fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:'0.5px' }}>SWIPE LEFT/RIGHT TO NAVIGATE • TAP OUTSIDE TO CLOSE</div>
+        </div>
+      )}
+    </>
+  )
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extraAction, preloadedDiagram=null }) {
   const [showSummary, setShowSummary] = useState(false)
   const [showMore, setShowMore] = useState(false)
@@ -1580,14 +1936,15 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         {extraAction && <span onClick={e=>e.stopPropagation()}>{extraAction}</span>}
       </div>
 
-      {/* ── DIAGRAM — collapsed by default, expand on tap ── */}
+      {/* ── DIAGRAM ── */}
       <div style={{ marginBottom:10 }}>
-        {!showDiagram ? (
-          /* ── Thumbnail preview — tap to expand ── */
+        {play._sport === 'Basketball' ? (
+          /* ── Basketball: multi-phase static frames ── */
+          <BBPhaseViewer frames={preloadedDiagram?.frames||null} play={play} P={P} callAI={callAI} parseJSON={parseJSON} />
+        ) : !showDiagram ? (
+          /* ── Other sports: thumbnail → PlayAnimator ── */
           <div onClick={()=>setShowDiagram(true)} style={{ cursor:'pointer', position:'relative', borderRadius:6, overflow:'hidden', border:`1px solid ${hexToRgba(P,0.2)}`, background:'#0f1219' }}>
-            {/* Sport-specific field/court thumbnail */}
             <SportThumbnail sport={play._sport} P={P} isDefense={false}/>
-            {/* Overlay tap hint */}
             <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.35)' }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'1.5px', color:'white', display:'flex', alignItems:'center', gap:6 }}>
                 <span style={{ fontSize:14 }}>📐</span> TAP TO VIEW DIAGRAM
@@ -4663,22 +5020,26 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               // Linemen blocking = pathDelay 0
               let prompt
               if (isBB) {
-                const isFCBg = (play.type||'').includes('FULL COURT') || (play.type||'').includes('PRESS BREAK') || (play.type||'').includes('TRANSITION')
-                prompt = 'You are an elite basketball diagram engine. Generate a PHASE-BASED animated play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
-                  ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket at y=6 x=50 (TOP). Half-court y=58. Lower y = toward basket.' +
-                  (isFCBg ? ' FULL COURT: Ball starts y=54-58, PG up center, wings x=15-22 and x=78-85, trailer y=30-40, defenders sprint back.' :
-                  ' HALF COURT POSITIONS: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=18-26. C(5) x=46-54 y=10-18. Defenders 2-4 units below their man.') +
-                  ' PHASE TIMING with pathDelay (fraction 0.0-0.9 of post-snap time):' +
-                  ' pathDelay:0.0=immediate; 0.15-0.25=after initial action; 0.30-0.45=fill/rotation; 0.50-0.70=late help.' +
-                  ' DEFENDERS ALWAYS delay more than the offense they react to.' +
-                  ' SCREEN PLAYS: (1)Screener pathDelay:0 moves to set screen body-adjacent to defender being screened. (2)Ball handler/cutter pathDelay:0.15 drives off screen shoulder curving through screen spot. (3)Screener rolls/pops pathDelay:0.25 after contact. (4)Ball handler defender pathDelay:0.20 trails through screen then recovers. (5)Screener defender pathDelay:0 hedges outward toward ball then recovers OR switches.' +
-                  ' 5-OUT/MOTION: Passer pathDelay:0 basket cuts immediately to y=10-14. Adjacent players pathDelay:0.25 fill vacated spots. Passer defender pathDelay:0.20 chases cutter.' +
-                  ' ALL 5 DEFENDERS MUST MOVE — on-ball defender reacts to ball handler, screener defender hedges, weak-side defenders shift slightly. No defender is fully static.' +
-                  ' SPORT IQ: If ball handler drives to y<18, they finish at rim — never pass back to perimeter from paint.' +
-                  ' SHOOT: = final scoring option (driver on drives, open shooter on kick-outs). Max 10 players total.' +
-                  ' Passes go TOWARD open space or basket, not backward.' +
-                  ' routeName prefixes: BALL:, SHOOT:(routeYards>0), CUT:, SCREEN:, ROLL:, POP:, FILL:, DEF:' +
-                  ' Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
+                // Basketball uses frames format — skip old animated template, use frames JSON
+                const bbFramesCacheKey = 'coachiq_bbframes_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+                try {
+                  const cached = sessionStorage.getItem(bbFramesCacheKey)
+                  if (cached) {
+                    const framesData = JSON.parse(cached)
+                    setDiagrams(prev => ({ ...prev, [play.number]: { frames: framesData } }))
+                    return
+                  }
+                } catch(e) {}
+                const frameShape = '{"label":"Phase N","description":"one sentence","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off","role2":"ball"},{"id":"SG","label":"2","x":75,"y":42,"role":"off","role2":"move"},{"id":"SF","label":"3","x":84,"y":32,"role":"off","role2":"move"},{"id":"PF","label":"4","x":62,"y":18,"role":"off","role2":"move"},{"id":"C5","label":"5","x":50,"y":12,"role":"off","role2":"move"},{"id":"d1","label":"X1","x":50,"y":48,"role":"def"},{"id":"d2","label":"X2","x":75,"y":45,"role":"def"},{"id":"d3","label":"X3","x":84,"y":35,"role":"def"},{"id":"d4","label":"X4","x":62,"y":21,"role":"def"},{"id":"d5","label":"X5","x":50,"y":15,"role":"def"}],"arrows":[{"from":[50,45],"to":[72,32],"type":"pass"},{"from":[75,42],"to":[68,22],"type":"cut"}]}'
+                prompt = 'Elite basketball diagram generator. Generate 2-3 sequential static phase frames for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket y=4 x=50 (TOP). Attack UPWARD = lower y.' +
+                  ' HALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16. Defenders 2-4 units below their man.' +
+                  ' FRAME RULES: Each frame is a STATIC SNAPSHOT. Frame 1 = starting positions + first action arrows. Frame 2 = positions after phase 1 + next action arrows. Frame 3 = finishing action if needed.' +
+                  ' ARROW TYPES: type:"pass"=dashed yellow arc. type:"dribble"=wavy amber. type:"cut"=solid white arrow. type:"screen"=line + perpendicular bar.' +
+                  ' PLAYER role2: "ball"=has ball(1 per frame). "shooter"=scoring option(last frame). "move"=all others.' +
+                  ' DEFENDERS: X marks on court. Active defenders get "trail":[[startX,startY],[endX,endY]] showing reaction path.' +
+                  ' SPORT IQ: Driver at y<18 finishes at rim. Passes flow toward basket/open space. Screener body-adjacent to defender. 5-out passer cuts to basket immediately.' +
+                  ' Return ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
               } else if (isBSB) {
                 const isSoftballBg = play._sport === 'Softball'
                 prompt = (isSoftballBg ? 'Softball' : 'Baseball') + ' field diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
@@ -4757,6 +5118,12 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               }
               const raw = await callAI(prompt)
               const parsed3 = parseJSON(raw)
+              // Basketball returns frames format — store and skip old sanitizer
+              if (isBB && parsed3 && parsed3.frames && parsed3.frames.length > 0) {
+                try { sessionStorage.setItem(bbFramesCacheKey, JSON.stringify(parsed3.frames)) } catch(e2) {}
+                setDiagrams(prev => ({ ...prev, [play.number]: { frames: parsed3.frames } }))
+                return
+              }
               if (parsed3 && parsed3.players && parsed3.players.length > 0) {
                 parsed3._sportType = detectedSport
                 // ── SANITIZER (mirrors PlayAnimator sanitizer) ──────────────────
