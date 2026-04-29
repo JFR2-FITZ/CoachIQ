@@ -1634,7 +1634,7 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const touchStartX = useRef(null)
-  const cacheKey = 'coachiq_bbframes_v3_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
+  const cacheKey = 'coachiq_bbframes_v4_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
 
   useEffect(() => {
     // Use preloaded frames if provided
@@ -1651,41 +1651,48 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
   async function generateFrames() {
     setLoading(true); setError(null)
     try {
-      const frameShape = '{"label":"Phase N","description":"one sentence describing this phase","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off"},{"id":"SG","label":"2","x":75,"y":42,"role":"off"},{"id":"SF","label":"3","x":84,"y":32,"role":"off"},{"id":"PF","label":"4","x":62,"y":18,"role":"off"},{"id":"C5","label":"5","x":50,"y":12,"role":"off"}],"arrows":[{"from":[50,45],"to":[76,42],"type":"pass"},{"from":[50,45],"to":[50,12],"type":"cut"}]}'
-      const prompt = 'You are an elite basketball play diagram engine used by youth coaches. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
-        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=4 x=50 (TOP of diagram). Attack UPWARD = lower y values.' +
-        '\nHALF COURT starting spots: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16.' +
-        '\n\nOFFENSE ONLY — do NOT include defenders. Players array = 5 offensive players only. role field = "off" for all.' +
-        '\n\nFRAMES: 2 frames minimum, 3 if the play has 3 distinct phases.' +
-        '\nFrame 1 = starting positions + FIRST action arrows.' +
-        '\nFrame 2 = positions AFTER frame 1 completes + SECOND action arrows.' +
-        '\nFrame 3 = positions AFTER frame 2 + finishing action (shot, drive, final pass).' +
-        '\n\nARROWS — frame.arrows is MANDATORY. Every frame needs 1-4 arrows showing what happens in that phase.' +
-        '\nArrow format: {"from":[x,y], "to":[x,y], "type":"TYPE"}' +
-        '\nTYPE VALUES:' +
-        '\n  "pass"    = ball moves from one player to another (draws curved RED arc)' +
-        '\n  "dribble" = ball handler moves with the ball (draws solid RED line)' +
-        '\n  "cut"     = player moves WITHOUT the ball (draws solid BLUE arrow)' +
-        '\n  "screen"  = player moves to set a screen (draws RED line + ⊥ bar at endpoint)' +
-        '\n\nCRITICAL: The "from" and "to" coordinates must match the player positions in that frame.' +
-        '\nThe arrow FROM must start at a player position. The arrow TO must end where the action ends.' +
-        '\n\nCONCRETE EXAMPLES:' +
-        '\nPASS AND CUT (5-out) Frame 1: PG at [50,46] passes to SG at [76,42], then cuts to basket.' +
-        '\n  arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,10],"type":"cut"}]' +
-        '\nPASS AND CUT Frame 2: SG has ball at [76,42], adjacent players fill.' +
-        '\n  arrows=[{"from":[76,42],"to":[84,28],"type":"dribble"},{"from":[84,32],"to":[76,46],"type":"cut"}]' +
-        '\nPICK AND ROLL Frame 1: C moves to set screen for PG.' +
-        '\n  arrows=[{"from":[50,12],"to":[50,32],"type":"screen"},{"from":[50,46],"to":[64,34],"type":"dribble"}]' +
-        '\nPICK AND ROLL Frame 2: PG off screen, C rolls to basket.' +
-        '\n  arrows=[{"from":[64,34],"to":[50,20],"type":"dribble"},{"from":[50,32],"to":[50,10],"type":"cut"}]' +
-        '\nDRIVE Frame 1: PG drives to paint, wings space.' +
-        '\n  arrows=[{"from":[50,46],"to":[50,20],"type":"dribble"},{"from":[76,42],"to":[84,22],"type":"cut"}]' +
-        '\nDRIVE Frame 2: PG at rim, kick to corner.' +
-        '\n  arrows=[{"from":[50,20],"to":[84,38],"type":"pass"}]' +
-        '\n\nSPORT IQ: If PG drives to y<20 they finish OR kick out — never pass backward to half court.' +
-        '\nPasses go TOWARD the basket or open space. Cuts go toward the basket.' +
-        '\nRead the play description carefully. Every arrow must reflect exactly what the play says is happening.' +
-        '\n\nReturn ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
+      const frameShape = '{"label":"Phase N","description":"one sentence — exactly what happens in this phase","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off"},{"id":"SG","label":"2","x":75,"y":42,"role":"off"},{"id":"SF","label":"3","x":84,"y":32,"role":"off"},{"id":"PF","label":"4","x":62,"y":18,"role":"off"},{"id":"C5","label":"5","x":50,"y":12,"role":"off"}],"arrows":[{"from":[50,45],"to":[76,42],"type":"pass"},{"from":[50,45],"to":[50,10],"type":"cut"}]}'
+
+      // Build the full play context from ALL available fields
+      const playContext = [
+        'PLAY NAME: ' + play.name,
+        'TYPE: ' + (play.type||''),
+        'DESCRIPTION: ' + (play.note||''),
+        play.presnap ? 'PRE-SNAP / SETUP: ' + play.presnap : '',
+        play.audible ? 'AUDIBLE / READ: ' + play.audible : '',
+        play.youthCue ? 'COACHING CUE: ' + play.youthCue : '',
+        play.mistake ? 'COMMON MISTAKE: ' + play.mistake : '',
+      ].filter(Boolean).join('\n')
+
+      const prompt = 'You are an expert basketball play diagrammer. Your job is to read a play description and turn it into accurate static frame diagrams — like a coaching whiteboard.' +
+        '\n\n' + playContext +
+        '\n\nSTEP 1 — Read the play description above carefully. Identify:' +
+        '\n- Who starts with the ball (which player number: 1=PG, 2=SG, 3=SF, 4=PF, 5=C)' +
+        '\n- What is the first action (pass? dribble drive? screen? cut?)' +
+        '\n- What happens next as a result' +
+        '\n- How does the play finish (shot, layup, kick-out pass, dump-off?)' +
+        '\n- Where on the court does each action happen' +
+        '\n\nSTEP 2 — Generate 2-3 sequential frames showing those exact actions.' +
+        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom.' +
+        '\nBasket at y=4 x=50 (TOP of diagram). Half-court line at y=56. Lower y = closer to basket.' +
+        '\nHALF COURT default spots: 1(PG) x=50 y=46. 2(SG) x=76 y=42. 3(SF) x=84 y=32. 4(PF) x=62 y=18. 5(C) x=50 y=12.' +
+        '\nCorners: left corner x=8 y=38, right corner x=92 y=38. Wings: left x=18 y=30, right x=82 y=30.' +
+        '\n3-point line is roughly at y=22 center, y=32 wings, y=38 corners.' +
+        '\n\nFRAME STRUCTURE:' +
+        '\nFrame 1: Player x,y = WHERE THEY START. Arrows = FIRST actions only.' +
+        '\nFrame 2: Player x,y = WHERE THEY ARE after frame 1. Arrows = SECOND actions.' +
+        '\nFrame 3 (if needed): Player x,y = after frame 2. Arrows = finishing action.' +
+        '\nCRITICAL: If a player cuts to the corner in frame 1, they MUST be in the corner in frame 2.' +
+        '\nIf a player drives to the paint in frame 1, they MUST be in the paint in frame 2.' +
+        '\nArrows from/to coordinates MUST exactly match the player x,y positions in that frame.' +
+        '\n\nARROW TYPES:' +
+        '\n"pass"    — ball moves to a teammate. Draw curved arc. FROM = ball handler position. TO = receiver position.' +
+        '\n"dribble" — ball handler moves with ball. FROM = start position. TO = end position after dribbling.' +
+        '\n"cut"     — player moves WITHOUT ball. FROM = their current position. TO = where they cut to.' +
+        '\n"screen"  — player moves to set a screen. FROM = their position. TO = screen location (next to the player being screened).' +
+        '\nEvery frame MUST have at least 1 arrow. 2-3 arrows per frame is ideal.' +
+        '\n\nOFFENSE ONLY — 5 players, all role:"off". No defenders.' +
+        '\n\nRETURN ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
       const raw = await callAI(prompt, null, false)
       const data = parseJSON(raw)
       if (!data || !data.frames || !data.frames.length) throw new Error('No frames returned')
@@ -4996,7 +5003,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               let prompt
               if (isBB) {
                 // Basketball uses frames format — skip old animated template, use frames JSON
-                const bbFramesCacheKey = 'coachiq_bbframes_v3_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+                const bbFramesCacheKey = 'coachiq_bbframes_v4_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
                 try {
                   const cached = sessionStorage.getItem(bbFramesCacheKey)
                   if (cached) {
@@ -5006,17 +5013,17 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   }
                 } catch(e) {}
                 const frameShape = '{"label":"Phase N","description":"one sentence","players":[{"id":"PG","label":"1","x":50,"y":45,"role":"off"},{"id":"SG","label":"2","x":75,"y":42,"role":"off"},{"id":"SF","label":"3","x":84,"y":32,"role":"off"},{"id":"PF","label":"4","x":62,"y":18,"role":"off"},{"id":"C5","label":"5","x":50,"y":12,"role":"off"}],"arrows":[{"from":[50,45],"to":[76,42],"type":"pass"},{"from":[50,45],"to":[50,12],"type":"cut"}]}'
-                prompt = 'Elite basketball diagram engine for youth coaches. Generate 2-3 sequential STATIC FRAME diagrams for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
-                  ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket y=4 x=50 TOP. Attack UPWARD = lower y.' +
-                  ' HALF COURT: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=16-24. C(5) x=46-54 y=8-16.' +
-                  ' OFFENSE ONLY — no defenders in players array.' +
-                  ' FRAMES: Frame1=starting spots+first action. Frame2=positions after frame1+second action. Frame3=finish if needed.' +
-                  ' ARROWS are MANDATORY — every frame needs 1-4 arrows. Arrow: {"from":[x,y],"to":[x,y],"type":"pass|dribble|cut|screen"}' +
-                  ' pass=ball moves to receiver(RED arc). dribble=ball handler moves with ball(RED line). cut=player without ball moves(BLUE arrow). screen=player sets screen(RED+perp bar).' +
-                  ' EXAMPLES: 5-out Frame1: arrows=[{"from":[50,46],"to":[76,42],"type":"pass"},{"from":[50,46],"to":[50,10],"type":"cut"}]' +
-                  ' PnR Frame1: arrows=[{"from":[50,12],"to":[50,30],"type":"screen"},{"from":[50,46],"to":[64,34],"type":"dribble"}]' +
-                  ' Drive Frame1: arrows=[{"from":[50,46],"to":[50,20],"type":"dribble"},{"from":[76,42],"to":[84,22],"type":"cut"}]' +
-                  ' FROM coord = player starting position. TO coord = where action ends. Read play description — arrows must match.' +
+                const bgPlayCtx = ['PLAY: ' + play.name, 'TYPE: ' + (play.type||''), 'DESC: ' + (play.note||''), play.presnap?'SETUP: '+play.presnap:'', play.audible?'READ: '+play.audible:'', play.youthCue?'CUE: '+play.youthCue:''].filter(Boolean).join(' | ')
+                prompt = 'Expert basketball play diagrammer. Read this play and create accurate frame diagrams. ' + bgPlayCtx +
+                  ' STEP1: Identify who has ball, what happens first, second, how it finishes, where on court.' +
+                  ' STEP2: Generate 2-3 frames showing those exact actions.' +
+                  ' COORDS: x=0-100, y=0-60. Basket y=4 x=50 TOP. Lower y=closer to basket.' +
+                  ' DEFAULT SPOTS: 1(PG) x=50 y=46. 2(SG) x=76 y=42. 3(SF) x=84 y=32. 4(PF) x=62 y=18. 5(C) x=50 y=12.' +
+                  ' Corners: left [8,38] right [92,38]. Wings: left [18,30] right [82,30].' +
+                  ' FRAME RULE: If player cuts to corner in frame1, they ARE in corner in frame2. Arrow from/to must match player positions.' +
+                  ' ARROWS (mandatory 1-3 per frame): pass=ball moves(curved arc). dribble=handler moves with ball. cut=player moves without ball. screen=player sets screen.' +
+                  ' Arrow format: {"from":[x,y],"to":[x,y],"type":"pass|dribble|cut|screen"}' +
+                  ' OFFENSE ONLY — 5 players, role:"off". No defenders.' +
                   ' Return ONLY valid JSON: {"frames":[' + frameShape + ',' + frameShape + ']}'
               } else if (isBSB) {
                 const isSoftballBg = play._sport === 'Softball'
