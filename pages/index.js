@@ -1940,9 +1940,16 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           ' Adjust positions and paths to accurately show: ' + play.note +
           ' Return ONLY raw JSON:\n' + dTemplate
       } else if (isDefBB) {
-        prompt = 'Generate DEFENSIVE basketball diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + play.note +
-          ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket at y=6. Players attack upward (lower y). Show 5 defenders (D) guarding 5 offensive players.' +
-          ' Defenders move to intercept/cover their assignments. Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
+        prompt = 'DEFENSIVE basketball diagram — PHASE-BASED: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket at y=6 x=50 (top). Defenders protect basket = lower y end.' +
+          ' Show 5 OFFENSIVE players (labeled 1-5 by position) AND 5 DEFENDERS reacting to them.' +
+          ' PHASE TIMING with pathDelay: Defenders respond AFTER the offensive action they are reacting to.' +
+          ' pathDelay:0.0 = immediate pressure on ball. 0.15-0.30 = closing out after pass. 0.35-0.55 = rotation after ball moves. 0.60-0.80 = weakside help.' +
+          ' ZONE DEFENSE: Show zone boundaries — 2-3 zone has 2 top defenders x=30-40 and x=60-70 y=28-34, 3 bottom defenders across paint y=12-20. Players shift TOGETHER toward ball (pathDelay shows staggered shift).' +
+          ' MAN DEFENSE: Each defender tracks their man — path mirrors offensive player path but with pathDelay:0.15-0.25 lag showing they are reacting.' +
+          ' PRESS: Defenders start in backcourt y=40-55, trap ball handler, deny passing lanes.' +
+          ' ALL defenders must have meaningful paths showing their defensive assignment and movement.' +
+          ' routeName prefix DEF: for all defenders. Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
       } else if (isDefBSB) {
         const isSoftballDef = play._sport === 'Softball'
         prompt = 'DEFENSIVE ' + (isSoftballDef ? 'softball' : 'baseball') + ' positioning diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
@@ -1973,19 +1980,51 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           ' Return ONLY raw JSON: ' + scDefTemplate.replace('PLAYNAME', play.name)
       } else {
         // Tackle football defensive diagram
-        prompt = 'Generate DEFENSIVE football diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + play.note +
-          ' COORDINATE SYSTEM: x=0-100, y=0-60. LOS at y=42. Defense lines up y=34-38. Safeties y=12-22. LBs y=26-32.' +
-          ' DL attack DOWNWARD (higher y toward offense). Coverage drops UPWARD (lower y = deeper).' +
-          ' Include 5 static offensive players as reference (OL at y=42). Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
+        prompt = 'DEFENSIVE football diagram — PHASE-BASED: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. LOS offense y=42. Defenders pre-snap y=34-38 (DL), y=26-32 (LBs), y=12-22 (safeties), y=36-40 (CBs).' +
+          ' DL attack DOWNWARD (higher y = toward offense). Coverage drops UPWARD (lower y = deeper = away from LOS).' +
+          ' Include 5 static OL reference players (OL at y=42) so viewer sees the line of scrimmage.' +
+          ' PHASE TIMING with pathDelay: DL fires immediately pathDelay:0. LBs read and react pathDelay:0.15. CBs in man trail WRs pathDelay:0.10. Zone defenders drop on snap pathDelay:0. Safety rotates after seeing play develop pathDelay:0.35.' +
+          ' BLITZ: Blitzing LB/CB shows aggressive path toward QB y=44-50, pathDelay:0. Non-blitzers may widen coverage to compensate pathDelay:0.20.' +
+          ' COVERAGE DROPS: Cover 2 safeties split wide and deep. Cover 3 safety stays center deep y=10-16, CBs drop to flats. Cover 4 CBs and safeties each take deep quarters.' +
+          ' ALL defenders must have meaningful paths — no defender should have a path [[x,y],[x,y]] (identical start and end). Show at minimum 2-3 units of movement for every player.' +
+          ' Return ONLY raw JSON: ' + fbTemplate.replace('PLAYNAME', play.name)
       }
     } else if (isBasketball) {
-      prompt = 'Basketball play diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
-        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 center x=50 (top). Half-court line at y=58. Players attack UPWARD (lower y = toward basket).' +
-        ' FULL COURT PLAYS (type FULL COURT BREAK, PRESS BREAK, TRANSITION): Use full court — ball starts y=55-58. PG advances up center. Wings fill sideline lanes x=18 and x=82. Trailer at y=30-40. Defenders sprint back. End positions near basket y=10-25.' +
-        ' HALF COURT PLAYS: PG at x=48-52 y=42-46. SG at x=72-80 y=38-44. SF at x=80-88 y=28-36. PF at x=58-65 y=18-24. C at x=48-52 y=10-16. Defenders 2-3 units toward basket from their man.' +
-        ' SCREEN ACCURACY: Screener path ends ADJACENT to defender they screen (within 3 units). Cutter path passes within 2 units of screener final position then curls to basket. Defender on cutter trails or gets picked (moves same direction as cutter with 0.5 sec delay). Pick and Roll: screener rolls to basket after screen — path continues from screen spot to y=10-14.' +
-        ' ONE routeName starts with BALL:, ONE starts with SHOOT:, others: CUT:, SCREEN:, ROLL:, MOVE:, FILL:. routeYards>0 on primary scorer only.' +
-        ' Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
+      const isFullCourt = (play.type||'').includes('FULL COURT') || (play.type||'').includes('PRESS BREAK') || (play.type||'').includes('TRANSITION')
+      prompt = 'You are an elite basketball diagram engine. Generate a PHASE-BASED animated play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+        '\n\nCOORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 x=50 (TOP of diagram). Half-court at y=58. Players attack UPWARD = lower y.' +
+        (isFullCourt
+          ? '\n\nFULL COURT / FAST BREAK / PRESS BREAK: Ball starts at y=54-58. PG dribbles up center path. Wings sprint wide x=15-22 and x=78-85. Trailer follows at y=30-40. Defenders sprint back. End near basket y=8-22.'
+          : '\n\nHALF COURT STARTING POSITIONS: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=18-26. C(5) x=46-54 y=10-18. Defenders start 2-4 units below their man (toward basket).') +
+        '\n\nPHASED ANIMATION — THIS IS CRITICAL. The animation plays over time. Use pathDelay (0.0-0.9 fraction of post-snap time) to sequence actions correctly:' +
+        '\n• pathDelay:0.0 = fires immediately (ball handler, screener moving to set screen)' +
+        '\n• pathDelay:0.15-0.25 = fires after initial action (cutter using a screen, roller after screen is set)' +
+        '\n• pathDelay:0.30-0.45 = fires after seeing the play develop (fill rotations, weak-side adjustments)' +
+        '\n• pathDelay:0.50-0.70 = late reactions (help defender rotating, second cutter)' +
+        '\n• DEFENDERS ALWAYS have higher pathDelay than the offensive action they are reacting to — they RESPOND, never anticipate.' +
+        '\n\nSCREEN PLAYS (Pick and Roll, Pick and Pop, Down Screen, Back Screen, Away Screen):' +
+        '\n1. SCREENER (pathDelay:0): moves from starting spot to screen location — ends body-to-body adjacent to the DEFENDER of the player being screened, within 2-3 units. routeName: "SCREEN: set at [location]"' +
+        '\n2. BALL HANDLER / CUTTER (pathDelay:0.15): holds until screener arrives, then drives off the screen shoulder. Path CURVES through or off the screen spot. routeName: "BALL: off screen" or "CUT: off screen"' +
+        '\n3. SCREENER ROLL or POP (pathDelay:0.25): After screen is set, screener rolls to basket (path to y=8-14) or pops to open spot. routeName: "ROLL: to basket" or "POP: perimeter"' +
+        '\n4. BALL HANDLER DEFENDER (pathDelay:0.20): gets briefly picked — path shows them trailing behind the screen, then recovering. Ends 3-5 units behind ball handler.' +
+        '\n5. SCREENER DEFENDER (pathDelay:0.0): must CHOOSE hedge (steps out toward ball handler path then recovers) OR switch (moves to cover ball handler). Show the hedge: step out path then recover path. routeName: "DEF: hedge" or "DEF: switch"' +
+        '\n6. WEAK SIDE HELP (pathDelay:0.45): rotates toward the roller or paint if ball penetrates.' +
+        '\n\n5-OUT MOTION / PASS AND CUT:' +
+        '\n1. PASSER (pathDelay:0): immediately basket cuts HARD to rim after passing (path to y=10-14 center). routeName: "CUT: basket"' +
+        '\n2. ADJACENT PLAYERS (pathDelay:0.25): rotate to fill vacated spot — move one position closer to ball. routeName: "FILL: rotate"' +
+        '\n3. PASS RECEIVER (pathDelay:0): catches and faces basket, looks to shoot or pass. routeName: "BALL: catch and face"' +
+        '\n4. PASSER DEFENDER (pathDelay:0.20): chases the basket cutter — trails behind by 3-5 units.' +
+        '\n5. FILL DEFENDERS (pathDelay:0.35): shift slightly to stay with their man as rotations happen.' +
+        '\n\nGENERAL DEFENDER RULES:' +
+        '\n• Every offensive player has a corresponding defender starting 2-4 units toward basket from their man.' +
+        '\n• Defenders on non-involved players hold position (path barely moves, 1-2 units max) — showing they are staying with their assignment.' +
+        '\n• Help defender (weakside) can sink toward paint when ball drives — pathDelay:0.40.' +
+        '\n• NEVER have all defenders be static — at minimum the on-ball defender and screener defender must show reactive movement.' +
+        '\n\nrouteType: use "route" for all players with meaningful movement (offense and defense), "block" only for truly stationary players.' +
+        '\nrouteName prefix rules: BALL: (has ball), SHOOT: (primary scoring option, routeYards>0), CUT:, SCREEN:, ROLL:, POP:, FILL:, DEF: (defenders).' +
+        '\nOnly ONE routeYards>0 — the primary scoring option.' +
+        '\nReturn ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
     } else if (isBaseball) {
       const isSoftball = _sportName === 'Softball'
       prompt = (isSoftball ? 'Softball' : 'Baseball') + ' field diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
@@ -4428,14 +4467,18 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               // Linemen blocking = pathDelay 0
               let prompt
               if (isBB) {
-                prompt = 'Basketball play diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
-                  ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Basket at y=6 center x=50 (top of diagram). Half-court line at y=58. Players attack UPWARD (lower y = toward basket).' +
-                  ' FULL COURT PLAYS (type FULL COURT BREAK, PRESS BREAK, or TRANSITION): Use full court. Ball starts at y=55-58 (backcourt). Offense advances up. Defense retreats. Show realistic fast break lanes — PG dribbles up center, wings fill sideline lanes at x=20 and x=80, trailer fills at y=30-40. Defenders sprint back to protect basket. End positions: ball handler y=20-30, shooters y=10-20.' +
-                  ' HALF COURT PLAYS: Ball handler (PG) starts at y=40-45. Key y=22. Paint from y=8 to y=22 center x=35-65.' +
-                  ' SCREEN ACCURACY IS CRITICAL: When a player sets a screen, their path ends ADJACENT to the defender they are screening (within 2-4 units). The screener is stationary (short path, routeType block). The player USING the screen must CUT off the screener body — their path passes within 2 units of the screener final position and curls toward the basket. The defender on the cutter must react — show them trailing or getting picked. Example Pick and Roll: PF (screener) moves to x=50 y=30 (ball handler position), path ends there. PG dribbles off screen: path curves from PG start through screener position then attacks basket or pulls up. PF rolls: after screen, path continues to basket at y=8-14.' +
-                  ' PLAYER SPACING: No two players should start within 8 units of each other unless intentional (screens). PG starts at x=45-55 y=42-46. SG at x=70-80 y=38-44. SF at x=80-88 y=28-36. PF at x=55-65 y=18-24. C at x=48-52 y=10-16 (post). Defenders mirror each offensive player — d1 guards PG, d2 guards SG, etc — starting 2-3 units toward basket from their man.' +
-                  ' ONE routeName starts with BALL:, ONE starts with SHOOT: (this player ends near basket or 3pt line), others use CUT:, SCREEN:, ROLL:, MOVE:, or FILL:.' +
-                  ' routeYards > 0 on the primary scoring option only.' +
+                const isFCBg = (play.type||'').includes('FULL COURT') || (play.type||'').includes('PRESS BREAK') || (play.type||'').includes('TRANSITION')
+                prompt = 'You are an elite basketball diagram engine. Generate a PHASE-BASED animated play diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket at y=6 x=50 (TOP). Half-court y=58. Lower y = toward basket.' +
+                  (isFCBg ? ' FULL COURT: Ball starts y=54-58, PG up center, wings x=15-22 and x=78-85, trailer y=30-40, defenders sprint back.' :
+                  ' HALF COURT POSITIONS: PG(1) x=48-52 y=44-48. SG(2) x=72-80 y=40-46. SF(3) x=80-88 y=30-38. PF(4) x=55-65 y=18-26. C(5) x=46-54 y=10-18. Defenders 2-4 units below their man.') +
+                  ' PHASE TIMING with pathDelay (fraction 0.0-0.9 of post-snap time):' +
+                  ' pathDelay:0.0=immediate; 0.15-0.25=after initial action; 0.30-0.45=fill/rotation; 0.50-0.70=late help.' +
+                  ' DEFENDERS ALWAYS delay more than the offense they react to.' +
+                  ' SCREEN PLAYS: (1)Screener pathDelay:0 moves to set screen body-adjacent to defender being screened. (2)Ball handler/cutter pathDelay:0.15 drives off screen shoulder curving through screen spot. (3)Screener rolls/pops pathDelay:0.25 after contact. (4)Ball handler defender pathDelay:0.20 trails through screen then recovers. (5)Screener defender pathDelay:0 hedges outward toward ball then recovers OR switches.' +
+                  ' 5-OUT/MOTION: Passer pathDelay:0 basket cuts immediately to y=10-14. Adjacent players pathDelay:0.25 fill vacated spots. Passer defender pathDelay:0.20 chases cutter.' +
+                  ' ALL 5 DEFENDERS MUST MOVE — on-ball defender reacts to ball handler, screener defender hedges, weak-side defenders shift slightly. No defender is fully static.' +
+                  ' routeName prefixes: BALL:, SHOOT:(routeYards>0), CUT:, SCREEN:, ROLL:, POP:, FILL:, DEF:' +
                   ' Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
               } else if (isBSB) {
                 const isSoftballBg = play._sport === 'Softball'
