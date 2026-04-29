@@ -1282,6 +1282,191 @@ function FootballHoleDiagram({ P }) {
 }
 
 
+
+// ─── SPORT-AWARE DIAGRAM THUMBNAIL ───────────────────────────────────────────
+function SportThumbnail({ sport, P='#C0392B', isDefense=false }) {
+  const accent = isDefense ? '#6b9fff' : P
+  const s = sport || 'Football'
+
+  // ── BASKETBALL — half court ────────────────────────────────────────────────
+  if (s === 'Basketball') return (
+    <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.85 }}>
+      <rect width="280" height="100" fill="#c8a96e"/>
+      {/* Court outline */}
+      <rect x="4" y="4" width="272" height="92" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/>
+      {/* Half court line */}
+      <line x1="0" y1="50" x2="280" y2="50" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+      {/* Paint / key — attack toward top */}
+      <rect x="105" y="4" width="70" height="42" fill="rgba(180,80,40,0.35)" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+      {/* Free throw circle */}
+      <circle cx="140" cy="46" r="18" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1"/>
+      {/* Basket */}
+      <circle cx="140" cy="10" r="5" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+      <line x1="140" y1="4" x2="140" y2="15" stroke="rgba(255,255,255,0.5)" strokeWidth="1"/>
+      {/* 3-point arc */}
+      <path d="M 62 4 Q 62 68 140 68 Q 218 68 218 4" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.2"/>
+      {/* Players — 5-out spread */}
+      {isDefense ? <>
+        <circle cx="140" cy="54" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="80"  cy="48" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="200" cy="48" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="105" cy="28" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="175" cy="28" r="5" fill="#4a90d9" opacity={0.9}/>
+      </> : <>
+        <circle cx="140" cy="58" r="5" fill={accent} opacity={0.9}/>
+        <circle cx="78"  cy="50" r="5" fill={accent} opacity={0.9}/>
+        <circle cx="202" cy="50" r="5" fill={accent} opacity={0.9}/>
+        <circle cx="108" cy="28" r="5" fill={accent} opacity={0.9}/>
+        <circle cx="172" cy="28" r="5" fill={accent} opacity={0.9}/>
+        {/* Sample cut arrow */}
+        <path d="M 108 23 Q 124 16 138 12" fill="none" stroke={accent} strokeWidth="1.5" opacity={0.7} markerEnd="url(#arr)"/>
+      </>}
+    </svg>
+  )
+
+  // ── BASEBALL / SOFTBALL — diamond ─────────────────────────────────────────
+  if (s === 'Baseball' || s === 'Softball') return (
+    <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.85 }}>
+      <rect width="280" height="100" fill="#8fbc6b"/>
+      {/* Infield dirt circle */}
+      <ellipse cx="140" cy="72" rx="50" ry="42" fill="#c4a46b" opacity={0.7}/>
+      {/* Diamond — home at bottom, 2nd at top */}
+      <polygon points="140,88 175,60 140,32 105,60" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+      {/* Bases */}
+      <rect x="136" y="84" width="8" height="8" fill="white" opacity={0.9}/>{/* home */}
+      <rect x="171" y="56" width="8" height="8" fill="white" opacity={0.9}/>{/* 1st */}
+      <rect x="136" y="28" width="8" height="8" fill="white" opacity={0.9}/>{/* 2nd */}
+      <rect x="101" y="56" width="8" height="8" fill="white" opacity={0.9}/>{/* 3rd */}
+      {/* Pitcher mound */}
+      <circle cx="140" cy="62" r="5" fill="#b8956a" stroke="rgba(255,255,255,0.5)" strokeWidth="1"/>
+      {/* Outfield arc */}
+      <path d="M 30 90 Q 140 5 250 90" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2"/>
+      {/* Fielders */}
+      {isDefense ? <>
+        <circle cx="140" cy="62" r="4" fill="#4a90d9" opacity={0.9}/>{/* P */}
+        <circle cx="140" cy="88" r="4" fill="#4a90d9" opacity={0.85}/>{/* C */}
+        <circle cx="175" cy="58" r="4" fill="#4a90d9" opacity={0.85}/>{/* 1B */}
+        <circle cx="161" cy="46" r="4" fill="#4a90d9" opacity={0.85}/>{/* 2B */}
+        <circle cx="119" cy="46" r="4" fill="#4a90d9" opacity={0.85}/>{/* SS */}
+        <circle cx="105" cy="58" r="4" fill="#4a90d9" opacity={0.85}/>{/* 3B */}
+        <circle cx="80"  cy="22" r="4" fill="#4a90d9" opacity={0.8}/>{/* LF */}
+        <circle cx="140" cy="14" r="4" fill="#4a90d9" opacity={0.8}/>{/* CF */}
+        <circle cx="200" cy="22" r="4" fill="#4a90d9" opacity={0.8}/>{/* RF */}
+      </> : <>
+        <circle cx="140" cy="88" r="5" fill={accent} opacity={0.9}/>{/* batter */}
+        {/* Baserunning arrow */}
+        <path d="M 144 84 L 168 62" fill="none" stroke={accent} strokeWidth="1.8" opacity={0.8}/>
+        <circle cx="175" cy="60" r="4" fill={accent} opacity={0.7}/>{/* runner on 1st */}
+        <circle cx="140" cy="62" r="4" fill="#888" opacity={0.6}/>{/* pitcher */}
+      </>}
+    </svg>
+  )
+
+  // ── SOCCER ─────────────────────────────────────────────────────────────────
+  if (s === 'Soccer') return (
+    <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.85 }}>
+      <rect width="280" height="100" fill="#4a8c3f"/>
+      {/* Pitch stripes */}
+      {[0,1,2,3,4,5,6].map(i=><rect key={i} x={i*40} y="0" width="40" height="100" fill={i%2===0?'rgba(0,0,0,0.05)':'transparent'}/>)}
+      {/* Penalty box */}
+      <rect x="90" y="4" width="100" height="36" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.2"/>
+      {/* Goal box */}
+      <rect x="118" y="4" width="44" height="16" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1"/>
+      {/* Goal */}
+      <rect x="122" y="2" width="36" height="6" fill="rgba(255,255,255,0.6)"/>
+      {/* Penalty spot */}
+      <circle cx="140" cy="30" r="2" fill="rgba(255,255,255,0.6)"/>
+      {/* Center circle (partial) */}
+      <line x1="0" y1="70" x2="280" y2="70" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+      {/* Players */}
+      {isDefense ? <>
+        <circle cx="140" cy="18" r="5" fill="#4a90d9" opacity={0.9}/>{/* GK */}
+        <circle cx="80"  cy="42" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="140" cy="44" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="200" cy="42" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="100" cy="62" r="5" fill="#4a90d9" opacity={0.85}/>
+        <circle cx="180" cy="62" r="5" fill="#4a90d9" opacity={0.85}/>
+      </> : <>
+        <circle cx="140" cy="82" r="5" fill={accent} opacity={0.9}/>
+        <circle cx="90"  cy="65" r="5" fill={accent} opacity={0.9}/>
+        <circle cx="190" cy="65" r="5" fill={accent} opacity={0.9}/>
+        <circle cx="115" cy="48" r="5" fill={accent} opacity={0.85}/>
+        <circle cx="165" cy="48" r="5" fill={accent} opacity={0.85}/>
+        <circle cx="140" cy="36" r="5" fill={accent} opacity={0.85}/>
+        {/* Pass arrow */}
+        <path d="M 140 78 L 140 52" fill="none" stroke={accent} strokeWidth="1.8" opacity={0.7}/>
+      </>}
+    </svg>
+  )
+
+  // ── FLAG FOOTBALL — no LOS OL blocks, just skill players + routes ──────────
+  if (s === 'Flag Football') return (
+    <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.85 }}>
+      <rect width="280" height="100" fill="#4a7c3f"/>
+      {[0,28,56,84,112,140,168,196,224,252,280].map((x,i)=>
+        <line key={i} x1={x} y1="0" x2={x} y2="100" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
+      )}
+      <line x1="0" y1="60" x2="280" y2="60" stroke="rgba(255,255,255,0.5)" strokeWidth="1.2" strokeDasharray="8,5"/>
+      <text x="8" y="57" fontSize="7" fill="rgba(255,255,255,0.5)">LOS</text>
+      {/* End zone hint */}
+      <rect x="0" y="0" width="280" height="10" fill="rgba(255,255,255,0.07)"/>
+      {isDefense ? <>
+        <circle cx="45"  cy="54" r="5" fill="#4a90d9" opacity={0.9}/>{/* CB */}
+        <circle cx="235" cy="54" r="5" fill="#4a90d9" opacity={0.9}/>{/* CB */}
+        <circle cx="155" cy="50" r="5" fill="#ef4444" opacity={0.9}/>{/* Rusher */}
+        <circle cx="90"  cy="42" r="5" fill="#4a90d9" opacity={0.85}/>{/* LB */}
+        <circle cx="140" cy="30" r="5" fill="#4a90d9" opacity={0.85}/>{/* S */}
+      </> : <>
+        <circle cx="140" cy="60" r="5" fill={accent} opacity={0.9}/>{/* QB */}
+        <circle cx="45"  cy="60" r="5" fill={accent} opacity={0.85}/>{/* WR */}
+        <circle cx="235" cy="60" r="5" fill={accent} opacity={0.85}/>{/* WR */}
+        <circle cx="95"  cy="62" r="5" fill={accent} opacity={0.8}/>{/* SL */}
+        {/* Routes */}
+        <path d="M 45 55 L 45 32 L 65 20" fill="none" stroke={accent} strokeWidth="1.5" opacity={0.6}/>
+        <path d="M 235 55 L 235 32 L 215 20" fill="none" stroke={accent} strokeWidth="1.5" opacity={0.6}/>
+        <path d="M 95 57 L 115 40" fill="none" stroke={accent} strokeWidth="1.5" opacity={0.6}/>
+      </>}
+    </svg>
+  )
+
+  // ── FOOTBALL (default) ─────────────────────────────────────────────────────
+  return (
+    <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.85 }}>
+      <rect width="280" height="100" fill="#4a7c3f"/>
+      {[0,28,56,84,112,140,168,196,224,252,280].map((x,i)=>
+        <line key={i} x1={x} y1="0" x2={x} y2="100" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
+      )}
+      <line x1="0" y1="62" x2="280" y2="62" stroke="rgba(255,255,255,0.5)" strokeWidth="1.2" strokeDasharray="8,5"/>
+      <text x="8" y="59" fontSize="7" fill="rgba(255,255,255,0.5)">LOS</text>
+      {isDefense ? <>
+        {/* OL reference (offense, faded) */}
+        {[-24,-12,0,12,24].map((off,i)=>(<rect key={i} x={140+off-5} y={58} width={10} height={7} fill="rgba(255,255,255,0.2)" rx={1}/>))}
+        {/* D-line */}
+        {[-20,-7,7,20].map((off,i)=>(<rect key={i} x={140+off-5} y={48} width={10} height={7} fill="#4a90d9" rx={1} opacity={0.85}/>))}
+        {/* LBs */}
+        <circle cx="100" cy="36" r="5" fill="#4a90d9" opacity={0.85}/>
+        <circle cx="140" cy="34" r="5" fill="#4a90d9" opacity={0.85}/>
+        <circle cx="180" cy="36" r="5" fill="#4a90d9" opacity={0.85}/>
+        {/* DBs */}
+        <circle cx="40"  cy="56" r="5" fill="#4a90d9" opacity={0.8}/>
+        <circle cx="240" cy="56" r="5" fill="#4a90d9" opacity={0.8}/>
+        <circle cx="140" cy="20" r="5" fill="#4a90d9" opacity={0.8}/>
+      </> : <>
+        {/* OL */}
+        {[-24,-12,0,12,24].map((off,i)=>(<rect key={i} x={140+off-6} y={58} width={12} height={8} fill={accent} rx={1} opacity={0.8}/>))}
+        {/* Skill players */}
+        <circle cx="35"  cy="60" r="5" fill={accent} opacity={0.7}/>
+        <circle cx="245" cy="60" r="5" fill={accent} opacity={0.7}/>
+        <circle cx="140" cy="74" r="5" fill={accent} opacity={0.7}/>
+        {/* Routes */}
+        <path d="M 35 55 L 35 33 L 55 20" fill="none" stroke={accent} strokeWidth="1.5" opacity={0.5}/>
+        <path d="M 245 55 L 245 33 L 225 20" fill="none" stroke={accent} strokeWidth="1.5" opacity={0.5}/>
+      </>}
+    </svg>
+  )
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extraAction, preloadedDiagram=null }) {
   const [showSummary, setShowSummary] = useState(false)
   const [showMore, setShowMore] = useState(false)
@@ -1400,24 +1585,8 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         {!showDiagram ? (
           /* ── Thumbnail preview — tap to expand ── */
           <div onClick={()=>setShowDiagram(true)} style={{ cursor:'pointer', position:'relative', borderRadius:6, overflow:'hidden', border:`1px solid ${hexToRgba(P,0.2)}`, background:'#0f1219' }}>
-            {/* Mini static field */}
-            <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.7 }}>
-              <rect width="280" height="100" fill="#f4f4f0"/>
-              {[0,1,2,3].map(i=><line key={i} x1={0} y1={20+i*22} x2={280} y2={20+i*22} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
-              <line x1={0} y1={64} x2={280} y2={64} stroke="rgba(0,0,0,0.3)" strokeWidth={1} strokeDasharray="6,4"/>
-              <text x={8} y={61} fontSize={7} fill="rgba(0,0,0,0.25)">LOS</text>
-              {/* Mini OL */}
-              {[-24,-12,0,12,24].map((off,i)=>(
-                <rect key={i} x={140+off-6} y={60} width={12} height={8} fill={P} rx={1} opacity={0.8}/>
-              ))}
-              {/* Mini skill players */}
-              <circle cx={35} cy={62} r={5} fill={P} opacity={0.7}/>
-              <circle cx={245} cy={62} r={5} fill={P} opacity={0.7}/>
-              <circle cx={140} cy={74} r={5} fill={P} opacity={0.7}/>
-              {/* Route suggestions */}
-              <path d="M 35 57 L 35 35 L 55 22" fill="none" stroke={P} strokeWidth={1.5} opacity={0.5}/>
-              <path d="M 245 57 L 245 35 L 225 22" fill="none" stroke={P} strokeWidth={1.5} opacity={0.5}/>
-            </svg>
+            {/* Sport-specific field/court thumbnail */}
+            <SportThumbnail sport={play._sport} P={P} isDefense={false}/>
             {/* Overlay tap hint */}
             <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.35)' }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'1.5px', color:'white', display:'flex', alignItems:'center', gap:6 }}>
@@ -1637,6 +1806,10 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
     play.type.includes('HIT AND RUN') || play.type.includes('FIRST AND THIRD') || play.type.includes('STEAL') ||
     play.type.includes('PITCHING') || play.type.includes('DEFENSE ALIGN') || play.type.includes('OFFENSIVE APPROACH')
   )))
+  const isSoccer = !isFlagFootball && !isBasketball && !isBaseball && (_sportName === 'Soccer' || !!(play?.type && (
+    play.type.includes('ATTACKING BUILDUP') || play.type.includes('CORNER KICK') || play.type.includes('FREE KICK') ||
+    play.type.includes('COUNTER ATTACK') || play.type.includes('SET PIECE ATTACK')
+  )))
 
   useEffect(() => {
     if (preloadedData) { setParsed(preloadedData); return }
@@ -1737,7 +1910,8 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       const sportCtx = play._sport || (isFlagFootball ? 'Flag Football' : isBasketball ? 'Basketball' : isBaseball ? 'Baseball' : 'Football')
       const isDefFF = isFlagFootball || sportCtx === 'Flag Football'
       const isDefBB = isBasketball || sportCtx === 'Basketball'
-      const isDefBSB = isBaseball || sportCtx === 'Baseball'
+      const isDefBSB = isBaseball || sportCtx === 'Baseball' || sportCtx === 'Softball'
+      const isDefSoccer = isSoccer || sportCtx === 'Soccer'
 
       if (isDefFF) {
         // Flag Football defensive diagram — correct player counts, generic offense as reference
@@ -1770,8 +1944,33 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           ' COORDINATE SYSTEM: x=0-100, y=0-60. Basket at y=6. Players attack upward (lower y). Show 5 defenders (D) guarding 5 offensive players.' +
           ' Defenders move to intercept/cover their assignments. Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
       } else if (isDefBSB) {
-        prompt = 'Generate DEFENSIVE baseball/softball positioning diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + play.note +
-          ' Show all 9 fielders in their shifted/aligned positions. Home y=50 x=50. 1B y=36 x=74. 2B y=22 x=50. 3B y=36 x=26. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
+        const isSoftballDef = play._sport === 'Softball'
+        prompt = 'DEFENSIVE ' + (isSoftballDef ? 'softball' : 'baseball') + ' positioning diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. Home plate at y=50 x=50. 1B y=36 x=74. 2B y=22 x=50. 3B y=36 x=26. Pitcher mound y=34 x=50.' +
+          ' Show all 9 fielders in their correct shifted or standard positions based on the play name and description.' +
+          ' Standard positions: P(50,34), C(50,44), 1B(74,38), 2B(64,26), SS(38,28), 3B(26,38), LF(20,10), CF(50,6), RF(80,10).' +
+          ' SHIFTS: Pull-side shift moves 2B toward 1B side. Five-man infield brings outfielder in. Corner charge moves 1B/3B toward plate.' +
+          ' PITCHING plays: show P with path toward plate. C with path toward received ball. Infielders backing up.' +
+          ' Each fielder routeName describes their assignment: "Hold bag", "Cover 2B", "Charge", "Field position", "Back up", etc.' +
+          ' Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
+      } else if (isDefSoccer) {
+        const scDefTemplate = JSON.stringify({formation:'PLAYNAME',snapPoint:0.2,duration:3000,players:[
+          {id:'GK',label:'GK',role:'def',routeType:'block',x:50,y:56,path:[[50,56],[50,56]],routeName:'Protect goal',routeYards:0},
+          {id:'CB1',label:'CB',role:'def',routeType:'route',x:38,y:46,path:[[38,46],[38,42]],routeName:'Mark ST',routeYards:0},
+          {id:'CB2',label:'CB',role:'def',routeType:'route',x:62,y:46,path:[[62,46],[62,42]],routeName:'Mark CF',routeYards:0},
+          {id:'LB',label:'LB',role:'def',routeType:'route',x:20,y:42,path:[[20,42],[20,36]],routeName:'Track LW',routeYards:0},
+          {id:'RB',label:'RB',role:'def',routeType:'route',x:80,y:42,path:[[80,42],[80,36]],routeName:'Track RW',routeYards:0},
+          {id:'DM',label:'DM',role:'def',routeType:'route',x:50,y:36,path:[[50,36],[50,30]],routeName:'Screen passes',routeYards:0},
+          {id:'CM1',label:'CM',role:'def',routeType:'route',x:34,y:30,path:[[34,30],[34,24]],routeName:'Press',routeYards:0},
+          {id:'CM2',label:'CM',role:'def',routeType:'route',x:66,y:30,path:[[66,30],[66,24]],routeName:'Press',routeYards:0},
+          {id:'ST1',label:'FW',role:'def',routeType:'route',x:40,y:20,path:[[40,20],[40,14]],routeName:'High press',routeYards:0},
+          {id:'ST2',label:'FW',role:'def',routeType:'route',x:60,y:20,path:[[60,20],[60,14]],routeName:'High press',routeYards:0}
+        ]})
+        prompt = 'DEFENSIVE soccer shape diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + (play.note||'') +
+          ' COORDINATE SYSTEM: x=0-100, y=0-60. Defending goal at y=58 (bottom). Attacking goal at y=4 (top). Team defends DOWNWARD — lower y = pressing higher up. GK stays near y=54-58.' +
+          ' Show the defensive shape, marking assignments, and pressing triggers described in the play.' +
+          ' ZONE DEFENSE: show blocks of space covered. MAN: show defenders mirroring attackers. HIGH PRESS: defenders push to y=16-26 with compact shape.' +
+          ' Return ONLY raw JSON: ' + scDefTemplate.replace('PLAYNAME', play.name)
       } else {
         // Tackle football defensive diagram
         prompt = 'Generate DEFENSIVE football diagram for: "' + play.name + '" (' + (play.type||'') + '). ' + play.note +
@@ -1788,9 +1987,41 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         ' ONE routeName starts with BALL:, ONE starts with SHOOT:, others: CUT:, SCREEN:, ROLL:, MOVE:, FILL:. routeYards>0 on primary scorer only.' +
         ' Return ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
     } else if (isBaseball) {
-      prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + play.type + '). ' + play.note +
-        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Show all 9 fielders in correct positions plus batter movement.' +
+      const isSoftball = _sportName === 'Softball'
+      prompt = (isSoftball ? 'Softball' : 'Baseball') + ' field diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50.' +
+        ' DIAGRAM ACCURACY: This must show a real baseball/softball situation — not a football field. Use the 9 fielder positions for DEFENSIVE plays. Use batter + baserunner arrows for OFFENSIVE plays.' +
+        ' OFFENSIVE PLAYS (BATTING, BASERUN, BUNT, HIT AND RUN, FIRST AND THIRD): Show batter at home (y=50 x=50), fielders in standard positions, and baserunner paths with arrows showing where runners go. Use role:def for fielders, role:off for batter and runners.' +
+        ' DEFENSIVE PLAYS (PITCHING, DEFENSE ALIGN, POSITIONING): Show all 9 fielders in correct shifted/unshifted positions based on the play description. P at mound y=34 x=50. C at y=44 x=50. 1B y=38 x=74. 2B y=26 x=64. SS y=28 x=38. 3B y=38 x=26. LF y=10 x=20. CF y=6 x=50. RF y=10 x=80.' +
+        ' MOVEMENT ARROWS: For bunt plays, show 3B and 1B charging (paths toward home). For hit-and-run, show runner breaking from 1st toward 2nd. For first-and-third, show both runners. For shifts, show infielders moved toward pull side.' +
+        ' routeName describes the action: "Run to 1B", "Cover bag", "Charge", "Field position", etc. routeYards > 0 on the primary action player only.' +
         ' Return ONLY raw JSON using this template: ' + bsbTemplate.replace('PLAYNAME', play.name)
+    } else if (isSoccer) {
+      const soccerTemplate = JSON.stringify({formation:"PLAYNAME",snapPoint:0.2,duration:3500,players:[
+        {id:"GK",label:"GK",role:"off",routeType:"block",x:50,y:56,path:[[50,56],[50,56]],routeName:"Goal",routeYards:0},
+        {id:"LB",label:"LB",role:"off",routeType:"block",x:20,y:44,path:[[20,44],[20,44]],routeName:"Defend",routeYards:0},
+        {id:"CB1",label:"CB",role:"off",routeType:"block",x:38,y:46,path:[[38,46],[38,46]],routeName:"Defend",routeYards:0},
+        {id:"CB2",label:"CB",role:"off",routeType:"block",x:62,y:46,path:[[62,46],[62,46]],routeName:"Defend",routeYards:0},
+        {id:"RB",label:"RB",role:"off",routeType:"block",x:80,y:44,path:[[80,44],[80,44]],routeName:"Defend",routeYards:0},
+        {id:"CM1",label:"CM",role:"off",routeType:"route",x:35,y:34,path:[[35,34],[35,26]],routeName:"Support",routeYards:0},
+        {id:"CM2",label:"CM",role:"off",routeType:"route",x:65,y:34,path:[[65,34],[65,26]],routeName:"Support",routeYards:0},
+        {id:"LW",label:"LW",role:"off",routeType:"route",x:15,y:22,path:[[15,22],[15,12]],routeName:"Run",routeYards:0},
+        {id:"RW",label:"RW",role:"off",routeType:"route",x:85,y:22,path:[[85,22],[85,12]],routeName:"Run",routeYards:0},
+        {id:"ST",label:"ST",role:"off",routeType:"route",x:50,y:18,path:[[50,18],[50,10]],routeName:"Attack",routeYards:8},
+        {id:"BALL",label:"▶",role:"off",routeType:"route",x:50,y:34,path:[[50,34],[50,22]],routeName:"Pass",routeYards:0}
+      ]})
+      prompt = 'Soccer attacking diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+        ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Attacking goal at y=4 (top center). Own goal at y=58. Half line at y=30.' +
+        ' ATTACK UPWARD = lower y values. Defenders start at higher y. Ball carrier advances to lower y toward goal.' +
+        ' PLAYER ROLES: GK stays near y=54-58 own goal. Defenders (CB, LB, RB) start y=40-50. Midfielders y=26-38. Forwards/Strikers y=10-24. Wingers fill wide channels x=10-20 and x=80-90.' +
+        ' PLAY TYPE ACCURACY:' +
+        ' ATTACKING BUILDUP: GK or CB passes short, midfielders circulate, wide players stretch, striker makes run in behind.' +
+        ' COUNTER ATTACK: Ball won deep, quick vertical passes. Wide players sprint forward x=10-20 and x=80-90. Striker leads run. Show speed of transitions with long path arrows.' +
+        ' CORNER KICK: Ball at x=2 y=4 or x=98 y=4. Players cluster in penalty area y=8-20. Near post runner, far post runner, penalty spot attacker. Defender holds edge of area.' +
+        ' FREE KICK: Ball marked with ▶ at foul location. Show wall of 3-5 defenders at y 6-8 units from ball. Show shot curve or pass routing around wall.' +
+        ' SET PIECE ATTACK: Show organized runs — near post, far post, peeling run, and one player staying for potential second ball.' +
+        ' BALL PLAYER: Always include a BALL marker (label:"▶") that shows the ball path (pass, shot, or dribble). routeYards>0 on the player making the key scoring run or receiving final ball.' +
+        ' Return ONLY raw JSON using this template: ' + soccerTemplate.replace('PLAYNAME', play.name)
     } else if (isFlagFootball) {
       // Use _flagFormat if available (most reliable), fallback to text detection
       const flagFmt = play._flagFormat ||
@@ -3097,18 +3328,8 @@ function DefFormationCard({ formation: f, S, P='#C0392B', al, callAI, parseJSON,
       <div style={{ marginBottom:10 }}>
         {!showDiagram ? (
           <div onClick={()=>setShowDiagram(true)} style={{ cursor:'pointer', position:'relative', borderRadius:6, overflow:'hidden', border:`1px solid ${hexToRgba(S,0.2)}`, background:'#0f1219' }}>
-            <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.7 }}>
-              <rect width="280" height="100" fill="#f4f4f0"/>
-              {[0,1,2,3].map(i=><line key={i} x1={0} y1={20+i*22} x2={280} y2={20+i*22} stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>)}
-              <line x1={0} y1={64} x2={280} y2={64} stroke="rgba(0,0,0,0.3)" strokeWidth={1} strokeDasharray="6,4"/>
-              <text x={8} y={61} fontSize={7} fill="rgba(0,0,0,0.25)">LOS</text>
-              {[-24,-12,0,12,24].map((off,i)=>(<rect key={i} x={140+off-6} y={56} width={12} height={8} fill={S} rx={1} opacity={0.6}/>))}
-              <circle cx={35} cy={64} r={5} fill="#444" opacity={0.7}/>
-              <circle cx={245} cy={64} r={5} fill="#444" opacity={0.7}/>
-              <circle cx={140} cy={44} r={5} fill="#444" opacity={0.7}/>
-              <path d="M 35 59 L 35 40 L 20 28" fill="none" stroke="#555" strokeWidth={1.5} opacity={0.4}/>
-              <path d="M 245 59 L 245 40 L 260 28" fill="none" stroke="#555" strokeWidth={1.5} opacity={0.4}/>
-            </svg>
+            {/* Sport-specific defensive thumbnail */}
+            <SportThumbnail sport={sport} P={P} isDefense={true}/>
             <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.35)' }}>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:11, letterSpacing:'1.5px', color:'white', display:'flex', alignItems:'center', gap:6 }}>
                 <span style={{ fontSize:14 }}>📐</span> TAP TO VIEW DIAGRAM
@@ -4183,7 +4404,8 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
           const isBB = typeStr.includes('COURT')||typeStr.includes('PRESS')||typeStr.includes('BREAK')||typeStr.includes('INBOUND')||typeStr.includes('TRANSITION')||typeStr.includes('QUICK HITTER')||typeStr.includes('HALF COURT')
           const isBSB = !isBB && (typeStr.includes('BATTING')||typeStr.includes('BASERUN')||typeStr.includes('BUNT')||typeStr.includes('HIT AND RUN')||typeStr.includes('FIRST AND THIRD')||typeStr.includes('OFFENSIVE APPROACH'))
           const isFlagBg = !!(play._isFlagFootball || play._sport === 'Flag Football')
-          if (play._sport === undefined) play._sport = isBB ? 'Basketball' : isBSB ? 'Baseball' : isFlagBg ? 'Flag Football' : 'Football'
+          const isSoccerBg = !isBB && !isBSB && !isFlagBg && (play._sport === 'Soccer' || typeStr.includes('ATTACKING BUILDUP')||typeStr.includes('CORNER KICK')||typeStr.includes('FREE KICK')||typeStr.includes('COUNTER ATTACK')||typeStr.includes('SET PIECE'))
+          if (play._sport === undefined) play._sport = isBB ? 'Basketball' : isBSB ? 'Baseball' : isFlagBg ? 'Flag Football' : isSoccerBg ? 'Soccer' : 'Football'
           const detectedSport = isBB ? 'basketball' : isBSB ? 'baseball' : 'football'
           const cacheKey = 'coachiq_anim2_' + (play.name||'').replace(/\s/g,'_').slice(0,30)
           // Check session cache first — skip API call if already cached
@@ -4216,7 +4438,31 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   ' routeYards > 0 on the primary scoring option only.' +
                   ' Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
               } else if (isBSB) {
-                prompt = 'Generate baseball/softball field diagram for: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') + ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50. Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
+                const isSoftballBg = play._sport === 'Softball'
+                prompt = (isSoftballBg ? 'Softball' : 'Baseball') + ' field diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' COORDINATE SYSTEM: x=0-100 left-right, y=0-60 top-bottom. Home plate at y=50 x=50. First base at y=36 x=74. Second base at y=22 x=50. Third base at y=36 x=26. Pitcher mound at y=34 x=50.' +
+                  ' OFFENSIVE PLAYS (BATTING/BASERUN/BUNT/HIT AND RUN): Show batter at home, fielders in position, baserunner arrows showing where runners go.' +
+                  ' DEFENSIVE PLAYS (PITCHING/DEFENSE ALIGN): Show all 9 fielders correctly positioned. P at mound, C behind plate, infielders at standard spots, outfielders in correct depth.' +
+                  ' MOVEMENT: Bunt plays show 3B/1B charging paths. Hit-and-run shows runner break path. Shifts show infielders moved toward pull side.' +
+                  ' Return ONLY raw JSON: ' + bsbTemplate.replace('PLAYNAME', play.name)
+              } else if (isSoccerBg) {
+                const scTemplate = JSON.stringify({formation:'PLAYNAME',snapPoint:0.2,duration:3500,players:[
+                  {id:'GK',label:'GK',role:'off',routeType:'block',x:50,y:56,path:[[50,56],[50,56]],routeName:'Goal',routeYards:0},
+                  {id:'CB1',label:'CB',role:'off',routeType:'block',x:38,y:46,path:[[38,46],[38,46]],routeName:'Defend',routeYards:0},
+                  {id:'CB2',label:'CB',role:'off',routeType:'block',x:62,y:46,path:[[62,46],[62,46]],routeName:'Defend',routeYards:0},
+                  {id:'LB',label:'LB',role:'off',routeType:'route',x:20,y:42,path:[[20,42],[20,30]],routeName:'Overlap',routeYards:0},
+                  {id:'RB',label:'RB',role:'off',routeType:'route',x:80,y:42,path:[[80,42],[80,30]],routeName:'Overlap',routeYards:0},
+                  {id:'CM',label:'CM',role:'off',routeType:'route',x:50,y:34,path:[[50,34],[50,24]],routeName:'Support',routeYards:0},
+                  {id:'LW',label:'LW',role:'off',routeType:'route',x:18,y:22,path:[[18,22],[18,10]],routeName:'Run',routeYards:0},
+                  {id:'RW',label:'RW',role:'off',routeType:'route',x:82,y:22,path:[[82,22],[82,10]],routeName:'Run',routeYards:0},
+                  {id:'ST',label:'ST',role:'off',routeType:'route',x:50,y:16,path:[[50,16],[50,8]],routeName:'Attack',routeYards:8},
+                  {id:'BALL',label:'▶',role:'off',routeType:'route',x:50,y:34,path:[[50,34],[50,20]],routeName:'Pass',routeYards:0}
+                ]})
+                prompt = 'Soccer attacking diagram: ' + play.name + ' (' + (play.type||'') + '). ' + (play.note||'') +
+                  ' COORDINATE SYSTEM: x=0-100, y=0-60. Attacking goal at y=4 center x=50 (top). Own goal at y=58. Attack UPWARD = lower y.' +
+                  ' GK stays y=54-58. Defenders y=40-50. Midfielders y=26-38. Forwards y=10-24. Wingers wide x=10-20 and x=80-90.' +
+                  ' CORNER KICK: Ball at x=2 or x=98, y=4. Players run into penalty area. COUNTER: long vertical paths. FREE KICK: show wall + shot/pass curve. BUILDUP: short passes circulating then final ball forward.' +
+                  ' Include a BALL marker (label:"▶") showing ball path. routeYards>0 on key scoring run. Return ONLY raw JSON: ' + scTemplate.replace('PLAYNAME', play.name)
               } else if (isFlagBg) {
                 const fFmt = ((play.note||'').includes('7v7') || (play.name||'').includes('7v7')) ? '7v7' : ((play.note||'').includes('6v6') || (play.name||'').includes('6v6')) ? '6v6' : '5v5'
                 const fIs5 = fFmt === '5v5', fIs6 = fFmt === '6v6'
