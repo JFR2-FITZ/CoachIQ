@@ -906,7 +906,7 @@ const SPORTS = {
     emoji:'BB',
     fields:[
       {id:'system',label:'Offensive System',opts:['Motion Offense','Flex Offense','Horns','Pick and Roll','4-Out 1-In','Dribble Drive']},
-      {id:'roster',label:'Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
+      {id:'threat',label:'Scoring Threat',opts:['Elite Ball Handler / PG','Dominant Big Man / Post','3-Point Shooting Team','Athletic Wing / Slasher','Balanced — No Clear Star','Speed / Fast Break Team']},
       {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Athletic']},
       {id:'focus',label:'Offensive Focus',opts:['Half Court','Full Court / Fast Break','Press Break','End of Game','Zone Attack','Secondary Break']},
@@ -914,7 +914,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth basketball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: HALF COURT SET,TRANSITION,FULL COURT BREAK,PRESS BREAK,OUT OF BOUNDS,QUICK HITTER. When focus includes Full Court or Fast Break include FULL COURT BREAK plays showing ball from backcourt to finish. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';const threatNote=f.threat?'Feature the '+f.threat+' as the primary scoring option in at least 3 of the 5 plays. Build play designs around their strengths.':'';return 'Youth basketball coach: 5-play package. '+st+'. '+threatNote+' Age/skill drive complexity. Types: HALF COURT SET,TRANSITION,FULL COURT BREAK,PRESS BREAK,OUT OF BOUNDS,QUICK HITTER. When focus includes Full Court or Fast Break include FULL COURT BREAK plays showing ball from backcourt to finish. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -2749,9 +2749,74 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       return 'move'
     }
 
+    // ── Basketball screen mark: draw ⊥ perpendicular bar at screen location ──────
+    function drawBBScreen(fromX, fromY, toX, toY) {
+      const dx = toX - fromX, dy = toY - fromY
+      const len = Math.sqrt(dx*dx + dy*dy) || 1
+      const px = -dy/len, py = dx/len
+      const size = r * 1.8
+      ctx.beginPath()
+      ctx.moveTo(toX + px*size, toY + py*size)
+      ctx.lineTo(toX - px*size, toY - py*size)
+      ctx.stroke()
+    }
+
+    // ── Wavy dribble line for basketball ball handler ────────────────────────────
+    function drawBBDribble(pts, progress, color) {
+      if (pts.length < 2) return
+      ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.setLineDash([])
+      ctx.beginPath()
+      const totalPts = Math.max(2, Math.round(pts.length * progress))
+      ctx.moveTo(pts[0].x, pts[0].y)
+      for (let i = 1; i < totalPts; i++) {
+        const waveAmp = r * 0.55
+        const waveFreq = 6
+        const frac = i / pts.length
+        const perp = { x: -(pts[i].y - pts[i-1].y), y: pts[i].x - pts[i-1].x }
+        const pLen = Math.sqrt(perp.x*perp.x + perp.y*perp.y) || 1
+        const wave = Math.sin(frac * Math.PI * waveFreq) * waveAmp
+        ctx.lineTo(pts[i].x + perp.x/pLen * wave, pts[i].y + perp.y/pLen * wave)
+      }
+      ctx.stroke()
+    }
+
     function drawRoutes(t) {
       const isStatic = t < snap
       const pt = isStatic ? 0 : Math.min((t - snap) / (1 - snap), 1)
+
+      // ── Basketball defender movement trails — dashed gray lines ──────────────
+      if (isBBall) {
+        ;(parsed.players || []).filter(p => p.role === 'def').forEach(player => {
+          const path = player.path
+          if (!path || path.length < 2) return
+          const isMoving = player.routeType === 'route' && (path[path.length-1][0] !== path[0][0] || path[path.length-1][1] !== path[0][1])
+          if (!isMoving) return
+          const segs = path.length - 1
+          const delay = player.pathDelay || 0
+          const postSnap2 = isStatic ? 0 : (pt - delay) / Math.max(0.001, 1 - delay)
+          const traveled2 = Math.max(0, Math.min(1, postSnap2)) * segs
+          if (traveled2 <= 0 && !isStatic) return
+          ctx.strokeStyle = 'rgba(120,120,140,0.6)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4])
+          ctx.beginPath(); ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+          if (isStatic) {
+            for (let s = 1; s < path.length; s++) ctx.lineTo(sx(path[s][0]), sy(path[s][1]))
+          } else {
+            for (let s = 0; s < segs; s++) {
+              const segProg = Math.max(0, Math.min(1, traveled2 - s))
+              if (segProg <= 0) break
+              ctx.lineTo(sx(lerp(path[s][0],path[s+1][0],segProg)), sy(lerp(path[s][1],path[s+1][1],segProg)))
+            }
+          }
+          ctx.stroke(); ctx.setLineDash([])
+          // Small arrowhead at end of defender trail
+          if (isStatic || traveled2/segs >= 0.8) {
+            const ep = isStatic ? path[path.length-1] : path[path.length-1]
+            const pp2 = path[path.length-2]
+            ctx.fillStyle = 'rgba(120,120,140,0.7)'; ctx.strokeStyle = 'rgba(120,120,140,0.7)'; ctx.lineWidth = 1.2
+            arrow(sx(pp2[0]), sy(pp2[1]), sx(ep[0]), sy(ep[1]), r * 1.3)
+          }
+        })
+      }
 
       ;(parsed.players || []).forEach(player => {
         if (player.role !== 'off') return
@@ -2760,19 +2825,59 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         const isLineman = ['C', 'G', 'T'].includes(player.label)
         const isBlock = player.routeType === 'block' || isLineman
         const bbRole = isBBall ? getBBRole(player) : null
+        const isBBDribble = isBBall && bbRole === 'ball'
+        const isBBCut = isBBall && (bbRole === 'cut' || bbRole === 'shooter' || bbRole === 'move')
+        const isBBScreen = isBBall && bbRole === 'screen'
+        const isBBDef = player.role === 'def' && isBBall
+
+        // ── BASKETBALL: standard coaching diagram line styles ──────────────────
+        // Dribble (BALL:) = wavy line in amber
+        // Cut/Move/Shoot (CUT:/SHOOT:/MOVE:/FILL:) = solid line with arrowhead in white/team color
+        // Screen (SCREEN:) = solid line to screen spot + ⊥ perpendicular bar
+        // DEF: defenders = dashed gray line showing coverage shift
+        // Pass arc handled separately in drawBBPass
 
         const routeColor = isLineman
           ? 'rgba(120,120,120,0.65)'
           : isBBall
-            ? (bbRole === 'ball' ? 'rgba(245,158,11,0.9)' : bbRole === 'shooter' ? 'rgba(74,222,128,0.9)' : hexToRgba(DA, 0.8))
+            ? (isBBDribble ? 'rgba(245,158,11,0.95)'
+              : isBBScreen ? 'rgba(200,200,200,0.85)'
+              : bbRole === 'shooter' ? 'rgba(74,222,128,0.95)'
+              : 'rgba(255,255,255,0.85)')
             : hexToRgba(DA, 0.85)
 
         const segs = path.length - 1
 
         if (isStatic) {
-          // ── STATIC VIEW: draw full route as ghost lines so coach can read the play ──
-          // Full route — dashed for receivers, solid-thin for linemen/blockers
-          ctx.strokeStyle = isLineman ? 'rgba(120,120,120,0.4)' : hexToRgba(P, isBBall ? 0.5 : 0.45)
+          // ── STATIC VIEW: full route preview ───────────────────────────────────
+          if (isBBall) {
+            if (isBBDribble) {
+              // Wavy amber line full preview
+              const wavePts = path.map(p => ({ x: sx(p[0]), y: sy(p[1]) }))
+              drawBBDribble(wavePts, 1, 'rgba(245,158,11,0.6)')
+            } else if (isBBScreen) {
+              // Solid line to screen spot + ⊥ bar
+              ctx.strokeStyle = 'rgba(200,200,200,0.7)'; ctx.lineWidth = 2.2; ctx.setLineDash([])
+              ctx.beginPath(); ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+              for (let s = 1; s < path.length; s++) ctx.lineTo(sx(path[s][0]), sy(path[s][1]))
+              ctx.stroke()
+              const ep = path[path.length-1], pp2 = path[path.length-2]
+              ctx.strokeStyle = 'rgba(200,200,200,0.9)'; ctx.lineWidth = 2.8
+              drawBBScreen(sx(pp2[0]), sy(pp2[1]), sx(ep[0]), sy(ep[1]))
+            } else {
+              // Solid cut line with arrowhead
+              ctx.strokeStyle = routeColor; ctx.lineWidth = 2.0; ctx.setLineDash([])
+              ctx.beginPath(); ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+              for (let s = 1; s < path.length; s++) ctx.lineTo(sx(path[s][0]), sy(path[s][1]))
+              ctx.stroke()
+              const ep = path[path.length-1], pp2 = path[path.length-2]
+              ctx.fillStyle = routeColor; ctx.strokeStyle = routeColor; ctx.lineWidth = 1.8
+              arrow(sx(pp2[0]), sy(pp2[1]), sx(ep[0]), sy(ep[1]), r * 2.0)
+            }
+            return
+          }
+          // Non-basketball static view (unchanged)
+          ctx.strokeStyle = isLineman ? 'rgba(120,120,120,0.4)' : hexToRgba(P, 0.45)
           ctx.lineWidth = isLineman ? 1 : 1.8
           ctx.setLineDash(isBlock ? [4, 3] : [])
           ctx.beginPath()
@@ -2780,8 +2885,6 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           for (let s = 1; s < path.length; s++) ctx.lineTo(sx(path[s][0]), sy(path[s][1]))
           ctx.stroke()
           ctx.setLineDash([])
-
-          // Arrowhead or block mark at end of full route
           const ep = path[path.length - 1]
           const pp2 = path[path.length - 2]
           const endX = sx(ep[0]), endY = sy(ep[1])
@@ -2793,40 +2896,90 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
           } else {
             arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 1.9)
           }
-
-          // Route labels collected — drawn as legend below (see drawRouteLegend)
         } else {
           // ── ANIMATED VIEW: draw the traveled portion of each route ──
           const traveled = pt * segs
 
           ctx.strokeStyle = routeColor
-          ctx.lineWidth = isLineman ? 1.3 : 2.2
-          ctx.setLineDash([])
-          ctx.beginPath()
-          ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
-
-          for (let s = 0; s < segs; s++) {
-            const segProgress = Math.max(0, Math.min(1, traveled - s))
-            if (segProgress <= 0) break
-            const ex = lerp(path[s][0], path[s + 1][0], segProgress)
-            const ey = lerp(path[s][1], path[s + 1][1], segProgress)
-            ctx.lineTo(sx(ex), sy(ey))
-          }
-          ctx.stroke()
-
-          // Arrowhead / block mark at end of traveled route
-          const progress2 = Math.min(traveled / segs, 1)
-          if (progress2 >= 0.82) {
-            const ep = path[path.length - 1]
-            const pp2 = path[path.length - 2]
-            const endX = sx(ep[0]), endY = sy(ep[1])
-            ctx.fillStyle = routeColor
-            ctx.strokeStyle = routeColor
-            ctx.lineWidth = 2
-            if (isBlock) {
-              perpMark(endX, endY, ep[0] - pp2[0], ep[1] - pp2[1], r * 1.5)
+          // ── BASKETBALL animated routes — standard coaching notation ─────────
+          if (isBBall) {
+            if (isBBDribble) {
+              // Wavy dribble line — draws progressively
+              const wavePts = []
+              for (let s = 0; s < segs; s++) {
+                const segProg = Math.max(0, Math.min(1, traveled - s))
+                if (segProg <= 0) break
+                const ex = lerp(path[s][0], path[s+1][0], segProg)
+                const ey = lerp(path[s][1], path[s+1][1], segProg)
+                wavePts.push({ x: sx(ex), y: sy(ey) })
+              }
+              if (wavePts.length > 0) {
+                wavePts.unshift({ x: sx(path[0][0]), y: sy(path[0][1]) })
+                drawBBDribble(wavePts, 1, routeColor)
+              }
+            } else if (isBBScreen) {
+              // Solid line to screen location + ⊥ bar when arrived
+              ctx.strokeStyle = routeColor; ctx.lineWidth = 2.2; ctx.setLineDash([])
+              ctx.beginPath(); ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+              for (let s = 0; s < segs; s++) {
+                const segProg = Math.max(0, Math.min(1, traveled - s))
+                if (segProg <= 0) break
+                ctx.lineTo(sx(lerp(path[s][0],path[s+1][0],segProg)), sy(lerp(path[s][1],path[s+1][1],segProg)))
+              }
+              ctx.stroke()
+              const progress2 = Math.min(traveled / segs, 1)
+              if (progress2 >= 0.85) {
+                const ep = path[path.length-1], pp2 = path[path.length-2]
+                ctx.strokeStyle = 'rgba(220,220,220,0.95)'; ctx.lineWidth = 3.0
+                drawBBScreen(sx(pp2[0]), sy(pp2[1]), sx(ep[0]), sy(ep[1]))
+              }
             } else {
-              arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 2)
+              // Cut / Move / Shoot — solid line with arrowhead
+              ctx.strokeStyle = routeColor; ctx.lineWidth = 2.2; ctx.setLineDash([])
+              ctx.beginPath(); ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+              for (let s = 0; s < segs; s++) {
+                const segProg = Math.max(0, Math.min(1, traveled - s))
+                if (segProg <= 0) break
+                ctx.lineTo(sx(lerp(path[s][0],path[s+1][0],segProg)), sy(lerp(path[s][1],path[s+1][1],segProg)))
+              }
+              ctx.stroke()
+              const progress2 = Math.min(traveled / segs, 1)
+              if (progress2 >= 0.80) {
+                const ep = path[path.length-1], pp2 = path[path.length-2]
+                ctx.fillStyle = routeColor; ctx.strokeStyle = routeColor; ctx.lineWidth = 2
+                arrow(sx(pp2[0]), sy(pp2[1]), sx(ep[0]), sy(ep[1]), r * 2.2)
+              }
+            }
+          } else {
+            // ── Non-basketball animated routes (unchanged) ─────────────────────
+            ctx.strokeStyle = routeColor
+            ctx.lineWidth = isLineman ? 1.3 : 2.2
+            ctx.setLineDash([])
+            ctx.beginPath()
+            ctx.moveTo(sx(path[0][0]), sy(path[0][1]))
+
+            for (let s = 0; s < segs; s++) {
+              const segProgress = Math.max(0, Math.min(1, traveled - s))
+              if (segProgress <= 0) break
+              const ex = lerp(path[s][0], path[s + 1][0], segProgress)
+              const ey = lerp(path[s][1], path[s + 1][1], segProgress)
+              ctx.lineTo(sx(ex), sy(ey))
+            }
+            ctx.stroke()
+
+            const progress2 = Math.min(traveled / segs, 1)
+            if (progress2 >= 0.82) {
+              const ep = path[path.length - 1]
+              const pp2 = path[path.length - 2]
+              const endX = sx(ep[0]), endY = sy(ep[1])
+              ctx.fillStyle = routeColor
+              ctx.strokeStyle = routeColor
+              ctx.lineWidth = 2
+              if (isBlock) {
+                perpMark(endX, endY, ep[0] - pp2[0], ep[1] - pp2[1], r * 1.5)
+              } else {
+                arrow(sx(pp2[0]), sy(pp2[1]), endX, endY, r * 2)
+              }
             }
           }
         }
@@ -3055,21 +3208,24 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
 
         if (isOff) {
           if (isBBall) {
-            // Basketball offensive players
+            // Basketball offensive players — FastDraw style: bold numbered circles
             const isBH = bbRole === 'ball'
             const isShooter = bbRole === 'shooter'
             const isScreener = bbRole === 'screen'
+            // Glow ring on ball handler and primary scorer
             if (isBH || isShooter) {
-              ctx.fillStyle = isBH ? 'rgba(245,158,11,0.2)' : 'rgba(74,222,128,0.15)'
-              ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 2.5, 0, Math.PI * 2); ctx.fill()
+              ctx.fillStyle = isBH ? 'rgba(245,158,11,0.18)' : 'rgba(74,222,128,0.12)'
+              ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 2.8, 0, Math.PI * 2); ctx.fill()
             }
-            // Static reference offense in defensive diagrams = mid-gray (not team color)
-            const isStaticRef = player.role === 'off' && player.routeType === 'block' && (player.routeName === '' || player.routeName === undefined) && parsed._isFlagFootball
-            ctx.fillStyle = isBH ? '#f59e0b' : isShooter ? '#4ade80' : isScreener ? '#999' : isStaticRef ? 'rgba(120,120,140,0.85)' : DA
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 1.8
-            ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
-            ctx.fillStyle = isBH || isShooter ? '#000' : 'white'
-            ctx.font = `bold ${Math.round(r * 1.1)}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+            // Circle fill: ball handler = amber, shooter = green, everyone else = team color
+            const offFill = isBH ? '#f59e0b' : isShooter ? '#4ade80' : DA
+            const offStroke = 'rgba(255,255,255,0.95)'
+            ctx.fillStyle = offFill; ctx.strokeStyle = offStroke; ctx.lineWidth = 2.2
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 1.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+            // Number label — black on amber/green, white on team color
+            ctx.fillStyle = (isBH || isShooter) ? '#111' : 'white'
+            ctx.font = `bold ${Math.round(r * 1.15)}px sans-serif`
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
             ctx.fillText(player.label, pos.x, pos.y)
           } else if (isLineman) {
             // Linemen = squares
@@ -3112,17 +3268,23 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
             ctx.fillText(player.label, pos.x, pos.y)
           } else {
-            // Basketball defenders — smaller, clearly distinguished from offense
-            // Role check: DEF: prefix = active defender with movement
-            const isActiveDef = (player.routeName || '').startsWith('DEF:') || player.routeType === 'route'
-            ctx.fillStyle = isActiveDef ? 'rgba(30,50,80,0.88)' : 'rgba(60,60,70,0.55)'
-            ctx.strokeStyle = isActiveDef ? 'rgba(160,200,255,0.9)' : 'rgba(140,140,160,0.5)'
-            ctx.lineWidth = isActiveDef ? 1.5 : 1.0
-            ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 0.75, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
-            ctx.fillStyle = isActiveDef ? 'rgba(200,220,255,0.95)' : 'rgba(160,160,160,0.8)'
-            ctx.font = `${Math.round(r * 0.75)}px sans-serif`
+            // Basketball defenders — FastDraw/Hoops Geek standard: X marks with label
+            // Active defenders (DEF: or route type) draw movement trail as dashed gray
+            const isActiveDef2 = (player.routeName || '').startsWith('DEF:') || player.routeType === 'route'
+            const defColor = isActiveDef2 ? 'rgba(80,80,90,0.95)' : 'rgba(80,80,90,0.65)'
+            const defStroke = isActiveDef2 ? 'rgba(160,160,180,0.9)' : 'rgba(130,130,150,0.55)'
+            const xSize = r * 0.82
+            ctx.strokeStyle = defColor; ctx.lineWidth = isActiveDef2 ? 2.2 : 1.5
+            // Draw X mark
+            ctx.beginPath()
+            ctx.moveTo(pos.x - xSize, pos.y - xSize); ctx.lineTo(pos.x + xSize, pos.y + xSize)
+            ctx.moveTo(pos.x + xSize, pos.y - xSize); ctx.lineTo(pos.x - xSize, pos.y + xSize)
+            ctx.stroke()
+            // Small label below the X
+            ctx.fillStyle = isActiveDef2 ? 'rgba(180,180,200,0.9)' : 'rgba(140,140,160,0.65)'
+            ctx.font = `${Math.round(r * 0.72)}px sans-serif`
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-            ctx.fillText(player.label, pos.x, pos.y)
+            ctx.fillText(player.label, pos.x, pos.y + xSize + r * 0.7)
           }
         }
       })
