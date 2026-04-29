@@ -2021,9 +2021,16 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
         '\n• Defenders on non-involved players hold position (path barely moves, 1-2 units max) — showing they are staying with their assignment.' +
         '\n• Help defender (weakside) can sink toward paint when ball drives — pathDelay:0.40.' +
         '\n• NEVER have all defenders be static — at minimum the on-ball defender and screener defender must show reactive movement.' +
-        '\n\nrouteType: use "route" for all players with meaningful movement (offense and defense), "block" only for truly stationary players.' +
-        '\nrouteName prefix rules: BALL: (has ball), SHOOT: (primary scoring option, routeYards>0), CUT:, SCREEN:, ROLL:, POP:, FILL:, DEF: (defenders).' +
-        '\nOnly ONE routeYards>0 — the primary scoring option.' +
+        '\n\nSPORT IQ — NON-NEGOTIABLE RULES:' +
+        '\n• If ball handler drives to basket (path ends y<18), they FINISH at rim. routeName: "BALL: drive finish". Never show them passing back to perimeter from the paint.' +
+        '\n• SHOOT: goes on the player receiving the FINAL scoring opportunity. On a drive play = the driver. On a kick-out = the open perimeter player.' +
+        '\n• Passes follow basketball gravity — FROM ball handler TOWARD open space or basket. A pass from paint back to half-court on a drive is WRONG.' +
+        '\n• Weak-side players space to corners/wings — they do NOT drift toward the ball.' +
+        '\n• In 5-Out motion: passer cuts immediately to basket (pathDelay:0), adjacent players fill one spot closer to ball (pathDelay:0.25).' +
+        '\n• Show MAX 5 offensive + 5 defensive players. Fewer defenders is acceptable if 10 total creates visual confusion on a simple play.' +
+        '\n\nrouteType: "route" for meaningful movement, "block" for truly stationary.' +
+        '\nrouteName prefixes: BALL:, SHOOT:(routeYards>0), CUT:, SCREEN:, ROLL:, POP:, FILL:, DEF:' +
+        '\nOnly ONE routeYards>0 — primary scoring option only.' +
         '\nReturn ONLY raw JSON using this template: ' + bbTemplate.replace('PLAYNAME', play.name)
     } else if (isBaseball) {
       const isSoftball = _sportName === 'Softball'
@@ -2977,39 +2984,61 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
       if (!ballHolder || !shooter) return
       const pt = t < snap ? 0 : Math.min((t - snap) / (1 - snap), 1)
       const passTime = 0.55
-      if (pt < passTime) {
-        // Ball dot on ball handler
-        const pos = getPos(ballHolder, t)
+
+      // LOGIC CHECK: if ball handler ends up closer to basket (lower y) than the shooter,
+      // the play is a drive-to-basket — don't show a kick-out arc, just show the ball on the driver
+      const bhEndY = ballHolder.path ? ballHolder.path[ballHolder.path.length - 1][1] : ballHolder.y
+      const shooterEndY = shooter.path ? shooter.path[shooter.path.length - 1][1] : shooter.y
+      const isDriveToBasket = bhEndY < shooterEndY - 8  // ball handler ends significantly closer to basket
+
+      // Ball dot always on ball handler while they have it
+      const pos = getPos(ballHolder, t)
+      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
+      ctx.beginPath(); ctx.arc(pos.x + r * 0.6, pos.y - r * 0.6, r * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+
+      if (isDriveToBasket) {
+        // Drive play: show ball traveling with the driver toward basket, no kick-out arc
+        // Highlight driver with a ring when near basket
+        if (pt > 0.7 && bhEndY < 22) {
+          ctx.strokeStyle = 'rgba(245,158,11,0.85)'; ctx.lineWidth = 2.5
+          ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 1.7, 0, Math.PI * 2); ctx.stroke()
+        }
+        return
+      }
+
+      if (pt < passTime) return  // holding — ball dot already drawn above
+
+      // Kick-out pass arc: only fires when ball handler ends up farther from basket than shooter
+      const pp2 = Math.min(1, (pt - passTime) / 0.3)
+      const startPos = getPos(ballHolder, snap + passTime * (1 - snap))
+      const endPos = getPos(shooter, t)
+
+      // Arc height: passes going AWAY from basket (higher y = toward half court) arc upward
+      // Passes going TOWARD basket arc downward — clamp direction intelligently
+      const passingTowardBasket = endPos.y < startPos.y
+      const arcDir = passingTowardBasket ? 1 : -1  // negative = arc bows away from basket
+
+      ctx.strokeStyle = 'rgba(255,220,50,0.9)'; ctx.lineWidth = 2; ctx.setLineDash([6, 3])
+      ctx.beginPath(); ctx.moveTo(startPos.x, startPos.y)
+      const steps = 24
+      for (let i = 1; i <= Math.round(steps * pp2); i++) {
+        const f = i / steps
+        ctx.lineTo(
+          startPos.x + (endPos.x - startPos.x) * f,
+          startPos.y + (endPos.y - startPos.y) * f + arcDir * sy(8) * f * (1 - f) * 4
+        )
+      }
+      ctx.stroke(); ctx.setLineDash([])
+      if (pp2 < 1) {
+        const f = pp2
+        const bx = startPos.x + (endPos.x - startPos.x) * f
+        const by = startPos.y + (endPos.y - startPos.y) * f + arcDir * sy(8) * f * (1 - f) * 4
         ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
-        ctx.beginPath(); ctx.arc(pos.x + r, pos.y - r, r * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+        ctx.beginPath(); ctx.arc(bx, by, r * 0.55, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
       } else {
-        // Pass arc in flight
-        const pp2 = Math.min(1, (pt - passTime) / 0.3)
-        const startPos = getPos(ballHolder, snap + passTime * (1 - snap))
-        const endPos = getPos(shooter, t)
-        ctx.strokeStyle = 'rgba(255,220,50,0.9)'; ctx.lineWidth = 2; ctx.setLineDash([6, 3])
-        ctx.beginPath(); ctx.moveTo(startPos.x, startPos.y)
-        const steps = 24
-        for (let i = 1; i <= Math.round(steps * pp2); i++) {
-          const f = i / steps
-          ctx.lineTo(
-            startPos.x + (endPos.x - startPos.x) * f,
-            startPos.y + (endPos.y - startPos.y) * f - sy(8) * f * (1 - f) * 4
-          )
-        }
-        ctx.stroke(); ctx.setLineDash([])
-        if (pp2 < 1) {
-          const f = pp2
-          const bx = startPos.x + (endPos.x - startPos.x) * f
-          const by = startPos.y + (endPos.y - startPos.y) * f - sy(8) * f * (1 - f) * 4
-          ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
-          ctx.beginPath(); ctx.arc(bx, by, r * 0.55, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
-        } else {
-          // Ball arrived — show on shooter
-          const pos = getPos(shooter, t)
-          ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
-          ctx.beginPath(); ctx.arc(pos.x + r, pos.y - r, r * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
-        }
+        const shootPos = getPos(shooter, t)
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1
+        ctx.beginPath(); ctx.arc(shootPos.x + r * 0.6, shootPos.y - r * 0.6, r * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
       }
     }
 
@@ -3083,10 +3112,15 @@ function PlayAnimator({ play, P='#C0392B', callAI, parseJSON, autoLoad=false, pr
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
             ctx.fillText(player.label, pos.x, pos.y)
           } else {
-            // Ghost defenders (reference only)
-            ctx.strokeStyle = 'rgba(80,80,80,0.65)'; ctx.fillStyle = 'rgba(80,80,80,0.08)'; ctx.lineWidth = 1.2
-            ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 0.85, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
-            ctx.fillStyle = 'rgba(80,80,80,0.7)'; ctx.font = `${Math.round(r * 0.9)}px sans-serif`
+            // Basketball defenders — smaller, clearly distinguished from offense
+            // Role check: DEF: prefix = active defender with movement
+            const isActiveDef = (player.routeName || '').startsWith('DEF:') || player.routeType === 'route'
+            ctx.fillStyle = isActiveDef ? 'rgba(30,50,80,0.88)' : 'rgba(60,60,70,0.55)'
+            ctx.strokeStyle = isActiveDef ? 'rgba(160,200,255,0.9)' : 'rgba(140,140,160,0.5)'
+            ctx.lineWidth = isActiveDef ? 1.5 : 1.0
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, r * 0.75, 0, Math.PI * 2); ctx.fill(); ctx.stroke()
+            ctx.fillStyle = isActiveDef ? 'rgba(200,220,255,0.95)' : 'rgba(160,160,160,0.8)'
+            ctx.font = `${Math.round(r * 0.75)}px sans-serif`
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
             ctx.fillText(player.label, pos.x, pos.y)
           }
@@ -4478,6 +4512,9 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   ' SCREEN PLAYS: (1)Screener pathDelay:0 moves to set screen body-adjacent to defender being screened. (2)Ball handler/cutter pathDelay:0.15 drives off screen shoulder curving through screen spot. (3)Screener rolls/pops pathDelay:0.25 after contact. (4)Ball handler defender pathDelay:0.20 trails through screen then recovers. (5)Screener defender pathDelay:0 hedges outward toward ball then recovers OR switches.' +
                   ' 5-OUT/MOTION: Passer pathDelay:0 basket cuts immediately to y=10-14. Adjacent players pathDelay:0.25 fill vacated spots. Passer defender pathDelay:0.20 chases cutter.' +
                   ' ALL 5 DEFENDERS MUST MOVE — on-ball defender reacts to ball handler, screener defender hedges, weak-side defenders shift slightly. No defender is fully static.' +
+                  ' SPORT IQ: If ball handler drives to y<18, they finish at rim — never pass back to perimeter from paint.' +
+                  ' SHOOT: = final scoring option (driver on drives, open shooter on kick-outs). Max 10 players total.' +
+                  ' Passes go TOWARD open space or basket, not backward.' +
                   ' routeName prefixes: BALL:, SHOOT:(routeYards>0), CUT:, SCREEN:, ROLL:, POP:, FILL:, DEF:' +
                   ' Return ONLY raw JSON: ' + bbTemplate.replace('PLAYNAME', play.name)
               } else if (isBSB) {
