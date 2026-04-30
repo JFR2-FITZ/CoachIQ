@@ -2821,28 +2821,6 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
       const positions = matchData.playerPositions || {}
       const slotAssignments = matchData.slotAssignments || {}
 
-      // ── STEP 3: Build frames from template + player assignments ───────────────
-      // Map slot names → player numbers using AI assignments, fallback to template defaults
-      const slotToNum = {}
-      Object.entries(template.slots).forEach(([slot, defaultNum]) => {
-        slotToNum[slot] = slotAssignments[slot] || defaultNum
-      })
-
-      // Build player position lookup from AI-provided positions + descriptions
-      // Each player number maps to x,y from the AI's reading of the play description
-      const numToPos = {}
-      ;['1','2','3','4','5'].forEach(num => {
-        if (positions[num]) {
-          numToPos[num] = [positions[num].x, positions[num].y]
-        }
-      })
-      // Fallback: use template default positions mapped through slot assignments
-      Object.entries(slotToNum).forEach(([slot, num]) => {
-        if (!numToPos[num] && template.defaultPositions[slot]) {
-          numToPos[num] = template.defaultPositions[slot]
-        }
-      })
-
       // ── SLOT-RELATIVE FRAME BUILDER ─────────────────────────────────────────
       // Build a slot→position lookup for each frame.
       // Positions chain across frames: a player who moved in frame N starts
