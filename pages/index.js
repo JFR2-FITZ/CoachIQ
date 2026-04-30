@@ -921,7 +921,6 @@ const SPORTS = {
     emoji:'BSB',
     fields:[
       {id:'system',label:'Offensive Approach',opts:['Small Ball','Power Hitting','Speed and Baserunning','Balanced','Bunting Focus']},
-      {id:'roster',label:'Roster Size',opts:['9-11 players','12-14 players','15+ players']},
       {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
       {id:'skill',label:'Skill Level',opts:['Beginner','Average','Competitive']},
       {id:'focus',label:'Defensive Focus',opts:['Fundamentals First','Outfield Positioning','Infield Shifts','Pitching Strategy','Rundowns']},
@@ -952,7 +951,6 @@ const SPORTS = {
     emoji:'SB',
     fields:[
       {id:'system',    label:'Offensive Approach',  opts:['Small Ball','Power Hitting','Speed and Slap','Balanced','Bunting Focus','Rise Ball Heavy']},
-      {id:'roster',    label:'Roster Size',         opts:['9-11 players','12-14 players','15+ players']},
       {id:'age',       label:'Age Group',           opts:['8U Coach Pitch','10U','12U','14U','16U','18U','High School']},
       {id:'skill',     label:'Skill Level',         opts:['Beginner','Average','Competitive']},
       {id:'focus',     label:'Defensive Focus',     opts:['Fundamentals First','Circle Defense','Outfield Reads','Bunt Defense','Slap Defense']},
@@ -2844,6 +2842,12 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
         }
         return [50,30]
       }
+
+      // Build numToPos from AI playerPositions response
+      const numToPos = {}
+      ;['1','2','3','4','5'].forEach(num => {
+        if (positions[num]) numToPos[num] = [positions[num].x, positions[num].y]
+      })
 
       // Build slot→playerNum lookup
       const slotToNum = {}
@@ -5334,7 +5338,6 @@ function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) 
   const bbFields = [
     {id:'offense',label:'Opponent Offense',opts:['Unknown / Scout First','Motion Heavy','Pick and Roll Heavy','Isolation / Star Player','Drive and Kick','Three Point Heavy','Post Dominant']},
     {id:'personnel',label:'Their Key Threat',opts:['Elite Ball Handler','Dominant Big Man','Three Point Shooter','Athletic Wing','Balanced Team','Physical Post']},
-    {id:'roster',label:'Your Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
     {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
     {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Athletic']},
     {id:'style',label:'Defensive Style',opts:['Man to Man Pressure','2-3 Zone','1-3-1 Zone','Full Court Press','Matchup Zone','Pack the Paint']},
@@ -5342,7 +5345,6 @@ function DefenseGen({ sport, P='#C0392B', S='#002868', al, callAI, parseJSON }) 
   const bsbFields = [
     {id:'batting',label:'Opponent Batting Style',opts:['Unknown / Scout First','Pull Hitters Heavy','Spray Hitters','Bunt Heavy / Small Ball','Power Hitters','Speed and Baserunning','Mixed Approach']},
     {id:'personnel',label:'Their Key Threat',opts:['Elite Leadoff Hitter','Cleanup Power Hitter','Fast Baserunners','Contact Hitters','Patient / Walk Heavy','Switch Hitters']},
-    {id:'roster',label:'Your Roster Size',opts:['9-11 players','12-14 players','15+ players']},
     {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
     {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Competitive']},
     {id:'style',label:'Pitching Approach',opts:['Fastball First','Breaking Ball Setup','Change of Speed','Attack the Zone','Work the Corners','Keep Off Balance']},
@@ -6628,14 +6630,28 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                   <PlayCardWithSave key={play.number} play={play} P={P} S={S} al={al} callAI={callAI} parseJSON={parseJSON} sport={sport} playbook={playbook} onAddToPlaybook={addToPlaybook} onCreateAndAdd={createAndAdd} preloadedDiagram={diagrams[play.number]||null} />
                 ))}
                 {offResult.coachingCue && (<div style={{ marginTop:10, padding:10, background:al(P,0.1), borderRadius:8 }}><div style={{ fontSize:9, letterSpacing:2, color:P, textTransform:'uppercase', fontWeight:700, marginBottom:4 }}>Coaching Cue</div><div style={{ fontSize:13, color:'#f2f4f8', fontStyle:'italic' }}>"{offResult.coachingCue}"</div></div>)}
-                {/* Coming Soon tease */}
-                <div style={{ marginTop:12, padding:'10px 14px', background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8, display:'flex', alignItems:'center', gap:10 }}>
-                  <span style={{ fontSize:18, flexShrink:0 }}>📖</span>
-                  <div>
-                    <div style={{ fontSize:10, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:2 }}>COMING SOON — FULL PLAY BREAKDOWN</div>
-                    <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4 }}>Audible triggers, pre-snap reads, youth coaching cues, and mistake breakdowns — streaming live for every play.</div>
-                  </div>
-                </div>
+                {/* Coming Soon tease — sport-specific */}
+                {(() => {
+                  const isBBSport = sport === 'Basketball'
+                  const isBSBSport = sport === 'Baseball' || sport === 'Softball'
+                  const isSoccerSport = sport === 'Soccer'
+                  const csText = isBBSport
+                    ? 'Shot clock reads, defensive matchup breakdowns, in-game adjustment recommendations, and play-by-play youth coaching cues — coming for every play.'
+                    : isBSBSport
+                    ? 'Situational breakdowns, pitch sequence reads, baserunning decisions, and youth coaching cues for every game situation — coming soon.'
+                    : isSoccerSport
+                    ? 'Formation reads, pressing triggers, set piece coaching cues, and in-game tactical adjustment guides — coming soon.'
+                    : 'Audible triggers, pre-snap reads, youth coaching cues, and mistake breakdowns — streaming live for every play.'
+                  return (
+                    <div style={{ marginTop:12, padding:'10px 14px', background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:8, display:'flex', alignItems:'center', gap:10 }}>
+                      <span style={{ fontSize:18, flexShrink:0 }}>📖</span>
+                      <div>
+                        <div style={{ fontSize:10, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, marginBottom:2 }}>COMING SOON — FULL PLAY BREAKDOWN</div>
+                        <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4 }}>{csText}</div>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             )}
             {/* Recent generations */}
@@ -6739,7 +6755,6 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
   const bbFields = [
     {id:'offense',label:'Opponent Offense',opts:['Unknown / Scout First','Motion Heavy','Pick and Roll Heavy','Isolation / Star Player','Drive and Kick','Three Point Heavy','Post Dominant']},
     {id:'personnel',label:'Their Key Threat',opts:['Elite Ball Handler','Dominant Big Man','Three Point Shooter','Athletic Wing','Balanced Team','Physical Post']},
-    {id:'roster',label:'Your Roster Size',opts:['6-8 players','9-10 players','10-12 players']},
     {id:'age',label:'Age Group',opts:['6-8 yrs','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
     {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Athletic']},
     {id:'style',label:'Defensive Style',opts:['Man to Man Pressure','2-3 Zone','1-3-1 Zone','Full Court Press','Matchup Zone','Pack the Paint']},
@@ -6747,7 +6762,6 @@ function DefenseGenCollapsible({ sport, P='#C0392B', S='#002868', al, callAI, pa
   const bsbFields = [
     {id:'batting',label:'Opponent Batting Style',opts:['Unknown / Scout First','Pull Hitters Heavy','Spray Hitters','Bunt Heavy / Small Ball','Power Hitters','Speed and Baserunning','Mixed Approach']},
     {id:'personnel',label:'Their Key Threat',opts:['Elite Leadoff Hitter','Cleanup Power Hitter','Fast Baserunners','Contact Hitters','Patient / Walk Heavy','Switch Hitters']},
-    {id:'roster',label:'Your Roster Size',opts:['9-11 players','12-14 players','15+ players']},
     {id:'age',label:'Age Group',opts:['7-8 yrs Coach Pitch','9-10 yrs','11-12 yrs','13-14 yrs','High School']},
     {id:'skill',label:'Your Defensive Skill',opts:['Beginner','Average','Competitive']},
     {id:'style',label:'Pitching Approach',opts:['Fastball First','Breaking Ball Setup','Change of Speed','Attack the Zone','Work the Corners','Keep Off Balance']},
