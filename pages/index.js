@@ -914,7 +914,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Aggressive On-Ball Pressure','Sags Off Shooters','Overplays Passing Lanes','Help Side Heavy','No Rotation / Ball Watching','Switches Everything','Traps Ball Handlers','Packs the Paint','Gambles for Steals']},
     ],
     positions:['Point Guard','Shooting Guard','Small Forward','Power Forward','Center','Entire Team'],
-    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';const threatNote=f.threat?'Feature the '+f.threat+' as the primary scoring option in at least 3 of the 5 plays. Build play designs around their strengths.':'';return 'Youth basketball coach: 5-play package. '+st+'. '+threatNote+' Age/skill drive complexity. Types: HALF COURT SET,TRANSITION,FULL COURT BREAK,PRESS BREAK,OUT OF BOUNDS,QUICK HITTER. When focus includes Full Court or Fast Break include FULL COURT BREAK plays showing ball from backcourt to finish. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const threatNote=f.threat?'Feature the '+f.threat+' as the primary scoring option in at least 3 of the 5 plays.':'';const ps='{"number":N,"name":"","type":"","note":"","callIt":"","steps":["Step 1: ","Step 2: ","Step 3: "],"watchFor":"","mistake":""}';return 'You are a youth basketball coach writing play packages for coaches who may be brand new. Generate 5 plays. '+st+'. '+threatNote+' Use plain language always. Instead of ball handler say the player with the ball. Instead of wing say the player on the side of the court near the 3-point line. Instead of basket cut say run toward the basket as fast as possible. Instead of set a screen say stand still to block a defenders path. callIt: how the coach signals this play from the sideline in simple practical terms. steps: 3 to 4 numbered steps in plain language written for someone who never coached before. watchFor: one sentence what the coach watches to know the play is working. mistake: one sentence the most common thing young players do wrong on this play. Types: HALF COURT SET,TRANSITION,FULL COURT BREAK,PRESS BREAK,OUT OF BOUNDS,QUICK HITTER. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+'],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a basketball coaching AI. Create a basketball coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. Q4 DOWN 2 8 SECONDS LEFT","phase":"OFFENSE or DEFENSE or TIMEOUT or INBOUND","question":"2-3 sentence basketball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Baseball: {
@@ -928,7 +928,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Defensive Tendency',opts:['Unknown / Balanced','Standard Positioning','Pull-Side Shift Heavy','Five Man Infield Late','Aggressive Corner Charges','Outfield Plays Shallow','Pitcher Works Inside Heavy','Catcher Sets Up Away','Pitcher Changes Speeds Often','Challenges Hitters Early Count']},
     ],
     positions:['Pitcher','Catcher','First Baseman','Shortstop','Outfielder','Batter','Entire Team'],
-    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth baseball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: OFFENSIVE APPROACH,BASERUNNING SITUATION,BUNT PLAY,HIT AND RUN,FIRST AND THIRD. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","situation":"","signal":"","steps":["Step 1: ","Step 2: ","Step 3: "],"watchFor":"","mistake":""}';return 'You are a youth baseball coach. Generate 5 situational plays. '+st+'. situation: when to use this play, describe game situation in plain terms such as inning outs runners on base. signal: how coach communicates this play to players such as touch cap verbal call hand signal. steps: 3-4 numbered plain-language steps, name each position involved such as pitcher catcher first baseman shortstop batter runner, define any terms new coaches might not know. watchFor: what the coach watches to know it is working. mistake: most common mistake young players make. Types: OFFENSIVE APPROACH,BASERUNNING SITUATION,BUNT PLAY,HIT AND RUN,FIRST AND THIRD. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+'],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a baseball coaching AI. Create a baseball scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 6TH RUNNER ON 2ND 1 OUT TIED 3-3","phase":"OFFENSE or PITCHING or DEFENSE or BULLPEN","question":"2-3 sentence baseball scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Soccer: {
@@ -944,7 +944,7 @@ const SPORTS = {
       {id:'oppShape',  label:'Opponent Shape',     opts:['Unknown / Balanced','4-4-2 Block','5-4-1 Defensive','4-3-3 High Press','4-2-3-1','3-5-2 Wings','Long Ball Direct']},
     ],
     positions:['Goalkeeper','Center Back','Full Back','Defensive Mid','Central Mid','Attacking Mid','Winger','Striker','Wing Back'],
-    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth soccer coach: 5-play package. '+st+'. Age/skill drive complexity. Types: ATTACKING BUILDUP,SET PIECE ATTACK,CORNER KICK,FREE KICK,COUNTER ATTACK. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","trigger":"","shape":"","steps":["Step 1: ","Step 2: ","Step 3: "],"watchFor":"","mistake":""}';return 'You are a youth soccer coach. Generate 5 tactical plays. '+st+'. trigger: the game situation that calls for this play, what is happening on the field. shape: where players position before the play starts, describe using field zones such as defensive third middle third attacking third left side right side center. steps: 3-4 numbered plain-language steps describing key player movements, define soccer terms new coaches might not know for example overlapping run means when a defender runs past a teammate to get ahead of them. watchFor: what coach watches to know it is working. mistake: most common mistake youth players make. Types: ATTACKING BUILDUP,SET PIECE ATTACK,CORNER KICK,FREE KICK,COUNTER ATTACK. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+'],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a soccer coaching AI. Create a youth soccer coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. DOWN 1 GOAL 15 MIN LEFT ATTACKING","phase":"ATTACK or DEFENSE or SET PIECE or TRANSITION or TIMEOUT","question":"2-3 sentence scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
   Softball: {
@@ -958,7 +958,7 @@ const SPORTS = {
       {id:'oppTendency',label:'Opponent Tendency',  opts:['Unknown / Balanced','Slap Hitters Heavy','Power Lineup','Bunt Every Opportunity','Free Swingers','Patient Takes Pitches','Aggressive First Pitch','Pull Hitters Only','Spray Hitters','Speed Team Steals Often']},
     ],
     positions:['Pitcher','Catcher','First Base','Second Base','Third Base','Shortstop','Left Field','Center Field','Right Field'],
-    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","presnap":"","audible":"","youthCue":"","mistake":""}';return 'Youth softball coach: 5-play package. '+st+'. Age/skill drive complexity. Types: OFFENSIVE APPROACH,BASERUNNING SITUATION,BUNT PLAY,HIT AND RUN,FIRST AND THIRD. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+ '],"defenseTip":"","coachingCue":""}';},
+    buildPrompt:(f)=>{const st=Object.keys(f).map(k=>k+': '+f[k]).join('; ');const ps='{"number":N,"name":"","type":"","note":"","situation":"","signal":"","steps":["Step 1: ","Step 2: ","Step 3: "],"watchFor":"","mistake":""}';return 'You are a youth softball coach. Generate 5 situational plays. '+st+'. situation: when to use this play in plain terms. signal: how coach signals this play such as touch cap verbal call hand signal. steps: 3-4 numbered plain-language steps, name each position involved such as pitcher catcher first baseman shortstop batter runner on first, define any terms new coaches might not know. watchFor: what the coach watches to know it is working. mistake: most common mistake young players make. Types: OFFENSIVE APPROACH,BASERUNNING SITUATION,BUNT PLAY,HIT AND RUN,FIRST AND THIRD. JSON only: {"packageName":"","summary":"","plays":['+[1,2,3,4,5].map(n=>ps.replace('N',String(n))).join(',')+'],"defenseTip":"","coachingCue":""}';},
     scenarioPrompt:(diff)=>`You are a softball coaching AI with knowledge of ASA/USA Softball rules. Create a coaching scenario. Difficulty: ${diff}. Return ONLY valid JSON: {"situation":"e.g. TOP 5TH RUNNER ON 2ND 1 OUT TIED 2-2","phase":"OFFENSE or PITCHING or DEFENSE or BASERUNNING","question":"2-3 sentence softball-specific scenario","options":[{"letter":"A","text":"option","correct":false},{"letter":"B","text":"option","correct":true},{"letter":"C","text":"option","correct":false},{"letter":"D","text":"option","correct":false}],"explanation":"2-3 sentence explanation"} Rules: exactly 1 correct.`,
   },
 
@@ -1282,6 +1282,60 @@ function FootballHoleDiagram({ P }) {
 
 
 // ─── SPORT-AWARE DIAGRAM THUMBNAIL ───────────────────────────────────────────
+
+// ─── NOTIFY ME BUTTON — Coming Soon early access signup ───────────────────────
+function NotifyMeButton({ sport, P }) {
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  async function handleSubmit() {
+    if (!email || !email.includes('@')) return
+    try {
+      const leads = JSON.parse(sessionStorage.getItem('coachiq_leads') || '[]')
+      leads.push({ email, sport, feature:'coach_creator', ts: Date.now() })
+      sessionStorage.setItem('coachiq_leads', JSON.stringify(leads))
+    } catch(e) {}
+    setSubmitted(true)
+  }
+
+  if (!open) return (
+    <button
+      onClick={() => setOpen(true)}
+      style={{ marginTop:12, width:'100%', padding:'10px 0', background:'rgba(107,154,255,0.12)', border:'1px solid rgba(107,154,255,0.3)', borderRadius:8, color:'#6b9fff', fontSize:11, fontWeight:700, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1.5, cursor:'pointer', textTransform:'uppercase' }}
+    >🔔 Notify Me When Available</button>
+  )
+
+  if (submitted) return (
+    <div style={{ marginTop:12, padding:'10px 14px', background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.25)', borderRadius:8, textAlign:'center' }}>
+      <div style={{ fontSize:16, marginBottom:4 }}>✅</div>
+      <div style={{ fontSize:11, color:'#4ade80', fontWeight:700, fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:1 }}>You're on the list!</div>
+      <div style={{ fontSize:10, color:'#8a94b0', marginTop:2 }}>We'll notify you when Coach Creator launches.</div>
+    </div>
+  )
+
+  return (
+    <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:8 }}>
+      <div style={{ fontSize:11, color:'#dde1f0', marginBottom:8, fontWeight:600 }}>Enter your email to get early access:</div>
+      <div style={{ display:'flex', gap:6 }}>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="your@email.com"
+          onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+          style={{ flex:1, padding:'8px 10px', background:'#0f1117', border:'1px solid #2a3040', borderRadius:6, color:'#dde1f0', fontSize:12, outline:'none' }}
+        />
+        <button
+          onClick={handleSubmit}
+          style={{ padding:'8px 14px', background:P, border:'none', borderRadius:6, color:'white', fontSize:11, fontWeight:700, fontFamily:"'Barlow Condensed',sans-serif", cursor:'pointer', letterSpacing:1 }}
+        >NOTIFY</button>
+      </div>
+    </div>
+  )
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function SportThumbnail({ sport, P='#C0392B', isDefense=false }) {
   const accent = isDefense ? '#6b9fff' : P
   const s = sport || 'Football'
@@ -2950,35 +3004,179 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         </button>
       </div>
 
-      {/* ── SUMMARY ── */}
-      {showSummary && (
-        <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:10, animation:'fadeIn 0.2s ease' }}>
-          {play.presnap && (
-            <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
-              <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 Pre-Snap Read</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.presnap||'')}</div>
-            </div>
-          )}
-          {play.audible && (
-            <div style={{ padding:'8px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:6 }}>
-              <div style={{ fontSize:10, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>📣 Audible</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.audible||'')}</div>
-            </div>
-          )}
-          {play.youthCue && (
-            <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
-              <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>🧒 Youth Cue</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontStyle:'italic' }}>"{play.youthCue}"</div>
-            </div>
-          )}
-          {play.mistake && (
-            <div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:6 }}>
-              <div style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
-              <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* ── SUMMARY — sport-specific breakdown fields ── */}
+      {showSummary && (() => {
+        const sp = play._sport || sport || 'Football'
+        const isBB = sp === 'Basketball'
+        const isBSB = sp === 'Baseball' || sp === 'Softball'
+        const isSoccer = sp === 'Soccer'
+        const isFootball = !isBB && !isBSB && !isSoccer
+        const ytQuery = encodeURIComponent((play.name||'basketball play') + ' NBA basketball')
+        const fmQuery = encodeURIComponent(play.name||'basketball')
+        return (
+          <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:10, animation:'fadeIn 0.2s ease' }}>
+
+            {/* ── BASKETBALL breakdown ── */}
+            {isBB && <>
+              {play.callIt && (
+                <div style={{ padding:'8px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>📣 How to Call It</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.callIt||'')}</div>
+                </div>
+              )}
+              {play.steps && play.steps.length > 0 && (
+                <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:6 }}>📋 Step by Step</div>
+                  {(Array.isArray(play.steps)?play.steps:[]).map((step,i) => (
+                    <div key={i} style={{ display:'flex', gap:8, marginBottom:4 }}>
+                      <div style={{ flexShrink:0, width:20, height:20, borderRadius:'50%', background:P, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'white' }}>{i+1}</div>
+                      <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, paddingTop:2 }}>{String(step).replace(/^Step [0-9]+: */,'')}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {play.watchFor && (
+                <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 What to Watch For</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.watchFor||'')}</div>
+                </div>
+              )}
+              {play.mistake && (
+                <div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
+                </div>
+              )}
+              {/* FastModel + YouTube links */}
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                <a href={'https://www.youtube.com/results?search_query='+ytQuery} target="_blank" rel="noopener noreferrer"
+                  style={{ flex:1, minWidth:120, padding:'8px 10px', background:'rgba(255,0,0,0.08)', border:'1px solid rgba(255,0,0,0.25)', borderRadius:6, textDecoration:'none', display:'flex', alignItems:'center', gap:6 }}>
+                  <span style={{ fontSize:16 }}>▶️</span>
+                  <div>
+                    <div style={{ fontSize:9, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, textTransform:'uppercase' }}>Watch on YouTube</div>
+                    <div style={{ fontSize:10, color:'#8a94b0' }}>See this play in action</div>
+                  </div>
+                </a>
+                <a href={'https://www.fastmodelsports.com/library/plays?q='+fmQuery} target="_blank" rel="noopener noreferrer"
+                  style={{ flex:1, minWidth:120, padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6, textDecoration:'none', display:'flex', alignItems:'center', gap:6 }}>
+                  <span style={{ fontSize:16 }}>📐</span>
+                  <div>
+                    <div style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1, textTransform:'uppercase' }}>FastModel Diagrams</div>
+                    <div style={{ fontSize:10, color:'#8a94b0' }}>Pro play diagrams</div>
+                  </div>
+                </a>
+              </div>
+            </>}
+
+            {/* ── BASEBALL / SOFTBALL breakdown ── */}
+            {isBSB && <>
+              {play.situation && (
+                <div style={{ padding:'8px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚾ Game Situation</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.situation||'')}</div>
+                </div>
+              )}
+              {play.signal && (
+                <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>📣 Coach Signal</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.signal||'')}</div>
+                </div>
+              )}
+              {play.steps && play.steps.length > 0 && (
+                <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:6 }}>📋 Step by Step</div>
+                  {(Array.isArray(play.steps)?play.steps:[]).map((step,i) => (
+                    <div key={i} style={{ display:'flex', gap:8, marginBottom:4 }}>
+                      <div style={{ flexShrink:0, width:20, height:20, borderRadius:'50%', background:P, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'white' }}>{i+1}</div>
+                      <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, paddingTop:2 }}>{String(step).replace(/^Step [0-9]+: */,'')}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {play.watchFor && (
+                <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 What to Watch For</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.watchFor||'')}</div>
+                </div>
+              )}
+              {play.mistake && (
+                <div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
+                </div>
+              )}
+            </>}
+
+            {/* ── SOCCER breakdown ── */}
+            {isSoccer && <>
+              {play.trigger && (
+                <div style={{ padding:'8px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚡ When to Use It</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.trigger||'')}</div>
+                </div>
+              )}
+              {play.shape && (
+                <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚽ Player Shape</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.shape||'')}</div>
+                </div>
+              )}
+              {play.steps && play.steps.length > 0 && (
+                <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:6 }}>📋 Step by Step</div>
+                  {(Array.isArray(play.steps)?play.steps:[]).map((step,i) => (
+                    <div key={i} style={{ display:'flex', gap:8, marginBottom:4 }}>
+                      <div style={{ flexShrink:0, width:20, height:20, borderRadius:'50%', background:P, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'white' }}>{i+1}</div>
+                      <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, paddingTop:2 }}>{String(step).replace(/^Step [0-9]+: */,'')}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {play.watchFor && (
+                <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 What to Watch For</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.watchFor||'')}</div>
+                </div>
+              )}
+              {play.mistake && (
+                <div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
+                </div>
+              )}
+            </>}
+
+            {/* ── FOOTBALL / FLAG FOOTBALL breakdown (unchanged) ── */}
+            {isFootball && <>
+              {play.presnap && (
+                <div style={{ padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>👁 Pre-Snap Read</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.presnap||'')}</div>
+                </div>
+              )}
+              {play.audible && (
+                <div style={{ padding:'8px 10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#fbbf24', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>📣 Audible</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.audible||'')}</div>
+                </div>
+              )}
+              {play.youthCue && (
+                <div style={{ padding:'8px 10px', background:'rgba(107,154,255,0.06)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>🧒 Youth Cue</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, fontStyle:'italic' }}>"{play.youthCue}"</div>
+                </div>
+              )}
+              {play.mistake && (
+                <div style={{ padding:'8px 10px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:6 }}>
+                  <div style={{ fontSize:10, color:'#ef4444', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>⚠️ Common Mistake</div>
+                  <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5 }}>{String(play.mistake||'')}</div>
+                </div>
+              )}
+            </>}
+
+          </div>
+        )
+      })()}
 
       {/* ── MORE ── */}
       {showMore && (
@@ -6402,6 +6600,26 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
                 })()}
               </div>
             )}
+
+            {/* ── COMING SOON — Coach Creator ── */}
+            <div style={{ marginTop:20, padding:'14px 16px', background:'linear-gradient(135deg, rgba(107,154,255,0.06) 0%, rgba(160,60,200,0.06) 100%)', border:'1px solid rgba(107,154,255,0.2)', borderRadius:10 }}>
+              <div style={{ fontSize:11, color:'#6b9fff', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:2, textTransform:'uppercase', marginBottom:10 }}>🚀 Coming Soon</div>
+              {[
+                { icon:'✏️', title:'Create Your Own Play', desc:'Build your own play from scratch — name it, write the breakdown, add it to your playbook.' },
+                { icon:'🎨', title:'Draw Your Own Diagram', desc:'Tap to place players, draw arrows, and create a diagram that matches exactly how you run the play.' },
+                { icon:'🌎', title:'Community Playbook', desc:'Share plays with other coaches or import plays that other coaches in your sport have built and tested.' },
+              ].map((item, i) => (
+                <div key={i} style={{ display:'flex', gap:10, marginBottom: i < 2 ? 10 : 0, padding:'10px 12px', background:'rgba(255,255,255,0.03)', borderRadius:8, border:'1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ fontSize:20, flexShrink:0 }}>{item.icon}</span>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, fontWeight:700, color:'#dde1f0', marginBottom:2 }}>{item.title}</div>
+                    <div style={{ fontSize:11, color:'#8a94b0', lineHeight:1.4 }}>{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+              <NotifyMeButton sport={sport} P={P} />
+            </div>
+
             {/* Recent generations */}
             {sportHistory.length > 0 && (
               <div style={{ marginTop:14 }}>
