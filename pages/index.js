@@ -1469,1087 +1469,923 @@ function SportThumbnail({ sport, P='#C0392B', isDefense=false }) {
 
 // ─── BASKETBALL PLAY TEMPLATES ────────────────────────────────────────────────
 // SLOT-RELATIVE ARROW SYSTEM:
-// Arrow 'from' and 'to' values:
-//   String like 'ballHandler' → resolved to that slot's actual player position
-//   Array ['slotName', dx, dy] → slot position + offset
-//   Array [x,y] → fixed court coordinate (corners, basket etc)
+// ─── BASKETBALL PLAY TEMPLATES ────────────────────────────────────────────────
+// Each frame is FULLY SELF-CONTAINED:
+//   - players: exact [x,y] for every player in that frame
+//   - arrows: exact [x,y] from/to coordinates matching those player positions
+// No chaining. No resolving. No math. Just data.
 //
-// This ensures arrows always connect actual players regardless of AI placement.
-// COORDINATE SYSTEM: x=0-100, y=0-60. Basket y=4 x=50 (TOP). Lower y = basket.
-// Corners: left[8,38] right[92,38]. Wings: left[18,30] right[82,30].
-// Elbows: left[36,28] right[64,28]. Basket area: [50,6].
+// COORDINATE SYSTEM: x=0-100, y=0-60. Basket at y=4 x=50 (TOP). Lower y = basket.
+// Key landmarks:
+//   Top of key: x=50 y=46    Left wing: x=18 y=32    Right wing: x=82 y=32
+//   Left corner: x=8 y=38    Right corner: x=92 y=38
+//   Left elbow: x=36 y=28    Right elbow: x=64 y=28
+//   Paint center: x=50 y=18  Rim: x=50 y=6
+//   Left block: x=36 y=12    Right block: x=64 y=12
+//   Half court: y=56
+//
+// Slot names map to player numbers via AI template matching.
+// slots: { slotName: defaultPlayerNumber }
+// Arrow types: 'pass' (red arc), 'dribble' (red line), 'cut' (blue line), 'screen' (red + bar)
+// read: 'secondary' = orange dashed, 'tertiary' = purple dashed
 
 const BB_TEMPLATES = {
 
-  // ── PICK AND ROLL FAMILY ────────────────────────────────────────────────────
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // PICK AND ROLL — TOP OF KEY
+  // 1 has ball top of key. 5 sets screen. Wings in corners.
+  // ─────────────────────────────────────────────────────────────────────────
   pick_and_roll_top: {
     name: 'Pick and Roll — Top of Key',
-    tags: ['pick and roll','pnr','ball screen','top','high screen','pick roll'],
+    tags: ['pick and roll','pnr','ball screen','top','high screen','pick roll','high ball screen'],
     slots: { ballHandler:'1', screener:'5', wing1:'2', wing2:'3', spacer:'4' },
-    defaultPositions: {
-      ballHandler:[50,46], screener:[50,14], wing1:[76,42], wing2:[24,42], spacer:[84,30]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Wings clear to corners. Screener moves up to set ball screen at top of key.',
-        arrows:[
-          { from:'wing1', to:[92,38], type:'cut' },
-          { from:'wing2', to:[8,38], type:'cut' },
-          { from:'screener', to:['ballHandler',0,8], type:'screen' },
+        label: 'Phase 1',
+        description: 'Wings clear to corners. Screener moves up to set ball screen at top of key.',
+        players: [
+          { label:'1', x:50, y:46 },  // PG — top of key with ball
+          { label:'2', x:76, y:42 },  // SG — right wing, will clear
+          { label:'3', x:24, y:42 },  // SF — left wing, will clear
+          { label:'4', x:84, y:30 },  // PF — right short corner
+          { label:'5', x:50, y:14 },  // C — starts in paint, moves up
+        ],
+        arrows: [
+          { from:[76,42], to:[92,38], type:'cut' },    // 2 clears to right corner
+          { from:[24,42], to:[8,38],  type:'cut' },    // 3 clears to left corner
+          { from:[50,14], to:[50,36], type:'screen' }, // 5 moves up to set screen
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball handler uses screen, drives off the screen shoulder toward the paint.',
-        arrows:[
-          { from:'ballHandler', to:['ballHandler',-10,-16], type:'dribble' },
-          { from:'screener', to:[50,6], type:'cut' },
+        label: 'Phase 2',
+        description: 'Ball handler uses screen, drives off the screen shoulder into the paint.',
+        players: [
+          { label:'1', x:50, y:46 },  // PG — still at top, about to use screen
+          { label:'2', x:92, y:38 },  // SG — right corner (moved from phase 1)
+          { label:'3', x:8,  y:38 },  // SF — left corner (moved from phase 1)
+          { label:'4', x:84, y:30 },  // PF — right short corner (holding)
+          { label:'5', x:50, y:36 },  // C — screen set at top of key
+        ],
+        arrows: [
+          { from:[50,46], to:[40,26], type:'dribble' }, // 1 drives left off screen
+          { from:[50,36], to:[50,8],  type:'cut' },     // 5 rolls hard to basket
         ]
       },
       {
-        label:'Phase 3',
-        description:'Ball handler reads — finish at rim or kick to open corner shooter.',
-        arrows:[
-          { from:'ballHandler', to:[50,6], type:'dribble' },
-          { from:'ballHandler', to:[8,38], type:'pass', read:'secondary' },
-          { from:'ballHandler', to:[92,38], type:'pass', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Ball handler in paint reads defense — finish at rim or kick to open corner.',
+        players: [
+          { label:'1', x:42, y:22 },  // PG — in paint after drive
+          { label:'2', x:92, y:38 },  // SG — right corner (spacing)
+          { label:'3', x:8,  y:38 },  // SF — left corner (spacing)
+          { label:'4', x:84, y:30 },  // PF — right short corner
+          { label:'5', x:50, y:10 },  // C — rolled to basket
+        ],
+        arrows: [
+          { from:[42,22], to:[42,6],  type:'dribble' },              // 1 finishes at rim
+          { from:[42,22], to:[8,38],  type:'pass', read:'secondary' }, // kick to left corner
+          { from:[42,22], to:[92,38], type:'pass', read:'secondary' }, // kick to right corner
         ]
       }
     ]
   },
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // PICK AND ROLL — WING
+  // 1 has ball on right wing. 4 sets screen at right elbow.
+  // ─────────────────────────────────────────────────────────────────────────
   pick_and_roll_wing: {
     name: 'Pick and Roll — Wing',
-    tags: ['wing pnr','side ball screen','elbow screen','wing pick roll'],
+    tags: ['wing pnr','side ball screen','elbow screen','wing pick roll','wing ball screen'],
     slots: { ballHandler:'1', screener:'4', wing1:'2', wing2:'3', spacer:'5' },
-    defaultPositions: {
-      ballHandler:[72,40], screener:[64,22], wing1:[92,38], wing2:[50,46], spacer:[84,30]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Screener moves to elbow to set ball screen. Weak side players space.',
-        arrows:[
-          { from:'screener', to:['ballHandler',0,10], type:'screen' },
-          { from:'wing2', to:[8,38], type:'cut' },
+        label: 'Phase 1',
+        description: 'Ball handler on right wing. Screener moves to elbow to set screen. Weak side spaces.',
+        players: [
+          { label:'1', x:74, y:40 },  // PG — right wing with ball
+          { label:'2', x:92, y:38 },  // SG — right corner
+          { label:'3', x:50, y:46 },  // SF — top of key
+          { label:'4', x:64, y:20 },  // PF — starts low, moves to elbow
+          { label:'5', x:36, y:14 },  // C — left block
+        ],
+        arrows: [
+          { from:[64,20], to:[64,32], type:'screen' }, // 4 moves up to right elbow
+          { from:[50,46], to:[8,38],  type:'cut' },    // 3 clears weak side
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball handler drives off elbow screen into the paint. Screener rolls to basket.',
-        arrows:[
-          { from:'ballHandler', to:['ballHandler',-18,-14], type:'dribble' },
-          { from:'screener', to:[50,6], type:'cut' },
+        label: 'Phase 2',
+        description: 'Ball handler comes off elbow screen, drives middle. Screener rolls to basket.',
+        players: [
+          { label:'1', x:74, y:40 },  // PG — still at wing, using screen
+          { label:'2', x:92, y:38 },  // SG — right corner
+          { label:'3', x:8,  y:38 },  // SF — left corner (cleared)
+          { label:'4', x:64, y:32 },  // PF — screen set at right elbow
+          { label:'5', x:36, y:14 },  // C — left block spacing
+        ],
+        arrows: [
+          { from:[74,40], to:[52,24], type:'dribble' }, // 1 drives off screen to paint
+          { from:[64,32], to:[54,8],  type:'cut' },     // 4 rolls to basket
         ]
       },
       {
-        label:'Phase 3',
-        description:'Finish at rim, dump to roller, or kick weak side.',
-        arrows:[
-          { from:'ballHandler', to:[50,6], type:'dribble' },
-          { from:'ballHandler', to:'screener', type:'pass', read:'secondary' },
-          { from:'ballHandler', to:[8,38], type:'pass', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Finish, dump to roller, or kick to weak side corner.',
+        players: [
+          { label:'1', x:52, y:22 },  // PG — in paint
+          { label:'2', x:92, y:38 },  // SG — right corner
+          { label:'3', x:8,  y:38 },  // SF — left corner
+          { label:'4', x:54, y:10 },  // PF — rolled to basket
+          { label:'5', x:36, y:14 },  // C — left block
+        ],
+        arrows: [
+          { from:[52,22], to:[50,6],  type:'dribble' },              // finish at rim
+          { from:[52,22], to:[54,10], type:'pass', read:'secondary' }, // dump to roller
+          { from:[52,22], to:[8,38],  type:'pass', read:'secondary' }, // kick weak side
         ]
       }
     ]
   },
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // PICK AND POP
+  // 1 uses screen but screener pops to perimeter instead of rolling.
+  // ─────────────────────────────────────────────────────────────────────────
   pick_and_pop: {
     name: 'Pick and Pop',
-    tags: ['pick and pop','pnp','pop','shooting big','stretch big'],
+    tags: ['pick and pop','pnp','pop','shooting big','stretch big','stretch four'],
     slots: { ballHandler:'1', popper:'4', wing1:'2', wing2:'3', spacer:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], popper:[50,14], wing1:[82,32], wing2:[18,32], spacer:[84,42]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Popper sets screen at top, wings clear wide.',
-        arrows:[
-          { from:'popper', to:['ballHandler',0,10], type:'screen' },
-          { from:'wing1', to:[92,38], type:'cut' },
-          { from:'wing2', to:[8,38], type:'cut' },
+        label: 'Phase 1',
+        description: 'Popper sets screen at top. Wings clear to corners.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:42 },
+          { label:'3', x:24, y:42 },
+          { label:'4', x:50, y:16 },
+          { label:'5', x:84, y:42 },
+        ],
+        arrows: [
+          { from:[50,16], to:[50,36], type:'screen' },
+          { from:[76,42], to:[92,38], type:'cut' },
+          { from:[24,42], to:[8,38],  type:'cut' },
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball handler uses screen. Popper pops to elbow for shot.',
-        arrows:[
-          { from:'ballHandler', to:['ballHandler',-14,-14], type:'dribble' },
-          { from:'popper', to:[64,30], type:'cut' },
+        label: 'Phase 2',
+        description: 'Ball handler uses screen left. Popper pops to right elbow for open shot.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:92, y:38 },
+          { label:'3', x:8,  y:38 },
+          { label:'4', x:50, y:36 },
+          { label:'5', x:84, y:42 },
+        ],
+        arrows: [
+          { from:[50,46], to:[38,30], type:'dribble' }, // 1 drives left
+          { from:[50,36], to:[66,30], type:'cut' },     // 4 pops to elbow
         ]
       },
       {
-        label:'Phase 3',
-        description:'Pass to popper for open mid-range or 3. Popper reads closeout.',
-        arrows:[
-          { from:'ballHandler', to:'popper', type:'pass' },
-          { from:'popper', to:['popper',0,-4], type:'dribble', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Pass to popper for open elbow jumper or 3. Popper attacks closeout.',
+        players: [
+          { label:'1', x:38, y:28 },
+          { label:'2', x:92, y:38 },
+          { label:'3', x:8,  y:38 },
+          { label:'4', x:66, y:30 },
+          { label:'5', x:84, y:42 },
+        ],
+        arrows: [
+          { from:[38,28], to:[66,30], type:'pass' },
+          { from:[66,30], to:[66,18], type:'dribble', read:'secondary' },
         ]
       }
     ]
   },
 
-  spain_pick_and_roll: {
-    name: 'Spain Pick and Roll',
-    tags: ['spain','spain pnr','back screen roll','spain action'],
-    slots: { ballHandler:'1', screener:'5', backScreener:'4', wing1:'2', wing2:'3' },
-    defaultPositions: {
-      ballHandler:[50,46], screener:[50,14], backScreener:[62,20], wing1:[82,32], wing2:[18,32]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Screener sets ball screen. Back screener screens the screener\'s defender.',
-        arrows:[
-          { from:'screener', to:['ballHandler',0,10], type:'screen' },
-          { from:'backScreener', to:['screener',4,8], type:'screen' },
-          { from:'wing1', to:[92,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Ball handler attacks middle. Screener rolls hard to basket.',
-        arrows:[
-          { from:'ballHandler', to:['ballHandler',-8,-16], type:'dribble' },
-          { from:'screener', to:[50,6], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 3',
-        description:'Lob to roller, pull-up jumper, or kick to corner.',
-        arrows:[
-          { from:'ballHandler', to:'screener', type:'pass' },
-          { from:'ballHandler', to:['ballHandler',0,-10], type:'dribble', read:'secondary' },
-          { from:'ballHandler', to:[92,38], type:'pass', read:'secondary' },
-        ]
-      }
-    ]
-  },
-
-  // ── 5-OUT MOTION FAMILY ─────────────────────────────────────────────────────
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // 5-OUT MOTION — PASS AND CUT
+  // All 5 players on the 3-point line. Passer cuts to basket.
+  // ─────────────────────────────────────────────────────────────────────────
   five_out_pass_cut: {
     name: '5-Out Motion — Pass and Cut',
-    tags: ['5 out','five out','motion','pass and cut','open post','dribble drive motion','pass cut'],
+    tags: ['5 out','five out','motion','pass and cut','open post','dribble drive motion','pass cut','5-out'],
     slots: { ballHandler:'1', wing1:'2', wing2:'3', corner1:'4', corner2:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], wing1:[76,40], wing2:[24,40], corner1:[92,38], corner2:[8,38]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Ball handler passes to wing then immediately cuts hard to the basket.',
-        arrows:[
-          { from:'ballHandler', to:'wing1', type:'pass' },
-          { from:'ballHandler', to:[50,8], type:'cut' },
-          { from:'wing2', to:'ballHandler', type:'cut' },
+        label: 'Phase 1',
+        description: 'Ball handler passes to right wing then immediately cuts hard to the basket.',
+        players: [
+          { label:'1', x:50, y:46 },  // PG — top with ball
+          { label:'2', x:76, y:40 },  // SG — right wing
+          { label:'3', x:24, y:40 },  // SF — left wing
+          { label:'4', x:92, y:38 },  // PF — right corner
+          { label:'5', x:8,  y:38 },  // C — left corner
+        ],
+        arrows: [
+          { from:[50,46], to:[76,40], type:'pass' },  // 1 passes to 2
+          { from:[50,46], to:[50,8],  type:'cut' },   // 1 basket cuts
+          { from:[24,40], to:[50,46], type:'cut' },   // 3 fills top
         ]
       },
       {
-        label:'Phase 2',
-        description:'Wing catches, reads the cutter — feed cutter or skip to opposite wing.',
-        arrows:[
-          { from:'wing1', to:[50,8], type:'pass' },
-          { from:'wing1', to:'corner2', type:'pass', read:'secondary' },
-          { from:'corner1', to:'wing1', type:'cut' },
+        label: 'Phase 2',
+        description: 'Wing reads cutter — feed cutter at rim or skip to opposite wing.',
+        players: [
+          { label:'1', x:50, y:8  },  // PG — at rim after cut
+          { label:'2', x:76, y:40 },  // SG — right wing with ball
+          { label:'3', x:50, y:46 },  // SF — filled top
+          { label:'4', x:92, y:38 },  // PF — right corner
+          { label:'5', x:8,  y:38 },  // C — left corner
+        ],
+        arrows: [
+          { from:[76,40], to:[50,8],  type:'pass' },               // feed cutter at rim
+          { from:[76,40], to:[8,38],  type:'pass', read:'secondary' }, // skip to left corner
+          { from:[92,38], to:[76,40], type:'cut' },                // 4 fills right wing
         ]
       },
       {
-        label:'Phase 3',
-        description:'Cutter receives at rim for layup, or kick to corner if help collapses.',
-        arrows:[
-          { from:'ballHandler', to:[50,4], type:'dribble' },
-          { from:'ballHandler', to:'corner2', type:'pass', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Cutter receives at rim for layup. If help collapses, kick to open corner.',
+        players: [
+          { label:'1', x:50, y:8  },  // PG — at rim
+          { label:'2', x:76, y:40 },  // SG — right wing
+          { label:'3', x:50, y:46 },  // SF — top of key
+          { label:'4', x:76, y:38 },  // PF — filled right wing
+          { label:'5', x:8,  y:38 },  // C — left corner
+        ],
+        arrows: [
+          { from:[50,8],  to:[50,4],  type:'dribble' },              // 1 finishes
+          { from:[50,8],  to:[8,38],  type:'pass', read:'secondary' }, // kick left corner
         ]
       }
     ]
   },
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // 5-OUT MOTION — DRIBBLE AT
+  // Ball handler dribbles at wing — wing reads and back cuts.
+  // ─────────────────────────────────────────────────────────────────────────
   five_out_dribble_at: {
     name: '5-Out Motion — Dribble At',
-    tags: ['dribble at','dribble chase','motion dribble at','replace','drive at'],
+    tags: ['dribble at','dribble chase','motion dribble at','replace','drive at','dribble at cut'],
     slots: { ballHandler:'1', wing1:'2', wing2:'3', corner1:'4', corner2:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], wing1:[76,40], wing2:[24,40], corner1:[92,38], corner2:[8,38]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Ball handler dribbles directly at wing. Wing reads and back cuts to basket.',
-        arrows:[
-          { from:'ballHandler', to:['wing1',-8,2], type:'dribble' },
-          { from:'wing1', to:[70,10], type:'cut' },
-          { from:'wing2', to:'ballHandler', type:'cut' },
+        label: 'Phase 1',
+        description: 'Ball handler dribbles directly at right wing. Wing reads the pressure and back cuts to basket.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:40 },
+          { label:'3', x:24, y:40 },
+          { label:'4', x:92, y:38 },
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[50,46], to:[68,42], type:'dribble' }, // 1 dribbles at 2
+          { from:[76,40], to:[66,10], type:'cut' },     // 2 back cuts to basket
+          { from:[24,40], to:[50,46], type:'cut' },     // 3 fills top
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball handler passes to back cutter, or attacks the vacated space.',
-        arrows:[
-          { from:'ballHandler', to:'wing1', type:'pass' },
-          { from:'ballHandler', to:['ballHandler',0,-18], type:'dribble', read:'secondary' },
-          { from:'corner1', to:'wing1', type:'cut' },
+        label: 'Phase 2',
+        description: 'Ball handler passes to back cutter for layup, or attacks the open lane.',
+        players: [
+          { label:'1', x:68, y:42 },  // PG — dribbled to right wing area
+          { label:'2', x:66, y:10 },  // SG — at basket after back cut
+          { label:'3', x:50, y:46 },  // SF — filled top
+          { label:'4', x:92, y:38 },
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[68,42], to:[66,10], type:'pass' },               // pass to cutter
+          { from:[68,42], to:[60,18], type:'dribble', read:'secondary' }, // attack open lane
         ]
       }
     ]
   },
 
-  five_out_skip_pass: {
-    name: '5-Out Motion — Skip Pass',
-    tags: ['skip pass','weak side skip','motion skip','swing skip'],
-    slots: { ballHandler:'1', wing1:'2', wing2:'3', corner1:'4', corner2:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], wing1:[76,40], wing2:[24,40], corner1:[92,38], corner2:[8,38]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Ball swings to wing. Weak side corner cuts to wing, wing fills top.',
-        arrows:[
-          { from:'ballHandler', to:'wing1', type:'pass' },
-          { from:'corner2', to:'wing2', type:'cut' },
-          { from:'wing2', to:'ballHandler', type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Wing skip passes over defense to opposite corner.',
-        arrows:[
-          { from:'wing1', to:'corner2', type:'pass' },
-          { from:'corner1', to:'wing1', type:'cut' },
-          { from:'wing2', to:'ballHandler', type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 3',
-        description:'Corner catches and attacks the closeout — shoot or drive baseline.',
-        arrows:[
-          { from:'corner2', to:['corner2',0,-2], type:'dribble' },
-          { from:'corner2', to:['corner2',12,-16], type:'dribble', read:'secondary' },
-        ]
-      }
-    ]
-  },
-
-  // ── DRIBBLE DRIVE FAMILY ────────────────────────────────────────────────────
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // DRIBBLE DRIVE — MIDDLE
+  // PG attacks the paint down the middle. Wings space to corners.
+  // ─────────────────────────────────────────────────────────────────────────
   dribble_drive_middle: {
     name: 'Dribble Drive — Middle',
-    tags: ['dribble drive','middle drive','lane attack','paint attack','drive kick','drive middle'],
+    tags: ['dribble drive','middle drive','lane attack','paint attack','drive kick','drive middle','downhill'],
     slots: { ballHandler:'1', wing1:'2', wing2:'3', corner1:'4', corner2:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], wing1:[76,40], wing2:[24,40], corner1:[92,38], corner2:[8,38]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Ball handler attacks the paint middle. Wings clear to corners.',
-        arrows:[
-          { from:'wing1', to:[92,38], type:'cut' },
-          { from:'wing2', to:[8,38], type:'cut' },
-          { from:'ballHandler', to:[50,22], type:'dribble' },
+        label: 'Phase 1',
+        description: 'Ball handler attacks the paint. Wings clear to corners to open the lane.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:40 },
+          { label:'3', x:24, y:40 },
+          { label:'4', x:84, y:32 },
+          { label:'5', x:16, y:32 },
+        ],
+        arrows: [
+          { from:[76,40], to:[92,38], type:'cut' },    // 2 clears right corner
+          { from:[24,40], to:[8,38],  type:'cut' },    // 3 clears left corner
+          { from:[50,46], to:[50,22], type:'dribble' }, // 1 drives middle
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball handler in paint reads collapsing defense — finish or kick to corner.',
-        arrows:[
-          { from:'ballHandler', to:[50,6], type:'dribble' },
-          { from:'ballHandler', to:[92,38], type:'pass', read:'secondary' },
-          { from:'ballHandler', to:[8,38], type:'pass', read:'secondary' },
+        label: 'Phase 2',
+        description: 'Ball handler in paint reads help defense — finish at rim or kick to open corner.',
+        players: [
+          { label:'1', x:50, y:20 },  // PG — in paint
+          { label:'2', x:92, y:38 },  // SG — right corner (spacing)
+          { label:'3', x:8,  y:38 },  // SF — left corner (spacing)
+          { label:'4', x:84, y:32 },  // PF — right wing (spacing)
+          { label:'5', x:16, y:32 },  // C — left wing (spacing)
+        ],
+        arrows: [
+          { from:[50,20], to:[50,6],  type:'dribble' },              // finish at rim
+          { from:[50,20], to:[92,38], type:'pass', read:'secondary' }, // kick right corner
+          { from:[50,20], to:[8,38],  type:'pass', read:'secondary' }, // kick left corner
         ]
       }
     ]
   },
 
-  dribble_drive_right: {
-    name: 'Dribble Drive — Right Wing',
-    tags: ['drive right','right wing drive','right side attack','right drive'],
-    slots: { ballHandler:'1', wing1:'2', wing2:'3', corner1:'4', corner2:'5' },
-    defaultPositions: {
-      ballHandler:[72,42], wing1:[92,38], wing2:[50,46], corner1:[8,38], corner2:[18,30]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Ball handler attacks right baseline. Weak side spaces.',
-        arrows:[
-          { from:'ballHandler', to:[82,22], type:'dribble' },
-          { from:'wing2', to:'ballHandler', type:'cut' },
-          { from:'corner2', to:[8,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Finish at rim or kick to trail or weak side corner.',
-        arrows:[
-          { from:'ballHandler', to:[82,6], type:'dribble' },
-          { from:'ballHandler', to:'wing2', type:'pass', read:'secondary' },
-          { from:'ballHandler', to:[8,38], type:'pass', read:'secondary' },
-        ]
-      }
-    ]
-  },
-
-  dribble_drive_left: {
-    name: 'Dribble Drive — Left Wing',
-    tags: ['drive left','left wing drive','left side attack','left drive'],
-    slots: { ballHandler:'1', wing1:'3', wing2:'2', corner1:'5', corner2:'4' },
-    defaultPositions: {
-      ballHandler:[28,42], wing1:[8,38], wing2:[50,46], corner1:[92,38], corner2:[82,30]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Ball handler attacks left baseline. Weak side spaces.',
-        arrows:[
-          { from:'ballHandler', to:[18,22], type:'dribble' },
-          { from:'wing2', to:'ballHandler', type:'cut' },
-          { from:'corner2', to:[92,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Finish at rim or kick to trail or weak side corner.',
-        arrows:[
-          { from:'ballHandler', to:[18,6], type:'dribble' },
-          { from:'ballHandler', to:'wing2', type:'pass', read:'secondary' },
-          { from:'ballHandler', to:[92,38], type:'pass', read:'secondary' },
-        ]
-      }
-    ]
-  },
-
-  // ── POST ENTRY FAMILY ───────────────────────────────────────────────────────
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // POST ENTRY — LOW POST
+  // Ball enters the low post. Post works 1-on-1.
+  // ─────────────────────────────────────────────────────────────────────────
   post_entry_low: {
     name: 'Post Entry — Low Post',
-    tags: ['post entry','low post','post up','feed the post','post iso'],
+    tags: ['post entry','low post','post up','feed the post','post iso','low block'],
     slots: { ballHandler:'1', post:'5', wing1:'2', wing2:'3', spacer:'4' },
-    defaultPositions: {
-      ballHandler:[50,46], post:[36,12], wing1:[82,32], wing2:[18,32], spacer:[84,42]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Post player seals on low block. Ball handler passes into post.',
-        arrows:[
-          { from:'post', to:['post',0,-2], type:'cut' },
-          { from:'ballHandler', to:'post', type:'pass' },
-          { from:'wing1', to:[92,38], type:'cut' },
+        label: 'Phase 1',
+        description: 'Post seals defender on the low block. Ball handler passes into the post.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:80, y:34 },
+          { label:'3', x:18, y:34 },
+          { label:'4', x:84, y:44 },
+          { label:'5', x:36, y:12 },  // C — left block
+        ],
+        arrows: [
+          { from:[50,46], to:[36,12], type:'pass' },  // entry pass to post
+          { from:[80,34], to:[92,38], type:'cut' },   // 2 spaces to corner
         ]
       },
       {
-        label:'Phase 2',
-        description:'Post works 1-on-1 — finish, kick to wing, or pass back to handler.',
-        arrows:[
-          { from:'post', to:['post',0,-4], type:'dribble' },
-          { from:'post', to:'wing2', type:'pass', read:'secondary' },
-          { from:'post', to:'ballHandler', type:'pass', read:'secondary' },
+        label: 'Phase 2',
+        description: 'Post works 1-on-1 — finish, kick to wing, or pass back to handler.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:92, y:38 },
+          { label:'3', x:18, y:34 },
+          { label:'4', x:84, y:44 },
+          { label:'5', x:36, y:10 },
+        ],
+        arrows: [
+          { from:[36,10], to:[36,4],  type:'dribble' },              // post finish
+          { from:[36,10], to:[18,34], type:'pass', read:'secondary' }, // kick to wing
+          { from:[36,10], to:[50,46], type:'pass', read:'secondary' }, // pass back
         ]
       }
     ]
   },
 
-  post_entry_elbow: {
-    name: 'Post Entry — Elbow/High Post',
-    tags: ['elbow','high post','mid post','elbow entry','elbow iso'],
-    slots: { ballHandler:'1', post:'4', wing1:'2', wing2:'3', spacer:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], post:[64,28], wing1:[82,32], wing2:[18,32], spacer:[84,42]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Ball enters high post at elbow. Wings space wide.',
-        arrows:[
-          { from:'ballHandler', to:'post', type:'pass' },
-          { from:'wing2', to:[8,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'High post faces up — drive, shoot, or find cutter.',
-        arrows:[
-          { from:'post', to:['post',-10,-14], type:'dribble' },
-          { from:'post', to:'wing1', type:'pass', read:'secondary' },
-          { from:'ballHandler', to:[50,8], type:'cut' },
-        ]
-      }
-    ]
-  },
-
-  // ── SCREEN AWAY / DOWN SCREEN ───────────────────────────────────────────────
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // DOWN SCREEN
+  // Screener sets down screen for shooter on the wing.
+  // ─────────────────────────────────────────────────────────────────────────
   down_screen: {
     name: 'Down Screen',
-    tags: ['down screen','screen away','pin down','shoot off screen','curl','flare'],
+    tags: ['down screen','screen away','pin down','shoot off screen','curl','flare','pin down screen'],
     slots: { ballHandler:'1', screener:'4', shooter:'2', wing:'3', spacer:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], screener:[76,36], shooter:[76,18], wing:[18,32], spacer:[8,38]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Screener sets down screen for shooter on the wing.',
-        arrows:[
-          { from:'screener', to:['shooter',0,12], type:'screen' },
-          { from:'wing', to:[8,38], type:'cut' },
+        label: 'Phase 1',
+        description: 'Screener sets down screen for shooter on the right wing.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:18 },  // shooter starts low
+          { label:'3', x:18, y:32 },
+          { label:'4', x:76, y:32 },  // screener on wing
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[76,32], to:[76,24], type:'screen' }, // screener sets down screen
+          { from:[18,32], to:[8,38],  type:'cut' },    // 3 spaces
         ]
       },
       {
-        label:'Phase 2',
-        description:'Shooter curls off screen to catch. Ball handler feeds the shooter.',
-        arrows:[
-          { from:'shooter', to:['screener',0,12], type:'cut' },
-          { from:'ballHandler', to:'shooter', type:'pass' },
-          { from:'shooter', to:['screener',-12,8], type:'cut', read:'secondary' },
+        label: 'Phase 2',
+        description: 'Shooter curls off screen to the wing to receive. Ball handler feeds the shooter.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:18 },
+          { label:'3', x:8,  y:38 },
+          { label:'4', x:76, y:24 },  // screener held at screen spot
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[76,18], to:[72,34], type:'cut' },   // shooter curls off screen
+          { from:[50,46], to:[72,34], type:'pass' },  // ball handler feeds
+          { from:[76,18], to:[84,34], type:'cut', read:'secondary' }, // flare option
         ]
       },
       {
-        label:'Phase 3',
-        description:'Shooter attacks — shoot, drive, or swing.',
-        arrows:[
-          { from:'shooter', to:['shooter',0,-2], type:'dribble' },
-          { from:'shooter', to:'ballHandler', type:'pass', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Shooter catches and attacks — shoot, drive, or swing ball.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:72, y:34 },  // shooter caught the ball
+          { label:'3', x:8,  y:38 },
+          { label:'4', x:76, y:24 },
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[72,34], to:[64,18], type:'dribble' },              // drive
+          { from:[72,34], to:[50,46], type:'pass', read:'secondary' }, // swing
         ]
       }
     ]
   },
 
-  zipper_cut: {
-    name: 'Zipper Cut',
-    tags: ['zipper','zipper cut','high cut','elbow curl'],
-    slots: { ballHandler:'1', cutter:'2', screener:'5', wing:'3', spacer:'4' },
-    defaultPositions: {
-      ballHandler:[50,46], cutter:[64,12], screener:[64,20], wing:[18,32], spacer:[8,38]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Cutter uses screener to zip up to the elbow. Ball handler hits the cutter.',
-        arrows:[
-          { from:'cutter', to:['screener',0,12], type:'cut' },
-          { from:'ballHandler', to:'cutter', type:'pass' },
-          { from:'wing', to:[8,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Cutter receives at elbow — face up and attack or shoot.',
-        arrows:[
-          { from:'cutter', to:['cutter',-8,-14], type:'dribble' },
-          { from:'cutter', to:['cutter',0,-2], type:'dribble', read:'secondary' },
-          { from:'ballHandler', to:['cutter',0,10], type:'cut' },
-        ]
-      }
-    ]
-  },
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // UCLA CUT
+  // PG passes to high post. Wing cuts off high post to basket.
+  // ─────────────────────────────────────────────────────────────────────────
   ucla_cut: {
     name: 'UCLA Cut',
-    tags: ['ucla','ucla cut','high post cut','guard cut'],
+    tags: ['ucla','ucla cut','high post cut','guard cut','high post'],
     slots: { ballHandler:'1', highPost:'4', cutter:'2', wing:'3', spacer:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], highPost:[50,28], cutter:[76,40], wing:[82,32], spacer:[8,38]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Ball handler passes to high post. Cutter makes hard cut off high post to basket.',
-        arrows:[
-          { from:'ballHandler', to:'highPost', type:'pass' },
-          { from:'cutter', to:[54,8], type:'cut' },
-          { from:'wing', to:[92,38], type:'cut' },
+        label: 'Phase 1',
+        description: 'Ball handler passes to high post at elbow. Right wing cuts hard off the high post to the basket.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:40 },
+          { label:'3', x:18, y:34 },
+          { label:'4', x:50, y:28 },  // high post
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[50,46], to:[50,28], type:'pass' },  // pass to high post
+          { from:[76,40], to:[54,8],  type:'cut' },   // 2 cuts off high post
+          { from:[18,34], to:[8,38],  type:'cut' },   // 3 spaces
         ]
       },
       {
-        label:'Phase 2',
-        description:'High post feeds cutter for layup or hits weak side.',
-        arrows:[
-          { from:'highPost', to:'cutter', type:'pass' },
-          { from:'highPost', to:'spacer', type:'pass', read:'secondary' },
-          { from:'ballHandler', to:['highPost',0,8], type:'cut' },
+        label: 'Phase 2',
+        description: 'High post feeds cutter at rim for layup. Ball handler cuts behind.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:54, y:8  },  // cutter at rim
+          { label:'3', x:8,  y:38 },
+          { label:'4', x:50, y:28 },  // high post with ball
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[50,28], to:[54,8],  type:'pass' },               // feed cutter
+          { from:[50,28], to:[8,38],  type:'pass', read:'secondary' }, // kick weak side
+          { from:[50,46], to:[36,28], type:'cut' },                // 1 cuts behind
         ]
       }
     ]
   },
 
-  back_screen: {
-    name: 'Back Screen',
-    tags: ['back screen','lob','back screen lob','blind screen'],
-    slots: { ballHandler:'1', screener:'4', cutter:'5', wing1:'2', wing2:'3' },
-    defaultPositions: {
-      ballHandler:[50,46], screener:[60,28], cutter:[50,12], wing1:[82,32], wing2:[18,32]
-    },
+  // ─────────────────────────────────────────────────────────────────────────
+  // BACKDOOR
+  // Wing fakes out cut then back cuts to basket for layup.
+  // ─────────────────────────────────────────────────────────────────────────
+  backdoor: {
+    name: 'Quick Hitter — Backdoor',
+    tags: ['backdoor','back door','backdoor cut','quick hitter backdoor','overplay','back cut'],
+    slots: { ballHandler:'1', cutter:'2', spacer1:'3', spacer2:'4', spacer3:'5' },
     frames: [
       {
-        label:'Phase 1',
-        description:'Screener sets back screen on cutter\'s defender.',
-        arrows:[
-          { from:'screener', to:['cutter',10,6], type:'screen' },
-          { from:'wing1', to:[92,38], type:'cut' },
-          { from:'wing2', to:[8,38], type:'cut' },
+        label: 'Phase 1',
+        description: 'Right wing fakes toward ball to get defender leaning, then cuts backdoor to basket.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:40 },  // wing — will back cut
+          { label:'3', x:18, y:34 },
+          { label:'4', x:84, y:30 },
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[76,40], to:[60,10], type:'cut' },  // 2 back cuts to basket
         ]
       },
       {
-        label:'Phase 2',
-        description:'Cutter cuts hard off back screen for lob or layup.',
-        arrows:[
-          { from:'cutter', to:[50,4], type:'cut' },
-          { from:'ballHandler', to:'cutter', type:'pass' },
+        label: 'Phase 2',
+        description: 'Ball handler hits back cutter in stride for easy layup.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:60, y:10 },  // cutter at basket
+          { label:'3', x:18, y:34 },
+          { label:'4', x:84, y:30 },
+          { label:'5', x:8,  y:38 },
+        ],
+        arrows: [
+          { from:[50,46], to:[60,10], type:'pass' }, // pass to cutter
         ]
       }
     ]
   },
 
-  flex_action: {
-    name: 'Flex Action',
-    tags: ['flex','flex offense','flex cut','cross screen','flex screen'],
-    slots: { ballHandler:'1', crossScreener:'4', downScreener:'5', cutter:'2', wing:'3' },
-    defaultPositions: {
-      ballHandler:[50,46], crossScreener:[18,12], downScreener:[18,30], cutter:[36,8], wing:[82,32]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Cross screen set on the block. Cutter uses it to corner.',
-        arrows:[
-          { from:'crossScreener', to:['cutter',16,4], type:'screen' },
-          { from:'cutter', to:[8,38], type:'cut' },
-          { from:'wing', to:[92,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Down screen set. Ball reverses to wing using screen.',
-        arrows:[
-          { from:'downScreener', to:['crossScreener',0,10], type:'screen' },
-          { from:'ballHandler', to:'downScreener', type:'pass' },
-          { from:'wing', to:['downScreener',0,16], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 3',
-        description:'Wing receives off down screen — shoot or drive.',
-        arrows:[
-          { from:'downScreener', to:'wing', type:'pass' },
-          { from:'wing', to:['wing',0,-2], type:'dribble' },
-        ]
-      }
-    ]
-  },
-
-  horns_split: {
-    name: 'Horns — Split Action',
-    tags: ['horns','horns split','horns action','4-5 horns','horns set'],
-    slots: { ballHandler:'1', leftElbow:'4', rightElbow:'5', wing1:'2', wing2:'3' },
-    defaultPositions: {
-      ballHandler:[50,46], leftElbow:[36,28], rightElbow:[64,28], wing1:[8,38], wing2:[92,38]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'4 and 5 at elbows (Horns set). Ball handler attacks between them.',
-        arrows:[
-          { from:'ballHandler', to:[50,36], type:'dribble' },
-          { from:'wing1', to:[36,42], type:'cut' },
-          { from:'wing2', to:[64,42], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Ball handler reads — hand off to either elbow or split between them.',
-        arrows:[
-          { from:'ballHandler', to:'leftElbow', type:'pass' },
-          { from:'ballHandler', to:'rightElbow', type:'pass', read:'secondary' },
-          { from:'ballHandler', to:['ballHandler',0,-18], type:'dribble', read:'secondary' },
-        ]
-      },
-      {
-        label:'Phase 3',
-        description:'Elbow player attacks — drive middle, shoot, or find roller.',
-        arrows:[
-          { from:'leftElbow', to:['leftElbow',0,-18], type:'dribble' },
-          { from:'rightElbow', to:[50,8], type:'cut', read:'secondary' },
-        ]
-      }
-    ]
-  },
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // HORNS — PICK AND ROLL
+  // Two bigs at elbows. One sets ball screen.
+  // ─────────────────────────────────────────────────────────────────────────
   horns_pnr: {
     name: 'Horns — Pick and Roll',
-    tags: ['horns pnr','horns ball screen','horns pick'],
-    slots: { ballHandler:'1', screener:'4', spacer:'5', wing1:'2', wing2:'3' },
-    defaultPositions: {
-      ballHandler:[50,46], screener:[36,28], spacer:[64,28], wing1:[8,38], wing2:[92,38]
-    },
+    tags: ['horns','horns pnr','horns ball screen','horns pick','horns set','horns action'],
+    slots: { ballHandler:'1', screener:'5', spacer:'4', wing1:'2', wing2:'3' },
     frames: [
       {
-        label:'Phase 1',
-        description:'One elbow player sets ball screen for the ball handler.',
-        arrows:[
-          { from:'screener', to:['ballHandler',0,10], type:'screen' },
-          { from:'spacer', to:['spacer',0,-8], type:'cut' },
+        label: 'Phase 1',
+        description: 'Horns set — two bigs at elbows. Left elbow sets ball screen for PG.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:8,  y:38 },
+          { label:'3', x:92, y:38 },
+          { label:'4', x:64, y:28 },  // right elbow — spacer
+          { label:'5', x:36, y:28 },  // left elbow — screener
+        ],
+        arrows: [
+          { from:[36,28], to:[44,38], type:'screen' }, // 5 sets screen for 1
+          { from:[64,28], to:[64,14], type:'cut' },    // 4 dives to basket
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball handler attacks off screen. Screener rolls hard to basket.',
-        arrows:[
-          { from:'ballHandler', to:['ballHandler',-12,-12], type:'dribble' },
-          { from:'screener', to:[50,6], type:'cut' },
+        label: 'Phase 2',
+        description: 'Ball handler uses screen, attacks the paint. Screener rolls hard to basket.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:8,  y:38 },
+          { label:'3', x:92, y:38 },
+          { label:'4', x:64, y:14 },
+          { label:'5', x:44, y:38 },  // screen set
+        ],
+        arrows: [
+          { from:[50,46], to:[40,28], type:'dribble' }, // 1 attacks left
+          { from:[44,38], to:[48,8],  type:'cut' },     // 5 rolls to basket
         ]
       },
       {
-        label:'Phase 3',
-        description:'Finish, lob to roller, or kick to weak side.',
-        arrows:[
-          { from:'ballHandler', to:['ballHandler',0,-14], type:'dribble' },
-          { from:'ballHandler', to:'screener', type:'pass', read:'secondary' },
-          { from:'ballHandler', to:'wing2', type:'pass', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Finish at rim, lob to roller, or kick to corner.',
+        players: [
+          { label:'1', x:40, y:24 },
+          { label:'2', x:8,  y:38 },
+          { label:'3', x:92, y:38 },
+          { label:'4', x:64, y:14 },
+          { label:'5', x:48, y:8  },
+        ],
+        arrows: [
+          { from:[40,24], to:[40,6],  type:'dribble' },              // finish
+          { from:[40,24], to:[48,8],  type:'pass', read:'secondary' }, // lob to roller
+          { from:[40,24], to:[8,38],  type:'pass', read:'secondary' }, // kick corner
         ]
       }
     ]
   },
 
-  floppy: {
-    name: 'Floppy Action',
-    tags: ['floppy','double screen','two screens','floppy action'],
-    slots: { ballHandler:'1', screen1:'4', screen2:'5', shooter:'2', spacer:'3' },
-    defaultPositions: {
-      ballHandler:[50,46], screen1:[36,12], screen2:[64,12], shooter:[50,8], spacer:[18,32]
-    },
+  // ─────────────────────────────────────────────────────────────────────────
+  // FLEX ACTION
+  // Cross screen on block then down screen — classic Flex offense.
+  // ─────────────────────────────────────────────────────────────────────────
+  flex_action: {
+    name: 'Flex Action',
+    tags: ['flex','flex offense','flex cut','cross screen','flex screen','flex action'],
+    slots: { ballHandler:'1', crossScreener:'4', downScreener:'5', cutter:'2', wing:'3' },
     frames: [
       {
-        label:'Phase 1',
-        description:'Two screeners on each block. Shooter reads which screen to use.',
-        arrows:[
-          { from:'ballHandler', to:[72,42], type:'dribble' },
-          { from:'spacer', to:[8,38], type:'cut' },
+        label: 'Phase 1',
+        description: 'Cross screen set on the left block. Cutter uses it to curl to right corner.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:36, y:12 },  // cutter — left block
+          { label:'3', x:82, y:32 },
+          { label:'4', x:22, y:12 },  // cross screener — sets on block
+          { label:'5', x:18, y:30 },  // down screener
+        ],
+        arrows: [
+          { from:[22,12], to:[34,10], type:'screen' }, // cross screen on block
+          { from:[36,12], to:[92,38], type:'cut' },    // 2 curls to right corner
+          { from:[82,32], to:[92,38], type:'cut' },    // 3 spaces to right wing
         ]
       },
       {
-        label:'Phase 2',
-        description:'Shooter curls one screen or flares other screen for catch and shoot.',
-        arrows:[
-          { from:'shooter', to:['screen1',0,14], type:'cut' },
-          { from:'shooter', to:['screen2',0,14], type:'cut', read:'secondary' },
-          { from:'ballHandler', to:'shooter', type:'pass' },
+        label: 'Phase 2',
+        description: 'Ball reverses. Down screen set for left wing. Left wing uses screen.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:92, y:38 },
+          { label:'3', x:92, y:38 },
+          { label:'4', x:22, y:12 },
+          { label:'5', x:18, y:30 },
+        ],
+        arrows: [
+          { from:[18,30], to:[18,22], type:'screen' }, // down screen left side
+          { from:[50,46], to:[26,42], type:'pass' },   // ball reverses left
+          { from:[22,12], to:[18,24], type:'cut' },    // cutter uses down screen
+        ]
+      },
+      {
+        label: 'Phase 3',
+        description: 'Left wing receives off screen — shoot, drive, or continue the flex action.',
+        players: [
+          { label:'1', x:26, y:42 },
+          { label:'2', x:92, y:38 },
+          { label:'3', x:92, y:38 },
+          { label:'4', x:22, y:12 },
+          { label:'5', x:18, y:22 },
+        ],
+        arrows: [
+          { from:[26,42], to:[18,24], type:'pass' },
+          { from:[18,24], to:[18,22], type:'dribble', read:'secondary' },
         ]
       }
     ]
   },
 
-  blob_box: {
-    name: 'Baseline Out of Bounds — Box Set',
-    tags: ['blob','baseline out','baseline inbound','box set','out of bounds baseline'],
-    slots: { inbounder:'1', screen1:'4', screen2:'5', shooter1:'2', shooter2:'3' },
-    defaultPositions: {
-      inbounder:[50,4], screen1:[36,12], screen2:[64,12], shooter1:[36,20], shooter2:[64,20]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Box set — screens set simultaneously for two shooters.',
-        arrows:[
-          { from:'screen1', to:['shooter1',0,6], type:'screen' },
-          { from:'screen2', to:['shooter2',0,6], type:'screen' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Shooters use screens — curl or flare to open spots. Inbounder hits open player.',
-        arrows:[
-          { from:'shooter1', to:[20,30], type:'cut' },
-          { from:'shooter2', to:[80,30], type:'cut', read:'secondary' },
-          { from:'inbounder', to:'shooter1', type:'pass' },
-        ]
-      }
-    ]
-  },
-
-  blob_stack: {
-    name: 'Baseline Out of Bounds — Stack',
-    tags: ['blob stack','stack set','inbound stack','baseline stack'],
-    slots: { inbounder:'5', shooter:'2', screener1:'4', screener2:'3', safety:'1' },
-    defaultPositions: {
-      inbounder:[92,4], shooter:[64,12], screener1:[64,18], screener2:[64,24], safety:[30,30]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Stack on ball side. Bottom player pops, top player cuts to rim.',
-        arrows:[
-          { from:'screener2', to:[64,40], type:'cut' },
-          { from:'shooter', to:['screener2',0,-10], type:'cut' },
-          { from:'screener1', to:[82,30], type:'cut', read:'secondary' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Inbounder hits the open cutter or safety valve.',
-        arrows:[
-          { from:'inbounder', to:'shooter', type:'pass' },
-          { from:'inbounder', to:'screener2', type:'pass', read:'secondary' },
-          { from:'inbounder', to:'safety', type:'pass', read:'secondary' },
-        ]
-      }
-    ]
-  },
-
-  slob_wing: {
-    name: 'Sideline Out of Bounds — Wing',
-    tags: ['slob','sideline out','sideline inbound','slob play'],
-    slots: { inbounder:'5', receiver1:'1', receiver2:'2', screener:'4', spacer:'3' },
-    defaultPositions: {
-      inbounder:[96,30], receiver1:[76,40], receiver2:[76,22], screener:[66,28], spacer:[30,40]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Screen set on sideline. Cutter uses screen to get open.',
-        arrows:[
-          { from:'screener', to:['receiver2',6,6], type:'screen' },
-          { from:'receiver2', to:['screener',0,14], type:'cut' },
-          { from:'spacer', to:[50,46], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Inbounder hits open receiver. Ball enters — attack.',
-        arrows:[
-          { from:'inbounder', to:'receiver2', type:'pass' },
-          { from:'receiver2', to:['receiver2',-12,-14], type:'dribble' },
-        ]
-      }
-    ]
-  },
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // PRESS BREAK — 1-4 HIGH
+  // Full court. Inbound to middle. Advance quickly.
+  // ─────────────────────────────────────────────────────────────────────────
   press_break_1_4_high: {
     name: 'Press Break — 1-4 High',
-    tags: ['press break','1-4 high','full court press','press offense','break press'],
-    slots: { inbounder:'1', wing1:'2', wing2:'3', middle:'4', safety:'5' },
-    defaultPositions: {
-      inbounder:[50,58], wing1:[82,50], wing2:[18,50], middle:[50,40], safety:[50,22]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'1-4 high press break — inbound to middle. Wings stretch the press.',
-        arrows:[
-          { from:'inbounder', to:'middle', type:'pass' },
-          { from:'wing1', to:[82,36], type:'cut' },
-          { from:'wing2', to:[18,36], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Middle advances. Wings fill ahead. Safety streaks to basket.',
-        arrows:[
-          { from:'middle', to:'wing1', type:'pass' },
-          { from:'safety', to:[50,8], type:'cut' },
-          { from:'wing2', to:[18,22], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 3',
-        description:'Ball advances quickly — attack before defense recovers.',
-        arrows:[
-          { from:'wing1', to:'safety', type:'pass' },
-          { from:'wing1', to:['wing1',0,-16], type:'dribble', read:'secondary' },
-        ]
-      }
-    ]
-  },
-
-  press_break_4_across: {
-    name: 'Press Break — 4 Across',
-    tags: ['4 across','press break 4','full court 4 across','four across'],
+    tags: ['press break','1-4 high','full court press','press offense','break press','press'],
     slots: { inbounder:'5', point:'1', wing1:'2', wing2:'3', safety:'4' },
-    defaultPositions: {
-      inbounder:[50,58], point:[50,52], wing1:[82,52], wing2:[18,52], safety:[50,22]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'4 across alignment — spread the press. Inbound to open player.',
-        arrows:[
-          { from:'inbounder', to:'wing1', type:'pass' },
-          { from:'point', to:[50,38], type:'cut' },
-          { from:'wing2', to:[18,38], type:'cut' },
+        label: 'Phase 1',
+        description: '1-4 high alignment. Inbound to point guard at mid-court. Wings stretch the press.',
+        players: [
+          { label:'1', x:50, y:52 },  // PG — near inbounder
+          { label:'2', x:82, y:48 },  // right wing
+          { label:'3', x:18, y:48 },  // left wing
+          { label:'4', x:50, y:22 },  // safety — ahead
+          { label:'5', x:50, y:58 },  // inbounder at baseline
+        ],
+        arrows: [
+          { from:[50,58], to:[50,52], type:'pass' },  // inbound to 1
+          { from:[82,48], to:[82,34], type:'cut' },   // 2 sprints ahead
+          { from:[18,48], to:[18,34], type:'cut' },   // 3 sprints ahead
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball advances through middle. Safety streaks to basket.',
-        arrows:[
-          { from:'wing1', to:'point', type:'pass' },
-          { from:'safety', to:[50,8], type:'cut' },
-          { from:'wing2', to:[18,24], type:'cut' },
+        label: 'Phase 2',
+        description: 'Point guard advances. Wings fill lanes ahead. Safety streaks to basket.',
+        players: [
+          { label:'1', x:50, y:52 },
+          { label:'2', x:82, y:34 },
+          { label:'3', x:18, y:34 },
+          { label:'4', x:50, y:22 },
+          { label:'5', x:50, y:58 },
+        ],
+        arrows: [
+          { from:[50,52], to:[82,34], type:'pass' },  // advance to right wing
+          { from:[50,22], to:[50,6],  type:'cut' },   // 4 streaks to basket
+          { from:[18,34], to:[18,20], type:'cut' },   // 3 continues up
+        ]
+      },
+      {
+        label: 'Phase 3',
+        description: 'Attack before defense sets. Pass to safety for easy layup.',
+        players: [
+          { label:'1', x:50, y:52 },
+          { label:'2', x:82, y:34 },
+          { label:'3', x:18, y:20 },
+          { label:'4', x:50, y:6  },
+          { label:'5', x:50, y:58 },
+        ],
+        arrows: [
+          { from:[82,34], to:[50,6],  type:'pass' },               // pass to safety
+          { from:[82,34], to:[72,18], type:'dribble', read:'secondary' }, // drive
         ]
       }
     ]
   },
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // FAST BREAK — 3 ON 2
+  // Full court. Ball advances center. Wings in lanes.
+  // ─────────────────────────────────────────────────────────────────────────
   fast_break_3on2: {
     name: 'Fast Break — 3 on 2',
-    tags: ['fast break','3 on 2','three on two','transition','break','outlet','full court break'],
+    tags: ['fast break','3 on 2','three on two','transition','break','outlet','full court break','fast break'],
     slots: { ballHandler:'1', wing1:'2', wing2:'3', trailer1:'4', trailer2:'5' },
-    defaultPositions: {
-      ballHandler:[50,58], wing1:[82,50], wing2:[18,50], trailer1:[66,58], trailer2:[34,58]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Ball handler advances up center court. Wings sprint ahead in outside lanes.',
-        arrows:[
-          { from:'ballHandler', to:[50,36], type:'dribble' },
-          { from:'wing1', to:[82,24], type:'cut' },
-          { from:'wing2', to:[18,24], type:'cut' },
+        label: 'Phase 1',
+        description: 'Ball handler advances center court. Wings sprint ahead in outside lanes.',
+        players: [
+          { label:'1', x:50, y:54 },  // PG — backcourt with ball
+          { label:'2', x:82, y:46 },  // right wing — sprinting
+          { label:'3', x:18, y:46 },  // left wing — sprinting
+          { label:'4', x:66, y:56 },  // trailer
+          { label:'5', x:34, y:56 },  // trailer
+        ],
+        arrows: [
+          { from:[50,54], to:[50,32], type:'dribble' }, // 1 advances
+          { from:[82,46], to:[82,22], type:'cut' },     // 2 sprints right lane
+          { from:[18,46], to:[18,22], type:'cut' },     // 3 sprints left lane
         ]
       },
       {
-        label:'Phase 2',
-        description:'Ball handler reads — pass to open wing or attack the gap.',
-        arrows:[
-          { from:'ballHandler', to:'wing1', type:'pass' },
-          { from:'ballHandler', to:['ballHandler',0,-18], type:'dribble', read:'secondary' },
-          { from:'wing2', to:[18,10], type:'cut' },
+        label: 'Phase 2',
+        description: 'Ball handler reads two defenders — pass to open wing or attack the gap.',
+        players: [
+          { label:'1', x:50, y:32 },
+          { label:'2', x:82, y:22 },
+          { label:'3', x:18, y:22 },
+          { label:'4', x:66, y:44 },
+          { label:'5', x:34, y:44 },
+        ],
+        arrows: [
+          { from:[50,32], to:[82,22], type:'pass' },               // pass to right wing
+          { from:[50,32], to:[50,14], type:'dribble', read:'secondary' }, // attack gap
+          { from:[18,22], to:[18,10], type:'cut' },                // 3 continues
         ]
       },
       {
-        label:'Phase 3',
-        description:'Wing finishes at rim or passes to cutter.',
-        arrows:[
-          { from:'wing1', to:[82,6], type:'dribble' },
-          { from:'wing1', to:'wing2', type:'pass', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Wing finishes at rim or passes to cutter on opposite side.',
+        players: [
+          { label:'1', x:50, y:32 },
+          { label:'2', x:82, y:22 },
+          { label:'3', x:18, y:10 },
+          { label:'4', x:66, y:44 },
+          { label:'5', x:34, y:44 },
+        ],
+        arrows: [
+          { from:[82,22], to:[82,6],  type:'dribble' },              // finish right
+          { from:[82,22], to:[18,10], type:'pass', read:'secondary' }, // cross pass
         ]
       }
     ]
   },
 
-  secondary_break: {
-    name: 'Secondary Break / Transition',
-    tags: ['secondary break','transition offense','early offense','push','pitch ahead'],
-    slots: { ballHandler:'1', wing1:'2', wing2:'3', trailer:'4', rim:'5' },
-    defaultPositions: {
-      ballHandler:[50,52], wing1:[76,40], wing2:[24,40], trailer:[50,58], rim:[50,16]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Pitch ahead to wing in transition. Rim runner goes early to basket.',
-        arrows:[
-          { from:'ballHandler', to:'wing1', type:'pass' },
-          { from:'rim', to:[50,6], type:'cut' },
-          { from:'wing2', to:[24,26], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Wing attacks with numbers advantage before defense sets.',
-        arrows:[
-          { from:'wing1', to:['wing1',-12,-18], type:'dribble' },
-          { from:'wing1', to:'rim', type:'pass', read:'secondary' },
-          { from:'wing2', to:[8,38], type:'cut' },
-        ]
-      }
-    ]
-  },
-
-  quick_hitter_iverson: {
-    name: 'Quick Hitter — Iverson Cut',
-    tags: ['iverson','iverson cut','cross cut','quick hitter','curl cut'],
-    slots: { ballHandler:'2', cutter:'1', screen1:'4', screen2:'5', spacer:'3' },
-    defaultPositions: {
-      ballHandler:[50,46], cutter:[50,28], screen1:[40,18], screen2:[60,18], spacer:[82,32]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Cutter uses double stagger screens across the top to get open.',
-        arrows:[
-          { from:'screen1', to:['cutter',10,8], type:'screen' },
-          { from:'screen2', to:['cutter',-10,8], type:'screen' },
-          { from:'cutter', to:[18,32], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Ball handler feeds cutter coming off screens.',
-        arrows:[
-          { from:'ballHandler', to:'cutter', type:'pass' },
-          { from:'cutter', to:['cutter',0,-16], type:'dribble' },
-          { from:'spacer', to:[92,38], type:'cut' },
-        ]
-      }
-    ]
-  },
-
-  quick_hitter_backdoor: {
-    name: 'Quick Hitter — Backdoor',
-    tags: ['backdoor','back door','backdoor cut','quick hitter backdoor','overplay'],
-    slots: { ballHandler:'1', cutter:'2', screener:'4', wing:'3', spacer:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], cutter:[76,40], screener:[62,28], wing:[18,32], spacer:[8,38]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Wing fakes out cut, reads overplay, cuts backdoor to basket.',
-        arrows:[
-          { from:'cutter', to:['cutter',0,-4], type:'cut' },
-          { from:'wing', to:[8,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Ball handler hits backdoor cutter in stride for layup.',
-        arrows:[
-          { from:'cutter', to:[62,8], type:'cut' },
-          { from:'ballHandler', to:'cutter', type:'pass' },
-        ]
-      }
-    ]
-  },
-
-  quick_hitter_mismatch: {
-    name: 'Quick Hitter — Mismatch Exploit',
-    tags: ['mismatch','iso','isolation','quick hitter iso','exploit'],
-    slots: { ballHandler:'1', iso:'4', spacer1:'2', spacer2:'3', spacer3:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], iso:[62,32], spacer1:[82,32], spacer2:[8,38], spacer3:[92,38]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Clear out one side. Ball enters mismatch player in space.',
-        arrows:[
-          { from:'spacer1', to:[92,38], type:'cut' },
-          { from:'ballHandler', to:'iso', type:'pass' },
-          { from:'spacer2', to:[4,38], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Mismatch player attacks defender 1-on-1 in isolated space.',
-        arrows:[
-          { from:'iso', to:['iso',-8,-14], type:'dribble' },
-          { from:'iso', to:[54,8], type:'dribble' },
-        ]
-      }
-    ]
-  },
-
-  end_of_game_buzzer: {
-    name: 'End of Game / Buzzer Beater',
-    tags: ['end of game','buzzer beater','last shot','final play','game winner','late game'],
-    slots: { inbounder:'5', shooter:'2', screen1:'4', screen2:'3', safety:'1' },
-    defaultPositions: {
-      inbounder:[50,58], shooter:[50,36], screen1:[36,28], screen2:[64,28], safety:[50,52]
-    },
-    frames: [
-      {
-        label:'Phase 1',
-        description:'Double screen set for shooter curling to 3-point line.',
-        arrows:[
-          { from:'screen1', to:['shooter',14,6], type:'screen' },
-          { from:'screen2', to:['shooter',-14,6], type:'screen' },
-          { from:'safety', to:[76,46], type:'cut' },
-        ]
-      },
-      {
-        label:'Phase 2',
-        description:'Shooter curls for catch and shoot. Safety as secondary option.',
-        arrows:[
-          { from:'shooter', to:[30,34], type:'cut' },
-          { from:'inbounder', to:'shooter', type:'pass' },
-          { from:'inbounder', to:'safety', type:'pass', read:'secondary' },
-        ]
-      },
-      {
-        label:'Phase 3',
-        description:'Shooter catches and fires — no hesitation.',
-        arrows:[
-          { from:'shooter', to:['shooter',0,-2], type:'dribble' },
-        ]
-      }
-    ]
-  },
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // ZONE ATTACK — HIGH LOW
+  // Beat 2-3 zone with high-low passing.
+  // ─────────────────────────────────────────────────────────────────────────
   zone_attack_high_low: {
     name: 'Zone Attack — High-Low',
-    tags: ['zone attack','zone offense','2-3 zone','zone high low','beat the zone'],
+    tags: ['zone attack','zone offense','2-3 zone','zone high low','beat the zone','zone'],
     slots: { ballHandler:'1', wing1:'2', wing2:'3', highPost:'4', lowPost:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], wing1:[76,38], wing2:[24,38], highPost:[50,24], lowPost:[36,10]
-    },
     frames: [
       {
-        label:'Phase 1',
-        description:'Ball swings to wing. High post seals the gap in the zone.',
-        arrows:[
-          { from:'ballHandler', to:'wing1', type:'pass' },
-          { from:'highPost', to:['highPost',0,-2], type:'cut' },
-          { from:'lowPost', to:['lowPost',0,-1], type:'cut' },
+        label: 'Phase 1',
+        description: 'Ball swings to right wing. High post seals the gap in the 2-3 zone.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:38 },
+          { label:'3', x:24, y:38 },
+          { label:'4', x:50, y:24 },  // high post — sealing gap
+          { label:'5', x:36, y:10 },  // low post — left block
+        ],
+        arrows: [
+          { from:[50,46], to:[76,38], type:'pass' },  // swing to wing
+          { from:[36,10], to:[64,10], type:'cut' },   // low post seals weak side
         ]
       },
       {
-        label:'Phase 2',
-        description:'Wing feeds high post in the gap. Low post seals weak side.',
-        arrows:[
-          { from:'wing1', to:'highPost', type:'pass' },
-          { from:'lowPost', to:[64,10], type:'cut' },
-          { from:'wing2', to:[8,38], type:'cut' },
+        label: 'Phase 2',
+        description: 'Right wing feeds high post in the zone gap. Low post seals on opposite block.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:38 },
+          { label:'3', x:24, y:38 },
+          { label:'4', x:50, y:24 },
+          { label:'5', x:64, y:10 },
+        ],
+        arrows: [
+          { from:[76,38], to:[50,24], type:'pass' },  // feed high post
+          { from:[24,38], to:[8,38],  type:'cut' },   // 3 spaces weak corner
         ]
       },
       {
-        label:'Phase 3',
-        description:'High post reads — shoot, drive, or find low post seal.',
-        arrows:[
-          { from:'highPost', to:['highPost',0,-12], type:'dribble' },
-          { from:'highPost', to:'lowPost', type:'pass', read:'secondary' },
-          { from:'highPost', to:'wing2', type:'pass', read:'secondary' },
+        label: 'Phase 3',
+        description: 'High post reads — shoot, drive middle, or find low post seal.',
+        players: [
+          { label:'1', x:50, y:46 },
+          { label:'2', x:76, y:38 },
+          { label:'3', x:8,  y:38 },
+          { label:'4', x:50, y:24 },
+          { label:'5', x:64, y:10 },
+        ],
+        arrows: [
+          { from:[50,24], to:[50,10], type:'dribble' },              // drive middle
+          { from:[50,24], to:[64,10], type:'pass', read:'secondary' }, // find low post
+          { from:[50,24], to:[8,38],  type:'pass', read:'secondary' }, // kick weak corner
         ]
       }
     ]
   },
 
-  zone_attack_skip: {
-    name: 'Zone Attack — Skip and Attack',
-    tags: ['zone skip','skip zone','zone attack skip','beat zone'],
-    slots: { ballHandler:'1', wing1:'2', wing2:'3', corner1:'4', corner2:'5' },
-    defaultPositions: {
-      ballHandler:[50,46], wing1:[76,38], wing2:[24,38], corner1:[92,36], corner2:[8,36]
-    },
+  // ─────────────────────────────────────────────────────────────────────────
+  // END OF GAME
+  // Double screen for open 3.
+  // ─────────────────────────────────────────────────────────────────────────
+  end_of_game_buzzer: {
+    name: 'End of Game / Buzzer Beater',
+    tags: ['end of game','buzzer beater','last shot','final play','game winner','late game','end game'],
+    slots: { inbounder:'5', shooter:'2', screen1:'4', screen2:'3', safety:'1' },
     frames: [
       {
-        label:'Phase 1',
-        description:'Ball moves wing to wing. Corners stay wide to stretch the zone.',
-        arrows:[
-          { from:'ballHandler', to:'wing1', type:'pass' },
-          { from:'wing2', to:[8,36], type:'cut' },
+        label: 'Phase 1',
+        description: 'Double screen set at the top of the key for shooter.',
+        players: [
+          { label:'1', x:50, y:52 },  // safety
+          { label:'2', x:50, y:36 },  // shooter — starts inside
+          { label:'3', x:42, y:28 },  // screen 1
+          { label:'4', x:58, y:28 },  // screen 2
+          { label:'5', x:50, y:58 },  // inbounder
+        ],
+        arrows: [
+          { from:[42,28], to:[42,32], type:'screen' }, // screen set left
+          { from:[58,28], to:[58,32], type:'screen' }, // screen set right
+          { from:[50,52], to:[76,46], type:'cut' },    // 1 safety valve
         ]
       },
       {
-        label:'Phase 2',
-        description:'Skip pass over zone to weak side corner — zone cannot recover.',
-        arrows:[
-          { from:'wing1', to:'corner2', type:'pass' },
-          { from:'corner1', to:'wing1', type:'cut' },
-          { from:'wing2', to:'ballHandler', type:'cut' },
+        label: 'Phase 2',
+        description: 'Shooter curls off double screen for catch and shoot. Inbounder hits open player.',
+        players: [
+          { label:'1', x:76, y:46 },
+          { label:'2', x:50, y:36 },
+          { label:'3', x:42, y:32 },
+          { label:'4', x:58, y:32 },
+          { label:'5', x:50, y:58 },
+        ],
+        arrows: [
+          { from:[50,36], to:[28,36], type:'cut' },   // shooter curls left
+          { from:[50,58], to:[28,36], type:'pass' },  // inbound to shooter
+          { from:[50,58], to:[76,46], type:'pass', read:'secondary' }, // safety valve
         ]
       },
       {
-        label:'Phase 3',
-        description:'Corner attacks the closeout — shoot or drive baseline.',
-        arrows:[
-          { from:'corner2', to:['corner2',0,-2], type:'dribble' },
-          { from:'corner2', to:['corner2',14,-14], type:'dribble', read:'secondary' },
+        label: 'Phase 3',
+        description: 'Shooter catches and fires. No hesitation — quick release.',
+        players: [
+          { label:'1', x:76, y:46 },
+          { label:'2', x:28, y:36 },  // shooter with ball
+          { label:'3', x:42, y:32 },
+          { label:'4', x:58, y:32 },
+          { label:'5', x:50, y:58 },
+        ],
+        arrows: [
+          { from:[28,36], to:[28,34], type:'dribble' }, // shot attempt
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // IVERSON CUT
+  // Guard cuts across two stagger screens.
+  // ─────────────────────────────────────────────────────────────────────────
+  iverson_cut: {
+    name: 'Quick Hitter — Iverson Cut',
+    tags: ['iverson','iverson cut','cross cut','quick hitter','curl cut','stagger','double stagger'],
+    slots: { ballHandler:'2', cutter:'1', screen1:'4', screen2:'5', spacer:'3' },
+    frames: [
+      {
+        label: 'Phase 1',
+        description: 'Cutter uses double stagger screens across the top to shake their defender.',
+        players: [
+          { label:'1', x:50, y:30 },  // cutter — starts top of key
+          { label:'2', x:50, y:46 },  // ball handler
+          { label:'3', x:82, y:32 },
+          { label:'4', x:38, y:18 },  // screen 1
+          { label:'5', x:58, y:18 },  // screen 2
+        ],
+        arrows: [
+          { from:[38,18], to:[38,26], type:'screen' }, // screen 1
+          { from:[58,18], to:[58,26], type:'screen' }, // screen 2
+          { from:[50,30], to:[18,30], type:'cut' },    // cutter runs through
+        ]
+      },
+      {
+        label: 'Phase 2',
+        description: 'Ball handler feeds cutter coming off screens on the left wing.',
+        players: [
+          { label:'1', x:18, y:30 },  // cutter emerged left wing
+          { label:'2', x:50, y:46 },
+          { label:'3', x:82, y:32 },
+          { label:'4', x:38, y:26 },
+          { label:'5', x:58, y:26 },
+        ],
+        arrows: [
+          { from:[50,46], to:[18,30], type:'pass' },   // feed cutter
+          { from:[18,30], to:[18,16], type:'dribble' }, // cutter attacks
         ]
       }
     ]
@@ -2760,7 +2596,7 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const touchStartX = useRef(null)
-  const cacheKey = 'coachiq_bbframes_v6_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
+  const cacheKey = 'coachiq_bbframes_v7_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
 
   useEffect(() => {
     // Use preloaded frames if provided
@@ -2816,107 +2652,45 @@ function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
       }
 
       const template = BB_TEMPLATES[matchData.templateKey]
-      const positions = matchData.playerPositions || {}
       const slotAssignments = matchData.slotAssignments || {}
 
-      // ── SLOT-RELATIVE FRAME BUILDER ─────────────────────────────────────────
-      // Build a slot→position lookup for each frame.
-      // Positions chain across frames: a player who moved in frame N starts
-      // at their destination in frame N+1.
+      // ── SIMPLE DIRECT FRAME BUILDER ──────────────────────────────────────────
+      // Templates now have fully explicit player positions and arrow coordinates
+      // per frame. No chaining. No resolving. No math.
+      // The AI assigns player NUMBERS to slot NAMES.
+      // We swap the number labels into the template's pre-defined positions.
 
-      // Helper: resolve a slot-relative coordinate to absolute [x,y]
-      // ref can be: string 'slotName', ['slotName',dx,dy], or [x,y] absolute
-      function resolveCoord(ref, slotPositions) {
-        if (!ref) return [50,30]
-        if (typeof ref === 'string') {
-          return slotPositions[ref] ? [...slotPositions[ref]] : [50,30]
-        }
-        if (Array.isArray(ref)) {
-          if (typeof ref[0] === 'string') {
-            // ['slotName', dx, dy]
-            const base = slotPositions[ref[0]] || [50,30]
-            return [base[0] + (ref[1]||0), base[1] + (ref[2]||0)]
-          }
-          // absolute [x,y]
-          return [ref[0], ref[1]]
-        }
-        return [50,30]
-      }
-
-      // Build numToPos from AI playerPositions response
-      const numToPos = {}
-      ;['1','2','3','4','5'].forEach(num => {
-        if (positions[num]) numToPos[num] = [positions[num].x, positions[num].y]
-      })
-
-      // Build slot→playerNum lookup
+      // Build slot→playerNum map (AI assignment or template default)
       const slotToNum = {}
       Object.entries(template.slots).forEach(([slot, defaultNum]) => {
         slotToNum[slot] = slotAssignments[slot] || defaultNum
       })
-      // Build num→slot lookup (reverse)
+      // Invert: playerNum→slotName
       const numToSlot = {}
-      Object.entries(slotToNum).forEach(([slot, num]) => { numToSlot[num] = slot })
+      Object.entries(slotToNum).forEach(([slot, num]) => { numToSlot[String(num)] = slot })
 
-      // Initial slot positions — from AI description or template defaults
-      const initSlotPos = {}
-      Object.entries(template.slots).forEach(([slot, defaultNum]) => {
-        const num = slotToNum[slot]
-        if (numToPos[num]) {
-          initSlotPos[slot] = [...numToPos[num]]
-        } else {
-          initSlotPos[slot] = [...(template.defaultPositions[slot] || [50,30])]
-        }
-      })
-      // Any player num not in a slot gets their AI position
-      const extraNumPos = {}
-      ;['1','2','3','4','5'].forEach(num => {
-        if (!numToSlot[num]) extraNumPos[num] = numToPos[num] || [50,46]
-      })
-
-      // Build frames with chaining positions
-      let currentSlotPos = { ...initSlotPos }
-      const builtFrames = template.frames.map((tFrame, frameIdx) => {
-        // Resolve all arrows for this frame using current slot positions
-        const resolvedArrows = tFrame.arrows.map(arr => ({
-          ...arr,
-          from: resolveCoord(arr.from, currentSlotPos),
-          to: resolveCoord(arr.to, currentSlotPos),
-        }))
-
-        // Build player list with current positions
-        const framePlayers = ['1','2','3','4','5'].map(num => {
-          const slot = numToSlot[num]
-          const pos = slot ? (currentSlotPos[slot] || [50,46]) : (extraNumPos[num] || [50,46])
-          return { id:'p'+num, label:num, role:'off', x:pos[0], y:pos[1] }
+      const builtFrames = template.frames.map((tFrame) => {
+        // Each template player has a label matching a slot's default number.
+        // Swap in the actual assigned player number.
+        const slotDefaultToAssigned = {}
+        Object.entries(slotToNum).forEach(([slot, assignedNum]) => {
+          const defaultNum = template.slots[slot]
+          slotDefaultToAssigned[String(defaultNum)] = String(assignedNum)
         })
 
-        // Advance positions for next frame:
-        // Each primary (non-read) arrow moves its 'from' slot to 'to' position
-        if (frameIdx < template.frames.length - 1) {
-          tFrame.arrows.forEach((arr, ai) => {
-            if (arr.read) return // secondary reads don't move players
-            if (arr.type === 'screen') return // screener stays put after screen
-            const resolvedFrom = resolvedArrows[ai].from
-            const resolvedTo = resolvedArrows[ai].to
-            // Find which slot is at this 'from' position
-            let movedSlot = null
-            let bestDist = 999
-            Object.entries(currentSlotPos).forEach(([slot, pos]) => {
-              const d = Math.abs(pos[0]-resolvedFrom[0]) + Math.abs(pos[1]-resolvedFrom[1])
-              if (d < bestDist) { bestDist = d; movedSlot = slot }
-            })
-            if (movedSlot && bestDist < 15) {
-              currentSlotPos = { ...currentSlotPos, [movedSlot]: resolvedTo }
-            }
-          })
-        }
+        const framePlayers = tFrame.players.map(p => ({
+          id: 'p' + (slotDefaultToAssigned[String(p.label)] || p.label),
+          label: slotDefaultToAssigned[String(p.label)] || String(p.label),
+          role: 'off',
+          x: p.x,
+          y: p.y,
+        }))
 
         return {
           label: tFrame.label,
-          description: tFrame.description + (matchData.adjustmentNote && frameIdx === 0 ? ' (Note: ' + matchData.adjustmentNote + ')' : ''),
+          description: tFrame.description,
           players: framePlayers,
-          arrows: resolvedArrows,
+          arrows: tFrame.arrows, // already absolute [x,y] — no resolving needed
         }
       })
 
@@ -6226,7 +6000,7 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               let prompt
               if (isBB) {
                 // Basketball: template matching system
-                const bbFramesCacheKey = 'coachiq_bbframes_v6_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
+                const bbFramesCacheKey = 'coachiq_bbframes_v7_' + (play.name||'').replace(/\s/g,'_').slice(0,40)
                 try {
                   const cached = sessionStorage.getItem(bbFramesCacheKey)
                   if (cached) {
@@ -6322,51 +6096,25 @@ function SchemesPage({ P='#C0392B', S='#002868', al, sport, callAI, parseJSON, p
               if (isBB && parsed3 && parsed3.templateKey && BB_TEMPLATES[parsed3.templateKey]) {
                 try {
                   const tpl = BB_TEMPLATES[parsed3.templateKey]
-                  const pos = parsed3.playerPositions || {}
                   const bgSlots = parsed3.slotAssignments || {}
-                  // Build slot→num and num→slot
+                  // Simple: build slot→assignedNum map, then swap labels
                   const bgSlotToNum = {}
                   Object.entries(tpl.slots).forEach(([slot, defNum]) => { bgSlotToNum[slot] = bgSlots[slot] || defNum })
-                  const bgNumToSlot = {}
-                  Object.entries(bgSlotToNum).forEach(([slot, num]) => { bgNumToSlot[num] = slot })
-                  // Build initial slot positions from AI or template defaults
-                  const bgNumToPos = {}
-                  ;['1','2','3','4','5'].forEach(n => { if (pos[n]) bgNumToPos[n] = [pos[n].x, pos[n].y] })
-                  const bgInitSlotPos = {}
-                  Object.entries(tpl.slots).forEach(([slot, defNum]) => {
-                    const num = bgSlotToNum[slot]
-                    if (bgNumToPos[num]) bgInitSlotPos[slot] = [...bgNumToPos[num]]
-                    else if (tpl.defaultPositions[slot]) bgInitSlotPos[slot] = [...tpl.defaultPositions[slot]]
+                  const bgDefaultToAssigned = {}
+                  Object.entries(bgSlotToNum).forEach(([slot, assignedNum]) => {
+                    const defNum = tpl.slots[slot]
+                    bgDefaultToAssigned[String(defNum)] = String(assignedNum)
                   })
-                  // Resolve slot-relative coordinate
-                  function bgResolve(ref, slotPos) {
-                    if (!ref) return [50,30]
-                    if (typeof ref === 'string') return slotPos[ref] ? [...slotPos[ref]] : [50,30]
-                    if (Array.isArray(ref)) {
-                      if (typeof ref[0] === 'string') { const b = slotPos[ref[0]]||[50,30]; return [b[0]+(ref[1]||0), b[1]+(ref[2]||0)] }
-                      return [ref[0], ref[1]]
-                    }
-                    return [50,30]
-                  }
-                  let bgCurSlotPos = { ...bgInitSlotPos }
-                  const builtFrames = tpl.frames.map((tFrame, fi) => {
-                    const resolvedArrows = tFrame.arrows.map(arr => ({ ...arr, from:bgResolve(arr.from,bgCurSlotPos), to:bgResolve(arr.to,bgCurSlotPos) }))
-                    const fp = ['1','2','3','4','5'].map(n => {
-                      const slot = bgNumToSlot[n]
-                      const p = slot ? (bgCurSlotPos[slot]||[50,46]) : (bgNumToPos[n]||[50,46])
-                      return { id:'p'+n, label:n, role:'off', x:p[0], y:p[1] }
-                    })
-                    if (fi < tpl.frames.length - 1) {
-                      tFrame.arrows.forEach((arr, ai) => {
-                        if (arr.read || arr.type === 'screen') return
-                        const rFrom = resolvedArrows[ai].from, rTo = resolvedArrows[ai].to
-                        let ms = null, md = 999
-                        Object.entries(bgCurSlotPos).forEach(([slot, p]) => { const d=Math.abs(p[0]-rFrom[0])+Math.abs(p[1]-rFrom[1]); if(d<md){md=d;ms=slot} })
-                        if (ms && md < 15) bgCurSlotPos = { ...bgCurSlotPos, [ms]: rTo }
-                      })
-                    }
-                    return { label:tFrame.label, description:tFrame.description, players:fp, arrows:resolvedArrows }
-                  })
+                  const builtFrames = tpl.frames.map(tFrame => ({
+                    label: tFrame.label,
+                    description: tFrame.description,
+                    players: tFrame.players.map(p => ({
+                      id: 'p' + (bgDefaultToAssigned[String(p.label)] || p.label),
+                      label: bgDefaultToAssigned[String(p.label)] || String(p.label),
+                      role: 'off', x: p.x, y: p.y
+                    })),
+                    arrows: tFrame.arrows,
+                  }))
                   try { sessionStorage.setItem(bbFramesCacheKey, JSON.stringify(builtFrames)) } catch(e2) {}
                   setDiagrams(prev => ({ ...prev, [play.number]: { frames: builtFrames } }))
                 } catch(e2) { console.error('BB template build error', e2) }
