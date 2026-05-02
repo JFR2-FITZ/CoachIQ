@@ -2659,6 +2659,180 @@ function LegendItem({ color, dash, label }) {
 }
 
 // ── BBPhaseViewer: strip of frame thumbnails + fullscreen modal ───────────────
+
+// ─── BASKETBALL SINGLE-FRAME DIAGRAM ─────────────────────────────────────────
+// Clean, mobile-first single frame showing starting positions + one primary arrow.
+// Tapping opens a modal with the full phase viewer for coaches who want more detail.
+
+function BBSingleFrame({ frames, play, P, callAI, parseJSON, preloadedDiagram }) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [parsedFrames, setParsedFrames] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const touchStartX = useRef(null)
+  const [activeFrame, setActiveFrame] = useState(0)
+  const cacheKey = 'coachiq_bbframes_v7_' + (play?.name||'').replace(/\s/g,'_').slice(0,40)
+
+  useEffect(() => {
+    if (preloadedDiagram?.frames?.length) { setParsedFrames(preloadedDiagram.frames); return }
+    if (frames?.length) { setParsedFrames(frames); return }
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) { setParsedFrames(JSON.parse(cached)); return }
+    } catch(e) {}
+    generateFrame()
+  }, [play?.name])
+
+  async function generateFrame() {
+    setLoading(true)
+    try {
+      const templateList = BB_TEMPLATE_KEYS.map(k => k + ': ' + BB_TEMPLATES[k].name + ' [' + BB_TEMPLATES[k].tags.slice(0,3).join(', ') + ']').join('\n')
+      const playCtx = [
+        'PLAY: ' + play.name,
+        'TYPE: ' + (play.type||''),
+        'DESC: ' + (play.note||''),
+        play.presnap ? 'SETUP: '+play.presnap : '',
+        play.callIt ? 'CALL: '+play.callIt : '',
+      ].filter(Boolean).join('\n')
+      const prompt = 'Basketball template matcher. Pick the closest template for this play and assign player numbers.\n\n' + playCtx +
+        '\n\nTEMPLATES:\n' + templateList +
+        '\n\nPLAYER NUMBERS: 1=PG 2=SG 3=SF 4=PF 5=C\n' +
+        'Return ONLY valid JSON: {"templateKey":"key","slotAssignments":{"slot":"num"},"confidence":"high|medium|low","adjustmentNote":""}'
+      const raw = await callAI(prompt, null, false)
+      const matchData = parseJSON(raw)
+      if (!matchData?.templateKey || !BB_TEMPLATES[matchData.templateKey]) throw new Error('No match')
+      const tpl = BB_TEMPLATES[matchData.templateKey]
+      const bgSlots = matchData.slotAssignments || {}
+      const bgSlotToNum = {}
+      Object.entries(tpl.slots).forEach(([slot, defNum]) => { bgSlotToNum[slot] = bgSlots[slot] || defNum })
+      const bgDefaultToAssigned = {}
+      Object.entries(bgSlotToNum).forEach(([slot, assignedNum]) => {
+        bgDefaultToAssigned[String(tpl.slots[slot])] = String(assignedNum)
+      })
+      const builtFrames = tpl.frames.map(tFrame => ({
+        label: tFrame.label,
+        description: tFrame.description,
+        players: tFrame.players.map(p => ({
+          id: 'p' + (bgDefaultToAssigned[String(p.label)] || p.label),
+          label: bgDefaultToAssigned[String(p.label)] || String(p.label),
+          role: 'off', x: p.x, y: p.y
+        })),
+        arrows: tFrame.arrows,
+      }))
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(builtFrames)) } catch(e2) {}
+      setParsedFrames(builtFrames)
+    } catch(e) {
+      // Fallback: show empty court with just players in default positions
+      setParsedFrames([{
+        label: 'Phase 1', description: play.note || '',
+        players: [
+          {id:'p1',label:'1',role:'off',x:50,y:46},
+          {id:'p2',label:'2',role:'off',x:76,y:40},
+          {id:'p3',label:'3',role:'off',x:24,y:40},
+          {id:'p4',label:'4',role:'off',x:92,y:38},
+          {id:'p5',label:'5',role:'off',x:8,y:38},
+        ],
+        arrows: []
+      }])
+    }
+    setLoading(false)
+  }
+
+  function onTouchStart(e) { touchStartX.current = e.touches[0].clientX }
+  function onTouchEnd(e) {
+    if (touchStartX.current === null || !parsedFrames) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    if (dx < -40) setActiveFrame(i => Math.min((parsedFrames.length||1)-1, i+1))
+    else if (dx > 40) setActiveFrame(i => Math.max(0, i-1))
+    touchStartX.current = null
+  }
+
+  // Only show Phase 1 arrows on the card — keeps it clean
+  const frame0 = parsedFrames?.[0] || null
+  const frame0Clean = frame0 ? {
+    ...frame0,
+    arrows: (frame0.arrows||[]).filter(a => !a.read).slice(0,2) // primary arrows only, max 2
+  } : null
+
+  const BB_AMBER = '#f59e0b'
+
+  if (loading) return (
+    <div style={{ height:180, background:'#d4a96a', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', border:`1px solid ${hexToRgba(BB_AMBER,0.3)}` }}>
+      <div style={{ textAlign:'center' }}>
+        <div style={{ width:20, height:20, borderRadius:'50%', border:`3px solid ${BB_AMBER}`, borderTopColor:'transparent', animation:'spin 0.8s linear infinite', margin:'0 auto 8px' }}/>
+        <div style={{ fontSize:10, color:'rgba(255,255,255,0.7)', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1 }}>LOADING DIAGRAM...</div>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      {/* ── COMPACT SINGLE-FRAME CARD (Phase 1 only, primary arrows only) ── */}
+      <div
+        onClick={() => { setActiveFrame(0); setModalOpen(true) }}
+        style={{ cursor:'pointer', borderRadius:8, overflow:'hidden', border:`1px solid ${hexToRgba(BB_AMBER,0.25)}`, position:'relative' }}
+      >
+        {frame0Clean && <BBFrameCanvas frame={frame0Clean} P={P} width={560} height={196} />}
+        {/* Tap to enlarge overlay — subtle bottom bar */}
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(0,0,0,0.5)', padding:'4px 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.7)', letterSpacing:1, textTransform:'uppercase' }}>
+            Phase 1 of {parsedFrames?.length||1}
+          </span>
+          <span style={{ fontSize:9, color:BB_AMBER, fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:0.5 }}>
+            TAP TO ENLARGE {parsedFrames?.length > 1 ? '• SWIPE FOR MORE PHASES' : ''}
+          </span>
+        </div>
+      </div>
+
+      {/* ── FULLSCREEN MODAL — all phases ── */}
+      {modalOpen && parsedFrames && (
+        <div
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.94)', zIndex:9999, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'12px 10px' }}
+          onClick={() => setModalOpen(false)}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          {/* Header */}
+          <div style={{ width:'100%', maxWidth:600, display:'flex', alignItems:'center', gap:8, marginBottom:8 }} onClick={e=>e.stopPropagation()}>
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, letterSpacing:1, color:'#f2f4f8', fontWeight:700, textTransform:'uppercase' }}>{play.name}</div>
+              <div style={{ fontSize:11, color:'#8a94b0', marginTop:2 }}>{parsedFrames[activeFrame]?.description || ''}</div>
+            </div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:10, color:'#8a94b0', fontWeight:600, whiteSpace:'nowrap' }}>
+              Phase {activeFrame+1} of {parsedFrames.length}
+            </div>
+            <button onClick={()=>setModalOpen(false)} style={{ width:28, height:28, background:'rgba(255,255,255,0.1)', border:'none', borderRadius:4, color:'white', fontSize:16, cursor:'pointer' }}>✕</button>
+          </div>
+
+          {/* Frame */}
+          <div style={{ width:'100%', maxWidth:600, borderRadius:8, overflow:'hidden', border:`1px solid ${hexToRgba(BB_AMBER,0.4)}` }} onClick={e=>e.stopPropagation()}>
+            <BBFrameCanvas frame={parsedFrames[activeFrame]} P={P} width={560} height={336} />
+          </div>
+
+          {/* Phase nav */}
+          <div style={{ marginTop:10, display:'flex', alignItems:'center', gap:10 }} onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>setActiveFrame(i=>Math.max(0,i-1))} disabled={activeFrame===0}
+              style={{ padding:'6px 14px', background:activeFrame===0?'rgba(255,255,255,0.05)':hexToRgba(BB_AMBER,0.8), border:`1px solid ${hexToRgba(BB_AMBER,0.3)}`, borderRadius:5, color:activeFrame===0?'#5a6480':'#111', fontSize:11, fontWeight:700, cursor:activeFrame===0?'default':'pointer', fontFamily:"'Barlow Condensed',sans-serif" }}>
+              ← PREV
+            </button>
+            <div style={{ display:'flex', gap:6 }}>
+              {parsedFrames.map((_,idx) => (
+                <div key={idx} onClick={()=>setActiveFrame(idx)}
+                  style={{ width:8, height:8, borderRadius:'50%', background:idx===activeFrame?BB_AMBER:'rgba(255,255,255,0.2)', cursor:'pointer' }} />
+              ))}
+            </div>
+            <button onClick={()=>setActiveFrame(i=>Math.min(parsedFrames.length-1,i+1))} disabled={activeFrame===parsedFrames.length-1}
+              style={{ padding:'6px 14px', background:activeFrame===parsedFrames.length-1?'rgba(255,255,255,0.05)':hexToRgba(BB_AMBER,0.8), border:`1px solid ${hexToRgba(BB_AMBER,0.3)}`, borderRadius:5, color:activeFrame===parsedFrames.length-1?'#5a6480':'#111', fontSize:11, fontWeight:700, cursor:activeFrame===parsedFrames.length-1?'default':'pointer', fontFamily:"'Barlow Condensed',sans-serif" }}>
+              NEXT →
+            </button>
+          </div>
+          <div style={{ marginTop:6, fontSize:9, color:'rgba(255,255,255,0.3)', fontFamily:"'Barlow Condensed',sans-serif" }}>SWIPE LEFT/RIGHT • TAP OUTSIDE TO CLOSE</div>
+        </div>
+      )}
+    </>
+  )
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function BBPhaseViewer({ frames, play, P, callAI, parseJSON }) {
   const [modalOpen, setModalOpen] = useState(false)
   const [activeFrame, setActiveFrame] = useState(0)
@@ -2990,8 +3164,8 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
       {/* ── DIAGRAM ── */}
       <div style={{ marginBottom:10 }}>
         {play._sport === 'Basketball' ? (
-          /* ── Basketball: multi-phase static frames ── */
-          <BBPhaseViewer frames={preloadedDiagram?.frames||null} play={play} P={P} callAI={callAI} parseJSON={parseJSON} />
+          /* ── Basketball: single-frame + modal for phases ── */
+          <BBSingleFrame frames={null} play={play} P={P} callAI={callAI} parseJSON={parseJSON} preloadedDiagram={preloadedDiagram} />
         ) : !showDiagram ? (
           /* ── Other sports: thumbnail → PlayAnimator ── */
           <div onClick={()=>setShowDiagram(true)} style={{ cursor:'pointer', position:'relative', borderRadius:6, overflow:'hidden', border:`1px solid ${hexToRgba(P,0.2)}`, background:'#0f1219' }}>
@@ -3010,18 +3184,20 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
         )}
       </div>
 
-      {/* ── TOGGLE BUTTONS ── */}
-      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:(showSummary||showMore)?10:0 }}>
-        <button onClick={()=>setShowSummary(v=>!v)} style={{ padding:'5px 12px', background:showSummary?P:'transparent', border:'1px solid ' + (showSummary?P:'#1e2330'), borderRadius:4, color:showSummary?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
-          📋 Summary {showSummary?'▲':'▼'}
-        </button>
-        <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
-          More {showMore?'▲':'▼'}
-        </button>
-      </div>
+      {/* ── TOGGLE BUTTONS — basketball shows breakdown always, others toggle ── */}
+      {play._sport !== 'Basketball' && (
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:(showSummary||showMore)?10:0 }}>
+          <button onClick={()=>setShowSummary(v=>!v)} style={{ padding:'5px 12px', background:showSummary?P:'transparent', border:'1px solid ' + (showSummary?P:'#1e2330'), borderRadius:4, color:showSummary?'white':'#6b7a96', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+            📋 Summary {showSummary?'▲':'▼'}
+          </button>
+          <button onClick={()=>setShowMore(v=>!v)} style={{ padding:'5px 12px', background:'transparent', border:'1px solid #1e2330', borderRadius:4, color:'#8a94b0', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, fontSize:10, cursor:'pointer' }}>
+            More {showMore?'▲':'▼'}
+          </button>
+        </div>
+      )}
 
-      {/* ── SUMMARY — sport-specific breakdown fields ── */}
-      {showSummary && (() => {
+      {/* ── BREAKDOWN — always visible for basketball, toggle for other sports ── */}
+      {(play._sport === 'Basketball' || showSummary) && (() => {
         const sp = play._sport || sport || 'Football'
         const isBB = sp === 'Basketball'
         const isBSB = sp === 'Baseball' || sp === 'Softball'
