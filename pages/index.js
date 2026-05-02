@@ -1340,38 +1340,51 @@ function SportThumbnail({ sport, P='#C0392B', isDefense=false }) {
   const accent = isDefense ? '#6b9fff' : P
   const s = sport || 'Football'
 
-  // ── BASKETBALL — half court ────────────────────────────────────────────────
+  // ── BASKETBALL — half court thumbnail (proportional) ──────────────────────
+  // viewBox 0 0 280 160: basket at top (y=8), baseline=y=4, half court=y=155
+  // Key: x=106 to x=174 (68px wide of 280 = 24%), y=4 to y=52 (48px = 30%)
+  // Free throw line: y=52. 3pt corners at x=28,x=252. 3pt arc radius≈70px from basket
   if (s === 'Basketball') return (
-    <svg viewBox="0 0 280 100" style={{ width:'100%', display:'block', opacity:0.85 }}>
-      <rect width="280" height="100" fill="#c8a96e"/>
-      {/* Court outline */}
-      <rect x="4" y="4" width="272" height="92" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/>
+    <svg viewBox="0 0 280 160" style={{ width:'100%', display:'block', opacity:0.85 }}>
+      <rect width="280" height="160" fill="#d4a96a"/>
+      {/* Wood grain */}
+      {[0,1,2,3,4,5,6,7,8,9].map(i=><rect key={i} x={i*28} y="0" width="28" height="160" fill={i%2===0?'rgba(0,0,0,0.02)':'rgba(255,255,255,0.01)'}/>)}
+      {/* Court boundary */}
+      <rect x="8" y="4" width="264" height="150" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5"/>
       {/* Half court line */}
-      <line x1="0" y1="50" x2="280" y2="50" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-      {/* Paint / key — attack toward top */}
-      <rect x="105" y="4" width="70" height="42" fill="rgba(180,80,40,0.35)" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
-      {/* Free throw circle */}
-      <circle cx="140" cy="46" r="18" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1"/>
-      {/* Basket */}
-      <circle cx="140" cy="10" r="5" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
-      <line x1="140" y1="4" x2="140" y2="15" stroke="rgba(255,255,255,0.5)" strokeWidth="1"/>
-      {/* 3-point arc */}
-      <path d="M 62 4 Q 62 68 140 68 Q 218 68 218 4" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.2"/>
-      {/* Players — 5-out spread */}
+      <line x1="8" y1="130" x2="272" y2="130" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+      <path d="M 140 130 m -24 0 a 24 24 0 0 1 48 0" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1"/>
+      {/* Key rectangle */}
+      <rect x="106" y="4" width="68" height="48" fill="rgba(160,70,30,0.25)" stroke="rgba(255,255,255,0.6)" strokeWidth="1"/>
+      {/* Free throw line */}
+      <line x1="106" y1="52" x2="174" y2="52" stroke="rgba(255,255,255,0.6)" strokeWidth="1"/>
+      {/* Free throw circle — upper half solid, lower dashed */}
+      <path d="M 128 52 a 12 12 0 0 1 24 0" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1"/>
+      <path d="M 152 52 a 12 12 0 0 1 -24 0" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" strokeDasharray="3,2"/>
+      {/* Backboard */}
+      <line x1="120" y1="4" x2="160" y2="4" stroke="rgba(255,255,255,0.9)" strokeWidth="2"/>
+      {/* Basket rim */}
+      <circle cx="140" cy="10" r="5" fill="none" stroke="rgba(200,70,20,0.9)" strokeWidth="1.8"/>
+      {/* Restricted area */}
+      <path d="M 132 10 a 8 8 0 0 1 16 0" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+      {/* THREE POINT LINE — corners at x=28 from baseline to y=38, arc radius=70 from basket */}
+      <line x1="28" y1="4" x2="28" y2="38" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2"/>
+      <line x1="252" y1="4" x2="252" y2="38" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2"/>
+      <path d="M 28 38 A 112 112 0 0 1 252 38" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2"/>
+      {/* Players */}
       {isDefense ? <>
-        <circle cx="140" cy="54" r="5" fill="#4a90d9" opacity={0.9}/>
-        <circle cx="80"  cy="48" r="5" fill="#4a90d9" opacity={0.9}/>
-        <circle cx="200" cy="48" r="5" fill="#4a90d9" opacity={0.9}/>
-        <circle cx="105" cy="28" r="5" fill="#4a90d9" opacity={0.9}/>
-        <circle cx="175" cy="28" r="5" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="140" cy="70" r="6" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="72"  cy="62" r="6" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="208" cy="62" r="6" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="100" cy="34" r="6" fill="#4a90d9" opacity={0.9}/>
+        <circle cx="180" cy="34" r="6" fill="#4a90d9" opacity={0.9}/>
       </> : <>
-        <circle cx="140" cy="58" r="5" fill={accent} opacity={0.9}/>
-        <circle cx="78"  cy="50" r="5" fill={accent} opacity={0.9}/>
-        <circle cx="202" cy="50" r="5" fill={accent} opacity={0.9}/>
-        <circle cx="108" cy="28" r="5" fill={accent} opacity={0.9}/>
-        <circle cx="172" cy="28" r="5" fill={accent} opacity={0.9}/>
-        {/* Sample cut arrow */}
-        <path d="M 108 23 Q 124 16 138 12" fill="none" stroke={accent} strokeWidth="1.5" opacity={0.7} markerEnd="url(#arr)"/>
+        <circle cx="140" cy="75" r="6" fill={accent} opacity={0.9}/>
+        <circle cx="60"  cy="62" r="6" fill={accent} opacity={0.85}/>
+        <circle cx="220" cy="62" r="6" fill={accent} opacity={0.85}/>
+        <circle cx="32"  cy="50" r="6" fill={accent} opacity={0.8}/>
+        <circle cx="248" cy="50" r="6" fill={accent} opacity={0.8}/>
+        <line x1="140" y1="70" x2="140" y2="18" stroke={accent} strokeWidth="1.8" markerEnd="url(#arrowhead)" opacity={0.6}/>
       </>}
     </svg>
   )
@@ -2454,6 +2467,24 @@ BB_TEMPLATE_KEYS.forEach(key => {
   })
 })
 
+// ── Play type → valid template group mapping ─────────────────────────────────
+// Used to validate that template matching picked a sensible template for the play type
+const BB_TYPE_TEMPLATES = {
+  'HALF COURT SET': ['pick_and_roll_top','pick_and_roll_wing','pick_and_pop','spain_pick_and_roll','five_out_pass_cut','five_out_dribble_at','five_out_skip_pass','dribble_drive_middle','dribble_drive_right','dribble_drive_left','post_entry_low','post_entry_elbow','down_screen','zipper_cut','ucla_cut','backdoor','horns_pnr','flex_action','floppy','zone_attack_high_low','end_of_game_buzzer','iverson_cut'],
+  'QUICK HITTER': ['backdoor','iverson_cut','quick_hitter_mismatch','horns_pnr','pick_and_roll_top','pick_and_roll_wing','end_of_game_buzzer','zipper_cut','ucla_cut'],
+  'TRANSITION': ['fast_break_3on2','secondary_break'],
+  'FULL COURT BREAK': ['fast_break_3on2','secondary_break'],
+  'PRESS BREAK': ['press_break_1_4_high','press_break_4_across'],
+  'OUT OF BOUNDS': ['blob_box','blob_stack','slob_wing','end_of_game_buzzer'],
+}
+
+function validateBBTemplate(templateKey, playType) {
+  if (!templateKey || !BB_TEMPLATES[templateKey]) return false
+  const validGroup = BB_TYPE_TEMPLATES[playType]
+  if (!validGroup) return true // unknown type — accept any template
+  return validGroup.includes(templateKey)
+}
+
 
 // ─── BASKETBALL PHASE DIAGRAM SYSTEM ─────────────────────────────────────────
 // Renders static multi-frame basketball diagrams in FastDraw style.
@@ -2508,53 +2539,72 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
 
     // ── Hardwood court background ──
     ctx.fillStyle='#d4a96a'; ctx.fillRect(0,0,W,H)
-    // Wood grain stripes (subtle)
     for (let i=0;i<10;i++) {
-      ctx.fillStyle=i%2===0?'rgba(0,0,0,0.03)':'rgba(255,255,255,0.02)'
+      ctx.fillStyle=i%2===0?'rgba(0,0,0,0.025)':'rgba(255,255,255,0.015)'
       ctx.fillRect(i*(W/10),0,W/10,H)
     }
-    // Court lines — white, clean
+
+    // ── COURT GEOMETRY (all in coordinate units 0-100 x, 0-60 y) ──
+    // Basket at x=50 y=4 (TOP). Baseline y=2. Half court y=55. Sidelines x=4, x=96.
+    // Key: 16ft wide of 50ft court = 32% → x=34 to x=66, 19ft of 42ft length = 45% → y=2 to y=26
+    // Free throw line: y=26. Free throw circle radius: 6ft of 50ft = 12% → sx(6)
+    // 3pt corners: 3ft from sideline → x=10 and x=90. Corner depth: 14ft → y=2 to y=19
+    // 3pt arc radius: 19.75ft of 42ft half court = 47% → 47% of 53 units = 25 units from basket
+    // 3pt arc top of key: y=4+25=29. Arc from x=10 y=19 sweeping to x=90 y=19
+
+    // Court outline
     ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.8
-    ctx.strokeRect(sx(4),sy(2),sx(92),sy(56))
+    ctx.strokeRect(sx(4),sy(2),sx(92),sy(53))
+
+    // Half court line + centre circle
     ctx.beginPath(); ctx.moveTo(sx(4),sy(55)); ctx.lineTo(sx(96),sy(55)); ctx.stroke()
-    ctx.beginPath(); ctx.arc(sx(50),sy(55),sx(12),Math.PI,0); ctx.stroke()
-    ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1.4
-    ctx.strokeRect(sx(36),sy(2),sx(28),sy(26))
-    ctx.beginPath(); ctx.moveTo(sx(36),sy(28)); ctx.lineTo(sx(64),sy(28)); ctx.stroke()
-    ctx.beginPath(); ctx.arc(sx(50),sy(28),sx(14),0,Math.PI,false); ctx.stroke()
-    // 3-point line — proper NBA/youth court shape
-    // Straight sideline segments from baseline up to where arc begins
-    // Arc centered on basket (x=50, y=4 in our coord system)
-    // 3pt distance ≈ 23.5 units from basket center in our x=0-100 space
-    const basketX = sx(50), basketY = sy(4)
-    const r3pt = sx(23.5) // three point radius in canvas pixels
-    // Find the angle where the arc meets the sideline at x=6
-    const sideX = sx(6)
-    const dxSide = sideX - basketX
-    const angleLeft = Math.acos(Math.max(-1, Math.min(1, dxSide / r3pt)))  // angle from basket to left side
-    const angleRight = Math.PI - angleLeft
-    // Straight sideline segments
-    ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1.4; ctx.setLineDash([])
-    // Left sideline segment: from baseline (y=2) up to where arc starts
-    const arcLeftY = basketY + r3pt * Math.sin(Math.PI - angleLeft)
-    ctx.beginPath(); ctx.moveTo(sx(6),sy(2)); ctx.lineTo(sx(6), arcLeftY); ctx.stroke()
-    // Right sideline segment
-    const arcRightY = basketY + r3pt * Math.sin(angleLeft)
-    ctx.beginPath(); ctx.moveTo(sx(94),sy(2)); ctx.lineTo(sx(94), arcRightY); ctx.stroke()
-    // The arc itself — connecting the two sideline endpoints
-    ctx.beginPath()
-    ctx.arc(basketX, basketY, r3pt, Math.PI - angleLeft, angleLeft, false)
-    ctx.stroke()
-    // Basket rim
-    ctx.strokeStyle='rgba(180,60,20,0.9)'; ctx.lineWidth=2
-    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2.2),0,Math.PI*2); ctx.stroke()
-    // Backboard
-    ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2.5
-    ctx.beginPath(); ctx.moveTo(sx(40),sy(2)); ctx.lineTo(sx(60),sy(2)); ctx.stroke()
-    // Lane dots
-    ctx.fillStyle='rgba(255,255,255,0.4)'
-    ;[[36,16],[36,20],[36,24],[64,16],[64,20],[64,24]].forEach(([bx,by])=>{
-      ctx.beginPath(); ctx.arc(sx(bx),sy(by),sx(0.7),0,Math.PI*2); ctx.fill()
+    ctx.beginPath(); ctx.arc(sx(50),sy(55),sx(10),Math.PI,0); ctx.stroke()
+
+    // Paint / key rectangle
+    ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1.5
+    ctx.strokeRect(sx(34),sy(2),sx(32),sy(24))
+
+    // Free throw line
+    ctx.beginPath(); ctx.moveTo(sx(34),sy(26)); ctx.lineTo(sx(66),sy(26)); ctx.stroke()
+
+    // Free throw circle — upper half visible above FT line
+    ctx.beginPath(); ctx.arc(sx(50),sy(26),sx(6),0,Math.PI,false); ctx.stroke()
+    // Lower half dashed
+    ctx.setLineDash([3,3])
+    ctx.beginPath(); ctx.arc(sx(50),sy(26),sx(6),Math.PI,Math.PI*2,false); ctx.stroke()
+    ctx.setLineDash([])
+
+    // ── THREE POINT LINE ──
+    // Corner straight segments: x=10 from baseline y=2 to y=19
+    ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=1.5
+    ctx.beginPath(); ctx.moveTo(sx(10),sy(2)); ctx.lineTo(sx(10),sy(19)); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(sx(90),sy(2)); ctx.lineTo(sx(90),sy(19)); ctx.stroke()
+    // Arc: radius 25 units centered on basket (x=50, y=4)
+    // From left corner endpoint to right corner endpoint, sweeping AWAY from basket (downward in canvas = higher y)
+    const bktX=sx(50), bktY=sy(4)
+    const r3=sx(25)
+    // Angle to left corner point (sx(10), sy(19)) from basket
+    const dx3L=sx(10)-bktX, dy3L=sy(19)-bktY
+    const ang3L=Math.atan2(dy3L,dx3L) // angle in canvas coords
+    const dx3R=sx(90)-bktX, dy3R=sy(19)-bktY
+    const ang3R=Math.atan2(dy3R,dx3R)
+    // Draw arc from left angle to right angle going clockwise (through top of key = lower y = upward in canvas)
+    ctx.beginPath(); ctx.arc(bktX,bktY,r3,ang3L,ang3R,false); ctx.stroke()
+
+    // Restricted area arc (small arc near basket)
+    ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1
+    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(4),0,Math.PI,false); ctx.stroke()
+
+    // Basket rim + backboard
+    ctx.strokeStyle='rgba(200,70,20,0.95)'; ctx.lineWidth=2.2
+    ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2),0,Math.PI*2); ctx.stroke()
+    ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.lineWidth=2.8
+    ctx.beginPath(); ctx.moveTo(sx(42),sy(2)); ctx.lineTo(sx(58),sy(2)); ctx.stroke()
+
+    // Lane hash marks
+    ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=1
+    ;[[34,12,32,12],[34,17,32,17],[34,22,32,22],[66,12,68,12],[66,17,68,17],[66,22,68,22]].forEach(([x1,y1,x2,y2])=>{
+      ctx.beginPath(); ctx.moveTo(sx(x1),sy(y1)); ctx.lineTo(sx(x2),sy(y2)); ctx.stroke()
     })
 
     // Offense-only: filter out defenders
@@ -2700,7 +2750,16 @@ function BBSingleFrame({ frames, play, P, callAI, parseJSON, preloadedDiagram })
       const raw = await callAI(prompt, null, false)
       const matchData = parseJSON(raw)
       if (!matchData?.templateKey || !BB_TEMPLATES[matchData.templateKey]) throw new Error('No match')
-      const tpl = BB_TEMPLATES[matchData.templateKey]
+      // Validate template is appropriate for play type
+      let templateKey = matchData.templateKey
+      if (!validateBBTemplate(templateKey, play.type)) {
+        // Pick first valid template for this play type instead
+        const validGroup = BB_TYPE_TEMPLATES[play.type]
+        if (validGroup && validGroup.length > 0) {
+          templateKey = validGroup[0]
+        }
+      }
+      const tpl = BB_TEMPLATES[templateKey]
       const bgSlots = matchData.slotAssignments || {}
       const bgSlotToNum = {}
       Object.entries(tpl.slots).forEach(([slot, defNum]) => { bgSlotToNum[slot] = bgSlots[slot] || defNum })
@@ -5479,7 +5538,29 @@ function PlaybookCard({ play, packageName, packageIndex, P='#C0392B', S='#002868
         </div>
         <button onClick={()=>setShowAnim(a=>!a)} style={{ padding:'4px 9px', background:showAnim?P:al(P,0.12), border:`1px solid ${P}`, borderRadius:6, color:showAnim?'white':P, fontSize:9, fontWeight:700, cursor:'pointer', fontFamily:'inherit', letterSpacing:0.5, whiteSpace:'nowrap', flexShrink:0 }}>{showAnim?'HIDE':'DIAGRAM'}</button>
       </div>
-      {showAnim && <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} />}
+      {showAnim && (
+        play._sport === 'Basketball'
+          ? <div style={{ padding:'0 14px 12px' }}>
+              <BBSingleFrame frames={null} play={play} P={P} callAI={callAI} parseJSON={parseJSON} preloadedDiagram={null} />
+              {/* Basketball breakdown in playbook */}
+              {play.callIt && <div style={{ marginTop:8, padding:'8px 10px', background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:6 }}>
+                <div style={{ fontSize:9, color:'#f59e0b', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1.5, textTransform:'uppercase', marginBottom:3 }}>📣 How to Call It</div>
+                <div style={{ fontSize:11, color:'#dde1f0' }}>{play.callIt}</div>
+              </div>}
+              {play.steps && Array.isArray(play.steps) && play.steps.length > 0 && (
+                <div style={{ marginTop:6, padding:'8px 10px', background:'rgba(74,222,128,0.06)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:6 }}>
+                  <div style={{ fontSize:9, color:'#4ade80', fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700, letterSpacing:1.5, textTransform:'uppercase', marginBottom:6 }}>📋 Step by Step</div>
+                  {play.steps.map((step,i) => (
+                    <div key={i} style={{ display:'flex', gap:8, marginBottom:4 }}>
+                      <div style={{ flexShrink:0, width:18, height:18, borderRadius:'50%', background:P, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:700, color:'white' }}>{i+1}</div>
+                      <div style={{ fontSize:11, color:'#dde1f0', lineHeight:1.5, paddingTop:1 }}>{String(step).replace(/^Step [0-9]+: */,'')}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          : <PlayAnimator play={play} P={P} callAI={callAI} parseJSON={parseJSON} autoLoad={true} />
+      )}
     </div>
   )
 }
@@ -9968,13 +10049,23 @@ function HubPage({ P='#C0392B', S='#002868', al, sport, cfg, teams, activeTeam, 
       // Half court: basket at TOP (y=10), players attack from BOTTOM (y=50+)
       function courtSVG() { return (
         <>
-          <rect x="8" y="4" width="204" height="52" rx="1" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
+          {/* Court outline — basket at TOP (y=8), baseline at y=4, half court at y=60 */}
+          <rect x="8" y="4" width="204" height="56" rx="1" fill="none" stroke={color} strokeWidth="0.7" opacity="0.2"/>
+          {/* Key rectangle: 60px wide centered, from baseline to FT line */}
           <rect x="80" y="4" width="60" height="22" fill="none" stroke={color} strokeWidth="0.8" opacity="0.35"/>
+          {/* Backboard */}
           <line x1="96" y1="4" x2="124" y2="4" stroke={color} strokeWidth="1.5" opacity="0.5"/>
-          <circle cx="110" cy="11" r="5" fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
+          {/* Basket */}
+          <circle cx="110" cy="10" r="5" fill="none" stroke={color} strokeWidth="1.2" opacity="0.7"/>
+          {/* Free throw line + circle */}
           <line x1="80" y1="26" x2="140" y2="26" stroke={color} strokeWidth="0.8" opacity="0.3"/>
-          <path d="M80,26 Q110,14 140,26" fill="none" stroke={color} strokeWidth="0.6" strokeDasharray="2,2" opacity="0.25"/>
-          <path d="M24,56 L24,36 Q24,4 110,4 Q196,4 196,36 L196,56" fill="none" stroke={color} strokeWidth="0.7" opacity="0.22"/>
+          <path d="M92,26 A18,18 0 0 1 128,26" fill="none" stroke={color} strokeWidth="0.6" strokeDasharray="2,2" opacity="0.25"/>
+          {/* THREE POINT LINE — corners at x=24,196 from baseline y=4 to y=20, arc from basket */}
+          {/* Straight segments from baseline UP to corner endpoints */}
+          <line x1="24" y1="4" x2="24" y2="20" stroke={color} strokeWidth="0.7" opacity="0.3"/>
+          <line x1="196" y1="4" x2="196" y2="20" stroke={color} strokeWidth="0.7" opacity="0.3"/>
+          {/* Arc from left corner to right corner sweeping AWAY from basket (downward) */}
+          <path d="M24,20 A90,90 0 0 0 196,20" fill="none" stroke={color} strokeWidth="0.7" opacity="0.3"/>
         </>
       )
       }
@@ -10881,8 +10972,14 @@ export default function CoachIQ() {
   const currentTeam = (teams[sport]||[]).find(t=>t.id===activeTeam[sport]?.id) || activeTeam[sport]
   // Color hierarchy: active team colors > personal colors from cfg > sport defaults
   // safeHex ensures we never get undefined/empty/invalid hex into the style system
-  const P = safeAccent(safeHex(currentTeam?.primary || cfg.primary || sportColors.primary, '#C0392B'))
-  const S = safeHex(currentTeam?.secondary || cfg.secondary || sportColors.secondary, '#002868')
+  // P priority: active team custom color > sport default color > personal cfg > fallback
+  // Sport color takes priority over cfg so Basketball always feels distinct from Football
+  // unless a coach has explicitly set a custom team color
+  const _sportPrimary = sportColors.primary || '#C0392B'
+  const _teamPrimary = currentTeam?.primary
+  const _hasCustomTeamColor = _teamPrimary && _teamPrimary !== '#C0392B' && _teamPrimary !== _sportPrimary
+  const P = safeAccent(safeHex(_hasCustomTeamColor ? _teamPrimary : _sportPrimary, '#C0392B'))
+  const S = safeHex(currentTeam?.secondary || sportColors.secondary || cfg.secondary, '#002868')
   const lastName = cfg.coach.replace(/^Coach\s*/i,'').trim().split(' ').pop()
 
   async function callAI(prompt, imageData, fast=false) {
