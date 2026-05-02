@@ -1731,49 +1731,47 @@ const BB_TEMPLATES = {
     frames: [
       {
         label: 'Phase 1',
-        description: 'Ball handler passes to right wing then immediately cuts hard to the basket.',
+        description: 'The player with the ball passes to the right side player. The left side player fills the top spot.',
         players: [
           { label:'1', x:50, y:46 },  // PG — top with ball
-          { label:'2', x:76, y:40 },  // SG — right wing
+          { label:'2', x:76, y:40 },  // SG — right wing (receiver)
           { label:'3', x:24, y:40 },  // SF — left wing
           { label:'4', x:92, y:38 },  // PF — right corner
           { label:'5', x:8,  y:38 },  // C — left corner
         ],
         arrows: [
-          { from:[50,46], to:[76,40], type:'pass' },  // 1 passes to 2
-          { from:[50,46], to:[50,8],  type:'cut' },   // 1 basket cuts
-          { from:[24,40], to:[50,46], type:'cut' },   // 3 fills top
+          { from:[50,46], to:[76,40], type:'pass' },  // pass to right wing
+          { from:[24,40], to:[50,46], type:'cut' },   // left player fills top
         ]
       },
       {
         label: 'Phase 2',
-        description: 'Wing reads cutter — feed cutter at rim or skip to opposite wing.',
+        description: 'The passer immediately runs hard to the basket. The player who just received reads the cutter.',
         players: [
-          { label:'1', x:50, y:8  },  // PG — at rim after cut
-          { label:'2', x:76, y:40 },  // SG — right wing with ball
-          { label:'3', x:50, y:46 },  // SF — filled top
+          { label:'1', x:50, y:46 },  // PG — still at top, about to cut
+          { label:'2', x:76, y:40 },  // SG — has ball on right wing
+          { label:'3', x:50, y:46 },  // SF — at top (filled in)
           { label:'4', x:92, y:38 },  // PF — right corner
           { label:'5', x:8,  y:38 },  // C — left corner
         ],
         arrows: [
-          { from:[76,40], to:[50,8],  type:'pass' },               // feed cutter at rim
-          { from:[76,40], to:[8,38],  type:'pass', read:'secondary' }, // skip to left corner
-          { from:[92,38], to:[76,40], type:'cut' },                // 4 fills right wing
+          { from:[50,46], to:[50,8],  type:'cut' },                   // 1 cuts hard to basket
+          { from:[76,40], to:[8,38],  type:'pass', read:'secondary' }, // skip to left corner if cutter denied
         ]
       },
       {
         label: 'Phase 3',
-        description: 'Cutter receives at rim for layup. If help collapses, kick to open corner.',
+        description: 'If the cutter is open — pass to them for a layup. If help comes, kick to the open corner.',
         players: [
-          { label:'1', x:50, y:8  },  // PG — at rim
-          { label:'2', x:76, y:40 },  // SG — right wing
-          { label:'3', x:50, y:46 },  // SF — top of key
-          { label:'4', x:76, y:38 },  // PF — filled right wing
+          { label:'1', x:50, y:8  },  // PG — at rim after cut
+          { label:'2', x:76, y:40 },  // SG — right wing with ball
+          { label:'3', x:50, y:44 },  // SF — top of key
+          { label:'4', x:92, y:38 },  // PF — right corner
           { label:'5', x:8,  y:38 },  // C — left corner
         ],
         arrows: [
-          { from:[50,8],  to:[50,4],  type:'dribble' },              // 1 finishes
-          { from:[50,8],  to:[8,38],  type:'pass', read:'secondary' }, // kick left corner
+          { from:[76,40], to:[50,8],  type:'pass' },                   // feed cutter for layup
+          { from:[76,40], to:[8,38],  type:'pass', read:'secondary' }, // kick to open corner
         ]
       }
     ]
@@ -2524,11 +2522,29 @@ function BBFrameCanvas({ frame, P, width, height, onClick }) {
     ctx.strokeRect(sx(36),sy(2),sx(28),sy(26))
     ctx.beginPath(); ctx.moveTo(sx(36),sy(28)); ctx.lineTo(sx(64),sy(28)); ctx.stroke()
     ctx.beginPath(); ctx.arc(sx(50),sy(28),sx(14),0,Math.PI,false); ctx.stroke()
-    // 3pt arc
-    ctx.beginPath(); ctx.moveTo(sx(6),sy(2)); ctx.lineTo(sx(6),sy(22)); ctx.stroke()
-    ctx.beginPath(); ctx.moveTo(sx(94),sy(2)); ctx.lineTo(sx(94),sy(22)); ctx.stroke()
-    const r3=Math.sqrt(Math.pow(sx(44),2)+Math.pow(sy(20),2))
-    ctx.beginPath(); ctx.arc(sx(50),sy(6),r3,Math.PI*1.08,Math.PI*1.92,false); ctx.stroke()
+    // 3-point line — proper NBA/youth court shape
+    // Straight sideline segments from baseline up to where arc begins
+    // Arc centered on basket (x=50, y=4 in our coord system)
+    // 3pt distance ≈ 23.5 units from basket center in our x=0-100 space
+    const basketX = sx(50), basketY = sy(4)
+    const r3pt = sx(23.5) // three point radius in canvas pixels
+    // Find the angle where the arc meets the sideline at x=6
+    const sideX = sx(6)
+    const dxSide = sideX - basketX
+    const angleLeft = Math.acos(Math.max(-1, Math.min(1, dxSide / r3pt)))  // angle from basket to left side
+    const angleRight = Math.PI - angleLeft
+    // Straight sideline segments
+    ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1.4; ctx.setLineDash([])
+    // Left sideline segment: from baseline (y=2) up to where arc starts
+    const arcLeftY = basketY + r3pt * Math.sin(Math.PI - angleLeft)
+    ctx.beginPath(); ctx.moveTo(sx(6),sy(2)); ctx.lineTo(sx(6), arcLeftY); ctx.stroke()
+    // Right sideline segment
+    const arcRightY = basketY + r3pt * Math.sin(angleLeft)
+    ctx.beginPath(); ctx.moveTo(sx(94),sy(2)); ctx.lineTo(sx(94), arcRightY); ctx.stroke()
+    // The arc itself — connecting the two sideline endpoints
+    ctx.beginPath()
+    ctx.arc(basketX, basketY, r3pt, Math.PI - angleLeft, angleLeft, false)
+    ctx.stroke()
     // Basket rim
     ctx.strokeStyle='rgba(180,60,20,0.9)'; ctx.lineWidth=2
     ctx.beginPath(); ctx.arc(sx(50),sy(4),sx(2.2),0,Math.PI*2); ctx.stroke()
@@ -3237,7 +3253,12 @@ function PlayCard({ play, P='#C0392B', S='#002868', al, callAI, parseJSON, extra
                   </div>
                 ))}
                 <div style={{ display:'flex', gap:6 }}>
-                  <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder="e.g. Who runs the ball?" style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:5, padding:'7px 10px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
+                  <input value={question} onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&question.trim())askQuestion()}} placeholder={
+  play._sport==='Basketball' ? 'e.g. Who starts with the ball?' :
+  play._sport==='Baseball' || play._sport==='Softball' ? 'e.g. What does the runner on first do?' :
+  play._sport==='Soccer' ? 'e.g. Who makes the first run?' :
+  'e.g. Who runs the ball?'
+} style={{ flex:1, background:'#0f1117', border:'1px solid #1e2330', borderRadius:5, padding:'7px 10px', color:'#f2f4f8', fontSize:12, outline:'none' }} />
                   <button onClick={askQuestion} disabled={qaLoading||!question.trim()} style={{ padding:'0 12px', background:qaLoading||!question.trim()?'#3d4559':P, color:'white', border:'none', borderRadius:5, fontFamily:"'Barlow Condensed',sans-serif", fontSize:11, cursor:qaLoading||!question.trim()?'not-allowed':'pointer', flexShrink:0 }}>ASK</button>
                 </div>
               </div>
